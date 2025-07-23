@@ -1,0 +1,511 @@
+-- BrowserRouter
+
+import ReactDOM from <react-dom<
+import * as React from <react<
+import { BrowserRouter } from <react-router-dom<
+import App from <./App`
+
+ReactDOM.render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+, document.getElementById(<app<))
+
+
+
+-- Route
+
+<Route path="/dashboard" element={<Dashboard />} />
+
+<Route path="/" element={<Home />} />
+<Route path="/about" element={<About />} />
+<Route path="/settings" element={<Settings />} />
+
+<Route exact path="/" element={<HomePage />} />
+
+
+-- Routes
+
+import { Routes, Route } from "react-router-dom";
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+import { Route } from 'react-router-dom';
+
+function App() {
+  return (
+    <>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="*" element={<NotFound />} />
+    </>
+  );
+}
+
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        {/* Các Route khác nếu cần */}
+        <Route element={<NotFoundPage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+-- Link
+
+<nav>
+  <Link to="/">Home</Link>
+  <Link to="/about">About</Link>
+  <Link to="/settings">Settings</Link>
+</nav>
+
+<nav>
+  <Link to="/">Home</Link>
+  <Link to="/about">About</Link>
+  <Link
+    to={{
+      pathname: "/settings",
+      search: "?sort=date",
+      state: { fromHome: true },
+    }}
+  >
+    Settings
+  </Link>
+</nav>
+
+-- URL Parameters
+
+<Route path="/wiki/:topicId" element={<Article />} />
+
+import * as React from <react<
+import { useParams } from <react-router-dom<
+import { getArticle } from <../utils<
+
+function Article () {
+  const [article, setArticle] = React.useState(null)
+  const { topicId } = useParams()
+
+  React.useEffect(() => {
+    getArticle(topicId)
+      .then(setUser)
+  }, [topicId])
+
+  return (
+    ...
+  )
+}
+
+<Route path="/item/:id" element={<ItemDetail />} />
+
+
+-- Nested Routes
+
+// App.js
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/messages" element={<Messages />} />
+      <Route path="/settings" element={<Settings />} />
+    </Routes>
+  );
+}
+
+function Messages() {
+  return (
+    <Container>
+      <Conversations />
+
+      <Routes>
+        <Route path=":id" element={<Chat />} />
+      </Routes>
+    </Container>
+  );
+}
+
+// App.js
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/messages/*" element={<Messages />} />
+      <Route path="/settings" element={<Settings />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/messages" element={<Messages />}>
+        <Route path=":id" element={<Chats />} />
+      </Route>
+      <Route path="/settings" element={<Settings />} />
+    </Routes>
+  );
+}
+
+import { Outlet } from "react-router-dom";
+
+function Messages() {
+  return (
+    <Container>
+      <Conversations />
+
+      <Outlet />
+    </Container>
+  );
+}
+
+-- Pass props to Router Components
+
+<Route path="/dashboard" element={<Dashboard authed={true} />} />
+
+
+-- Redirect
+
+import { Redirect } from "react-router-dom";
+
+state = { redirect: null };
+render() {
+  if (this.state.redirect) {
+    return <Redirect to={this.state.redirect} />
+  }
+  return(
+  // Your Code goes here
+  )
+}
+
+this.setState({ redirect: "/someRoute" });
+
+import { Redirect } from 'react-router-dom';
+
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      shouldRedirect: false,
+    };
+  }
+
+  handleRedirect = () => {
+    this.setState({ shouldRedirect: true });
+  };
+
+  render() {
+    if (this.state.shouldRedirect) {
+      return <Redirect to="/new-page" />;
+    }
+
+    return (
+      <div>
+        <button onClick={this.handleRedirect}>Go to New Page</button>
+      </div>
+    );
+  }
+}
+
+
+-- Programmatically Navigate
+
+import { useNavigate } from <react-router-dom
+
+function Register () {
+  const navigate = useNavigate()
+
+  return (
+    <div>
+      <h1>Register</h1>
+      <Form afterSubmit={() => navigate(</dashboard<)} />
+    </div>
+  )
+}
+
+function Register() {
+  const [toDashboard, setToDashboard] = React.useState(false);
+
+  if (toDashboard === true) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return (
+    <div>
+      <h1>Register</h1>
+      <Form afterSubmit={() => toDashboard(true)} />
+    </div>
+  );
+}
+
+
+-- Query Strings
+
+import { useSearchParams } from <react-router-dom<
+
+const Results = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const q = searchParams.get(<q<)
+  const src = searchParams.get(<src<)
+  const f = searchParams.get(<f<)
+
+  return (
+    ...
+  )
+}
+
+
+-- Catch all (404) Pages
+
+<Routes>
+  <Route path="*" element={<NotFound />} />
+  <Route path="/" element={<Home />} />
+  <Route path="/about" element={<About />} />
+  <Route path="/settings" element={<Settings />} />
+</Routes>
+
+
+-- Pass props to Link
+
+<Link to="/onboarding/profile" state={{ from: "occupation " }}>
+  Next Step
+</Link>
+
+import { useLocation } from <react-router-dom<
+
+function Profile () {
+  const location = useLocation()
+  const { from } = location.state
+
+  return (
+    ...
+  )
+}
+
+
+-- Rendering a Sidebar
+
+export default function App() {
+  return (
+    <div className="wrapper">
+      <div className="sidebar">
+        <ul className="nav">
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/p">Profile</Link>
+          </li>
+          <li>
+            <Link to="/s">Settings</Link>
+          </li>
+        </ul>
+
+        <Routes>
+          <Route path="/" element={<HomeDesc />} />
+          <Route path="/p" element={<ProfileDesc />} />
+          <Route path="/s" element={<SettingsDesc />} />
+        </Routes>
+      </div>
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/p" element={<Profile />} />
+        <Route path="/s" element={<Settings />} />
+      </Routes>
+    </div>
+  );
+}
+
+
+-- Customizing Link
+
+import { useLocation } from <react-router-dom<
+
+function GlowLink ({ children, to }) {
+  const location = useLocation()
+  const match = location.pathname === to
+
+  return (
+    <span className={match ? <glow< : <<}>
+      {match ? < < : <<}
+      <Link to={to}>
+        {children}
+      </Link>
+    </span>
+  )
+}
+
+...
+
+
+<nav>
+  <GlowLink to=</<>Home</GlowLink>
+  <GlowLink to=</about<>About</GlowLink>
+  <GlowLink to=</features<>Features</GlowLink>
+</nav>
+
+
+-- Code Splitting
+
+if (editingPost === true) {
+  import(<./editpost<)
+    .then((module) => module.showEditor())
+    .catch((e) => )
+}
+
+const LazyHomeComponent = React.lazy(
+  () => import(<./Home<)
+)
+
+...
+
+<LazyHomeComponent />
+
+import * as React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+
+import Loading from "./Loading";
+
+const Home = React.lazy(() => import("./Home"));
+const Topics = React.lazy(() => import("./Topics"));
+const Settings = React.lazy(() => import("./Settings"));
+
+export default function App() {
+  return (
+    <Router>
+      <div>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/topics">Topics</Link>
+          </li>
+          <li>
+            <Link to="/settings">Settings</Link>
+          </li>
+        </ul>
+
+        <hr />
+
+        <React.Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/topics" element={<Topics />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </React.Suspense>
+      </div>
+    </Router>
+  );
+}
+
+
+-- Protected Routes
+
+<Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/pricing" element={<Pricing />} />
+  <Route
+    path="/dashboard"
+    element={
+      <RequireAuth>
+        <Dashboard />
+      </RequireAuth>
+    }
+  />
+  <Route
+    path="/settings"
+    element={
+      <RequireAuth>
+        <Settings />
+      </RequireAuth>
+    }
+  />
+  <Route path="/login" element={<Login />} />
+</Routes>
+
+function RequireAuth({ children }) {
+  const { authed } = useAuth();
+  const location = useLocation();
+
+  return authed === true ? (
+    children
+  ) : (
+    <Navigate to="/login" replace state={{ path: location.pathname }} />
+  );
+}
+
+
+-- Route Config
+
+/
+/invoices
+:id
+pending
+complete
+/users
+:id
+settings
+
+
+return (
+  <Routes>
+    <Route path="/" element={<Home />} />
+    <Route path="/invoices" element={<Invoices />}>
+      <Route path=":id" element={<Invoice />} />
+      <Route path="pending" element={<Pending />} />
+      <Route path="complete" element={<Complete />} />
+    </Route>
+    <Route path="/users/*" element={<Users />} />
+  </Routes>
+);
+
+import { useRoutes } from "react-router-dom";
+
+const routes = useRoutes([
+  { path: "/", element: <Home /> },
+  {
+    path: "/invoices",
+    element: <Invoices />,
+    children: [
+      { path: ":id", element: <Invoice /> },
+      { path: "/pending", element: <Pending /> },
+      { path: "/complete", element: <Complete /> },
+    ],
+  },
+  {
+    path: "/users",
+    element: <Users />,
+    children: [
+      { path: ":id", element: <Profile /> },
+      { path: "/settings", element: <Settings /> },
+    ],
+  },
+]);
+
+export default function App() {
+  return (
+    <div>
+      <Navbar />
+      {routes}
+    </div>
+  );
+}
