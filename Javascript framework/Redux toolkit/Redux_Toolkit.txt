@@ -1,0 +1,258 @@
+-- Ví dụ
+
+// 1. Setup todo slice
+// todoSlice.js
+const todoSlice = createSlice({
+  name: 'todos',
+  initialState: [],
+  reducers: {
+    addTodo(state, action) {
+      state.push(action.payload);
+    },
+    removeTodo(state, action) {
+      state.splice(action.payload, 1);
+    }
+  }
+});
+
+const { actions, reducer } = todoSlice;
+export const { addTodo, removeTodo } = actions;
+export default reducer;
+
+
+// 2. Setup redux store
+// store.js
+import { configureStore } from '@reduxjs/toolkit';
+import todoReducer from 'features/todos/todoSlice';
+
+const store = configureStore({
+  reducer: {
+    todos: todoReducer,
+  },
+});
+
+
+// 3. Bind Redux Provider to App
+// src/index.js
+import { Provider } from 'react-redux';
+import store from './store';
+import App from './App';
+
+function Main() {
+  return (
+    <Provider store={store}>
+      <App />
+    </Provider>
+  );
+}
+
+
+// 4. Using redux in component
+// todo.jsx
+import { useDispatch, useSelector } from 'react-redux';
+import { removeTodo } from 'features/todos/todoSlice';
+
+function Todo() {
+  const dispatch = useDispatch();
+  const todoList = useSelector(state => state.todos);
+
+  const handleTodoClick = (todo, idx) => {
+    const action = removeTodo(idx);
+    dispatch(action);
+  };
+
+  return (
+    <ul>
+      {todoList.map((todo, idx) => (
+        <li key={todo.id} onClick={() => handleTodoClick(todo, idx)}>
+          {todo.title}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+
+-- Cấu hình Redux Store
+
+// store/index.js
+
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./userSlice";
+
+export const store = configureStore({
+  reducer: {
+    user: userReducer  // Khai báo 1 slice tên là user với giá trị là userReducer được export ở file userSlice
+    // Có thể khai báo nhiều slice khác tương tự
+  }
+});
+
+
+
+import React from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import { store } from "./store/index";
+
+import App from "./App";
+
+// Bọc App component vào trong Store Provider để App và toàn bộ Component con đều có thể truy xuất đến Store
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById("root")
+);
+
+
+
+// store/userSlice.js
+
+import { createSlice } from "@reduxjs/toolkit";
+
+// Khởi tạo state cho slice, có thể kèm giá trị mặc định ban đầu
+const initialState = {
+  username: "Guest"  // State username với giá trị mặc định là "Guest"
+  // Có thể khai báo nhiều state khác nữa
+};
+
+// Cấu hình slice
+export const userSlice = createSlice({
+  name: "user",  // Tên của slice, mỗi slice đặt 1 tên khác nhau để phân biệt
+  initialState,
+  // Reducers chứa các hàm xử lý cập nhật state
+  reducers: {
+    updateUsername: () => {},
+  }
+});
+
+// Export action ra để sử dụng cho tiện.
+export const { updateUsername } = userSlice.actions;
+
+// Action là 1 hàm trả về object dạng {type, payload}, chạy thử console.log(updateUsername()) để xem chi tiết
+
+// Hàm giúp lấy ra state mong muốn.
+// Hàm này có 1 tham số là root state là toàn bộ state trong store, chạy thử console.log(state) trong nội dung hàm để xem chi tiết
+export const selectUsername = state => state.user.username;
+
+// Export reducer để nhúng vào Store
+export default userSlice.reducer;
+
+
+
+-- Tương tác với Redux Store
+
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+
+// Import hook useDispatch từ react-redux và action updateUsername từ userSlice
+import { useDispatch } from "react-redux";
+import { updateUsername } from "../store/userSlice";
+
+export default function Login() {
+  const [username, setUsername] = useState("");
+  const history = useHistory();
+
+  const dispatch = useDispatch();
+
+  function handleLogin() {
+    // Dispatch action updateUsername vào store, action này có payload (dữ liệu đi kèm) là username
+    dispatch(updateUsername(username));
+
+    history.push("/dashboard");
+  }
+
+  ...
+
+}
+
+
+
+reducers: {
+  // Hàm có 2 tham số là state hiện tại và action truyền vào
+  updateUsername: (state, action) => {
+    // Cập nhật state username với giá trị truyền vào qua action (action.payload)
+    // Chạy thử console.log(action) để xem chi tiết giá trị action truyền vào
+    state.username = action.payload;
+  }
+}
+
+
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+// Import hook useSelector từ react-redux và hàm selectUsername từ userSlice
+import { useSelector } from "react-redux";
+import { selectUsername } from "../store/userSlice";
+
+export default function Dashboard() {
+  // Lấy ra state username từ store
+  // Hàm useSelector cần truyền vào 1 hàm callback có tham số là root state và trả về state cần lấy
+  const username = useSelector(selectUsername);
+
+  return (
+    <>
+      <h1>Dashboard</h2>
+
+      {/* In biến username ra màn hình */}
+      <h2>Welcome {username}</h2>
+
+      <Link to="/login">Log out</Link>
+    </>
+  );
+}
+
+
+-- Một số API hay dùng
+
+	-- configureStore()
+	
+	// Khi đã có redux toolkit // thì store.js sẽ :
+
+	import { configureStore } from '@reduxjs/toolkit'
+	import rootReducer from './reducers'// xem mục bên dưới để tạo reducerconststore=configureStore({ reducer: rootReducer })
+
+	export default store;// tạo store thật ngắn gọn
+	
+	
+	-- createReducer()
+	
+	// Có Redux Toolkit
+	// - Mỗi key là một case
+	// - Không cần handle default case
+	const counterReducer = createReducer(0, {
+	  increment: (state, action) => state + action.payload,
+	  decrement: (state, action) => state - action.payload
+	});
+
+
+
+
+	// Một điểm hay nữa là reducer có thể mutate data trực tiếp.
+	// Bản chất bên dưới họ sử dụng thư viện ImmerJS
+	const todoReducer = createReducer([], {
+	  addTodo: (state, action) => {
+		// 1. Có thể mutate data trực tiếp 🎉
+		state.push(action.payload);
+	  }
+	});
+
+	const addTodoWithoutImmerJS = (state, action) => {
+	  // Hoặc phải trả về state mới
+	  // CHỨ KHÔNG ĐƯỢC CẢ 1 VÀ 2 nha 😎
+	  const newState = [...state];
+	  newState.push(action.payload);
+	  return newState;
+	};
+
+	-- createAction()
+	
+	// Có redux toolkit
+	const increment = createAction('counter/increment');
+
+	const action = increment(3);
+	// returns { type: 'counter/increment', payload: 3 }
+
+	console.log(increment.toString());
+	// 'counter/increment'
