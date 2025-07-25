@@ -1,0 +1,50 @@
+Regex--JAVA:				var inputString = "The quick brown fox jumps over the lazy dog";
+	match(/./)				var regexPattern = /./g;
+							var matches = inputString.match(regexPattern); // /./g được sử dụng để tìm tất cả các ký tự trong chuỗi.
+																		   // ["T", "h", "e", " ", "q", "u", "i", "c", "k", " ", "b", "r", "o", "w",
+																			  "n", " ", "f", "o", "x", " ", "j", "u", "m", "p", "s", " ", "o", "v",
+																			  "e", "r", " ", "t", "h", "e", " ", "l", "a", "z", "y", " ", "d", "o", "g"]	
+	match(/b/)				var regexPattern = /b/g;
+							var matches = inputString.match(regexPattern); // tìm kiếm chuỗi ký tự "b" trong chuỗi đầu vào inputString.
+																		   // Kết quả của đoạn mã này sẽ là một mảng chứa tất cả các ký tự "b" trong chuỗi. ["b"]
+							var regexPattern = /b/;
+							var matches = inputString.match(regexPattern); // Kết quả của đoạn mã này sẽ là một mảng chứa thông tin về ký tự "b" đầu tiên trong chuỗi. ["b"]
+	match(/ab/)				var regexPattern = /ab/;
+							var matches = inputString.match(regexPattern); // tìm kiếm chuỗi "ab" trong chuỗi đầu vào inputString. null
+	match(/a|z/)			var regexPattern = /a|z/g;
+							var matches = inputString.match(regexPattern); // tìm kiếm bất kỳ ký tự "a" hoặc "z" trong chuỗi đầu vào inputString. ["a", "z"]
+	match(/z*/)				var regexPattern = /z*/g; // Biểu thức này khớp với 0 hoặc nhiều ký tự "z".
+							var matches = inputString.match(regexPattern); // z*: Biểu thức này khớp với bất kỳ chuỗi nào trong đó ký tự "z" xuất hiện 0 hoặc nhiều lần
+																		   // Các chuỗi rỗng ("") đại diện cho các vị trí trong chuỗi inputString mà không chứa ký tự "z".
+																		   // ["", "", "", "", "", "", "", "", "", "z", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+																		   //"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+																		   //"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+																		   //"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+	match(/z+/)				var regexPattern = /z+/g;
+							var matches = inputString.match(regexPattern); // một mảng chứa tất cả các chuỗi con trong inputString mà bắt đầu bằng một hoặc nhiều ký tự "z". ["z"]
+	match(/z?/)				var regexPattern = /z?/g; // Biểu thức này khớp với 0 hoặc 1 ký tự "z". 
+							var matches = inputString.match(regexPattern); // một mảng chứa tất cả các chuỗi con trong inputString mà có hoặc không có chứa một ký tự "z".
+																		   // ["", "", "", "", "", "", "", "", "", "z", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+																		   //"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+																		   //"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+																		   //"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+	match(/(ab)/)
+	match(/[ab-e]/)
+	match(/[^ab-e]/)
+	match(/\d/)
+	match(/\D/)
+	match(/\s/)
+	match(/\S/)
+	match(/\w/)
+	match(/\W/)
+	match(/\^a/)
+	match(/\c$/)
+	match(/\t/)
+	match(/\n/)
+	match(/\r/)
+	match(/\0/)
+	match(/a{5}/)
+	match(/a{3,5}/)
+	match(/a{3,}/)
+	match(/g/)
+	match(/i/)

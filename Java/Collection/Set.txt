@@ -1,0 +1,114 @@
+	Set--JAVA:				
+							Set: Các phần tử trong Set là duy nhất, không chứa các phần tử chùng lặp. Là một dạng riêng của Set interface, trong đó các giá trị của các phần tử mặc định được sắp xếp tăng dần.
+							AbstractSet: extends AbstractCollection và implements hầu hết Set interface
+							HashSet: Extends AbstractSet để sử dụng với bảng băm.
+							TreeSet: Implements một tập hợp được lưu trữ bởi tree. Extends AbstractSet
+							Set khi chuyển sang Javascript sẽ là một Array.
+							
+							Set<String> set = new HashSet<>(Arrays.asList("A", "B", "C"));
+		Khởi tạo:			
+							Set<String> set1 = new HashSet<>();
+							set1.add("Apple");
+							set1.add("Banana");
+							
+							Set<String> set2 = new LinkedHashSet<>();
+							set2.add("Apple");
+							set2.add("Banana");
+							
+							Set<String> set3 = new TreeSet<>();
+							set3.add("Apple");
+							set3.add("Banana");
+							
+							Set<String> set4 = new HashSet<>(Arrays.asList("Apple", "Banana", "Orange"));
+							
+							Set<String> set5 = Set.of("Apple", "Banana", "Orange");
+							
+							Set<String> set6 = Sets.newHashSet("Apple", "Banana", "Orange");
+							
+							Set<String> set8 = new CopyOnWriteArraySet<>();
+							set8.add("Apple");
+							set8.add("Banana");
+		- add:				set.add("Apple");
+		addAll:				
+							Set<String> additionalSet = new HashSet<>(Arrays.asList("B", "C", "D", "E"));
+							set.addAll(additionalSet); // Sử dụng phương thức addAll để thêm tất cả các phần tử từ additionalSet vào set. [A, B, C, D, E]
+							
+							Set<String> set = new HashSet<>();
+							List<String> fruits = new ArrayList<>();
+							fruits.add("kiwi");
+							fruits.add("grape");
+							set.addAll(fruits);
+		- remove:				
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							set.add("orange");
+							set.remove("banana");
+							System.out.println(set); // Output: [apple, orange]
+		removeAll:
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							set.add("orange");
+							List<String> fruitsToRemove = new ArrayList<>();
+							fruitsToRemove.add("banana");
+							fruitsToRemove.add("orange");
+							set.removeAll(fruitsToRemove);
+							System.out.println(set); // Output: [apple]
+		- clear:
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							set.add("orange");
+							set.clear();
+							System.out.println(set); // Output: []
+		- contains:
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							System.out.println(set.contains("banana")); // Output: true
+							System.out.println(set.contains("grape")); // Output: false
+		containsAll:
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							List<String> fruitsToCheck = new ArrayList<>();
+							fruitsToCheck.add("apple");
+							fruitsToCheck.add("banana");
+							System.out.println(set.containsAll(fruitsToCheck)); // Output: true
+		- isEmpty:
+							Set<String> set = new HashSet<>();
+							System.out.println(set.isEmpty()); // Output: true
+							set.add("apple");
+							System.out.println(set.isEmpty()); // Output: false
+		- size:
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							System.out.println(set.size()); // Output: 2
+		iterator:
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							Iterator<String> iterator = set.iterator();
+							while(iterator.hasNext()) {
+								System.out.println(iterator.next()); // apple banana
+							}
+		toArray:
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							Object[] array = set.toArray();
+							for(Object obj : array) {
+								System.out.println(obj); // apple banana
+							}
+		retainAll:
+							Set<String> set = new HashSet<>();
+							set.add("apple");
+							set.add("banana");
+							set.add("orange");
+							List<String> fruitsToRetain = new ArrayList<>();
+							fruitsToRetain.add("banana");
+							fruitsToRetain.add("orange");
+							set.retainAll(fruitsToRetain);
+							System.out.println(set); // Output: [banana, orange]

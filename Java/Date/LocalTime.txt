@@ -1,0 +1,757 @@
+LocalTime--Ngày và giờ trong Java:	
+
+						- Từ string thành time sẽ luôn có ở dạng 13:10:20.000012345, từ time chuyển thành chuỗi sẽ ở dạng theo như chúng ta format
+						- Represents a time (hour, minute, second and nanoseconds (HH-mm-ss-ns))					
+						- Lớp LocalTime đại diện cho thời gian địa phương (local time), nó không bao gồm thông tin ngày tháng và múi giờ. LocalTime bao gồm các thông tin giờ, phút, giây, thậm chí cả nano
+						giây (1 giây = 1 tỷ nano giây).
+						- Lớp LocalTime nằm trong package java.time. Cũng giống như các lớp khác được giới thiệu trong Java 8 Date Time API, LocalTime là bất biến (immutable) điều này có nghĩa là tất cả các tính
+						toán trên LocalTime đều tạo ra một đối tượng LocalTime mới, vì vậy nó an toàn khi được sử dụng trong môi trường multithreading.
+	
+	Static Factory Methods--LocalTime Java:
+							
+						Lớp LocalTime không cung cấp bất kỳ một constructor nào, nhưng nó cung cấp các phương thức nhà máy tĩnh (static factory method) để tạo ra đối tượng mới:
+						
+							public static LocalTime now()
+							public static LocalTime now(ZoneId zone)
+							public static LocalTime now(Clock clock)
+							public static LocalTime of(int hour, int minute)
+							public static LocalTime of(int hour, int minute, int second)
+							public static LocalTime of(int hour, int minute, int second, int nanoOfSecond)
+							public static LocalTime ofInstant(Instant instant, ZoneId zone)
+							public static LocalTime ofSecondOfDay(long secondOfDay)  
+							public static LocalTime ofNanoOfDay(long nanoOfDay)
+							public static LocalTime from(TemporalAccessor temporal)
+							public static LocalTime parse(CharSequence text)  
+							public static LocalTime parse(CharSequence text, DateTimeFormatter formatter)
+								
+						Tạo đối tượng LocalTime đại diện cho thời điểm hiện tại có được từ đồng hồ hệ thống và múi giờ mặc định (Trên máy tính của bạn).
+									
+							// Current time from the system clock in the default time-zone.
+							LocalTime localTime = LocalTime.now();
+							System.out.println("localTime: " + localTime);
+						
+						Tạo đối tượng LocalTime đại diện cho thời điểm hiện thời từ một đồng hồ được chỉ định:
+							
+							// Clock from system default zone
+							Clock clockDefault = Clock.systemDefaultZone();
+							Clock clock = Clock.system(ZoneId.of("Europe/Paris"));
+							// Current time from the specified clock.
+							LocalTime localTime = LocalTime.now(clock);
+							System.out.println("localTime: " + localTime); // 19:51:11.990871 (Example)
+						
+						Tạo đối tượng LocalTime đại diện cho thời điểm hiện thời từ một ZoneId được chỉ định:
+							
+							// System default zone
+							ZoneId zoneIdDefault = ZoneId.systemDefault();
+							ZoneId zoneId = ZoneId.of("Australia/Sydney");
+							LocalTime localTime = LocalTime.now(zoneId);
+							System.out.println("Now is: " + localTime); // 03:56:06.006877 (Example)
+							
+						Tạo đối tượng LocalTime từ các giá trị hour, minute, second, nanoOfSecond được chỉ định:
+							
+							// of(int hour, int minute, int second, int nanoOfSecond)
+							LocalTime localTime1 = LocalTime.of(13, 10, 20, 12345);  
+							System.out.println("localTime1: " + localTime1); // 13:10:20.000012345
+							// of(int hour, int minute, int second)
+							LocalTime localTime2 = LocalTime.of(13, 10, 20);
+							System.out.println("localTime2: " + localTime2); // 13:10:20
+							// of(int hour, int minute)
+							LocalTime localTime3 = LocalTime.of(13, 10);
+							System.out.println("localTime3: " + localTime3); // 13:10
+						
+						Tạo đối tượng LocalTime với các đối tượng Instant và ZoneId được chỉ định:
+							
+							// ofInstant(Instant instant, ZoneId zone)
+							Instant instant = Instant.now();
+							ZoneId zoneId = ZoneId.systemDefault();
+							LocalTime localTime = LocalTime.ofInstant(instant, zoneId);
+							System.out.println("localTime: " + localTime);
+						
+						Tạo đối tượng LocalTime từ việc phân tích một văn bản có định dạng thời gian:
+							
+							// parse(CharSequence text)  
+							LocalTime localTime1 = LocalTime.parse("10:15:30"); // 10:15:30
+							System.out.println("localTime1: " + localTime1);
+							// parse(CharSequence text, DateTimeFormatter formatter)
+							DateTimeFormatter fmt2 = DateTimeFormatter.ofPattern("HH:mm");
+							LocalTime localTime2 = LocalTime.parse("13:15", fmt2); // 13:15
+							System.out.println("localTime2: " + localTime2);
+						
+						Tạo đối tượng LocalTime từ một đối tượng TemporalAccessor được chỉ định.
+							
+							// from(TemporalAccessor temporal)
+							TemporalAccessor nowDatetime = LocalDateTime.now();
+							System.out.println("LocalDateTime.now(): " + nowDatetime);
+							LocalTime nowTime = LocalTime.from(nowDatetime);
+							System.out.println("nowTime: " + nowTime);
+						
+	isAfter(..), isBefore(..)--LocalTime Java:
+							
+						
+						Phương thức isBefore(LocalTime) được sử dụng để kiểm tra đối tượng LocalTime này có đứng trước (before) một đối tượng LocalTime khác đã cho hay không.
+							
+							public boolean isAfter(LocalTime other)
+						
+						Phương thức isAfter(LocalTime) được sử dụng để kiểm tra đối tượng LocalDate này có đứng sau (after) một đối tượng LocalTime khác đã cho hay không.
+							
+							public boolean isBefore(LocalTime other)
+						
+						Ví dụ:
+							
+							package org.o7planning.localtime.ex;
+							import java.time.LocalTime;
+							public class LocalTime_isBefore_isAfter_ex1 {
+								public static void main(String[] args) {
+									LocalTime localTime1 = LocalTime.parse("10:20"); // 10:20
+									LocalTime localTime2 = LocalTime.parse("21:15:30.12345"); // 21:15:30.123450																				
+									System.out.println("localTime1: " + localTime1); // 10:20
+									System.out.println("localTime2: " + localTime2); // 21:15:30.123450
+									System.out.println();									
+									System.out.println("localTime1.isBefore(localTime2): " + localTime1.isBefore(localTime2)); // true
+									System.out.println("localTime1.isAfter(localTime2): " + localTime1.isAfter(localTime2)); // false  
+								}
+							}
+							Output:
+							localTime1: 10:20
+							localTime2: 21:15:30.123450
+							localTime1.isBefore(localTime2): true
+							localTime1.isAfter(localTime2): false
+						
+	format(DateTimeFormatter)--LocalTime Java:
+	
+						Định dạng đối tượng LocalTime này bằng một DateTimeFormatter được chỉ định.
+							
+							public String format(DateTimeFormatter formatter)
+							
+							Ví dụ:
+								
+								LocalTime localTime = LocalTime.parse("10:15:30.12345");  
+								System.out.println("localTime: " + localTime); // 10:15:30.123450
+								System.out.println();
+								// '10:15', '10:15:30' or '10:15:30+01:00'.
+								DateTimeFormatter fmt1 = DateTimeFormatter.ISO_TIME;  
+								System.out.println("ISO_TIME: " + localTime.format(fmt1)); // 10:15:30.12345
+								DateTimeFormatter fmt2 = DateTimeFormatter.ofPattern("HH:mm");  
+								System.out.println("HH:mm: " + localTime.format(fmt2)); // 10:15
+						
+	getX() *--LocalTime Java:
+							
+							Phương thức getNano() trả về phần nano giây của LocalDate này. Nó tương đương với việc gọi phương thức get(ChronoField.NANO_OF_SECOND). Giá trị trả về nằm trong phạm vi từ 0 đến 10^9-1.
+								
+								public int getHour()  
+								public int getMinute()  
+								public int getSecond()  
+								public int getNano()
+							
+							Các phương thức getHour(),getMinute(), getSecond() cũng được hiểu một cách tương tự giống như cái tên của nó.
+								
+								Method Same As Range
+								getNano() get(ChronoField.NANO_OF_SECOND) 0-10^9-1
+								getSecond() get(ChronoField.SECOND_OF_MINUTE) 0-59
+								getMinute() get(ChronoField.MINUTE_OF_HOUR) 0-59
+								getHour() get(ChronoField.HOUR_OF_DAY) 0-23
+							
+							Ví dụ:
+								
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30.12345"); // 13:45:30.123450000
+								System.out.println("localTime: " + localTime); // 13:45:30
+								System.out.println();
+								System.out.println("localTime.getHour(): " + localTime.getHour());  // 13
+								System.out.println("localTime.getMinute(): " + localTime.getMinute()); // 45
+								System.out.println("localTime.getSecond(): " + localTime.getSecond()); // 30
+								System.out.println("localTime.getNano(): " + localTime.getNano());  // 123450000
+								Output:
+									localTime: 13:45:30.123450
+									localTime.getHour(): 13
+									localTime.getMinute(): 45
+									localTime.getSecond(): 30
+									localTime.getNano(): 123450000
+						
+	get(TemporalField)--LocalTime Java:
+	
+							Trả về giá trị của trường (field) đã chỉ định của đối tượng LocalTime này dưới dạng một số nguyên 32 bit.
+							
+								// Inherited from TemporalAccessor interface
+								public int get(TemporalField field)
+							
+							Chú ý: Một số trường (field) có thể không được hỗ trợ bởi LocalTime và UnsupportedTemporalTypeException sẽ được ném ra. Để chắc chắn, hãy sử dụng phương thức isSupported(TemporalField) để kiểm tra xem một trường nào đó có được LocalTime hỗ trợ hay không.
+								
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime time = LocalTime.parse("13:45:30.12345"); // 13:45:30.123450000
+								System.out.println("localTime: " + time); // 13:45:30.123450
+								System.out.println();
+								// int get(TemporalField field)
+								System.out.println("AMPM_OF_DAY: " + time.get(ChronoField.AMPM_OF_DAY)); // 13
+								System.out.println("CLOCK_HOUR_OF_AMPM: " + time.get(ChronoField.CLOCK_HOUR_OF_AMPM)); // 1
+								System.out.println("CLOCK_HOUR_OF_DAY: " + time.get(ChronoField.CLOCK_HOUR_OF_DAY)); // 13
+								System.out.println("HOUR_OF_AMPM: " + time.get(ChronoField.HOUR_OF_AMPM)); // 1
+								System.out.println("HOUR_OF_DAY: " + time.get(ChronoField.HOUR_OF_DAY)); // 13
+								System.out.println("MILLI_OF_DAY: " + time.get(ChronoField.MILLI_OF_DAY)); // 49530123
+								System.out.println("MILLI_OF_SECOND: " + time.get(ChronoField.MILLI_OF_SECOND)); // 123
+								System.out.println("MINUTE_OF_DAY: " + time.get(ChronoField.MINUTE_OF_DAY)); // 825
+								System.out.println("MINUTE_OF_HOUR: " + time.get(ChronoField.MINUTE_OF_HOUR)); // 45
+								System.out.println("MICRO_OF_SECOND: " + time.get(ChronoField.MICRO_OF_SECOND)); // 123450
+								System.out.println("NANO_OF_SECOND: " + time.get(ChronoField.NANO_OF_SECOND)); // 123450000
+								System.out.println("SECOND_OF_DAY: " + time.get(ChronoField.SECOND_OF_DAY)); // 49530
+								System.out.println("SECOND_OF_MINUTE: " + time.get(ChronoField.SECOND_OF_MINUTE)); // 30
+								// Use getLong() instead
+								// System.out.println("NANO_OF_DAY: " + time.get(ChronoField.NANO_OF_DAY)); // 49530123450000
+								// Unsupported
+								// System.out.println("INSTANT_SECONDS: " + time.get(ChronoField.INSTANT_SECONDS));
+								// System.out.println("OFFSET_SECONDS: " + time.get(ChronoField.OFFSET_SECONDS));
+	
+	getLong(TemporalField)--LocalTime Java:
+	
+							Trả về giá trị của trường (field) đã chỉ định của đối tượng LocalTime này dưới dạng một số nguyên 64 bit.
+							
+							// Inherited from TemporalAccessor interface									
+							public long getLong(TemporalField field)
+							
+							Chú ý: Một số trường (field) có thể không được hỗ trợ bởi LocalTime và UnsupportedTemporalTypeException sẽ được ném ra. Để chắc chắn, hãy sử dụng phương thức isSupported(TemporalField) để kiểm tra xem một trường nào đó có được LocalTime hỗ trợ hay không.
+							
+							Ví dụ:
+							
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime time = LocalTime.parse("13:45:30.12345"); // 13:45:30.123450000
+								System.out.println("localTime: " + time); // 13:45:30.123450
+								System.out.println();
+
+								// long getLong(TemporalField field)
+								System.out.println("AMPM_OF_DAY: " + time.getLong(ChronoField.AMPM_OF_DAY)); // 13
+								System.out.println("CLOCK_HOUR_OF_AMPM: " + time.getLong(ChronoField.CLOCK_HOUR_OF_AMPM)); // 1
+								System.out.println("CLOCK_HOUR_OF_DAY: " + time.getLong(ChronoField.CLOCK_HOUR_OF_DAY)); // 13
+								System.out.println("HOUR_OF_AMPM: " + time.getLong(ChronoField.HOUR_OF_AMPM)); // 1
+								System.out.println("HOUR_OF_DAY: " + time.getLong(ChronoField.HOUR_OF_DAY)); // 13
+
+								System.out.println("MILLI_OF_DAY: " + time.getLong(ChronoField.MILLI_OF_DAY)); // 49530123
+								System.out.println("MILLI_OF_SECOND: " + time.getLong(ChronoField.MILLI_OF_SECOND)); // 123
+								System.out.println("MINUTE_OF_DAY: " + time.getLong(ChronoField.MINUTE_OF_DAY)); // 825
+
+								System.out.println("MINUTE_OF_HOUR: " + time.getLong(ChronoField.MINUTE_OF_HOUR)); // 45
+
+								System.out.println("MICRO_OF_SECOND: " + time.getLong(ChronoField.MICRO_OF_SECOND)); // 123450
+								System.out.println("NANO_OF_SECOND: " + time.getLong(ChronoField.NANO_OF_SECOND)); // 123450000
+
+								System.out.println("SECOND_OF_DAY: " + time.getLong(ChronoField.SECOND_OF_DAY)); // 49530
+								System.out.println("SECOND_OF_MINUTE: " + time.getLong(ChronoField.SECOND_OF_MINUTE)); // 30
+
+								 
+								System.out.println("NANO_OF_DAY: " + time.getLong(ChronoField.NANO_OF_DAY)); // 49530123450000
+
+								// Unsupported
+								// System.out.println("INSTANT_SECONDS: " + time.getLong(ChronoField.INSTANT_SECONDS));
+								// System.out.println("OFFSET_SECONDS: " + time.getLong(ChronoField.OFFSET_SECONDS));
+	
+	plusX(..) *--LocalTime Java:
+	
+							- Phương thức plusHours(hoursToAdd) trả về một bản sao của đối tượng LocalTime này với một lượng giờ chỉ định được thêm vào.
+							- Các phương thức plusMinutes(minutesToAdd), plusSeconds(secondsToAdd), plusNanos(nanosToAdd) cũng được hiểu tương tự giống như cái tên của chúng.
+								
+								public LocalTime plusHours(long hoursToAdd)   
+								public LocalTime plusMinutes(long minutesToAdd)   
+								public LocalTime plusSeconds(long secondstoAdd)   
+								public LocalTime plusNanos(long nanosToAdd)
+									
+							Ví dụ:
+								
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30"); // 13:45:30
+								System.out.println("localTime: " + localTime); // 13:45:30
+								System.out.println();
+								// plusHours(long hoursToAdd)
+								LocalTime localTime1 = localTime.plusHours(10);
+								System.out.println("localTime1: " + localTime1); // 23:45:30
+								// plusHours(long hoursToAdd)
+								LocalTime localTime2 = localTime.plusHours(20);
+								System.out.println("localTime2: " + localTime2); // 09:45:30
+								LocalTime localTime3 = localTime.plusHours(-10);
+								System.out.println("localTime3: " + localTime3); // 03:45:30
+								// plusMinutes(long minutesToAdd)
+								LocalTime localTime4 = localTime.plusMinutes(5);
+								System.out.println("localTime4: " + localTime4); // 13:50:30
+								// plusSeconds(long secondstoAdd)
+								LocalTime localTime5 = localTime.plusSeconds(29);
+								System.out.println("localTime5: " + localTime5); // 13:45:59
+								// plusNanos(long nanosToAdd)
+								LocalTime localTime6 = localTime.plusNanos(12345);
+								System.out.println("localTime6: " + localTime6); // 13:45:30.000012345
+	
+	plus(TemporalAmount)--LocalTime Java:
+	
+							Trả về một bản sao của đối tượng LocalTime này với một lượng thời gian chỉ định được thêm vào.
+								
+								// Inherited from Temporal interface
+								public LocalTime plus(TemporalAmount amountToAdd)
+							
+							Bạn có thể sử dụng phương thức TemporalAmount.addTo(Temporal) để có được kết quả tương tự.
+								
+								// Defined in TemporalAmount interface:
+								public Temporal addTo​(Temporal temporal)
+							
+							Ví dụ:
+								
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30"); // 13:45:30
+								System.out.println("localTime: " + localTime); // 13:45:30
+								System.out.println();
+								// ofSeconds(long seconds, long nanoAdjustment)
+								TemporalAmount amount1 = Duration.ofSeconds(10, 12345);
+								//plus(TemporalAmount amountToAdd)
+								LocalTime localTime1 = localTime.plus(amount1);
+								System.out.println("localTime1: " + localTime1); // 13:45:40.000012345
+								// plus(TemporalAmount amountToAdd)
+								LocalTime from = LocalTime.of(10, 20, 35); // of(int hour, int minute, int second)
+								LocalTime to = LocalTime.of(10, 25, 45);
+								TemporalAmount amount2 = Duration.between(from, to); // 00:05:10
+								LocalTime localTime2 = localTime.plus(amount2);
+								System.out.println("localTime2: " + localTime2); // 13:50:40
+	
+	plus(long, TemporalUnit)--LocalTime Java:
+	
+							Trả về một bản sao của đối tượng LocalTime này với một giá trị chỉ định được thêm vào theo đơn vị tính đã cho.
+								
+								// Inherited from Temporal interface
+								public LocalTime plus(long amountToAdd, TemporalUnit unit)
+							
+							Các đơn vị tính tiêu chuẩn được hỗ trợ:
+								NANOS plusNanos(amountToAdd)
+								MICROS plusNanos(amountToAdd*1000)
+								MILLIS plusNanos(amountToAdd*100_000)
+								SECONDS plusSeconds(amountToAdd)
+								MINUTES plusMinutes(amountToAdd)
+								HOURS plusHours(amountToAdd)
+								HALF_DAYS plusHours(amountToAdd*12)
+							
+							Ví dụ:
+								
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30"); // 13:45:30
+								System.out.println("localTime: " + localTime); // 13:45:30
+								System.out.println();
+								// plus(long amountToAdd, TemporalUnit unit)
+								LocalTime localTime1 = localTime.plus(5, ChronoUnit.HOURS);
+								System.out.println("localTime1: " + localTime1); // 18:45:30
+								// plus(long amountToAdd, TemporalUnit unit)
+								LocalTime localTime2 = localTime.plus(10, ChronoUnit.SECONDS);
+								System.out.println("localTime2: " + localTime2); // 13:45:40
+								// plus(long amountToAdd, TemporalUnit unit)
+								LocalTime localTime3 = localTime.plus(12345, ChronoUnit.NANOS);
+								System.out.println("localTime3: " + localTime3); // 13:45:30.000012345
+	
+	minusX(..) *--LocalTime Java:
+	
+							- Phương thức minusHours(hoursToSubtract) trả về một bản sao của đối tượng LocalTime này với một lượng giờ chỉ định được trừ đi.
+							- Các phương thức minusMinutes(minutesToSubtract), minusSeconds(secondsToSubtract), minusNanos(nanosToSubtract) cũng được hiểu tương tự giống như cái tên của chúng.
+								
+								public LocalTime minusHours(long hoursToSubtract)
+								public LocalTime minusMinutes(long minutesToSubtract)  
+								public LocalTime minusSeconds(long secondsToSubtract)
+								public LocalTime minusNanos(long nanosToSubtract)
+							Ví dụ:
+								
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30"); // 13:45:30
+								System.out.println("localTime: " + localTime); // 13:45:30
+								System.out.println();
+								// minusHours(long hoursToSubtract)
+								LocalTime localTime1 = localTime.minusHours(10);
+								System.out.println("localTime1: " + localTime1); // 03:45:30
+								// minusHours(long hoursToSubtract)
+								LocalTime localTime2 = localTime.minusHours(20);
+								System.out.println("localTime2: " + localTime2); // 17:45:30
+								LocalTime localTime3 = localTime.minusHours(-10);
+								System.out.println("localTime3: " + localTime3); // 23:45:30
+								// minusMinutes(long minutesToSubtract)
+								LocalTime localTime4 = localTime.minusMinutes(5);
+								System.out.println("localTime4: " + localTime4); // 13:40:30
+								// minusSeconds(long secondstoSubtract)
+								LocalTime localTime5 = localTime.minusSeconds(29);
+								System.out.println("localTime5: " + localTime5); // 13:45:01
+								// minusNanos(long nanosToSubtract)
+								LocalTime localTime6 = localTime.minusNanos(12345);
+								System.out.println("localTime6: " + localTime6); // 13:45:29.999987655									
+
+	minus(TemporalAmount)--LocalTime Java:
+						
+							Trả về một bản sao của đối tượng LocalTime này với một lượng thời gian chỉ định được trừ đi.
+								
+								// Inherited from Temporal interface
+								public LocalTime minus(TemporalAmount amountToSubtract)
+							
+							Bạn có thể sử dụng phương thức TemporalAmount.subtractFrom(Temporal) để có được kết quả tương tự.
+								
+								// Defined in TemporalAmount interface:
+								public Temporal subtractFrom(Temporal temporal)
+							
+							Ví dụ:
+							
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30"); // 13:45:30
+								System.out.println("localTime: " + localTime); // 13:45:30
+								System.out.println();
+								// ofSeconds(long seconds, long nanoAdjustment)
+								TemporalAmount amount1 = Duration.ofSeconds(10, 12345);
+								// minus(TemporalAmount amountToSubtract)
+								LocalTime localTime1 = localTime.minus(amount1);
+								System.out.println("localTime1: " + localTime1); // 13:45:19.999987655
+								// minus(TemporalAmount amountToSubtract)
+								LocalTime from = LocalTime.of(10, 20, 35); // of(int hour, int minute, int second)
+								LocalTime to = LocalTime.of(10, 25, 45);
+								TemporalAmount amount2 = Duration.between(from, to); // 00:05:10
+								LocalTime localTime2 = localTime.minus(amount2);
+								System.out.println("localTime2: " + localTime2); // 13:40:20
+						
+	minus(long, TemporalUnit)--LocalTime Java:
+	
+							Trả về một bản sao của đối tượng LocalTime này với một giá trị chỉ định được trừ đi theo đơn vị tính đã cho.
+								
+								// Inherited from Temporal interface
+								public LocalTime minus(long amountToSubtract, TemporalUnit unit)
+							
+							Các đơn vị tính tiêu chuẩn được hỗ trợ:
+								
+								NANOS minusNanos(amountToSubtract)
+								MICROS minusNanos(amountToSubtract*1000)
+								MILLIS minusNanos(amountToSubtract*100_000)
+								SECONDS minusSeconds(amountToSubtract)
+								MINUTES minusMinutes(amountToSubtract)
+								HOURS minusHours(amountToSubtract)
+								HALF_DAYS minusHours(amountToSubtract*12)
+							
+							Ví dụ:
+								
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30"); // 13:45:30
+								System.out.println("localTime: " + localTime); // 13:45:30
+								System.out.println();
+								// minus(long amountToSubtract, TemporalUnit unit)
+								LocalTime localTime1 = localTime.minus(5, ChronoUnit.HOURS);
+								System.out.println("localTime1: " + localTime1); // 08:45:30
+								// minus(long amountToSubtract, TemporalUnit unit)
+								LocalTime localTime2 = localTime.minus(10, ChronoUnit.SECONDS);
+								System.out.println("localTime2: " + localTime2); // 13:45:20
+								// minus(long amountToSubtract, TemporalUnit unit)
+								LocalTime localTime3 = localTime.minus(12345, ChronoUnit.NANOS);
+								System.out.println("localTime3: " + localTime3); // 13:45:29.999987655
+	
+	withX(..) *--LocalTime Java:
+	
+							- Phương thức withHour(hour) trả về một bản sao của LocalTime này với giờ được thay đổi thành giờ đã chỉ định.
+							- Các phương thức withMinute(minute), withSecond(second), withNano(nanoOfSecond) cũng được hiểu tương tự giống như cái tên của nó.
+								
+								public LocalTime withHour(int hour)
+								public LocalTime withMinute(int minute)
+								public LocalTime withSecond(int second)
+								public LocalTime withNano(int nanoOfSecond)
+									
+							Ví dụ:
+								
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30"); // 13:45:30
+								System.out.println("localTime: " + localTime); // 13:45:30
+								System.out.println();
+								// withHour(int hour)  [0 - 23]
+								LocalTime localTime1 = localTime.withHour(23);
+								System.out.println("localTime1: " + localTime1); // 23:45:30
+								// withMinute(int minute)   [0 - 59]
+								LocalTime localTime2 = localTime.withMinute(59);
+								System.out.println("localTime2: " + localTime2); // 13:59:30
+								// withSecond(int second)   [0 - 59]
+								LocalTime localTime3 = localTime.withSecond(59);
+								System.out.println("localTime3: " + localTime3); // 13:45:59
+								// withNano(int nanoOfSecond)    [0 - 10^9-1]
+								LocalTime localTime4 = localTime.withNano(12345);
+								System.out.println("localTime4: " + localTime4); // 13:45:30.000012345
+	
+	with(TemporalAdjuster)--LocalTime Java:
+	
+							Trả về bản sao của đối tượng LocalDate này, với dữ liệu thời gian được điều chỉnh bởi đối tượng TemporalAdjuster.
+								
+								// Inherited from Temporal interface
+								public LocalTime with(TemporalAdjuster adjuster)
+							
+							Ví dụ:
+								
+								LocalTime now = LocalTime.now();
+								System.out.println("Now is: " + now);
+								System.out.println();
+
+								// with(TemporalAdjuster adjuster)
+								LocalTime noon = now.with(LocalTime.NOON);
+								System.out.println("NOON: " + noon); // 12:00
+
+								// with(TemporalAdjuster adjuster)
+								LocalTime midnight = now.with(LocalTime.MIDNIGHT);
+								System.out.println("MIDNIGHT: " + midnight);  // 00:00
+							
+							Ví dụ: Viết một TemporalAdjuster tuỳ biến:
+								
+								package org.o7planning.localtime.ex;
+								import java.time.LocalTime;
+								import java.time.temporal.ChronoField;
+								import java.time.temporal.Temporal;
+								import java.time.temporal.TemporalAdjuster;
+								public class LocalTime_with_adjuster_ex2 {
+									public static void main(String[] args) {
+										LocalTime now = LocalTime.now();
+										System.out.println("Now is: " + now);
+										System.out.println();
+										LocalTime lastMinOfHour = now.with(new LastMinOfHourAdjuster());
+										System.out.println("lastMinOfHour: " + lastMinOfHour);
+									}
+								}
+								class LastMinOfHourAdjuster implements TemporalAdjuster {
+									@Override
+									public Temporal adjustInto(Temporal temporal) {
+										LocalTime t = LocalTime.from(temporal);
+										return t.with(ChronoField.MINUTE_OF_HOUR, 59);
+									}
+								};
+								Output:
+									Now is: 19:37:57.524205
+									lastMinOfHour: 19:59:57.524205
+	
+	with(TemporalField, long)--LocalTime Java:
+	
+							Trả về bản sao của đối tượng LocalTime này với trường (field) chỉ định được thay đổi sang giá trị mới.
+								
+								// Inherited from Temporal interface
+								public LocalTime with(TemporalField field, long newValue)
+							
+							Ví dụ:
+							
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime myTime = LocalTime.parse("13:45:30.12345"); // 13:45:30.123450000
+								System.out.println("myTime is: " + myTime);
+								System.out.println("myTime CLOCK_HOUR_OF_AMPM: " + myTime.get(ChronoField.CLOCK_HOUR_OF_AMPM)); // 1
+								System.out.println("myTime CLOCK_HOUR_OF_DAY: " + myTime.get(ChronoField.CLOCK_HOUR_OF_DAY)); // 13
+								System.out.println("myTime SECOND_OF_MINUTE: " + myTime.get(ChronoField.SECOND_OF_MINUTE)); // 30
+								System.out.println();
+								LocalTime localTime1 = myTime.with(ChronoField.CLOCK_HOUR_OF_AMPM, 10); // 22:45:30.123450
+								System.out.println("localTime1: " + localTime1);
+								LocalTime localTime2 = myTime.with(ChronoField.CLOCK_HOUR_OF_DAY, 10); // 10:45:30.123450
+								System.out.println("localTime2: " + localTime2);
+								LocalTime localTime3 = myTime.with(ChronoField.SECOND_OF_MINUTE, 59); // 13:45:59.123450
+								System.out.println("localTime3: " + localTime3);
+	
+	adjustInto(Temporal)--LocalTime Java:
+	
+							Phương thức adjustInto(Temporal) trả về bản sao của đối tượng Temporal đã cho với dữ liệu thời gian được điều chỉnh để giống với đối tượng LocalTime này.
+								
+								Before adjustInto(): 2021-06-18T17:18:06.355673+06:00[Asia/Bishkek]
+								After adjustInto(): 2021-06-18T19:30:55+06:00[Asia/Bishkek]
+	
+	atDate(LocalDate)--LocalTime Java:
+	
+							Phương thức atDate(LocalDate) được sử dụng để kết hợp đối tượng LocalTime này với đối tượng LocalDate được chỉ định để tạo ra một đối tượng LocalDateTime.
+								
+								public LocalDateTime atDate(LocalDate date)
+							
+							Ví dụ:
+								
+								LocalTime localTime = LocalTime.parse("19:30:55");
+								LocalDate localDate = LocalDate.parse("2000-05-20");
+								LocalDateTime localDateTime = localTime.atDate(localDate);
+								System.out.println(localDateTime); // 2000-05-20T19:30:55
+	
+	atOffset(ZoneOffset)--LocalTime Java:
+	
+							Phương thức atOffset(ZoneOffset) được sử dụng để kết hợp đối tượng LocalTime này với đối tượng ZoneOffset được chỉ định để tạo ra một đối tượng OffsetTime.
+								
+								public OffsetTime atOffset(ZoneOffset offset)
+							
+							Ví dụ:
+								
+								LocalTime localTime = LocalTime.parse("16:30:59");
+								System.out.println("localTime: " + localTime); // 16:30:59
+								// Create a ZoneOffset object
+								ZoneOffset offset = ZoneOffset.ofHours(2);
+								// atOffset(ZoneOffset)
+								OffsetTime offsetTime = localTime.atOffset(offset);
+								System.out.println("offsetTime: " + offsetTime); // 16:30:59+02:00
+	
+	toX(..) *--LocalTime Java:
+	
+							public int toSecondOfDay()
+
+							public long toNanoOfDay()  
+
+							public long toEpochSecond(LocalDate date, ZoneOffset offset)
+	
+	until(Temporal, TemporalUnit)--LocalTime Java:
+	
+							Tính lượng thời gian cho đến ngày-giờ khác theo đơn vị được chỉ định.
+								
+								// Inherited from Temporal interface
+								public long until(Temporal endExclusive, TemporalUnit unit)
+							
+							Ví dụ:
+							
+								LocalTime localTime_from = LocalTime.of(1, 0, 0);
+								System.out.println("Time From: " + localTime_from); // 01:00
+								LocalTime localTime_to = LocalTime.of(13, 30, 59);  
+								System.out.println("Time To: " + localTime_to); // 13:30:59
+								System.out.println();
+								long hours = localTime_from.until(localTime_to, ChronoUnit.HOURS);
+								System.out.println("hours: " + hours); // 12
+								long minutes = localTime_from.until(localTime_to, ChronoUnit.MINUTES);
+								System.out.println("minutes: " + minutes); // 750
+									Bạn cũng có thể sử dụng phương thức TemporalUnit.between(Temporal,Temporal) để có kết quả tương tự:
+										LocalTime localTime_from = LocalTime.of(1, 0, 0);
+								System.out.println("Time From: " + localTime_from); // 01:00
+								LocalTime localTime_to = LocalTime.of(13, 30, 59);
+								System.out.println("Time To: " + localTime_to); // 13:30:59
+								System.out.println();
+								long hours = ChronoUnit.HOURS.between(localTime_from, localTime_to);
+								System.out.println("hours: " + hours); // 12
+								long minutes = ChronoUnit.MINUTES.between(localTime_from, localTime_to);
+								System.out.println("minutes: " + minutes); // 750
+	
+	truncatedTo(TemporalUnit)--LocalTime Java:
+	
+							Trả về một bản sao của đối tượng LocalTime này với thời gian bị cắt cụt (truncated) theo đơn vị tính chỉ định.
+								
+								public LocalTime truncatedTo(TemporalUnit unit)
+							
+							Ví dụ:
+								
+								LocalTime localTime = LocalTime.parse("21:30:59.12345");
+								System.out.println("localTime: " + localTime); // 21:30:59.123450
+								// truncatedTo(TemporalUnit unit)
+								LocalTime truncatedLocalTime = localTime.truncatedTo(ChronoUnit.MINUTES);											
+								System.out.println("truncatedLocalTime: " + truncatedLocalTime); // 21:30
+	
+	range(TemporalField)--LocalTime Java:
+	
+							Trả về một phạm vi các giá trị hợp lệ cho trường (field) được chỉ định.
+								
+								// Inherited from TemporalAccessor interface
+								public ValueRange range(TemporalField field)
+							
+							Ví dụ:
+								
+								LocalTime localTime = LocalTime.parse("09:30:45.12345");
+								// range(TemporalField field)
+								ValueRange range1 = localTime.range(ChronoField.MILLI_OF_SECOND);
+								System.out.println("Range in MILLI_OF_SECOND: " + range1);
+								ValueRange range2 = localTime.range(ChronoField.CLOCK_HOUR_OF_DAY);
+								System.out.println("Range in CLOCK_HOUR_OF_DAY: " + range2);
+								ValueRange range3 = localTime.range(ChronoField.CLOCK_HOUR_OF_AMPM);
+								System.out.println("Range in CLOCK_HOUR_OF_AMPM: " + range3);
+										Output:
+											Range in MILLI_OF_SECOND: 0 - 999
+								Range in CLOCK_HOUR_OF_DAY: 1 - 24
+								Range in CLOCK_HOUR_OF_DAY: 1 - 12
+	
+	query(TemporalQuery<R>)--LocalTime Java:
+	
+							Truy vấn đối tượng LocalTime này bằng đối tượng TemporalQuery đã chỉ định để trích ra thông tin.
+								
+								// Inherited from TemporalAccessor interface
+								public <R> R query(TemporalQuery<R> query)
+							
+							Ví dụ:
+								
+								package org.o7planning.localtime.ex;
+								import java.time.LocalDate;
+								import java.time.LocalTime;
+								import java.time.ZoneId;
+								import java.time.ZoneOffset;
+								import java.time.chrono.Chronology;
+								import java.time.temporal.TemporalQueries;
+								import java.time.temporal.TemporalUnit;
+								public class LocalTime_query_ex1 {
+									public static void main(String[] args) {
+										LocalTime localTime = LocalTime.of(11, 30, 59, 12345);  
+										System.out.printf("localTime: %s%n", localTime); // 11:30:59.000012345
+										TemporalUnit unit = localTime.query(TemporalQueries.precision());
+										System.out.printf("precision: %s%n", unit);
+										LocalTime localTime2 = localTime.query(TemporalQueries.localTime());
+										System.out.printf("localTime2: %s%n", localTime2);
+										LocalDate localDate = localTime.query(TemporalQueries.localDate());
+										System.out.printf("localDate: %s%n", localDate);
+										ZoneOffset zoneOffset = localTime.query(TemporalQueries.offset());
+										System.out.printf("ZoneOffset: %s%n", zoneOffset);
+										ZoneId zone = localTime.query(TemporalQueries.zone());
+										System.out.printf("zone: %s%n", zone);
+										ZoneId zoneId = localTime.query(TemporalQueries.zoneId());
+										System.out.printf("zoneId: %s%n", zoneId);
+										Chronology chronology = localTime.query(TemporalQueries.chronology());
+										System.out.printf("chronology: %s%n", chronology);
+									}
+								}
+								Output:
+								
+									localTime: 11:30:59.000012345
+									precision: Nanos
+									localTime2: 11:30:59.000012345
+									localDate: null
+									ZoneOffset: null
+									zone: null
+									zoneId: null
+									chronology: null
+	
+	isSupported(TemporalField)--LocalTime Java:
+	
+							// Inherited from TemporalAccessor interface									
+							public boolean isSupported(TemporalField field)
+							
+							Về cơ bản, LocalTime hỗ trợ các trường tiêu chuẩn sau:
+								
+								ChronoField.NANO_OF_SECOND
+								ChronoField.NANO_OF_DAY
+								ChronoField.MICRO_OF_SECOND
+								ChronoField.MICRO_OF_DAY
+								ChronoField.MILLI_OF_SECOND
+								ChronoField.MILLI_OF_DAY
+								ChronoField.SECOND_OF_MINUTE
+								ChronoField.SECOND_OF_DAY
+								ChronoField.MINUTE_OF_HOUR
+								ChronoField.MINUTE_OF_DAY
+								ChronoField.HOUR_OF_AMPM
+								ChronoField.CLOCK_HOUR_OF_AMPM
+								ChronoField.HOUR_OF_DAY
+								ChronoField.CLOCK_HOUR_OF_DAY
+								ChronoField.AMPM_OF_DAY
+							
+							Ví dụ:
+							
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30.12345"); // 13:45:30.123450000
+								// boolean isSupported(TemporalField field)
+								// LocalTime does not support ChronoField.DAY_OF_MONTH, DAY_OF_YEAR,.. (** Used for LocalDateTime, LocalDate)
+								System.out.println("DAY_OF_MONTH is supported? " + localTime.isSupported(ChronoField.DAY_OF_MONTH)); // false
+								System.out.println("DAY_OF_YEAR is supported? " + localTime.isSupported(ChronoField.DAY_OF_YEAR)); // false
+								// LocalTime support ChronoField.MINUTE_OF_DAY, SECOND_OF_MINUTE,..
+								System.out.println("MINUTE_OF_DAY is supported? " + localTime.isSupported(ChronoField.MINUTE_OF_DAY)); // true
+								System.out.println("SECOND_OF_MINUTE is supported? " + localTime.isSupported(ChronoField.SECOND_OF_MINUTE)); // true
+	
+	isSupported(TemporalUnit)--LocalTime Java:
+	
+							Kiểm tra xem một TemporalUnit đã cho có được hỗ trợ hay không.
+								
+								// Inherited from Temporal interface
+								public boolean isSupported(TemporalUnit unit)
+							
+							Về cơ bản, LocalTime hỗ trợ các đơn vị tính tiêu chuẩn sau:
+								
+								ChronoUnit.NANOS
+								ChronoUnit.MICROS
+								ChronoUnit.MILLIS
+								ChronoUnit.SECONDS
+								ChronoUnit.MINUTES
+								ChronoUnit.HOURS
+								ChronoUnit.HALF_DAYS
+							
+							Ví dụ:
+							
+								// Format: 13:45:30.12345 or 13:45:30 or 13:45
+								LocalTime localTime = LocalTime.parse("13:45:30.12345"); // 13:45:30.123450000
+								// boolean isSupported(TemporalUnit unit)
+								// LocalTime does not support ChronoUnit.CENTURIES, WEEKS,.. (** Used for LocalDateTime, LocalDate)
+								System.out.println("CENTURIES is supported? " + localTime.isSupported(ChronoUnit.CENTURIES)); // false
+								System.out.println("WEEKS is supported? " + localTime.isSupported(ChronoUnit.WEEKS)); // false
+								// LocalTime support ChronoUnit.HOURS, MINUTES,..
+								System.out.println("HOURS is supported? " + localTime.isSupported(ChronoUnit.HOURS)); // true
+								System.out.println("MINUTES is supported? " + localTime.isSupported(ChronoUnit.MINUTES)); // true

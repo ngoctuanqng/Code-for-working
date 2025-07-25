@@ -1,0 +1,281 @@
+ObjectMapper (Xử lý Json với Jackson ObjectMapper trong Java)--JAVA:
+
+	Maven Dependency
+		
+		Để sử dụng Jackson trong Project Maven chúng ta cần thêm dependency sau:
+			
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.9.8</version>
+			</dependency>
+			
+	Đọc ghi Json với ObjectMapper
+	
+		Thao tác đọc ghi Json là 2 thao tác cơ bản mà ObjectMapper cung cấp. Chúng ta có thể sử dụng readValue() method để deserialize Json sang Java Object. Tương tự, writeValue() serialize Java Object sang Json.
+		
+		Giả sử có Car class chứa 2 thuộc tính color và type:
+			public class Car {
+				private String color;
+				private String type;
+				public Car(String color, String type) {
+					this.color = color;
+					this.type = type;
+				}
+				public String getColor() {
+					return color;
+				}
+				public void setColor(String color) {
+					this.color = color;
+				}
+				public String getType() {
+					return type;
+				}
+				public void setType(String type) {
+					this.type = type;
+				}
+			}
+		
+		Convert Java Object to Json
+		
+			Để serialize Java object sang Json, chúng ta cần đến writeValue() method được cung cấp bởi ObjectMapper class.
+				
+				import java.io.File;
+				import java.io.IOException;
+				import com.fasterxml.jackson.databind.ObjectMapper;
+				public class Main {
+					public static void main(String[] args) throws IOException {
+						ObjectMapper objectMapper = new ObjectMapper();
+						Car car = new Car("yellow", "renault");
+						objectMapper.writeValue(new File("car.json"), car);
+					}
+				}
+				
+			Sau khi thực thi xong, chương trình sẽ tạo ra file car.json với nội dung
+				
+				{"color":"yellow","type":"renault"}
+			
+			Các method writeValueAsString() và writeValueAsBytes() của ObjectMapper sẽ tạo ra một string hoặc mảng byte tương ứng thay vì ghi vào file json.
+				
+				String carAsString = objectMapper.writeValueAsString(car);
+		
+		Convert Json to Java Object
+			
+			Sử dụng readValue() để convert Json String sang Java Object.
+				
+				String json = "{ \"color\" : \"Black\", \"type\" : \"BMW\" }";
+				Car car = objectMapper.readValue(json, Car.class);
+			
+			readValue() method cũng cho phép chúng ta đọc file Json vào Java object theo mẫu sau
+				
+				Car car = objectMapper.readValue(new File("car.json"), Car.class);
+			
+			Hoặc thông qua URL
+				
+				Car car = objectMapper.readValue(new URL("file:car.json"), Car.class);
+		
+		Convert Json to Jackson JsonNode
+			
+			Jackson cũng hỗ trợ chuyển từ Json String sang JsonNode thông qua readTree() method.
+				
+				public class Main {
+					public static void main(String[] args) throws IOException {
+						ObjectMapper objectMapper = new ObjectMapper();
+						String json = "{ \"color\" : \"Black\", \"type\" : \"FIAT\" }";
+						JsonNode jsonNode = objectMapper.readTree(json);
+						String color = jsonNode.get("color").asText(); // Black
+					}
+				}
+				
+		Convert Json Array String to Java List Object
+			
+			Đối với cấu trúc dạng mảng trong Json, chúng ta cũng có thể chuyển chúng sang Java List Object tương ứng với TypeReference:
+				
+				String jsonCarArray = 
+				  "[{ \"color\" : \"Black\", \"type\" : \"BMW\" }, { \"color\" : \"Red\", \"type\" : \"FIAT\" }]";
+				List<Car> listCar = objectMapper.readValue(jsonCarArray, new TypeReference<List<Car>>(){});
+		
+		Convert Json Array String to Map
+			
+			Tương tự, sử dụng TypeReference để chuyển Json sang Map
+				
+				String json = "{ \"color\" : \"Black\", \"type\" : \"BMW\" }";
+				Map<String, Object> map 
+				  = objectMapper.readValue(json, new TypeReference<Map<String,Object>>(){});
+	
+	Custom Jackson
+		
+		Khi làm việc với Json, chúng ta hiểu được sẽ nhiều trường hợp không prefect như cấu trúc giữa file Json và Java Class không trùng khớp, file Json được lấy từ nguồn khác chứa nhiều thuộc tính hơn Java
+		class cần thiết etc. Tất cả đó, Jackson cung cấp bộ công cụ cho phép chúng ta có thể custom serialization và deserialization.
+		
+		Configuring Serialization or Deserialization
+			
+			Trong khi convert Json string sang Java class, trong trường hợp nếu Json string có 1 số field mới, mặc định Jackson sẽ ném exception.
+			
+			Ví dụ convert Json string sang Car object, trong Json string chứa một thuộc tính year mới mà Car class không có.
+				
+				import java.io.IOException;
+				import com.fasterxml.jackson.databind.ObjectMapper;
+				public class Main {
+					public static void main(String[] args) throws IOException {
+						ObjectMapper objectMapper = new ObjectMapper();
+						String jsonString
+								= "{ \"color\" : \"Black\", \"type\" : \"Fiat\", \"year\" : \"1970\" }";
+						Car car = objectMapper.readValue(jsonString, Car.class);
+					}
+				}
+				
+			Để xử lý trường hợp trên, chúng ta có thể config để Jackson bỏ qua field mới trong quá trình deserialize với FAIL_ON_UNKNOWN_PROPERTIES option.
+				
+				import java.io.IOException;
+				import com.fasterxml.jackson.databind.DeserializationFeature;
+				import com.fasterxml.jackson.databind.JsonNode;
+				import com.fasterxml.jackson.databind.ObjectMapper;
+				public class Main {
+					public static void main(String[] args) throws IOException {
+						ObjectMapper objectMapper = new ObjectMapper();
+						String jsonString
+								= "{ \"color\" : \"Black\", \"type\" : \"Fiat\", \"year\" : \"1970\" }";
+						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+						Car car = objectMapper.readValue(jsonString, Car.class); //
+						JsonNode jsonNodeRoot = objectMapper.readTree(jsonString);
+						JsonNode jsonNodeYear = jsonNodeRoot.get("year");
+						String year = jsonNodeYear.asText();
+					}
+				}
+				
+			Ngoài ra, chúng ta còn một config enum khác:
+				
+				FAIL_ON_NULL_FOR_PRIMITIVES: giá trị null cho kiểu dữ liệu nguyên thủy được chấp nhận.
+				FAIL_ON_NUMBERS_FOR_ENUM : giá trị cho enum được phép là một số.
+	
+	Custom Serializer or Deserializer
+		
+		Trong trường hợp cấu trúc Json và Java class có cấu trúc khác nhau, chúng ta có thể tạo một custom serializer và deserializer và đăng ký sử dụng chúng với Jackson.
+		
+		Dưới đây là một Custom Serializer cho phép chuyển giá trị type trong Car class sang car_brand trong Json.
+			
+			public class CustomCarSerializer extends StdSerializer<Car> {		 
+				public CustomCarSerializer() {
+					this(null);
+				}				 
+				public CustomCarSerializer(Class<Car> t) {
+					super(t);
+				}				 
+				@Override
+				public void serialize(
+				  Car car, JsonGenerator jsonGenerator, SerializerProvider serializer) throws IOException {
+					jsonGenerator.writeStartObject();
+					jsonGenerator.writeStringField("car_brand", car.getType());
+					jsonGenerator.writeEndObject();
+				}
+			}
+			
+		Đăng ký CustomCarSerializer với Jackson theo mẫu sau:
+			
+			ObjectMapper mapper = new ObjectMapper();
+			SimpleModule module = 
+			  new SimpleModule("CustomCarSerializer", new Version(1, 0, 0, null, null, null));
+			module.addSerializer(Car.class, new CustomCarSerializer());
+			mapper.registerModule(module);
+			Car car = new Car("yellow", "renault");
+			String carJson = mapper.writeValueAsString(car);
+		
+		Và đây là ví dụ custom deserializer
+			
+			public class CustomCarDeserializer extends StdDeserializer<Car> {
+				public CustomCarDeserializer() {
+					this(null);
+				}
+				public CustomCarDeserializer(Class<?> vc) {
+					super(vc);
+				}
+				@Override
+				public Car deserialize(JsonParser parser, DeserializationContext deserializer) throws IOException {
+					Car car = new Car();
+					ObjectCodec codec = parser.getCodec();
+					JsonNode node = codec.readTree(parser);
+					JsonNode colorNode = node.get("color");
+					String color = colorNode.asText();
+					JsonNode typeNode = node.get("car_brand");
+					car.setType(typeNode.asText());
+					car.setColor(color);
+					return car;
+				}
+			}
+			
+		Sử dụng CustomCarDeserializer theo mẫu sau:
+			
+			public class Main {
+				public static void main(String[] args) throws IOException {
+					ObjectMapper mapper = new ObjectMapper();
+					String json = "{ \"color\" : \"Black\", \"car_brand\" : \"BMW\" }";
+					SimpleModule module =
+							new SimpleModule("CustomCarDeserializer", new Version(1, 0, 0, null, null, null));
+					module.addDeserializer(Car.class, new CustomCarDeserializer());
+					mapper.registerModule(module);
+					Car car = mapper.readValue(json, Car.class); // color: Black; type: BMW
+				}
+			}
+			
+	Handing Date Format
+		
+		Mặc định, quá trình serialization của java.util.Date sẽ cho ra một số timestamp (số mili giây kể từ 01-01-1970 UTC). Tuy nhiên giá trị này có thể gây khó hiểu cho người đọc, chúng ta có hoàn toàn có thể thay
+		đổi timestamp thành các định dạng chuẩn ngày tháng như sau.
+		
+		Giả sử có Request class
+		
+			public class Request {
+				private Car car;
+				private Date datePurchased;
+				public Request(Car car, Date datePurchased) {
+					this.car = car;
+					this.datePurchased = datePurchased;
+				}
+				public Car getCar() {
+					return car;
+				}
+				public void setCar(Car car) {
+					this.car = car;
+				}
+				public Date getDatePurchased() {
+					return datePurchased;
+				}
+				public void setDatePurchased(Date datePurchased) {
+					this.datePurchased = datePurchased;
+				}
+			}
+			
+		Để chuyển đổi định dạng timestamp sang date format eg yyyy-MM-dd HH:mm a z:
+			
+			public class Main {
+				public static void main(String[] args) throws IOException {
+					ObjectMapper mapper = new ObjectMapper();
+					DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm a z");
+					mapper.setDateFormat(df);
+					Request request = new Request(new Car("White", "BMW"), Date.from(Instant.now()));
+					String carAsString = mapper.writeValueAsString(request); 
+					// {"car":{"color":"White","type":"BMW"},"datePurchased":"2020-04-10 14:26 PM ICT"}
+				}
+			}
+			
+	Handling Collections
+		
+		Ở phần trên chúng ta cũng đã được giới thiệu cách thao tác với Json chứa một mảng dữ liệu, tuy nhiên ở phần này chúng ta sẽ gợi lại một xíu, cộng thêm việc xử lý các Array thông thường trong Java.
+		
+		Ví dụ chuyển Json chứa mảng Car sang array trong java.
+			
+			String jsonCarArray = 
+			  "[{ \"color\" : \"Black\", \"type\" : \"BMW\" }, { \"color\" : \"Red\", \"type\" : \"FIAT\" }]";
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.configure(DeserializationFeature.USE_JAVA_ARRAY_FOR_JSON_ARRAY, true);
+			Car[] cars = objectMapper.readValue(jsonCarArray, Car[].class);
+			// print cars
+				
+		Hoặc chuyển sang List
+			
+			String jsonCarArray = 
+			  "[{ \"color\" : \"Black\", \"type\" : \"BMW\" }, { \"color\" : \"Red\", \"type\" : \"FIAT\" }]";
+			ObjectMapper objectMapper = new ObjectMapper();
+			List<Car> listCar = objectMapper.readValue(jsonCarArray, new TypeReference<List<Car>>(){});
+			// print cars

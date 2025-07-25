@@ -1,0 +1,34 @@
+Recursion--JAVA:
+						Trong Java, việc gọi một phương thức trước khi nó được khai báo không gây ra lỗi bởi vì Java Compiler (trình biên dịch Java) thực hiện quá trình biên dịch hai lần.
+						Khi bạn biên dịch một chương trình Java, Compiler đi qua mã nguồn và tạo ra một tệp bytecode (.class) chứa thông tin về các lớp, phương thức và biến trong chương trình.
+						Trong quá trình này, Compiler chỉ quan tâm đến xác định tên và kiểu dữ liệu của các biến và phương thức mà không cần biết thực tế các phương thức được triển khai ở đâu.
+						Khi chương trình được chạy (runtime), JVM (Java Virtual Machine) sẽ tải các tệp bytecode và thực thi chúng. Trước khi chạy chương trình, JVM sẽ xác định và kiểm tra sự tồn
+						tại của các phương thức được gọi trong quá trình chạy.
+						Do đó, trong trường hợp của bạn, mặc dù phương thức sum được gọi trước khi nó được khai báo, nhưng trong quá trình biên dịch, Compiler chỉ cần xác định rằng có một phương
+						thức có tên là sum với kiểu trả về int và một tham số kiểu int. Quá trình biên dịch không yêu cầu phải biết định nghĩa thực tế của phương thức đó.
+						Khi JVM thực thi chương trình, nó sẽ tìm và xác định đúng phương thức sum trong cùng một lớp và thực thi nó một cách bình thường.
+						Tóm lại, trong quá trình biên dịch, việc gọi một phương thức trước khi nó được khai báo không gây ra lỗi bởi vì Compiler chỉ cần xác định kiểu và tên của phương thức, và
+						quá trình tìm đúng định nghĩa phương thức xảy ra trong quá trình chạy (runtime) của chương trình.
+	Recursion:
+						Recursion is the technique of making a function call itself. This technique provides a way to break complicated problems down into simple problems which are easier to solve.
+						
+						public class Main {
+						  public static void main(String[] args) {
+							int result = sum(10);
+							System.out.println(result);
+						  }
+						  public static int sum(int k) {
+							if (k > 0) {
+							  return k + sum(k - 1);
+							} else {
+							  return 0;
+							}
+						  }
+						}
+						Example Explained:
+						10 + sum(9)
+						10 + ( 9 + sum(8) )
+						10 + ( 9 + ( 8 + sum(7) ) )
+						...
+						10 + 9 + 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1 + sum(0)
+						10 + 9 + 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1 + 0

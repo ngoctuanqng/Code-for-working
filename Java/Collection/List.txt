@@ -1,0 +1,82 @@
+	List--JAVA:				
+				
+				- Một list có thể chứa giá trị null phía trong
+				- Một danh sách được coi là rỗng nếu nó không chứa bất kỳ phần tử nào. Nếu danh sách chứa một hoặc nhiều phần tử, kể cả khi một trong số đó là null, thì danh sách đó không được coi là rỗng.
+				- List: Các phần tử trong List interface được sắp xếp có thứ tự và có thể có giá trị giống nhau.
+				- LinkedList: Là 1 cấu trúc dữ liệu lưu trữ các phần tử dưới dạng danh sách. Các phần tử trong LinkedList được sắp xếp có thứ
+							tự và có thể có giá trị giống nhau. là một lớp kế thừa lớp AbstractSequentialList và triển khai của List,
+							Queue Interface trong Collections Framework
+					Singly Linked List:	Trong Singly Linked List, mỗi node trong danh sách này được lưu trữ dữ liệu của node và con trỏ trỏ
+										tới node tiếp theo trong danh sách
+					Doubly Linked List: Trong Double Linked List, có hai tham chiếu, đến node tiếp theo và đến node trước đó.										
+				- ArrayList: Là kiểu danh sách sử dụng cấu trúc mảng để lưu trữ phần tử. Thứ tự các phần tử dựa theo thứ tự lúc thêm vào và
+						   giá trị của các phần tử này có thể trùng nhau.
+						   Được sử dụng như một mảng động để lưu trữ các phần tử. Là một lớp kế thừa từ AbtractList và implements List
+						   interface trong collections framework
+				- AbstractList: kế thừa từ AbstractCollection và implements hầu hết List interface
+				- List khi chuyển sang Javascript sẽ là một Array.
+				
+				List<String> additionalFruits = List.of("Apple", "Banana", "Orange");
+				
+		Khởi tạo:			
+							List<String> list1 = new ArrayList<>();
+							list1.add("Apple");
+							list1.add("Banana");
+							
+							List<String> list2 = Arrays.asList("Apple", "Banana", "Orange");
+							
+							List<String> list3 = List.of("Apple", "Banana", "Orange");
+							
+							List<String> list4 = Lists.newArrayList("Apple", "Banana", "Orange");
+							
+							List<String> list5 = new ArrayList<>(Arrays.asList("Apple", "Banana", "Orange"));
+							
+							List<String> list6 = new LinkedList<>();
+							list6.add("Apple");
+							list6.add("Banana");
+							
+							List<String> list7 = new CopyOnWriteArrayList<>();
+							list7.add("Apple");
+							list7.add("Banana");
+							
+							List<String> list8 = new ArrayList<>(List.of("Apple", "Banana", "Orange"));
+							
+							List<String> emptyList = Collections.emptyList();
+		- add:				additionalFruits.add("Apple"); [Apple, Banana, Orange, Apple]
+		addAll:				
+							List<String> additionalFruits = List.of("Mango", "Strawberry");
+							fruits.addAll(additionalFruits); // Thêm tất cả phần tử từ một collection. [Apple, Banana, Orange, Mango, Strawberry]
+		- remove:
+							List<String> fruits = new ArrayList<>();
+							fruits.add("Apple");
+							fruits.add("Banana");
+							fruits.add("Orange");
+							fruits.remove("Banana"); // [Apple, Orange]
+		removeAll:			fruits.removeAll(fruitsToRemove); // Loại bỏ tất cả phần tử có trong một collection. []
+		- get:				String retrievedFruit = additionalFruits.get(1); // Lấy phần tử tại index 1. Banana
+		- set:				additionalFruits.set(1, "Mango"); // Sử dụng phương thức set để thay đổi giá trị tại index 1. [Apple, Mango, Orange]
+		- indexOf:			int indexOfBanana = additionalFruits.indexOf("Banana"); // 1
+		- lastIndexOf:		
+							List<String> additionalFruits = List.of("Apple", "Banana", "Orange", "Banana");
+							int lastIndexOfBanana = additionalFruits.lastIndexOf("Banana"); // Lấy index của phần tử "Banana" cuối cùng trong danh sách. 3
+		toArray:			
+							String[] array = additionalFruits.toArray(new String[0]); // Chuyển đổi danh sách thành mảng
+							System.out.print("Array: ");
+							for (String fruit : array) {
+								System.out.print(fruit + " "); // Apple Banana Orange
+							}
+		subList:			List<String> subListOfFruits = additionalFruits.subList(1, 2); // Lấy danh sách con từ index 1 đến index 2
+																					       // (không bao gồm index 2). [Banana]
+		- sort:				Collections.sort(additionalFruits); // Sắp xếp danh sách theo thứ tự tăng dần. [Apple, Banana, Orange]
+		listIterator:		
+							ListIterator<String> iterator = additionalFruits.listIterator();
+							System.out.println("Iterating forward:");
+							while (iterator.hasNext()) {
+								System.out.println(iterator.next()); // apple banana orange
+							}
+							
+							ListIterator<String> iterator = additionalFruits.listIterator(1);
+							System.out.println("Iterating forward from index 1:");
+							while (iterator.hasNext()) {
+								System.out.println(iterator.next()); // banana orange
+							}

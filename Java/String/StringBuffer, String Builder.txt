@@ -1,0 +1,127 @@
+StringBuffer, String Builder--JAVA:		
+
+										- StringBuffer: Là mutable, tức là bạn có thể thay đổi nội dung của nó mà không tạo ra một đối tượng mới.
+										- String: Là immutable, tức là một khi đã được tạo ra, không thể thay đổi nội dung của nó. Mọi thay đổi trên một đối tượng String sẽ tạo ra một đối tượng mới.
+										- Vì String là immutable, việc thực hiện các phép toán như nối chuỗi (+) hoặc thay đổi nội dung của chuỗi sẽ tạo ra nhiều đối tượng String tạm thời, làm tăng chi phí về bộ nhớ và
+										thời gian.
+										- StringBuffer thích hợp cho các tác vụ mà yêu cầu sự thay đổi nhiều lần nội dung của chuỗi, như khi bạn cần thực hiện các phép toán như nối chuỗi, chèn, xoá.
+										- StringBuffer là thread-safe, có nghĩa là nó được đồng bộ hóa và an toàn để sử dụng trong môi trường đa luồng. Điều này đảm bảo rằng các phương thức của StringBuffer sẽ không gây
+										ra xung đột dữ liệu khi được sử dụng trong các luồng khác nhau.
+										- String không đồng bộ hóa, nghĩa là nó không an toàn để sử dụng trong môi trường đa luồng mà không được đảm bảo.
+										- StringBuilder là một lớp tương tự như StringBuffer nhưng không đồng bộ hóa, nghĩa là nó không an toàn để sử dụng trong môi trường đa luồng, nhưng có hiệu suất cao hơn vì không
+										phải đồng bộ hóa. Vì vậy, khi cần xây dựng một chuỗi một cách hiệu quả trong một luồng đơn, StringBuilder thường là sự lựa chọn tốt hơn.
+
+										StringBuffer sb1 = new StringBuffer();
+										StringBuffer sb2 = new StringBuffer(10); // Tạo ra một StringBuffer với kích thước ban đầu là 10 ký tự.
+										StringBuffer sb3 = new StringBuffer("Hello"); // Tạo ra một StringBuffer với nội dung ban đầu là "Hello".
+	
+	append:								
+	
+										Phương thức append() trong StringBuffer được sử dụng để nối thêm chuỗi hoặc các giá trị khác vào cuối chuỗi hiện tại.
+										
+										public StringBuffer append(String str)
+	
+										sb1.append("Hello"); // Thêm chuỗi "Hello"
+										sb1.append(" "); // Thêm một khoảng trắng
+	
+	insert:								
+	
+										Phương thức insert() trong lớp StringBuffer của Java được sử dụng để chèn một chuỗi hoặc một giá trị vào vị trí cụ thể trong chuỗi hiện tại.
+										
+										public StringBuffer insert(int offset, String str)
+	
+										sb1.insert(0, "Java"); // Chèn chuỗi "Java" vào vị trí đầu tiên (index 0)
+										sb1.insert(4, " is awesome"); // Chèn chuỗi " is awesome" vào vị trí thứ 4 (index 4).
+										System.out.println(sb1.toString()); // "Java is awesome"
+	
+	delete:								
+	
+										Phương thức delete() trong lớp StringBuffer của Java được sử dụng để xoá một phần của chuỗi hiện tại, bắt đầu từ vị trí được chỉ định. 
+	
+										public StringBuffer delete(int start, int end)
+										
+										sb1.delete(5, 11); // Xóa phần từ vị trí thứ 5 (bao gồm) đến vị trí thứ 11 (không bao gồm).
+										System.out.println(sb1.toString()); // "Hello!"
+	
+	deleteCharAt: 						
+	
+										Phương thức deleteCharAt() trong lớp StringBuffer của Java được sử dụng để xoá một ký tự ở vị trí được chỉ định trong chuỗi hiện tại.
+										
+										public StringBuffer deleteCharAt(int index)
+	
+										sb1.append("Hello world!"); // Thêm chuỗi "Hello world!"
+										sb1.deleteCharAt(5); // Xóa ký tự tại vị trí thứ 5 trong chuỗi (" ").
+										System.out.println(sb1.toString()); // "Helloworld!"
+	
+	replace:							
+												
+										Phương thức replace() trong lớp StringBuffer của Java được sử dụng để thay thế một phần của chuỗi hiện tại bằng một chuỗi khác.
+										
+										public StringBuffer replace(int start, int end, String str)
+	
+										sb1.append("Hello world!"); // Thêm chuỗi "Hello world!"
+										sb1.replace(6, 11, "Java"); // Thay thế phần từ vị trí thứ 6 (bao gồm) đến vị trí thứ 11 (không bao gồm) bằng chuỗi "Java".
+										System.out.println(sb1.toString()); // "Hello Java!"
+	
+	reverse:							
+	
+										Phương thức reverse() trong lớp StringBuffer của Java được sử dụng để đảo ngược nội dung của chuỗi hiện tại. 
+										
+										public StringBuffer reverse()
+	
+										sb1.append("Hello"); // Thêm chuỗi "Hello"
+										sb1.reverse(); // Đảo ngược chuỗi.
+										System.out.println(sb1.toString()); // "olleH"
+	
+	charAt:								
+	
+										Phương thức charAt() trong lớp StringBuffer của Java được sử dụng để trả về ký tự ở vị trí cụ thể trong chuỗi hiện tại.
+										
+										public char charAt(int index)
+	
+										sb1.append("Hello"); // Thêm chuỗi "Hello"
+										char ch = sb1.charAt(1); // Lấy ký tự tại vị trí thứ 1 trong chuỗi.
+										System.out.println(sb1.toString()); // 'e'
+	
+	substring:				
+
+										Phương thức substring() trong lớp StringBuffer của Java được sử dụng để trích xuất một phần của chuỗi hiện tại, bắt đầu từ vị trí bắt đầu đến vị trí kết thúc được chỉ định.
+										
+										public String substring(int startIndex)
+										public String substring(int startIndex, int endIndex)
+	
+										sb1.append("Hello world!"); // Thêm chuỗi "Hello world!"
+										String subString1 = sb1.substring(6, 11); // Lấy phần từ vị trí thứ 6 (bao gồm) đến vị trí thứ 11 (không bao gồm).
+										System.out.println(subString1.toString()); // "world"
+										String subString2 = sb1.substring(6); // Lấy phần từ từ vị trí thứ 6 đến hết.
+										System.out.println(subString2.toString()); // "world!"
+	
+	toString:							
+	
+										Phương thức toString() trong lớp StringBuffer của Java được sử dụng để chuyển đổi nội dung của StringBuffer thành một đối tượng String.
+										
+										public String toString()
+	
+										sb1.append("Hello world!"); // Thêm chuỗi "Hello world!"
+										String result = sb1.toString(); // // Sử dụng phương thức toString() để chuyển đổi StringBuffer sb1 thành một String
+										System.out.println(result); // "Hello world!"
+	
+	indexOf:							
+												
+										Phương thức indexOf() trong lớp StringBuffer của Java được sử dụng để tìm vị trí đầu tiên của một chuỗi con trong chuỗi hiện tại.
+										
+										public int indexOf(String str)
+	
+										sb1.append("Hello world!"); // Thêm chuỗi "Hello world!"
+										int index1 = sb1.indexOf("world"); // 6
+										int index = sb1.indexOf("Hello", 7); // Tìm vị trí xuất hiện đầu tiên của chuỗi con "Hello" trong StringBuffer sb1, bắt đầu từ vị trí thứ 7. 13
+	
+	lastIndexOf:						
+												
+										Phương thức lastIndexOf() trong lớp StringBuffer của Java tương tự như phương thức indexOf(), nhưng nó được sử dụng để tìm vị trí cuối cùng của một chuỗi con trong chuỗi hiện tại.
+
+										public int lastIndexOf(String str)											
+	
+										sb1.append("Hello world! Hello universe!"); // Thêm chuỗi "Hello world! Hello universe!"
+										int lastIndex1 = sb1.lastIndexOf("Hello"); // Tìm vị trí xuất hiện cuối cùng của chuỗi con "Hello" trong StringBuffer sb1. 13
+										int lastIndex2 = sb1.lastIndexOf("Hello", 18); // Tìm vị trí xuất hiện cuối cùng của chuỗi con "Hello" trong StringBuffer sb1, bắt đầu từ vị trí thứ 18. 0			

@@ -1,0 +1,167 @@
+Null--JAVA:
+
+	Bất kì tham chiếu biến nào thì default là null:
+	
+														public class Test { 
+															private static Object obj; 
+															public static void main(String args[]) 
+															{ 
+																System.out.println("Value of object obj is : " + obj); // null
+															} 
+														}
+	
+	Bất cứ kiểu nào cũng có thể cast về null:
+	
+														String str = null; // null có thể gán cho String
+														Integer itr = null; // null có thể gán cho Integer
+														Double dbl = null; // tương tự cho Double
+														String myStr = (String) null; // null cũng cast được qua String
+														Integer myItr = (Integer) null; // cast null qua Integer
+	
+	Bị kiểu nguyên thủy (primitive type) kì thị:
+	
+														public class Kieblog { 
+															public static void main (String[] args) throws java.lang.Exception { 
+																Integer i = null; // Integer có thể gán là null 
+																int a = i; // Nhưng nếu gán null cho kiểu nguyên thủy thì sẽ NullpointerException 
+															} 
+														}
+
+	Bạn biết rằng bạn không thể gọi một phương thức không tĩnh trên biến tham chiếu null, nó sẽ gọi NullPointerException, nhưng bạn có thể không biết rằng bạn có thể gọi một phương thức tĩnh trên biến tham chiếu null. Bởi
+	vì các phương thức tĩnh sử dụng liên kết tĩnh, chúng không loại bỏ các tệp NullPointerException
+	
+														public class Testing {
+															public static void main(String args[]){
+																Testing myObject = null;
+																myObject.iAmStaticMethod();
+																myObject.iAmNonStaticMethod();
+															}
+															private static void iAmStaticMethod(){
+																System.out.println("I am static method, can be called by null reference");
+															}
+															private void iAmNonStaticMethod(){
+																System.out.println("I am NON static method, don't date to call me by null");
+															}
+														}
+	
+	Bạn có thể truyền null làm tham số cho một phương thức chấp nhận bất kỳ loại tham chiếu nào:
+	
+														public void print(Object obj)
+														
+														print(null)
+														
+	Bạn có thể so sánh null bằng cách sử dụng toán ==tử (bằng) và !=(không bằng), nhưng bạn không thể sử dụng nó với các toán tử số học hoặc logic khác như <(nhỏ hơn) hoặc >(lớn hơn). Không giống như SQL, Java
+	null == null sẽ trả về true:
+	
+														public class Test {
+															public static void main(String args[]) throws InterruptedException {
+																String abc = null;
+																String cde = null;
+																if(abc == cde){
+																	System.out.println("null == null is true in Java");
+																}
+																if(null != null){
+																	System.out.println("null != null is false in Java");
+																}
+																// classical null check
+																if(abc == null){
+																	// do something
+																}
+																// not ok, compile time error
+																if(abc > null){
+																}
+															}
+														}		
+	
+	Tránh lỗi NullPointerException:
+	
+		Return giá trị--Tránh lỗi NullPointerException Java:
+			
+			Return một EMPTY collection thay vì giá trị NULL:
+																	List<String> findSomething(){
+																		if(someCondition){
+																			return Collections.emptyList();
+																		}
+																		//code
+																	}
+																	
+																	public List<User> getUsers() {
+																		User[] usersFromDb = getUsersFromDatabase();
+																		if (usersFromDb == null) {
+																			// No users found in database
+																			return new ArrayList<>();    // A mutable list
+																		}
+																		else {
+																			return Arrays.asList(usersFromDb);
+																		}
+																	}																	
+		
+		Return một giá trị Unknown/ Default thay vì Null--Tránh lỗi NullPointerException Java:
+		
+																	public User getUser(UserType type){
+																		switch(type) {
+																			case ADMIN:
+																				return getAdmin();
+																			case MANAGER:
+																				return getManager();
+																			default:
+																			break;
+																		}
+																		return NullUser ();
+																	}
+																	class NullUser extends User {
+																		// Implement all abstract methods of User
+																		// Override neccessary methods to drive to do "Nothing" or "Default" action.
+																	}
+		
+		Luôn kiểm tra NULL trước khi sử dụng--Tránh lỗi NullPointerException Java:
+		
+		Hạn chế sử dụng multi-dot syntax--Tránh lỗi NullPointerException Java:
+		
+														getLoggedinUser().getUser().getRole().setRoleName("Developer"); // Như bạn thấy đoạn code trên rất dễ gặp lỗi NPE
+																														// nếu bất kỳ object LoggedinUser, User, hay Role trả về
+																														// giá trị null. 																		
+		
+		Khởi tạo giá trị trước khi sử dụng--Tránh lỗi NullPointerException Java:				
+														
+														private List<User> users = new ArrayList<>(); // khởi tạo giá trị empty cho các property khi một instance của object được tạo
+		
+														public UserManager() {
+															users = new ArrayList<>(); // Khởi tạo property trong hàm constructor
+														}			
+
+														public List<User> getUsers() {
+															if(users == null) {
+																users = new ArrayList<>(); // Khởi tạo property trong Getter
+															}
+															return users ;
+														}
+		Wrap return type của mình với Optional--Tránh lỗi NullPointerException Java:			
+														
+														Optional<String> makingCheck(){
+															//code check null
+														}
+														makingCheck().orElseThrow(SomeKindOfException::new);
+														
+		Đừng phức tạp hóa một vấn đề phức tạp--Tránh lỗi NullPointerException Java:			
+														
+														// Dùng máy chém để giết ruồi 
+														if(Optional.ofNullable(myVariable).isPresent();
+
+														// Dùng dao mổ trâu để giết ruồi
+														if(Objects.nonNull(myVariable))
+
+														// ....trong khi đây là giải pháp giết ruồi hiệu quả nhất
+														if(myVariable != null)
+														
+		Sử dụng object method như là stream predicate--Tránh lỗi NullPointerException Java:		
+		
+															myStream.filter(Objects::nonNull)
+															myStream.anyMatch(Objects:isNull) // khi áp dụng cho stream, chúng ta sẽ cần 2 method này
+															
+		Validate public API arguments--Tránh lỗi NullPointerException Java:						
+		
+															public Foo(Bar bar, Baz baz){
+																this.bar = Objects.requireNonNull(bar,"bar must not be null");
+																this.baz = Objects.requireNonNull(baz,"baz must not be null");
+															}										

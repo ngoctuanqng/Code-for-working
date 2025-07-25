@@ -1,0 +1,133 @@
+Java Peristence Framework--JAVA
+
+	- Lập trình cơ sở dữ liệu là một trong những khía cạnh quan trọng của lập trình. Trong java ta đã từng làm quen với JDBC (Java DataBase Connectivity) dùng để kết nối đến một Datasource, và trong ứng dụng Enterprise
+	ta có EJB (Enterprise Java Beans).
+	
+	- Nhưng với sự phát triển của ngành lập trình, ORM (Object-Relational Mapping) ra đời như một sự cải tiến cho JDBC. ORM cho phép lập trình dễ dàng hơn, tuân thủ chặt chẽ lý thuyết lập trình hướng đối tượng, phù hợp
+	với ứng dụng n-tier. Trong các framework ORM cho java nổi trội hơn cả là MyBatis, Hibernate, và JPA (sự cải tiến của EJB, trở thành chuẩn của Java EE). Vậy chúng ta cùng thử 1 so sánh nho nhỏ về 3 công cụ nổi tiếng
+	và mạnh mẽ này.
+	
+	Persistence Layer
+		
+		Trước hết chúng ta nói qua một chút về persistence layer.
+		
+		Các ứng dụng enterprise thường được xây dựng theo kiến trúc nhiều tầng, ví dụ như Presentation layer, Bussiness Layer, Persistence Layer. Tầng Persistence sẽ là tầng kết nối với DB, là cầu nối giúp ứng dụng
+		tương tác lên cơ sở dữ liệu như INSERT, UPDATE data, hoặc lưu giữ data cho ứng dụng được get (SELECT) từ DB.
+		
+		Như vậy một Persistence layer sẽ bao gồm sau:
+			
+			Tạo session
+				
+				- Persistence layer có nhiệm vụ tạo các phiên kết nối từ ứng dụng đến Cơ sở dữ liệu, mà qua các phiên này, ứng dụng sẽ tương tác được với DB, các phiên kết nối được thực hiện khi các connections
+				được thiết lập.
+			
+			Thực thi query
+				
+				- Khi các connections được thiết lập, tầng persistence có nhiệm vụ thực thi các truy vấn của ứng dụng lên cơ sở dữ liệu như update, insert và select data, call store procedure… thông qua các phương
+				thức được xây dựng và cung cấp trong persistence layer
+			
+			Mapping
+				
+				Persistence layer sẽ ánh xạ cấu trúc DB, tables, columns, rows với các class, object của java, và nhờ dó, các java object có nhiệm vụ lưu trữ thông tin của các thực thể trong tables khi truy
+				vấn (SELECT) hoặc lưu giữ thông tin từ người dùng và cập nhật vào DB(INSERT,UPDATE). ví dụ một mapping như sau:
+					
+					CREATE TABLE PRODUCT (
+					  ID INT PRIMARY KEY AUTO_INCREMENT,
+					  NAME VARCHAR(255) NOT NULL,
+					  PRICE INT NOT NULL
+					)
+				
+				Một table có cấu trúc như trên sẽ được ánh xạ bởi class sau:
+					
+					public class Product{
+					 private int id;
+					 private String name;
+					 private int price;
+					 public int getId(){
+					  return id;
+					 }
+					 public void setId(int id) {
+					  this.id = id;
+					 }
+					 public String getName() {
+					  return name;
+					  }
+					  public void setName(String name) {
+					   this.name = name;
+					  }
+					  public String getPrice() {
+					   return price;
+					  }
+					  public void setPrice(String price) {
+					   this.price = price;
+					  }
+					}
+					
+			Transaction and Exception
+			
+				- Khi truy vấn dữ liệu sẽ xảy ra các trường hợp các truy vấn được thực thi không thành công( truy vấn theo batch, ngắt kết nối….) những rủi ro xảy ra cho ứng dụng và dữ liệu trong DB khi truy vấn thất
+				bại, hoặc connection bị ngắt kết nối thì peristence phải có nhiệm vụ phục hồi tình trạng trước đó của dữ liệu, hoặc đưa ra các ngoại lệ, các hướng dẫn, log để thông báo cho ứng dụng.
+			
+			Cache
+			
+				- Để phục vụ tốt hơn cho việc truy vấn ( hiệu suất, tốc độ, tính tương thích..) thông thường persistence layer sẽ load một metadata của Database vào ứng dụng, các mapping giữa các đối tượng trong ứng dụng
+				với các tables thông qua các config, xml file, hoặc tạo ra các đối tượng, được lưu trữ như cache để có thể truy vấn lại mà không phải kết nối đến DB… Điều này sẽ làm cải thiện tốc độ cho chương trình
+				nhưng đôi khi lại gây ra một sự cồng kềnh, phức tạp.
+				
+				- Java cung cấp JDBC để xây dựng tầng persistence, các  JDBC API sẽ sử dụng các SQL query được viết chung với code java và thực thi nó thông qua các command, statement… Tuy nhiên những ORM fw sau này được
+				xây dựng đã lược bỏ sự phức tạp của JDBC, thay vào đó, bản thân các ORM sẽ định nghĩa các API cho riêng mình, giúp cho developer khỏi bận tâm hơn việc thao tác DB, mà tập trung vào xây dựng bussiness
+				cho ứng dụng.
+	
+	MyBatis
+	
+		MyBatis là sự cải tiến của phiên bản IBatis 2, là một persistence framework, tự động mapping giữa SQL database và Java object thông qua các config được định nghĩa trong file xml.
+		
+		Là một persistence framework nhưng MyBatis khá đơn giản, dễ học và có kích thước nhỏ, số lượng các package ít hơn nhiều so với các persistence fw khác. MyBatis thao tác trực tiếp với câu lệnh SQL, nên dù là
+		một persistence fw nhưng MyBatis chỉ có các tính năng như Create session, query data. còn Transaction thì không cũng cấp mà dùng của SQL.
+		
+		Ngoài ra MyBatis cũng không lưu trữ cache như Hibernate hoặc JPA. Các config để mapping được đặt trong các file xml, theo các cấu trúc của mybatis. Là một persistence framework nhưng thực ra Mybatis không
+		truy vấn trên java object như các framework khác, mà truy vấn trược tiếp trên SQL, sau đó kết quả trả về sẽ mapping với java object thông qua resutset mapping. tính năng này ở Hibernate và JPA cũng có nhưng
+		Mybatis đã tận dụng và phát huy sức mạnh, khiến cho framework này dù đơn giản, dễ học và phát triển ứng dụng nhanh nhưng tốc độ truy vấn cao, dễ dàng tùy biến với những query phức tạp, và không gây khó khăn
+		hay ức chế cho dev.
+		
+		Vì thế nếu xây dựng ứng dụng mà yêu cầu thời gian phát triển ngắn, không phức tạp, dễ bảo trì, và dễ tìm hiểu cho dev thì mybatis là lựa chọn tối ưu nhất
+	
+	Hibernate
+	
+		Hibernate là một persistence fw được phát triển bởi Gavin King năm 2001 theo mô hình entity bean của EJB2, fw này sẽ mapping DB với các POJOs(Plain Old Java Object) và sẽ thao tác trên các oject đó.
+		
+		Hibernate sử dụng ngôn ngữ truy vấn riêng của mình là HQL (Hibernate Query language), tượng tự SQL, nhưng các truy vấn của Hibernate đều thực hiện trên object, điều này khá mới mẻ và khó tiếp cận đối với
+		những ai chưa quen làm việc với ORM.
+		
+		Ngoài ra hibernate hỗ trợ rất lớn provider cho hầu hết các hệ quản trị cơ sở dữ liệu thông dụng, hỗ trợ Transaction, lưu cache.
+		
+		Nên nếu một ứng dụng mà yêu cầu tương thích với nhiều datasource hỗ trợ truy vấn tự động, mạnh mẽ và an toàn, hoặc có thể thay đổi cấu hình mà không ảnh hưởng tới code bên trong thì Hibernate là một sự lựa
+		chọn tốt hơn hẳn so với Mybatis
+		
+	JPA
+		
+		Về cơ bản JPA khá giống với Hibernate, cả hai đều là nỗ lực khắc phục nhược điểm của EJB, đều sử dụng mô hình entity bean để mapping với database, và truy vấn trên các object đó.
+		
+		Tuy nhiên, điểm khác biệt là JPA sử dụng ngôn ngữ truy vấn JPQL(Java Persistence Query Language) – tương đồng với HQL, ngoài ra JPA không sử dụng riêng lẻ được, mà phải đi kèm với một provider khác
+		để config, ví dụ như EclipseLink, Oracle TopLink, Hibernate.
+		
+		JPA trở thành chuẩn persistence của java, các API được định nghĩa trong package javax.pesistence.
+		
+		Nếu yêu cầu xây dựng ứng dụng tuân thủ chặt chẽ quy tắc của java enterprise, được hỗ trợ bởi java thì JPA là một đối thủ nặng ký đối với Hibernate
+		
+	Tổng kết
+		
+		MyBatis
+			
+			Phù hợp với các ứng dụng có yêu cầu thời gian xây dựng ngắn, chi phí phát triển thấp, đơn giản và dễ học.
+		
+		Hibernate vs JPA
+		
+			Phù hớp với các ứng dụng tuân thủ chặt chẽ quy tắc của ORM, hỗ trợ kết nối đến nhiều cơ sở dữ liệu, dễ điều khiển.
+			
+			Ngoài ra sự hỗ trợ tài liệu, trợ giúp bởi cộng đồng dev của Hibernate và JPA (đặc biệt là Hibernate) là rất lớn.
+			
+			Tuy nhiên để xây dựng một ứng dụng với Hibernate hoặc JPA mất rất nhiều thời gian phát triển, không kể thời gian dài tìm hiểu công nghệ, và phải hiểu rõ, phân tích tường tận mọi khía cạnh của ứng
+			dụng. Đặc biệt là mô hình ER của dữ liệu. vì các quan hệ của các bảng(1-1,1-n,n-n) được định nghĩa trong các entity, qua đó JPQL(hay HQL) mới có thể truy vấn được.
+			
+			Ngay cả việc xử lý kết quả lấy từ nhiều tables(SELECT nhiều tables) cũng gây ra khá nhiều rắc rối cho những người mới bắt đầu. Tuy nhiên các persistence sử dụng entity bean vẫn được ưa chuộng hơn cả.		

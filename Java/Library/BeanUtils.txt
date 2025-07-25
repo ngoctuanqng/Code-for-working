@@ -1,0 +1,26 @@
+BeanUtils--JAVA:
+	copyProperties:					
+									Sao chép các thuộc tính từ một đối tượng nguồn sang một đối tượng đích.
+									Tên thuộc tính phải trùng khớp: 		Cả bean nguồn và bean đích cần có các thuộc tính có cùng tên. Nếu không, phương thức copyProperties sẽ không thể tìm thấy thuộc tính tương ứng để sao chép
+																			và sẽ bỏ qua các thuộc tính không khớp.
+									Số lượng thuộc tính phải trùng khớp: 	Để phương thức copyProperties hoạt động chính xác, số lượng thuộc tính của bean nguồn và bean đích cần phải giống nhau. Nếu bean đích có các thuộc
+																			tính không có trong bean nguồn, các thuộc tính đó sẽ không được thay đổi. Nếu bean nguồn có các thuộc tính mà bean đích không có, khi sử dụng phương
+																			thức copyProperties từ BeanUtils, các thuộc tính không khớp sẽ bị bỏ qua và chỉ những thuộc tính có tên giống nhau giữa bean nguồn và bean đích mới
+																			được sao chép.
+									
+									class Person {
+										private String name;
+										private int age;
+
+										public Person() {
+										}
+
+										public Person(String name, int age) {
+											this.name = name;
+											this.age = age;
+										}
+									}
+									
+									Person sourcePerson = new Person("John", 30);
+									Person destinationPerson = new Person();
+									BeanUtils.copyProperties(destinationPerson, sourcePerson); // Destination Person: Person{name='John', age=30}

@@ -1,0 +1,155 @@
+Type Casting--JAVA:
+													
+													- Type casting is when you assign a value of one primitive data type to another type.
+													- Ưu tiên cast từ kiểu nhỏ sang kiểu lớn để không mất mát dữ liệu
+													- Cần phân biệt kiểu dữ liệu nguyên thủy, wrapper và object. Kiểu nguyên thủy có thể chuyển đổi không gây thông báo lỗi, kiểu wrapper có thể tự động chuyển thành kiểu nguyên
+													thủy tương ứng, kiểu object muốn chuyển kiểu thì phải có mối quan hệ kế thừa
+	
+	Widening Casting:
+													
+													Widening Casting (automatically) - converting a smaller type to a larger type size
+													
+													byte -> short -> char -> int -> long -> float -> double
+													
+													public class Main {
+													  public static void main(String[] args) {
+														int myInt = 9;
+														double myDouble = myInt; // Automatic casting: int to double
+														System.out.println(myInt);
+														System.out.println(myDouble);
+													  }
+													}
+	
+	Narrowing Casting:
+													
+													Narrowing Casting (manually) - converting a larger type to a smaller size type
+													
+													public class Main {
+													  public static void main(String[] args) {
+														double myDouble = 9.78d;
+														int myInt = (int) myDouble; // Explicit casting: double to int
+														System.out.println(myDouble);
+														System.out.println(myInt);
+													  }
+													}
+	
+	Autoboxing/Unboxing:
+		
+		Autoboxing:
+													
+													- Autoboxing là quá trình tự động chuyển đổi từ một kiểu dữ liệu nguyên thủy sang một kiểu dữ liệu bao (wrapper class) tương ứng khi cần thiết.
+													- Java tự động thực hiện autoboxing khi bạn sử dụng một biến kiểu dữ liệu nguyên thủy trong một ngữ cảnh yêu cầu một đối tượng của lớp bao.
+													
+													int numInt = 10;
+													Integer objInt = numInt; // Autoboxing: tự động chuyển đổi từ int sang Integer
+		
+		Unboxing:
+													
+													- Unboxing là quá trình tự động chuyển đổi từ một kiểu dữ liệu bao (wrapper class) sang một kiểu dữ liệu nguyên thủy tương ứng khi cần thiết.
+													- Java tự động thực hiện unboxing khi bạn sử dụng một đối tượng của lớp bao trong một ngữ cảnh yêu cầu một kiểu dữ liệu nguyên thủy.
+													
+													Integer objInt = 10;
+													int numInt = objInt; // Unboxing: tự động chuyển đổi từ Integer sang int
+	
+	Ép kiểu từ object (tự thêm):
+																				
+																		- Trong cả hai trường hợp, nếu kiểu dữ liệu của biến kiểu Object không tương thích với kiểu dữ liệu bạn muốn chuyển đổi thành, hoặc nếu không thể
+																		thực hiện chuyển đổi (ví dụ: khi ép kiểu từ String sang Integer nhưng chuỗi không phải là một số hợp lệ), một ngoại lệ ClassCastException sẽ
+																		được ném. Do đó, bạn cần chắc chắn kiểm tra và xử lý các trường hợp ngoại lệ này khi cần thiết.
+																		- Chúng ta chỉ có thể ép kiểu giữa các đối tượng của các lớp có mối quan hệ kế thừa. Nếu hai lớp không có mối quan hệ kế thừa, chúng ta không
+																		thể ép kiểu chúng với nhau.
+		
+		Ép kiểu bằng phương thức của lớp bao (Wrapper Class Method):
+																				
+																				- Các lớp bao trong Java cung cấp các phương thức static để chuyển đổi từ các kiểu dữ liệu nguyên thủy hoặc các đối tượng khác sang đối tượng
+																				của lớp bao.
+																				
+																				Object obj = "123";
+																				Integer num = Integer.valueOf((String) obj); // Ép kiểu từ Object sang Integer bằng phương thức valueOf()
+		
+		Ép kiểu bằng kiểu ép kiểu (Casting):
+																				
+																				- Bạn cũng có thể sử dụng kiểu ép kiểu (casting) để ép kiểu một biến kiểu Object sang một kiểu dữ liệu cụ thể.
+																				- Bạn cần chú thích kiểu dữ liệu bạn muốn chuyển đổi thành bên trái của toán tử ép kiểu và đặt biến kiểu Object bạn muốn chuyển đổi bên phải của
+																				toán tử ép kiểu.
+																				
+																				Object obj = "123";
+																				Integer num = (Integer) obj; // Ép kiểu từ Object sang Integer bằng kiểu ép kiểu (Casting)
+	
+	Ép kiểu trong quan hệ kế thừa (tự thêm):
+	
+		- Trong Java, ép kiểu trong quan hệ kế thừa được thực hiện thông qua các phương thức ép kiểu (type casting). Quan hệ kế thừa cho phép một lớp con (subclass) kế thừa các thuộc tính và phương thức
+		của một lớp cha (superclass).
+		- Có hai loại ép kiểu chính trong quan hệ kế thừa: ép kiểu từ lớp cha xuống lớp con (downcasting) và ép kiểu từ lớp con lên lớp cha (upcasting).
+		
+		Upcasting:
+		
+			- Upcasting là quá trình ép kiểu một đối tượng từ lớp con lên lớp cha. Upcasting không cần ép kiểu tường minh và luôn an toàn.
+			
+			class Animal {
+				void makeSound() {
+					System.out.println("Some generic animal sound");
+				}
+			}
+			class Dog extends Animal {
+				void makeSound() {
+					System.out.println("Bark");
+				}
+				
+				void fetch() {
+					System.out.println("Fetching...");
+				}
+			}
+			public class Main {
+				public static void main(String[] args) {
+					Dog dog = new Dog();
+					Animal animal = dog; // Upcasting					
+					animal.makeSound(); // Output: Bark
+				}
+			}
+			Trong ví dụ này, đối tượng dog của lớp Dog được upcast lên kiểu Animal.
+			
+		Downcasting:
+		
+			- Downcasting là quá trình ép kiểu một đối tượng từ lớp cha xuống lớp con. Downcasting cần phải ép kiểu tường minh và có thể không an toàn nếu đối tượng thực sự không thuộc về lớp con.
+			
+			class Animal {
+				void makeSound() {
+					System.out.println("Some generic animal sound");
+				}
+			}
+			class Dog extends Animal {
+				void makeSound() {
+					System.out.println("Bark");
+				}
+				
+				void fetch() {
+					System.out.println("Fetching...");
+				}
+			}
+			public class Main {
+				public static void main(String[] args) {
+					Animal animal = new Dog(); // Upcasting
+					Dog dog = (Dog) animal; // Downcasting						
+					dog.makeSound(); // Output: Bark
+					dog.fetch(); // Output: Fetching...
+				}
+			}
+			Trong ví dụ này, đối tượng animal ban đầu được upcast từ Dog lên Animal, và sau đó được downcast trở lại Dog.
+			
+		Kiểm Tra An Toàn Với instanceof:
+		
+			- Trước khi thực hiện downcasting, nên sử dụng toán tử instanceof để đảm bảo rằng ép kiểu là an toàn.
+			
+			public class Main {
+				public static void main(String[] args) {
+					Animal animal = new Dog(); // Upcasting					
+					if (animal instanceof Dog) {
+						Dog dog = (Dog) animal; // Downcasting
+						dog.makeSound(); // Output: Bark
+						dog.fetch(); // Output: Fetching...
+					} else {
+						System.out.println("The object is not a Dog");
+					}
+				}
+			}

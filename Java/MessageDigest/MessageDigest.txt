@@ -1,0 +1,70 @@
+MessageDigest--Java:
+
+	- MessageDigest là một lớp trong Java thuộc gói java.security, được sử dụng để thực hiện các thuật toán băm (hashing). Các thuật toán băm là các hàm toán học có thể chuyển
+	đổi dữ liệu đầu vào (thường là chuỗi hoặc tệp) thành một giá trị băm có kích thước cố định. Điều này thường được sử dụng trong các tình huống bảo mật, chẳng hạn như lưu trữ
+	mật khẩu một cách an toàn hoặc kiểm tra tính toàn vẹn của dữ liệu.
+	- Các Thuật Toán Băm Hỗ Trợ:
+		MD5 (Message Digest Algorithm 5)
+		SHA-1 (Secure Hash Algorithm 1)
+		SHA-256 (Secure Hash Algorithm 256-bit)
+		SHA-512 (Secure Hash Algorithm 512-bit)
+	- Các Phương Thức Chính
+		
+		static MessageDigest getInstance(String algorithm):
+			
+			Tạo một đối tượng MessageDigest cho thuật toán băm được chỉ định. Ví dụ, "SHA-256" hoặc "MD5".
+			
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+		
+		void update(byte input):
+
+			Cập nhật đối tượng MessageDigest với một byte dữ liệu. Bạn có thể gọi phương thức này nhiều lần với các phần khác nhau của dữ liệu.
+
+			md.update(data.getBytes());
+		
+		void update(byte[] input, int offset, int len):
+
+			Cập nhật đối tượng MessageDigest với một mảng byte và chỉ định phần của mảng cần cập nhật.
+		
+		byte[] digest():
+
+			Tính toán giá trị băm và trả về kết quả dưới dạng mảng byte. Sau khi gọi phương thức này, đối tượng MessageDigest không còn giữ lại trạng thái của dữ liệu trước đó.
+	
+			byte[] hashBytes = md.digest();
+		
+		void reset():
+
+			Đặt lại đối tượng MessageDigest về trạng thái ban đầu, để nó có thể được sử dụng lại.
+			
+	Ví dụ:
+	
+		import java.security.MessageDigest;
+		import java.security.NoSuchAlgorithmException;
+		import java.util.Arrays;
+		public class MessageDigestExample {
+			public static void main(String[] args) {
+				try {
+					// Tạo đối tượng MessageDigest cho thuật toán SHA-256
+					MessageDigest digest = MessageDigest.getInstance("SHA-256");				
+					// Dữ liệu đầu vào
+					String data = "Hello, World!";				
+					// Cập nhật dữ liệu vào đối tượng MessageDigest
+					digest.update(data.getBytes());				
+					// Tính toán giá trị băm
+					byte[] hashBytes = digest.digest();				
+					// Chuyển đổi giá trị băm thành chuỗi hex để dễ đọc
+					StringBuilder hexString = new StringBuilder();
+					for (byte b : hashBytes) {
+						String hex = Integer.toHexString(0xff & b);
+						if (hex.length() == 1) {
+							hexString.append('0');
+						}
+						hexString.append(hex);
+					}				
+					// In ra giá trị băm
+					System.out.println("Hash: " + hexString.toString());				
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+			}
+		}

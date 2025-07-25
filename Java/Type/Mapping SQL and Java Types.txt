@@ -1,0 +1,195 @@
+Mapping SQL and Java Types--JAVA: https://download.oracle.com/otn_hosted_doc/jdeveloper/904preview/jdk14doc/docs/guide/jdbc/getstart/mapping.html
+
+	Khi sql không thể hiện dữ liệu cụ thể thì khi chuyển đổi qua Java sẽ là kiểu BigInteger
+
+	JDBC Types Mapped to Java Types--Mapping SQL and Java Types:
+	
+		JDBC Type				Java Type				
+					
+		CHAR					String				
+					
+		VARCHAR					String			
+					
+		LONGVARCHAR				String				
+					
+		NUMERIC					java.math.BigDecimal				
+					
+		DECIMAL					java.math.BigDecimal				
+					
+		BIT						boolean			
+					
+		TINYINT					byte			
+					
+		SMALLINT				short				
+					
+		INTEGER					int				
+					
+		BIGINT					long
+									
+		REAL					float				
+					
+		FLOAT					double			
+					
+		DOUBLE					double			
+					
+		BINARY					byte[]				
+					
+		VARBINARY				byte[]
+	
+		LONGVARBINARY			byte[]
+	
+		DATE					java.sql.Date
+	
+		TIME					java.sql.Time
+	
+		TIMESTAMP				java.sql.Timestamp
+	
+		CLOB					Clob
+	
+		BLOB					Blob
+	
+		ARRAY					Array
+	
+		DISTINCT				mapping of underlying type
+	
+		STRUCT					Struct
+	
+		REF						Ref
+	
+		JAVA_OBJECT				underlying Java class
+		
+	Java Types Mapped to JDBC Types--Mapping SQL and Java Types:
+	
+		Java Type						JDBC Type
+	
+		String							CHAR, VARCHAR, or LONGVARCHAR
+	
+		java.math.BigDecimal			NUMERIC
+	
+		boolean							BIT
+	
+		byte							TINYINT
+	
+		short							SMALLINT
+	
+		int								INTEGER
+	
+		long							BIGINT
+	
+		float							REAL
+	
+		double							DOUBLE
+	
+		byte[]							BINARY, VARBINARY, or LONGVARBINARY
+	
+		java.sql.Date					DATE
+	
+		java.sql.Time					TIME
+	
+		java.sql.Timestamp				TIMESTAMP
+	
+		Clob							CLOB
+	
+		Blob							BLOB
+	
+		Array							ARRAY
+	
+		Struct							STRUCT
+	
+		Ref								REF
+	
+		Java class						JAVA_OBJECT			
+		
+	JDBC Types Mapped to Java Object Types--Mapping SQL and Java Types:
+	
+		JDBC Type				Java Object Type
+
+		CHAR					String
+
+		VARCHAR					String
+
+		LONGVARCHAR				String
+
+		NUMERIC					java.math.BigDecimal
+
+		DECIMAL					java.math.BigDecimal
+
+		BIT						Boolean
+
+		TINYINT					Integer
+
+		SMALLINT				Integer
+
+		INTEGER					Integer
+
+		BIGINT					Long
+
+		REAL					Float
+
+		FLOAT					Double
+
+		DOUBLE					Double
+
+		BINARY					byte[]
+
+		VARBINARY				byte[]
+
+		LONGVARBINARY			byte[]
+
+		DATE					java.sql.Date
+
+		TIME					java.sql.Time
+
+		TIMESTAMP				java.sql.Timestamp
+
+		DISTINCT				Object type of underlying type
+
+		CLOB					Clob
+
+		BLOB					Blob
+
+		ARRAY					Array
+
+		STRUCT					Struct or SQLData
+
+		REF						Ref
+
+		JAVA_OBJECT				underlying Java class
+		
+	Java Object Types Mapped to JDBC Types--Mapping SQL and Java Types:
+
+		Java Object Type			JDBC Type
+
+		String						CHAR, VARCHAR, or LONGVARCHAR
+
+		java.math.BigDecimal		NUMERIC
+
+		Boolean						BIT
+
+		Integer						INTEGER
+
+		Long						BIGINT
+
+		Float						REAL
+
+		Double						DOUBLE
+
+		byte[]						BINARY, VARBINARY, or LONGVARBINARY
+
+		java.sql.Date				DATE
+
+		java.sql.Time				TIME
+
+		java.sql.Timestamp			TIMESTAMP
+
+		Clob						CLOB
+
+		Blob						BLOB
+
+		Array						ARRAY
+
+		Struct						STRUCT
+
+		Ref							REF
+
+		Java class					JAVA_OBJECT

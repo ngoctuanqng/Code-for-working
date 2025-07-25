@@ -1,0 +1,768 @@
+Java.lang.Class--JAVA:
+
+	- Java provides a class with name Class in java.lang package. Instances of the class Class represent classes and interfaces in a running Java application. The primitive Java
+	types (boolean, byte, char, short, int, long, float, and double), and the keyword void are also represented as Class objects.
+	
+	- In Java, the java.lang.Class class is a built-in class that represents a class or interface at runtime. It contains various methods that provide information about the class or
+	interface, such as its name, superclass, interfaces, fields, and methods.
+	
+	- Here are some commonly used methods of the Class class:
+		
+		getName(): Returns the name of the class or interface represented by this Class object.
+		getSimpleName(): Returns the simple name of the class or interface represented by this Class object.
+		getSuperclass(): Returns the superclass of the class represented by this Class object.
+		getInterfaces(): Returns an array of interfaces implemented by the class or interface represented by this Class object.
+		getField(String name): Returns a Field object that represents the public field with the specified name in the class or interface represented by this Class object.
+		getMethod(String name, Class<?>… parameterTypes): Returns a Method object that represents the public method with the specified name and parameter types in the class or interface represented by this Class object.
+		newInstance(): Creates a new instance of the class represented by this Class object using its default constructor.
+		isInstance(Object obj): Returns true if the specified object is an instance of the class or interface represented by this Class object, false otherwise.
+		isAssignableFrom(Class<?> cls): Returns true if this Class object is assignable from the specified Class object, false otherwise.
+	
+	Here’s an example of how to use some of these methods:
+		
+		public class Main {
+			public static void main(String[] args) throws Exception {
+				Class<?> myClass = String.class;
+				System.out.println("Name: " + myClass.getName());
+				System.out.println("Simple name: " + myClass.getSimpleName());
+				System.out.println("Superclass: " + myClass.getSuperclass());
+				System.out.println("Interfaces: " + Arrays.toString(myClass.getInterfaces()));
+				System.out.println("Is string assignable from Object? " + String.class.isAssignableFrom(Object.class));
+			}
+		}
+		
+		Output:
+			Name: java.lang.String
+			Simple name: String
+			Superclass: class java.lang.Object
+			Interfaces: []
+			Is string assignable from Object? true
+	
+	Creating a Class object
+	
+		There are three ways to create Class object :
+			
+			Class.forName(“className”)
+				
+				Since class Class doesn’t contain any constructor, there is static factory method present in class Class, which is Class.forName() , used for creating object of class Class. Below is the syntax :
+					
+					Class c = Class.forName(String className)
+			
+			Myclass.class
+				
+				Class c = int.class
+					
+					A a = new A();   // Any class A
+					Class c = A.class; // No error
+					Class c = a.class; // Error
+			
+			obj.getClass()
+				A a = new A();   // Any class A
+				Class c = a.getClass();
+	
+	Methods:
+		
+		Class<? super T> getSuperclass()
+			// Java program to demonstrate getSuperclass() method
+		 
+		// base class
+		class A
+		{
+			// methods and fields
+		}			 
+		// derived class
+		class B extends A
+		{				 
+		}		 
+		// Driver class
+		public class Test
+		{
+			public static void main(String[] args) 
+					throws ClassNotFoundException 				 
+			{
+				// returns the Class object associated with Test class
+				Class myClass = Test.class;					 
+				// returns the Class object for the class 
+				// with the specified name 
+				Class c1 = Class.forName("A");
+				Class c2 = Class.forName("B");
+				Class c3 = Class.forName("java.lang.Object");				 
+				// getSuperclass method returns the superclass of the class represented 
+				// by this class object 					 
+				System.out.print("Test superclass : ");					 
+				// getSuperclass method on myClass
+				System.out.println(myClass.getSuperclass());					 
+				System.out.print("A superclass : ");					 
+				// getSuperclass method on c1
+				System.out.println(c1.getSuperclass());					 
+				System.out.print("B superclass : ");					 
+				// getSuperclass method on c2
+				System.out.println(c2.getSuperclass());				 
+				System.out.print("Object superclass : ");				 
+				// getSuperclass method on c3
+				System.out.println(c3.getSuperclass());
+			}
+		}
+		
+		Output:
+		
+			Test superclass : class java.lang.Object
+			A superclass : class java.lang.Object
+			B superclass : class A
+			Object superclass : null
+			
+		Class<?>[] getInterfaces()
+			
+			// Java program to demonstrate getInterfaces() method
+			// base interface
+			interface A
+			{
+				// methods and constant declarations
+			}				 
+			// derived class
+			class B implements A
+			{
+				// methods implementations that were declared in A
+			}			 
+			// Driver class
+			public class Test
+			{
+				public static void main(String[] args) 
+						throws ClassNotFoundException 				 
+				{
+					// returns the Class object for the class 
+					// with the specified name 
+					Class c1 = Class.forName("B");
+					Class c2 = Class.forName("java.lang.String");					 
+					// getInterface method on c1
+					// it returns the interfaces implemented by B class
+					Class c1Interfaces[] = c1.getInterfaces();					 
+					// getInterface method on c2
+					// returns the interfaces implemented by String class
+					Class c2Interfaces[] = c2.getInterfaces();					 					 
+					System.out.println("interfaces implemented by B class : ");					 
+					// iterating through B class interfaces
+					for (Class class1 : c1Interfaces) 
+					{
+						System.out.println(class1);
+					}					 					 
+					System.out.println("interfaces implemented by String class : ");				 
+					// iterating through String class interfaces
+					for (Class class1 : c2Interfaces) 
+					{
+						System.out.println(class1);
+					}
+				}
+			}
+			Output:
+				interfaces implemented by B class : 
+				interface A
+				interfaces implemented by String class : 
+				interface java.io.Serializable
+				interface java.lang.Comparable
+				interface java.lang.CharSequence
+		
+		Class<?>[ ] getClasses()
+			
+			// Java program to demonstrate getClasses() method
+			public class Test
+			{
+				// base interface
+				public interface A
+				{
+					// methods and constant declarations
+				}			 
+				// derived class
+				public class B implements A
+				{
+					// methods implementations that were declared in A
+				}				 
+				public static void main(String[] args) 
+						throws ClassNotFoundException 				 
+				{
+					// returns the Class object associated with Test class
+					Class c1 = Test.class;					 
+					// getClasses method on c1
+					// it returns the array of Class objects containing the all 
+					// public classes and interfaces  represented by Test class
+					Class[] c1Classes = c1.getClasses();				 
+					System.out.println("public members of Test class : ");				 
+					// iterating through all public members of Test class
+					for (Class class1 : c1Classes)
+					{
+						System.out.println(class1);
+					}				 
+				}
+			}
+			
+			Output:
+				public members of Test class : 
+				interface Test$A
+				class Test$B
+		
+		Field getField(String fieldName)
+			
+			// Java program to demonstrate getField() method 
+			import java.lang.reflect.Field;
+			public class Test
+			{
+				public static void main(String[] args) 
+						throws SecurityException,ClassNotFoundException,
+							   NoSuchFieldException
+				{
+					// returns the Class object for the class 
+					// with the specified name 
+					Class c1 = Class.forName("java.lang.Integer");			 
+					// getField method on c1
+					// it checks a public field in Integer class with specified parameter
+					Field f = c1.getField("MIN_VALUE");			 
+					System.out.println("public field in Integer class with MIN_VALUE name :");
+					System.out.println(f);
+				}
+			}
+			
+			Output:
+				public field in Integer class with MIN_VALUE name :
+				public static final int java.lang.Integer.MIN_VALUE
+		
+		int getModifiers()
+			
+			// Java program to demonstrate getModifiers() method
+			import java.lang.reflect.Modifier;		 
+			public abstract class Test
+			{
+				public static void main(String[] args) 
+				{
+					// returns the Class object associated with Test class
+					Class c = Test.class;	 
+					// returns the Modifiers of the class Test
+					// getModifiers method
+					int i = c.getModifiers();			 
+					System.out.println(i);			 
+					System.out.print("Modifiers of " + c.getName() + " class are : ");	 
+					// getting decoded i using toString() method
+					// of Modifier class
+					System.out.println(Modifier.toString(i));
+				}
+			}
+			
+			Output:
+				
+				1025
+				Modifiers of Test class are : public abstract
+		
+		Class<?>[] getDeclaredClasses()
+			
+			// Java program to demonstrate getDeclaredClasses() method
+			public class Test
+			{
+				// base interface
+				interface A
+				{
+					// methods and constant declarations
+				}				  
+				// derived class
+				class B implements A
+				{
+					// methods implementations that were declared in A
+				}			 				 
+				public static void main(String[] args)
+				{
+					// returns the Class object associated with Test class
+					Class myClass = Test.class;					 
+					// getDeclaredClasses on myClass
+					// it returns array of classes and interface declare in Test class
+					Class c[] = myClass.getDeclaredClasses();					 
+					System.out.println("Declared classes and interfaces present in " + 
+															  myClass.getName() + " class : ");					 
+					// iterating through classes and interfaces declared in Test class
+					for (Class class1 : c)
+					{
+						System.out.println(class1);
+					}
+					 
+				}
+			}
+			
+			Output:
+				Declared classes and interfaces present in Test class : 
+				interface Test$A
+				class Test$B
+		
+		Field getDeclaredField(String fieldName)
+			
+			// Java program to demonstrate getDeclaredField() method
+			import java.lang.reflect.Field;		 
+			public class Test
+			{
+				// any declared field
+				int i;			 
+				public static void main(String[] args) 
+						throws NoSuchFieldException, SecurityException
+				{
+					// returns the Class object associated with Test class
+					Class myClass = Test.class;				 
+					// getDeclaredField on myClass
+					Field f = myClass.getDeclaredField("i");				 
+					System.out.println("Declared field present in " +
+												 myClass.getName() + 
+												 " class specified by \"i\" : ");			 
+					System.out.println(f);
+				}
+			}
+			
+			Output:
+				Declared field present in Test class specified by "i" : 
+				int Test.i
+		
+		Field[] getDeclaredFields()
+			
+			// Java program to demonstrate getDeclaredFields() method
+			import java.lang.reflect.Field;				 
+			public class Test
+			{
+				// some declared fields
+				int i;
+				String str;
+				boolean b;					 
+				public static void main(String[] args)
+				{
+					// returns the Class object associated with Test class
+					Class myClass = Test.class;						 
+					// getDeclaredFields on myClass
+					Field f[] = myClass.getDeclaredFields();					 
+					System.out.println("Declared fields present in " +
+														myClass.getName() + " class are : ");					 
+					// iterating through declared fields of Test class
+					for (Field field : f) 
+					{
+						System.out.println(field);
+					}
+				}
+			}
+			
+			Output:
+				Declared fields present in Test class are : 
+				int Test.i
+				java.lang.String Test.str
+				boolean Test.b
+		
+		Method getDeclaredMethod(String methodName,Class… parameterTypes)
+			
+			// Java program to demonstrate getDeclaredMethod() method
+			import java.lang.reflect.Method;				 
+			public class Test
+			{
+				// any declared method
+				// with a String argument
+				public void m1(String str)
+				{
+					System.out.println(str);
+				}				 
+				public static void main(String[] args) 
+						throws NoSuchMethodException, SecurityException, ClassNotFoundException
+				{
+					// returns the Class object associated with Test class
+					Class myClass = Test.class;					 
+					// returns the Class object for the class 
+					// with the specified name 
+					Class c = Class.forName("java.lang.String");					 
+					// getDeclaredMethod on myClass
+					Method m = myClass.getDeclaredMethod("m1",c);					 
+					System.out.println("Declared method present in " +
+											myClass.getName() +
+											" class specified by argument : " + c.getName());				 
+					System.out.println(m);
+				}
+			}
+			
+			Output:
+				Declared method present in Test class specified by argument : java.lang.String
+				public void Test.m1(java.lang.String)
+		
+		Method[] getDeclaredMethods()
+			
+			// Java program to demonstrate getDeclaredMethods() method
+			import java.lang.reflect.Method;			 
+			public class Test
+			{
+				// some declared Methods
+				public void m1()
+				{
+					System.out.println("Inside m1 method");
+				}
+				 
+				static void m2()
+				{
+					System.out.println("Inside m2 method");
+				}
+				 
+				// main method
+				public static void main(String[] args)
+				{
+					// returns the Class object associated with Test class
+					Class myClass = Test.class;
+					 
+					// getDeclaredMethods on myClass
+					Method m[] = myClass.getDeclaredMethods();
+					 
+					System.out.println("Declared methods present in " +
+														myClass.getName() + " class are : ");
+					 
+					// iterating through declared Methods of Test class
+					for (Method Method : m) 
+					{
+						System.out.println(Method);
+					}
+				}
+			}
+			
+			Output:
+				Declared methods present in Test class are : 
+				public static void Test.main(java.lang.String[])
+				public void Test.m1()
+				static void Test.m2()
+				
+		String toString()
+		
+			// Java program to demonstrate toString() method
+			public class Test {
+				public static void main(String[] args)
+					throws ClassNotFoundException
+				{
+					// returns the Class object for the class
+					// with the specified name
+					Class c1 = Class.forName("
+											 java.lang.String & quot;);
+					Class c2 = int.class;
+					Class c3 = void.class;			 
+					System.out.print(" Class represented by c1
+									 : ");			 
+					// toString method on c1
+					System.out.println(c1.toString());			 
+					System.out.print(" Class represented by c2
+									 : ");		 
+					// toString method on c2
+					System.out.println(c2.toString());		 
+					System.out.print(" Class represented by c3
+									 : ");		 
+					// toString method on c3
+					System.out.println(c3.toString());
+				}
+			}
+			
+			Output:
+			
+				Class represented by c1: class java.lang.String
+				Class represented by c2: int
+				Class represented by c3: void
+		
+		Class<?> forName(String className)
+
+			// Java program to demonstrate forName() method
+			public class Test
+			{
+				public static void main(String[] args)
+									 throws ClassNotFoundException
+				{
+					// forName method
+					// it returns the Class object for the class 
+					// with the specified name 
+					Class c = Class.forName("java.lang.String");				 
+					System.out.print("Class represented by c : " + c.toString());
+				}
+			}
+			
+			Output:
+				
+				Class represented by c : class java.lang.String
+		
+		Class<?> forName(String className,boolean initialize, ClassLoader loader)
+			
+			// Java program to demonstrate forName() method
+			public class Test
+			{
+				public static void main(String[] args)
+									 throws ClassNotFoundException
+				{
+					// returns the Class object for this class
+					Class myClass = Class.forName("Test");			 
+					ClassLoader loader = myClass.getClassLoader();			 
+					// forName method
+					// it returns the Class object for the class 
+					// with the specified name using the given class loader
+					Class c = Class.forName("java.lang.String",true,loader);			 
+					System.out.print("Class represented by c : " + c.toString());
+				}
+			}
+			
+			Output:
+				Class represented by c : class java.lang.String
+		
+		T newInstance()
+			
+			// Java program to demonstrate newInstance() method
+			public class Test
+			{
+				public static void main(String[] args)
+									 throws ClassNotFoundException, InstantiationException,
+									 IllegalAccessException
+				{
+					// returns the Class object for this class
+					Class myClass = Class.forName("Test");
+					 
+					// creating new instance of this class
+					// newInstance method
+					Object obj = myClass.newInstance();
+					 
+					// returns the runtime class of obj
+					System.out.println("Class of obj : " + obj.getClass());
+				}
+			}
+			
+			Output:
+				Class of obj : class Test
+		
+		boolean isInstance(Object obj)
+			
+			// Java program to demonstrate isInstance() method
+			public class Test
+			{
+				public static void main(String[] args)
+									 throws ClassNotFoundException
+				{
+					// returns the Class object for the class 
+					// with the specified name 
+					Class c = Class.forName("java.lang.String");
+			 
+					String s = "GeeksForGeeks";
+					int i = 10;
+					 
+					 
+					// checking for Class instance
+					// isInstance method
+					boolean b1 = c.isInstance(s);
+					boolean b2 = c.isInstance(i);
+					 
+					System.out.println("is s instance of String : " + b1);
+					System.out.println("is i instance of String : " + b1);
+					 
+				}
+			}
+			
+			Output:
+				is s instance of String : true
+				is i instance of String : false
+		
+		boolean isAssignableFrom(Class<?> cls)
+		
+			// Java program to demonstrate isAssignableFrom() method
+			public class Test extends Thread
+			{
+				public static void main(String[] args)
+									 throws ClassNotFoundException, InstantiationException,
+									 IllegalAccessException
+				{
+					// returns the Class object for this class
+					Class myClass = Class.forName("Test");					 
+					// returns the Class object for the class 
+					// with the specified name 
+					Class c1 = Class.forName("java.lang.Thread");
+					Class c2 = Class.forName("java.lang.String");					 
+				   // isAssignableFrom method on c1
+				   // it checks whether Thread class is assignable from Test
+				   boolean b1 = c1.isAssignableFrom(myClass);				
+				   // isAssignableFrom method on c2
+				   // it checks whether String class is assignable from Test
+				   boolean b2 = c2.isAssignableFrom(myClass);				
+				   System.out.println("is Thread class Assignable from Test : " + b1);
+				   System.out.println("is String class Assignable from Test : " + b2);
+					
+				}
+			}
+			
+			Output:
+				is Thread class Assignable from Test : true
+				is String class Assignable from Test : false
+		
+		boolean isInterface()
+			
+			// Java program to demonstrate isInterface() method
+			public class Test
+			{
+				public static void main(String[] args)
+									 throws ClassNotFoundException
+				{
+					// returns the Class object for the class 
+					// with the specified name 
+					Class c1 = Class.forName("java.lang.String");
+					Class c2 = Class.forName("java.lang.Runnable");					 
+					// checking for interface type		 
+					// isInterface method on c1
+					boolean b1 = c1.isInterface();		 
+					// is Interface method on c2
+					boolean b2 = c2.isInterface();				 
+					System.out.println("is java.lang.String an interface : " + b1);
+					System.out.println("is java.lang.Runnable an interface : " + b2);
+				}
+			}
+			
+			Output:
+				is java.lang.String an interface : false
+				is java.lang.Runnable an interface : true
+		
+		boolean isPrimitive()
+			
+			// Java program to demonstrate isPrimitive method
+			public class Test
+			{
+				public static void main(String[] args) 
+				{
+					// returns the Class object associated with an integer;
+					Class c1 = int.class;			 
+				   // returns the Class object associated with Test class
+					Class c2 = Test.class;			
+					// checking for primitive type	 
+					// isPrimitive method on c1
+					boolean b1 = c1.isPrimitive();	 
+					// isPrimitive method on c2
+					boolean b2 = c2.isPrimitive();			 
+					System.out.println("is "+c1.toString()+" primitive : " + b1);
+					System.out.println("is "+c2.toString()+" primitive : " + b2);
+				}
+			}
+			
+			Output:
+				is int primitive : true
+				is class Test primitive : false
+		
+		boolean isArray()
+			
+			// Java program to demonstrate isArray method
+			public class Test
+			{
+				public static void main(String[] args)
+				{
+					int a[] = new int[2];			 
+					// returns the Class object for array class
+					Class c1 = a.getClass();		 
+					// returns the Class object for Test class
+					Class c2 = Test.class;		 
+					// checking for array type
+					// isArray method on c1
+					boolean b1 = c1.isArray();
+					// is Array method on c2
+					boolean b2 = c2.isArray();				 
+					System.out.println("is "+c1.toString()+" an array : " + b1);
+					System.out.println("is "+c2.toString()+" an array : " + b2);
+					 
+				}
+			}
+			
+			Output:
+				is class [I an array : true
+				is class Test an array : false
+		
+		boolean isEnum()
+			
+			// Java program to demonstrate isEnum() method			 
+			enum Color
+			{
+				RED, GREEN, BLUE;
+			}			  
+			public class Test
+			{
+				public static void main(String[] args) 
+				{   
+					// returns the Class object associated with Color(an enum class)
+					Class c1 = Color.class;					 
+					// returns the Class object associated with Test class
+					Class c2 = Test.class;					 
+					// checking for Enum class
+					// isEnum method
+					boolean b1 = c1.isEnum();
+					boolean b2 = c2.isEnum();				 
+					System.out.println("is "+c1.toString()+" an Enum class : " + b1);
+					System.out.println("is "+c2.toString()+" an Enum class : " + b2);
+				}
+			}
+			
+			Output:
+				is class Color an Enum class : true
+				is class Test an Enum class : false
+		
+		boolean isAnnotation()
+			
+			// Java program to demonstrate isAnnotation() method				 
+			// declaring an Annotation Type
+			@interface A
+			{
+				 // Annotation element definitions
+			}				 
+			public class Test
+			{
+				public static void main(String[] args)
+									 throws ClassNotFoundException
+				{
+					// returns the Class object associated with A  annotation
+					Class c1 = A.class;			 
+					// returns the Class object associated with Test class
+					Class c2 = Test.class;					 
+					// checking for annotation type
+					// isAnnotation method
+					boolean b1 = c1.isAnnotation();
+					boolean b2 = c2.isAnnotation();					 
+					System.out.println("is "+c1.toString()+" an annotation  : " + b1);
+					System.out.println("is "+c2.toString()+" an annotation : " + b2);
+					 
+				}
+			}
+			
+			Output:
+				is interface A an annotation  : true
+				is class Test an annotation : false
+		
+		String getName()
+		
+			// Java program to demonstrate getName() method
+			public class Test
+			{
+				public static void main(String[] args) 
+				{
+					// returns the Class object associated with Test class
+					Class c = Test.class;					 
+					System.out.print("Class Name associated with c : ");			 
+					// returns the name of the class
+					// getName method
+					System.out.println(c.getName());
+				}
+			}
+			
+			Output:
+				Class Name associated with c : Test
+		
+		String getSimpleName()
+		
+			// Java program to demonstrate getSimpleName() method
+			public class Test
+			{
+				public static void main(String[] args) 
+						throws ClassNotFoundException 
+				{
+					// returns the Class object for the class 
+					// with the specified name 
+					Class c1 = Class.forName("java.lang.String");	 
+					System.out.print("Class Name associated with c : ");				 
+					// returns the name of the class
+					// getName method
+					System.out.println(c1.getName());		 
+					System.out.print("Simple class Name associated with c : ");			 
+					// returns the simple name of the class
+					// getSimpleName method
+					System.out.println(c1.getSimpleName());
+				}
+			}
+			
+			Output:
+				Class Name associated with c : java.lang.String
+				Simple class Name associated with c : String

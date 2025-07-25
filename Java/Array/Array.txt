@@ -1,0 +1,15 @@
+	Array--JAVA:			
+							Immutable
+							
+							String[] names = {"Alice", "Bob", "Charlie", "David", "Eva"};
+		- stream:			Arrays.stream(names).forEach(System.out::println); // Alice Bob Charlie David Eva
+		- length:			names.length; // 5
+		- sort:				Arrays.sort(names); // [Alice, Bob, Charlie, David, Eva]
+		- asList:			List<String> nameList = Arrays.asList(names);
+							System.out.println("\nList from array: " + nameList); // List from array: [Alice, Bob, Charlie, David, Eva]
+		spliterator:		Spliterator<String> spliterator = Arrays.spliterator(names);
+							System.out.println("\nUsing spliterator:");
+							spliterator.forEachRemaining(System.out::println); // Alice Bob Charlie David Eva\
+		- for-each:			for (String name : names) {
+								// Thực hiện thao tác với num
+							}

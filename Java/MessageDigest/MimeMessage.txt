@@ -1,0 +1,104 @@
+MimeMessage--Java:
+
+	- MimeMessage trong Spring Framework là một lớp thuộc gói javax.mail được sử dụng để tạo và quản lý các email theo định dạng MIME (Multipurpose Internet Mail Extensions). MIME là một chuẩn
+	cho việc định dạng các loại dữ liệu khác nhau trong email, chẳng hạn như văn bản, hình ảnh, tệp đính kèm, và nhiều hơn nữa.
+	- Trong Spring, bạn có thể sử dụng MimeMessage kết hợp với các lớp khác để gửi email. Dưới đây là một ví dụ cơ bản về cách sử dụng MimeMessage trong một ứng dụng Spring để gửi email.
+	- Cấu hình Spring để gửi email:
+	
+		Thêm phụ thuộc vào pom.xml (nếu bạn đang sử dụng Maven):
+		
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>5.3.20</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>5.3.20</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>1.6.2</version>
+			</dependency>
+			
+		Cấu hình Bean JavaMailSender trong file cấu hình Spring:
+		
+			import org.springframework.context.annotation.Bean;
+			import org.springframework.context.annotation.Configuration;
+			import org.springframework.mail.javamail.JavaMailSender;
+			import org.springframework.mail.javamail.JavaMailSenderImpl;
+			@Configuration
+			public class MailConfig {
+				@Bean
+				public JavaMailSender javaMailSender() {
+					JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+					mailSender.setHost("smtp.example.com");
+					mailSender.setPort(587);
+					mailSender.setUsername("your-email@example.com");
+					mailSender.setPassword("your-password");
+					Properties props = mailSender.getJavaMailProperties();
+					props.put("mail.transport.protocol", "smtp");
+					props.put("mail.smtp.auth", "true");
+					props.put("mail.smtp.starttls.enable", "true");
+					props.put("mail.debug", "true");
+					return mailSender;
+				}
+			}
+			
+		Sử dụng MimeMessage để tạo và gửi email:
+		
+			import org.springframework.beans.factory.annotation.Autowired;
+			import org.springframework.mail.javamail.JavaMailSender;
+			import org.springframework.mail.javamail.MimeMessageHelper;
+			import org.springframework.stereotype.Service;
+			import javax.mail.MessagingException;
+			import javax.mail.internet.MimeMessage;
+			@Service
+			public class EmailService {
+				@Autowired
+				private JavaMailSender javaMailSender;
+				public void sendEmail(String to, String subject, String text) {
+					MimeMessage message = javaMailSender.createMimeMessage();
+					try {
+						MimeMessageHelper helper = new MimeMessageHelper(message, true);
+						helper.setFrom("your-email@example.com");
+						helper.setTo(to);
+						helper.setSubject(subject);
+						helper.setText(text, true); // true indicates HTML
+						// Optional: Add attachments or inline resources here if needed
+						// helper.addAttachment("filename.txt", new File("path/to/file"));
+						javaMailSender.send(message);
+					} catch (MessagingException e) {
+						e.printStackTrace(); // Handle the exception properly in real-world scenarios
+					}
+				}
+			}
+			
+		Ví dụ:
+		
+			    public static boolean sendEmail(Session session, String toEmail, String subject, String body){
+					try
+					{
+						MimeMessage msg = new MimeMessage(session);
+						//set message headers
+						msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
+						msg.addHeader("format", "flowed");
+						msg.addHeader("Content-Transfer-Encoding", "8bit");
+						msg.setFrom(new InternetAddress(Utils.MAIL_SMTP_EMAIL_ID, Utils.MAIL_SMTP_EMAIL_ID_ALIAS));
+						//msg.setReplyTo(InternetAddress.parse(ConstantUtil.MAIL_SMTP_EMAIL_ID, false));
+						msg.setSubject(subject, "UTF-8");
+						msg.setContent(body,"text/html; charset=utf-8");
+						msg.setSentDate(new Date());
+						msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail, false));
+						System.out.println("Message is ready");
+						Transport.send(msg);
+						System.out.println("EMail Sent Successfully!!");
+						return true;
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					return false;
+					}
+				}

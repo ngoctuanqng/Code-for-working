@@ -1,0 +1,85 @@
+super--JAVA:
+	Tham chiếu trực tiếp đến biến instance của lớp cha:
+																	class Vehicle {
+																		int speed = 50;
+																	}																		 
+																	public class Bike2 extends Vehicle {
+																		int speed = 100;																		 
+																		void display() {
+																			System.out.println(super.speed);//in speed của lớp Vehicle  
+																		}																		 
+																		public static void main(String args[]) {
+																			Bike2 b = new Bike2();
+																			b.display(); // 50																		 
+																		}
+																	}
+	Gọi trực tiếp Constructor của lớp cha:
+																	class Vehicle {
+																		Vehicle() {
+																			System.out.println("Vehicle is created");
+																		}
+																	}																		 
+																	class Bike2 extends Vehicle {
+																		Bike2() {
+																			super();//gọi Constructor của lớp cha  
+																			System.out.println("Bike is created");
+																		}																		 
+																		public static void main(String args[]) {
+																			Bike2 b = new Bike2(); // Vehicle is created
+																								   // Bike is created
+																		}
+																	}
+	super() được tự động thêm vào câu lệnh đầu tiên mỗi Constructor của class bởi trình biên dịch:
+																										class Vehicle {
+																											Vehicle() {
+																												System.out.println("Vehicle is created");
+																											}
+																										}																		 
+																										public class Bike6 extends Vehicle {
+																											int speed;
+																										 
+																											Bike6(int speed) {
+																												this.speed = speed;
+																												System.out.println(speed);
+																											}																		 
+																											public static void main(String args[]) {
+																												Bike6 b = new Bike6(10); // Vehicle is created
+																																		 // 10
+																											}
+																										}
+	super được sử dụng để gọi trực tiếp phương thức của lớp cha:
+																	class Person {
+																		void message() {
+																			System.out.println("welcome");
+																		}
+																	}																		 
+																	public class Student16 extends Person {
+																		void message() {
+																			System.out.println("welcome to java");
+																		}																		 
+																		void display() {
+																			message();// gọi phương thức message() của lớp hiện tại
+																			super.message();// gọi phương thức message() của lớp cha
+																		}																		 
+																		public static void main(String args[]) {
+																			Student16 s = new Student16();
+																			s.display(); // welcome to java
+																						 // welcome
+																		}
+																	}
+																	
+																	class Person {
+																		void message() {
+																			System.out.println("welcome");
+																		}
+																	}																		 
+																	public class Student17 extends Person {																		 
+																		void display() {
+																			message(); // will invoke parent class message() method
+																			           // Trong TH không có phương thức ở class con giống class cha thì không cần phải sử dụng super
+																		}																		 
+																		public static void main(String args[]) {
+																			Student17 s = new Student17();
+																			s.display(); // welcome
+																		}
+																	}

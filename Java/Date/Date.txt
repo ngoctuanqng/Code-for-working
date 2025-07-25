@@ -1,0 +1,153 @@
+Date--Ngày và giờ trong Java:
+
+										- Date không tự động điều chỉnh cho múi giờ hoặc thời gian mùa hè (DST - Daylight Saving Time). Nó chỉ đơn giản lưu trữ một số mili giây
+										kể từ Epoch (1/1/1970 00:00:00 UTC). Do đó, khi hiển thị một đối tượng Date, nó sẽ hiển thị ngày và giờ tương ứng với múi giờ của hệ thống
+										- Lớp java.util.Date trong java biểu diễn ngày và giờ (date và time)
+										- Lớp java.util.Date implements các giao diện Serializable, Cloneable and Comparable<Date>. Nó được kế thừa bởi các lớp java.sql.Date,
+										java.sql.Time và java.sql.Timestamp.
+										- Sau khi lớp Calendar ra đời, hầu hết các Constructor và phương thức của lớp java.util.Date đã bị khuyến cáo không nên dùng
+										nữa (@deprecated).
+
+	Các cách tạo Date--Date Java:
+	
+		Ngày và giờ hiện tại:
+										import java.util.Date;
+										public class Main {
+											public static void main(String[] args) {
+												Date currentDate = new Date();
+												System.out.println("Current date and time: " + currentDate); // Current date and time: Wed Feb 23 15:30:00 UTC 2022
+											}
+										}
+		Ngày cụ thể:
+										import java.util.Date;
+										public class Main {
+											public static void main(String[] args) {
+												Date specificDate = new Date(1645624200000L); // 23/02/2022
+												System.out.println("Specific date: " + specificDate); // Specific date: Wed Feb 23 15:30:00 UTC 2022
+											}
+										}
+		Sử dụng thời gian từ chuỗi:
+										import java.util.Date;
+										import java.text.SimpleDateFormat;
+										public class Main {
+											public static void main(String[] args) throws Exception {
+												SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+												Date parsedDate = sdf.parse("2022-02-23 15:30:00");
+												System.out.println("Parsed date: " + parsedDate); // Parsed date: Wed Feb 23 15:30:00 UTC 2022
+											}
+										}
+		Thời gian từ số mili giây:
+										import java.util.Date;
+										public class Main {
+											public static void main(String[] args) {
+												Date dateFromMilliseconds = new Date(1645624200000L); // 23/02/2022
+												System.out.println("Date from milliseconds: " + dateFromMilliseconds); // Date from milliseconds: Wed Feb 23 15:30:00 UTC 2022
+											}
+										}
+		Sử dụng lớp Calendar:
+										import java.util.Calendar;
+										import java.util.Date;
+										public class Main {
+											public static void main(String[] args) {
+												Calendar calendar = Calendar.getInstance();
+												Date currentDate = calendar.getTime();
+												System.out.println("Current date and time using Calendar: " + currentDate); // Current date and time using Calendar:
+																															// Wed Feb 23 15:30:00 UTC 2022
+											}
+										}
+		Sử dụng lớp Instant:
+										import java.time.Instant;
+										import java.util.Date;
+										public class Main {
+											public static void main(String[] args) {
+												Instant instant = Instant.now();
+												Date currentDate = Date.from(instant);
+												System.out.println("Current date and time using Instant: " + currentDate); // Current date and time using Instant:
+																														   // Wed Feb 23 15:30:00 UTC 2022
+											}
+										}
+		Sử dụng lớp LocalDateTime:
+		
+										- Từ kiểu LocalDateTime đưa về Instant, sau đó mới đưa về Date
+		
+										import java.time.LocalDateTime;
+										import java.util.Date;
+										public class Main {
+											public static void main(String[] args) {
+												LocalDateTime localDateTime = LocalDateTime.now();
+												Date currentDate = Date.from(localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+												System.out.println("Current date and time using LocalDateTime: " + currentDate); // Current date and time using LocalDateTime:
+																																 // Wed Feb 23 15:30:00 UTC 2022
+											}
+										}
+										
+	boolean after(Date date)--Date Java:
+	
+										Date currentDate = new Date();
+										Date futureDate = new Date(currentDate.getTime() + 1000); // Tạo một Date trong tương lai
+										System.out.println("Is futureDate after currentDate? " + futureDate.after(currentDate)); // Is futureDate after currentDate? true
+	
+	boolean before(Date date)--Date Java:
+	
+										Date currentDate = new Date();
+										Date pastDate = new Date(currentDate.getTime() - 1000); // Tạo một Date trong quá khứ
+										System.out.println("Is pastDate before currentDate? " + pastDate.before(currentDate)); // Is pastDate before currentDate? true
+	
+	Object clone()--Date Java:
+	
+										Date currentDate = new Date();
+										Date clonedDate = new Date(currentDate.getTime()); // Sử dụng phương thức khởi tạo với tham số là số mili giây của currentDate
+										System.out.println("Original Date: " + currentDate); // Original Date: Wed Feb 23 15:30:00 UTC 2022
+										System.out.println("Cloned Date: " + clonedDate); // Cloned Date: Wed Feb 23 15:30:00 UTC 2022
+	
+	int compareTo(Date date)--Date Java:
+	
+										Date currentDate = new Date();
+										Date futureDate = new Date(currentDate.getTime() + 1000); // Tạo một Date trong tương lai
+										Date pastDate = new Date(currentDate.getTime() - 1000); // Tạo một Date trong quá khứ
+										System.out.println("Comparing futureDate with currentDate: " + futureDate.compareTo(currentDate)); // Comparing futureDate with
+																																		   // currentDate: 1
+										System.out.println("Comparing pastDate with currentDate: " + pastDate.compareTo(currentDate)); // Comparing pastDate with currentDate: -1
+	
+	boolean equals(Date date)--Date Java:
+	
+										Date date1 = new Date();
+										Date date2 = new Date(date1.getTime());
+										boolean isEqual = date1.equals(date2);
+										System.out.println("Are date1 and date2 equal? " + isEqual); // Are date1 and date2 equal? true
+	
+	static Date from(Instant instant)--Date Java:
+	
+										Instant instant = Instant.now();
+										Date date = Date.from(instant);
+										System.out.println("Date from Instant: " + date); // Date from Instant: Wed Feb 23 15:30:00 UTC 2022
+	
+	long getTime()--Date Java:
+	
+										Date date = new Date();
+										long timeInMillis = date.getTime();
+										System.out.println("Time in milliseconds: " + timeInMillis); // Time in milliseconds: 1645624200000
+	
+	int hashCode()--Date Java:
+	
+										Date date = new Date();
+										int hashCode = date.hashCode();
+										System.out.println("Hash code of date: " + hashCode); // Hash code of date: 1401071853
+	
+	void setTime(long time)--Date Java:
+	
+										Date date = new Date();
+										date.setTime(0); // Set time to Epoch time
+										System.out.println("Date after setTime: " + date); // Date after setTime: Thu Jan 01 07:00:00 UTC 1970
+	
+	Instant toInstant()--Date Java:
+	
+										Date date = new Date();
+										Instant instant = date.toInstant();
+										System.out.println("Instant from Date: " + instant); // Instant from Date: 2022-02-23T15:30:00Z
+	
+	String toString()--Date Java:
+	
+										Date date = new Date();
+										String dateString = date.toString();
+										System.out.println("String representation of Date: " + dateString); // String representation of Date: Wed Feb 23 15:30:00 UTC 2022	

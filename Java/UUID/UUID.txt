@@ -1,0 +1,9 @@
+UUID--JAVA:
+	Version 4:				UUID uuid = UUID.randomUUID();
+	
+							MessageDigest salt = MessageDigest.getInstance("SHA-256");
+							salt.update(UUID.randomUUID().toString().getBytes("UTF-8"));
+							String digest = bytesToHex(salt.digest());
+	Version 3 & 5:			String source = namespace + name;
+							byte[] bytes = source.getBytes("UTF-8");
+							UUID uuid = UUID.nameUUIDFromBytes(bytes);

@@ -1,0 +1,283 @@
+java.net.http--JAVA:
+
+	HttpClient--java.net.http:
+		- Dùng để gửi các yêu cầu HTTP.
+		- Nó nằm trong gói java.net.http và cung cấp các công cụ mạnh mẽ để gửi và nhận các yêu cầu HTTP, hỗ trợ cả các cuộc gọi đồng bộ (synchronous) và bất đồng bộ (asynchronous).
+		- HttpClient hỗ trợ cả HTTP/1.1 và HTTP/2. HTTP/2 là mặc định nếu cả client và server hỗ trợ. HTTP/2 cải thiện hiệu suất mạng với các tính năng như multiplexing, header compression, và server push.
+		- Đồng bộ (Synchronous): Các phương thức như send() sẽ chờ cho đến khi yêu cầu hoàn tất và trả về kết quả.
+		- Bất đồng bộ (Asynchronous): Các phương thức như sendAsync() trả về một CompletableFuture, cho phép thực hiện các thao tác khác trong khi chờ kết quả từ yêu cầu.
+		
+		Ví dụ:
+			
+			Tạo và gửi một yêu cầu HTTP GET đồng bộ
+			
+				import java.net.URI;
+				import java.net.http.HttpClient;
+				import java.net.http.HttpRequest;
+				import java.net.http.HttpResponse;
+				import java.time.Duration;
+				public class HttpClientExample {
+					public static void main(String[] args) throws Exception {
+						// Tạo một HttpClient với HTTP/2 và thời gian timeout là 10 giây
+						HttpClient client = HttpClient.newBuilder()
+								.version(HttpClient.Version.HTTP_2)
+								.connectTimeout(Duration.ofSeconds(10))
+								.build();
+						// Tạo một HttpRequest cho phương thức GET
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("https://api.example.com/data"))
+								.header("Accept", "application/json")
+								.GET()
+								.build();
+						// Gửi yêu cầu và nhận phản hồi đồng bộ
+						HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+						// In ra mã trạng thái và nội dung phản hồi
+						System.out.println("Status code: " + response.statusCode());
+						System.out.println("Response body: " + response.body());
+					}
+				}
+			
+			Tạo và gửi một yêu cầu HTTP POST bất đồng bộ
+			
+				import java.net.URI;
+				import java.net.http.HttpClient;
+				import java.net.http.HttpRequest;
+				import java.net.http.HttpResponse;
+				import java.net.http.HttpRequest.BodyPublishers;
+				import java.util.concurrent.CompletableFuture;
+				public class HttpClientAsyncExample {
+					public static void main(String[] args) {
+						HttpClient client = HttpClient.newHttpClient();
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("https://api.example.com/post"))
+								.header("Content-Type", "application/json")
+								.POST(BodyPublishers.ofString("{\"name\":\"John\"}"))
+								.build();
+						// Gửi yêu cầu bất đồng bộ và xử lý phản hồi khi nó đến
+						CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+						// Xử lý phản hồi khi hoàn tất
+						response.thenApply(HttpResponse::body)
+								.thenAccept(System.out::println)
+								.join();  // Đợi cho đến khi quá trình hoàn tất
+					}
+				}
+			
+	HttpRequest--java.net.http:
+
+		- HttpRequest được sử dụng để xây dựng và cấu hình các yêu cầu HTTP gửi đến máy chủ. Đây là lớp đại diện cho một yêu cầu HTTP, cho phép bạn thiết lập URI, phương thức HTTP,
+		headers, và body của yêu cầu.
+		- Các Thành Phần Chính của HttpRequest:
+		
+			URI:
+				Đây là địa chỉ của tài nguyên mà bạn muốn yêu cầu. Ví dụ: https://api.example.com/data.
+			
+			Phương Thức HTTP:
+				HttpRequest hỗ trợ các phương thức HTTP phổ biến như GET, POST, PUT, DELETE, PATCH, v.v. Bạn có thể chỉ định phương thức này khi xây dựng đối tượng HttpRequest.
+			
+			Headers:
+				Các headers HTTP cung cấp thêm thông tin về yêu cầu, như Content-Type, Authorization, Accept, v.v.
+			
+			Body:
+				Body của yêu cầu chứa dữ liệu được gửi đi (chỉ áp dụng cho các phương thức như POST, PUT, PATCH). Ví dụ: dữ liệu JSON hoặc form data.
+
+		Ví dụ:
+		
+			Tạo HttpRequest:
+			
+				import java.net.URI;
+				import java.net.http.HttpRequest;
+				public class HttpRequestExample {
+					public static void main(String[] args) {
+						// Tạo một HttpRequest cho phương thức GET
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("https://api.example.com/data"))
+								.header("Accept", "application/json")
+								.GET() // Phương thức GET
+								.build();
+					}
+				}
+			
+			
+				
+			Sử Dụng HttpRequest với Thay Đổi Headers và Body
+
+				import java.net.URI;
+				import java.net.http.HttpRequest;
+				import java.net.http.HttpRequest.BodyPublishers;
+				public class HttpRequestModifyExample {
+					public static void main(String[] args) {
+						// Tạo một HttpRequest với các headers và body
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("https://api.example.com/update"))
+								.header("Content-Type", "application/json")
+								.header("Authorization", "Bearer your-token")
+								.PUT(BodyPublishers.ofString("{\"field\":\"value\"}"))
+								.build();
+					}
+				}
+				
+			Ví dụ Tổng Hợp:
+			
+				import java.net.URI;
+				import java.net.http.HttpClient;
+				import java.net.http.HttpRequest;
+				import java.net.http.HttpResponse;
+				import java.net.http.HttpRequest.BodyPublishers;
+				public class HttpClientExample {
+					public static void main(String[] args) throws Exception {
+						HttpClient client = HttpClient.newHttpClient();
+						// Yêu cầu GET
+						HttpRequest getRequest = HttpRequest.newBuilder()
+								.uri(URI.create("https://api.example.com/data"))
+								.header("Accept", "application/json")
+								.GET()
+								.build();
+						HttpResponse<String> getResponse = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+						System.out.println("GET Status Code: " + getResponse.statusCode());
+						System.out.println("GET Response Body: " + getResponse.body());
+						// Yêu cầu POST
+						HttpRequest postRequest = HttpRequest.newBuilder()
+								.uri(URI.create("https://api.example.com/submit"))
+								.header("Content-Type", "application/json")
+								.POST(BodyPublishers.ofString("{\"name\":\"John Doe\", \"age\":30}"))
+								.build();
+						HttpResponse<String> postResponse = client.send(postRequest, HttpResponse.BodyHandlers.ofString());
+						System.out.println("POST Status Code: " + postResponse.statusCode());
+						System.out.println("POST Response Body: " + postResponse.body());
+					}
+				}
+
+	HttpResponse--java.net.http:
+	
+		- Nó đại diện cho phản hồi từ máy chủ sau khi gửi một yêu cầu HTTP. HttpResponse chứa thông tin về phản hồi từ máy chủ, bao gồm mã trạng thái HTTP, headers, và body.
+		- Các Thành Phần Chính của HttpResponse:
+		
+			Mã Trạng Thái (Status Code):
+				Đây là mã số HTTP cho biết kết quả của yêu cầu. Ví dụ: 200 cho thành công, 404 cho không tìm thấy, 500 cho lỗi máy chủ.
+			Headers:
+				Headers HTTP cung cấp thông tin bổ sung về phản hồi. Ví dụ: Content-Type, Content-Length, Date, Set-Cookie.
+			Body:
+				Body của phản hồi chứa dữ liệu trả về từ máy chủ. Ví dụ: nội dung trang web, dữ liệu JSON, XML, hoặc bất kỳ loại dữ liệu nào khác.
+				
+		- Các Phương Thức Chính của HttpResponse:
+		
+			statusCode():
+				Trả về mã trạng thái HTTP của phản hồi.
+			headers():
+				Trả về đối tượng HttpHeaders chứa tất cả các headers của phản hồi.
+			body():
+				Trả về nội dung body của phản hồi dưới dạng chuỗi hoặc kiểu dữ liệu đã được chỉ định khi gửi yêu cầu.
+				
+		- Các Lựa Chọn Đối Tượng HttpResponse:
+		
+			BodyHandlers.ofString(): Xử lý body phản hồi dưới dạng chuỗi (String).
+			BodyHandlers.ofByteArray(): Xử lý body phản hồi dưới dạng mảng byte (byte array).
+			BodyHandlers.ofInputStream(): Xử lý body phản hồi dưới dạng InputStream.
+			BodyHandlers.ofFile(Path path): Xử lý body phản hồi và lưu trực tiếp vào một tệp tin.
+				
+		Ví dụ:
+		
+			Sử dụng HttpResponse với yêu cầu GET:
+			
+				import java.net.URI;
+				import java.net.http.HttpClient;
+				import java.net.http.HttpRequest;
+				import java.net.http.HttpResponse;
+				public class HttpResponseExample {
+					public static void main(String[] args) throws Exception {
+						HttpClient client = HttpClient.newHttpClient();
+						// Tạo một HttpRequest với phương thức GET
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("https://api.example.com/data"))
+								.header("Accept", "application/json")
+								.GET()
+								.build();
+						// Gửi yêu cầu và nhận phản hồi
+						HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+						// In ra mã trạng thái
+						System.out.println("Status code: " + response.statusCode());
+						// In ra headers
+						response.headers().map().forEach((k, v) -> System.out.println(k + ":" + v));
+						// In ra nội dung body
+						System.out.println("Response body: " + response.body());
+					}
+				}
+				
+			Sử dụng HttpResponse với yêu cầu POST:
+			
+				import java.net.URI;
+				import java.net.http.HttpClient;
+				import java.net.http.HttpRequest;
+				import java.net.http.HttpRequest.BodyPublishers;
+				import java.net.http.HttpResponse;
+				public class HttpResponsePostExample {
+					public static void main(String[] args) throws Exception {
+						HttpClient client = HttpClient.newHttpClient();
+						// Tạo một HttpRequest với phương thức POST
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("https://api.example.com/submit"))
+								.header("Content-Type", "application/json")
+								.POST(BodyPublishers.ofString("{\"name\":\"John Doe\", \"age\":30}"))
+								.build();
+						// Gửi yêu cầu và nhận phản hồi
+						HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+						// In ra mã trạng thái
+						System.out.println("Status code: " + response.statusCode());
+						// In ra headers
+						response.headers().map().forEach((k, v) -> System.out.println(k + ":" + v));
+						// In ra nội dung body
+						System.out.println("Response body: " + response.body());
+					}
+				}
+				
+CharSequence--java:
+
+	- CharSequence là một interface trong Java được định nghĩa trong gói java.lang. Nó cung cấp một cách để đại diện cho một chuỗi các ký tự mà có thể được đọc
+	tuần tự. Các lớp chính triển khai CharSequence bao gồm String, StringBuilder, StringBuffer, và CharBuffer.
+	- Khả Năng Tương Thích: Sử dụng CharSequence giúp mã nguồn của bạn linh hoạt hơn vì bạn có thể làm việc với nhiều loại chuỗi khác nhau mà không cần quan tâm đến loại cụ thể.
+	- Tăng Tính Đa Dạng: Nó cho phép các phương thức hoặc API hoạt động với nhiều loại đối tượng khác nhau triển khai CharSequence, không chỉ String.
+	- Các Đặc Điểm Chính của CharSequence:
+		
+		Khả Năng Đọc Ký Tự: CharSequence cung cấp các phương thức để truy cập các ký tự trong chuỗi theo chỉ số, giống như các phương thức của String.
+		
+		Các Phương Thức Chính:
+		
+			char charAt(int index): Trả về ký tự tại chỉ số được chỉ định.
+			int length(): Trả về độ dài của chuỗi.
+			CharSequence subSequence(int start, int end): Trả về một phần con của chuỗi từ chỉ số bắt đầu đến chỉ số kết thúc.
+			String toString(): Chuyển đổi CharSequence thành một String.
+			
+	- Các Lớp Triển Khai CharSequence:
+		
+		String:
+
+			Đại diện cho một chuỗi ký tự không thay đổi.
+			Cung cấp nhiều phương thức hữu ích để xử lý chuỗi.
+		
+		StringBuilder:
+
+			Đại diện cho một chuỗi ký tự có thể thay đổi.
+			Cung cấp khả năng tạo và thay đổi chuỗi một cách hiệu quả.
+		
+		StringBuffer:
+
+			Tương tự như StringBuilder, nhưng là đồng bộ hóa, nên nó an toàn với đa luồng.
+			Thường được sử dụng khi bạn cần làm việc với chuỗi trong môi trường đa luồng.
+		
+		CharBuffer:
+
+			Cung cấp khả năng lưu trữ và xử lý chuỗi ký tự trong các buffer.
+			
+	Ví dụ:
+	
+		public class CharSequenceExample {
+			public static void main(String[] args) {
+				CharSequence cs = "Hello, World!";				
+				// Sử dụng phương thức của CharSequence
+				System.out.println(cs.charAt(0)); // Output: H
+				System.out.println(cs.length());  // Output: 13				
+				// Chuyển đổi CharSequence thành String
+				String str = cs.toString();
+				System.out.println(str); // Output: Hello, World!
+			}
+		}

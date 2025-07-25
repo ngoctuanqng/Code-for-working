@@ -1,0 +1,288 @@
+Data Type--JAVA:
+												- Trong Java, phép ép kiểu trực tiếp, như (Integer) bigInteger, chỉ hoạt động khi có một mối quan hệ kế thừa
+												hoặc giao diện giữa các kiểu dữ liệu.
+												- Tuy nhiên, BigInteger và Integer không có mối quan hệ kế thừa hoặc giao diện trực tiếp. Chúng là hai kiểu dữ
+												liệu riêng biệt trong Java và không thể được ép kiểu trực tiếp từ
+												BigInteger sang Integer.
+
+	Primitive Data Types:
+		Numbers:
+			Integer Types:
+												byte:			
+																Stores whole numbers from -128 to 127. 1 byte
+																
+																byte myNum = 100;
+												short:			
+																Stores whole numbers from -32,768 to 32,767. 2 bytes
+																
+																short myNum = 5000;
+												int:			
+																Stores whole numbers from -2,147,483,648 to 2,147,483,647. 4 bytes
+																
+																int myNum = 100000;
+			Floating Point Types:
+												long:			Stores whole numbers from -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807. 8 bytes
+												float:			
+																Stores fractional numbers. Sufficient for storing 6 to 7 decimal digits. 4 bytes
+																
+																float f1 = 35e3f;
+																float myNum = 5.75f;
+												double:			
+																Stores fractional numbers. Sufficient for storing 15 decimal digits. 8 bytes
+													
+																double d1 = 12E4d;
+																double myNum = 19.99d;
+												boolean:		
+																Stores true or false values. 1 bit
+												
+																boolean isJavaFun = true;
+												char:			
+																Stores a single character/letter or ASCII values. 2 bytes
+																
+																char myGrade = 'B';
+	Non-Primitive Data Types:
+												String:
+																		Strings are used for storing text.	
+																		
+																		String greeting = "Hello";
+												Array:		
+																		Arrays are used to store multiple values in a single variable, instead of declaring separate variables for each value.
+																		
+																		String[] cars = {"Volvo", "BMW", "Ford", "Mazda"};
+												Classes:		
+																		A Class is like an object constructor, or a "blueprint" for creating objects.
+																		
+																		public class Main {
+																		int x = 5;
+	
+																		public static void main(String[] args) {
+																			Main myObj = new Main();
+																			System.out.println(myObj.x);
+																		}
+																		}
+												Interface:		
+																		An interface is a completely "abstract class" that is used to group related methods with empty bodies:
+																		
+																		interface FirstInterface {
+																		public void myMethod(); // interface method
+																		}
+																		interface SecondInterface {
+																		public void myOtherMethod(); // interface method
+																		}
+																		class DemoClass implements FirstInterface, SecondInterface {
+																		public void myMethod() {
+																			System.out.println("Some text..");
+																		}
+																		public void myOtherMethod() {
+																			System.out.println("Some other text...");
+																		}
+																		}
+																		class Main {
+																		public static void main(String[] args) {
+																			DemoClass myObj = new DemoClass();
+																			myObj.myMethod();
+																			myObj.myOtherMethod();
+																		}
+																		}
+												Integer:		
+																		Đại diện cho số nguyên.
+																		
+																		Integer num = 10;
+												Float:		
+																		Đại diện cho số thực (float).
+																		
+																		Float f = 3.14f;
+												Double:		
+																		Đại diện cho số thực (double).
+																		
+																		Double d = 3.14;
+												Boolean:		
+																		Đại diện cho giá trị logic true hoặc false.
+																		
+																		Boolean isJavaFun = true;
+												Character:		
+																		Đại diện cho một ký tự.
+																		
+																		Character ch = 'A';
+												ArrayList:		
+																		Một danh sách động có thể mở rộng.
+																		
+																		import java.util.ArrayList;
+																		ArrayList<String> list = new ArrayList<>();
+																		list.add("Apple");
+																		list.add("Banana");
+												HashMap:		
+																		Một bản đồ không có thứ tự với các cặp key-value.
+																		
+																		import java.util.HashMap;
+																		HashMap<String, Integer> map = new HashMap<>();
+																		map.put("apple", 10);
+																		map.put("banana", 20);
+												LocalDate:		
+																		Represents a date (year, month, day (yyyy-MM-dd))
+																		
+																		LocalDate myObj = LocalDate.now();
+																		LocalDate specificDate = LocalDate.of(2022, 12, 31); // 2022-12-31
+																		int year = currentDate.getYear();
+																		int month = currentDate.getMonthValue();
+																		int day = currentDate.getDayOfMonth();
+																		LocalDate futureDate = currentDate.plusDays(7); // thêm 7 ngày
+																		LocalDate pastDate = currentDate.minusMonths(1); // giảm 1 tháng
+												LocalTime:		
+																		Represents a time (hour, minute, second and nanoseconds (HH-mm-ss-ns))
+																		
+																		LocalTime myObj = LocalTime.now();
+																		LocalTime specificTime = LocalTime.of(12, 30, 45); // 12:30:45
+																		int hour = currentTime.getHour();
+																		int minute = currentTime.getMinute();
+																		int second = currentTime.getSecond();
+																		LocalTime futureTime = currentTime.plusHours(3).plusMinutes(20); // thêm 3 giờ 20 phút
+																		LocalTime pastTime = currentTime.minusSeconds(15); // giảm 15 giây
+												LocalDateTime:		
+																		Represents both a date and a time (yyyy-MM-dd-HH-mm-ss-ns)
+																		
+																		LocalDateTime currentDateTime = LocalDateTime.now();
+																		LocalDateTime specificDateTime = LocalDateTime.of(2022, 12, 31, 15, 30); // 2022-12-31T15:30
+																		int year = currentDateTime.getYear();
+																		int month = currentDateTime.getMonthValue();
+																		int day = currentDateTime.getDayOfMonth();
+																		int hour = currentDateTime.getHour();
+																		int minute = currentDateTime.getMinute();
+																		int second = currentDateTime.getSecond();
+												DateTimeFormatter:
+																		Formatter for displaying and parsing date-time objects
+																	
+																		LocalDateTime currentDateTime = LocalDateTime.now();
+																		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+																		String formattedDateTime = currentDateTime.format(formatter); // định dạng currentDateTime thành một chuỗi theo định dạng đã được chỉ định bởi formatter.
+																																	  // 26/02/2024 15:48:30
+																		String dateTimeString = "25/02/2024 15:30:00";
+																		LocalDateTime parsedDateTime = LocalDateTime.parse(dateTimeString, formatter); // parse chuỗi dateTimeString thành một đối tượng LocalDateTime.
+																		                                                                               // 2024-02-25T15:30:00
+																																					   // parse là chuyển một input thành kiểu của nó
+												Date:
+																						Date không tự động điều chỉnh cho múi giờ hoặc thời gian mùa hè (DST - Daylight Saving Time). Nó chỉ đơn giản lưu trữ một số mili giây
+																						kể từ Epoch (1/1/1970 00:00:00 UTC). Do đó, khi hiển thị một đối tượng Date, nó sẽ hiển thị ngày và giờ tương ứng với múi giờ của hệ thống
+																						Lớp java.util.Date trong java biểu diễn ngày và giờ (date và time)
+																						Lớp java.util.Date implements các giao diện Serializable, Cloneable and Comparable<Date>. Nó được kế thừa bởi các lớp java.sql.Date,
+																						java.sql.Time và java.sql.Timestamp.
+																						Sau khi lớp Calendar ra đời, hầu hết các Constructor và phương thức của lớp java.util.Date đã bị khuyến cáo không nên dùng
+																						nữa (@deprecated).
+												
+													Các cách tạo Date:					
+														Ngày và giờ hiện tại--Date:
+																						import java.util.Date;
+																						public class Main {
+																							public static void main(String[] args) {
+																								Date currentDate = new Date();
+																								System.out.println("Current date and time: " + currentDate); // Current date and time: Wed Feb 23 15:30:00 UTC 2022
+																							}
+																						}
+														Ngày cụ thể--Date::
+																						import java.util.Date;
+																						public class Main {
+																							public static void main(String[] args) {
+																								Date specificDate = new Date(1645624200000L); // 23/02/2022
+																								System.out.println("Specific date: " + specificDate); // Specific date: Wed Feb 23 15:30:00 UTC 2022
+																							}
+																						}
+														Sử dụng thời gian từ chuỗi--Date::
+																						import java.util.Date;
+																						import java.text.SimpleDateFormat;
+																						public class Main {
+																							public static void main(String[] args) throws Exception {
+																								SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+																								Date parsedDate = sdf.parse("2022-02-23 15:30:00");
+																								System.out.println("Parsed date: " + parsedDate); // Parsed date: Wed Feb 23 15:30:00 UTC 2022
+																							}
+																						}
+														Thời gian từ số mili giây--Date::
+																						import java.util.Date;
+																						public class Main {
+																							public static void main(String[] args) {
+																								Date dateFromMilliseconds = new Date(1645624200000L); // 23/02/2022
+																								System.out.println("Date from milliseconds: " + dateFromMilliseconds); // Date from milliseconds: Wed Feb 23 15:30:00 UTC 2022
+																							}
+																						}
+														Sử dụng lớp Calendar--Date::
+																						import java.util.Calendar;
+																						import java.util.Date;
+																						public class Main {
+																							public static void main(String[] args) {
+																								Calendar calendar = Calendar.getInstance();
+																								Date currentDate = calendar.getTime();
+																								System.out.println("Current date and time using Calendar: " + currentDate); // Current date and time using Calendar:
+																																											// Wed Feb 23 15:30:00 UTC 2022
+																							}
+																						}
+														Sử dụng lớp Instant--Date::
+																						import java.time.Instant;
+																						import java.util.Date;
+																						public class Main {
+																							public static void main(String[] args) {
+																								Instant instant = Instant.now();
+																								Date currentDate = Date.from(instant);
+																								System.out.println("Current date and time using Instant: " + currentDate); // Current date and time using Instant:
+																																										   // Wed Feb 23 15:30:00 UTC 2022
+																							}
+																						}
+														Sử dụng lớp LocalDateTime--Date::
+																						import java.time.LocalDateTime;
+																						import java.util.Date;
+																						public class Main {
+																							public static void main(String[] args) {
+																								LocalDateTime localDateTime = LocalDateTime.now();
+																								Date currentDate = Date.from(localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+																								System.out.println("Current date and time using LocalDateTime: " + currentDate); // Current date and time using LocalDateTime:
+																																												 // Wed Feb 23 15:30:00 UTC 2022
+																							}
+																						}
+													boolean after(Date date):
+																						Date currentDate = new Date();
+																						Date futureDate = new Date(currentDate.getTime() + 1000); // Tạo một Date trong tương lai
+																						System.out.println("Is futureDate after currentDate? " + futureDate.after(currentDate)); // Is futureDate after currentDate? true
+													boolean before(Date date):
+																						Date currentDate = new Date();
+																						Date pastDate = new Date(currentDate.getTime() - 1000); // Tạo một Date trong quá khứ
+																						System.out.println("Is pastDate before currentDate? " + pastDate.before(currentDate)); // Is pastDate before currentDate? true
+													Object clone():
+																						Date currentDate = new Date();
+																						Date clonedDate = new Date(currentDate.getTime()); // Sử dụng phương thức khởi tạo với tham số là số mili giây của currentDate
+																						System.out.println("Original Date: " + currentDate); // Original Date: Wed Feb 23 15:30:00 UTC 2022
+																						System.out.println("Cloned Date: " + clonedDate); // Cloned Date: Wed Feb 23 15:30:00 UTC 2022
+													int compareTo(Date date):
+																						Date currentDate = new Date();
+																						Date futureDate = new Date(currentDate.getTime() + 1000); // Tạo một Date trong tương lai
+																						Date pastDate = new Date(currentDate.getTime() - 1000); // Tạo một Date trong quá khứ
+																						System.out.println("Comparing futureDate with currentDate: " + futureDate.compareTo(currentDate)); // Comparing futureDate with
+																																														   // currentDate: 1
+																						System.out.println("Comparing pastDate with currentDate: " + pastDate.compareTo(currentDate)); // Comparing pastDate with currentDate: -1
+													boolean equals(Date date):
+																						Date date1 = new Date();
+																						Date date2 = new Date(date1.getTime());
+																						boolean isEqual = date1.equals(date2);
+																						System.out.println("Are date1 and date2 equal? " + isEqual); // Are date1 and date2 equal? true
+													static Date from(Instant instant):
+																						Instant instant = Instant.now();
+																						Date date = Date.from(instant);
+																						System.out.println("Date from Instant: " + date); // Date from Instant: Wed Feb 23 15:30:00 UTC 2022
+													long getTime():
+																						Date date = new Date();
+																						long timeInMillis = date.getTime();
+																						System.out.println("Time in milliseconds: " + timeInMillis); // Time in milliseconds: 1645624200000
+													int hashCode():
+																						Date date = new Date();
+																						int hashCode = date.hashCode();
+																						System.out.println("Hash code of date: " + hashCode); // Hash code of date: 1401071853
+													void setTime(long time):
+																						Date date = new Date();
+																						date.setTime(0); // Set time to Epoch time
+																						System.out.println("Date after setTime: " + date); // Date after setTime: Thu Jan 01 07:00:00 UTC 1970
+													Instant toInstant():
+																						Date date = new Date();
+																						Instant instant = date.toInstant();
+																						System.out.println("Instant from Date: " + instant); // Instant from Date: 2022-02-23T15:30:00Z
+													String toString():
+																						Date date = new Date();
+																						String dateString = date.toString();
+																						System.out.println("String representation of Date: " + dateString); // String representation of Date: Wed Feb 23 15:30:00 UTC 2022	

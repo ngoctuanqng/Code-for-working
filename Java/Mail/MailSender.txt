@@ -1,0 +1,7 @@
+MailSender--JAVA:					MailSender mailSender = new MailSender();
+	sendEmail:						mailSender.sendEmail("recipient@example.com", "Subject", "Hello, this is a simple email."); // Gửi email mà không yêu cầu xác thực
+	sendEmailWithAuthentication:	mailSender.sendEmailWithAuthentication(
+										"recipient@example.com", "Subject", "Hello, this is an email with authentication."); // // Gửi email với xác thực
+	sendEmailWithAttachment:		File attachment = new File("attachment.txt");
+									mailSender.sendEmailWithAttachment(
+										"recipient@example.com", "Subject with Attachment", "Hello, this is an email with attachment.", attachment); // Gửi email với tệp đính kèm

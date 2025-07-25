@@ -1,0 +1,144 @@
+OOP-JAVA:
+	Abstraction:
+								Data abstraction is the process of hiding certain details and showing only essential information to the user.
+								Abstraction can be achieved with either abstract classes or interfaces
+								The abstract keyword is a non-access modifier, used for classes and methods.
+								Abstraction can also be achieved with Interfaces
+		Abstract class: 		
+								Is a restricted class that cannot be used to create objects (to access it, it must be inherited from another class).
+								An abstract class can have both abstract and regular methods.
+								Một abstract class có thể có cả phương thức được triển khai và không triển khai.
+								Một lớp con chỉ có thể kế thừa từ một abstract class (được biểu diễn bằng từ khóa "extends").
+								Các phương thức trong abstract class có thể được đánh dấu là final hoặc static, nếu cần.
+								Một interface chỉ chứa các phương thức trừu tượng (tất cả các phương thức mặc định được coi là trừu tượng).
+								Một lớp con có thể triển khai nhiều interface (được biểu diễn bằng từ khóa "implements").
+								Một interface không thể chứa trường (fields) hoặc biểu thức (expressions) khác ngoài các phương thức trừu tượng.
+								Tất cả các phương thức trong interface đều ngầm định là public và abstract.
+								
+								abstract class Animal {
+								  public abstract void animalSound();
+								  public void sleep() {
+									System.out.println("Zzz");
+								  }
+								}
+								Animal myObj = new Animal(); // will generate an error
+								
+								abstract class Animal { // Abstract class							  
+								  public abstract void animalSound(); // Abstract method (does not have a body)							  
+								  public void sleep() { // Regular method
+									System.out.println("Zzz");
+								  }
+								}								
+								class Pig extends Animal { // Subclass (inherit from Animal)
+								  public void animalSound() {
+									// The body of animalSound() is provided here
+									System.out.println("The pig says: wee wee");
+								  }
+								}
+								class Main {
+								  public static void main(String[] args) {
+									Pig myPig = new Pig(); // Create a Pig object
+									myPig.animalSound();
+									myPig.sleep();
+								  }
+								}
+		Abstract method: 	
+								Can only be used in an abstract class, and it does not have a body. The body is provided by the subclass (inherited from).
+	Encapsulation:
+								The meaning of Encapsulation, is to make sure that "sensitive" data is hidden from users. To achieve this, you must:
+										declare class variables/attributes as private
+										provide public get and set methods to access and update the value of a private variable
+								Private variables can only be accessed within the same class (an outside class has no access to it). However, it is possible to access them if we provide public get and set methods.
+								Class attributes can be made read-only (if you only use the get method), or write-only (if you only use the set method)
+								Increased security of data
+								
+								public class Person {
+								  private String name; // private = restricted access
+								  // Getter
+								  public String getName() {
+									return name;
+								  }
+								  // Setter
+								  public void setName(String newName) {
+									this.name = newName;
+								  }
+								}
+	Inheritance:
+								It is useful for code reusability: reuse attributes and methods of an existing class when you create a new class.	
+								In Java, it is possible to inherit attributes and methods from one class to another. We group the "inheritance concept" into two categories:
+										subclass (child):		 the class that inherits from another class
+										superclass (parent):	 the class being inherited from
+										
+								class Vehicle {
+								  protected String brand = "Ford";
+								  public void honk() {
+									System.out.println("Tuut, tuut!");
+								  }
+								}
+								class Car extends Vehicle {
+								  private String modelName = "Mustang";
+								  public static void main(String[] args) {
+									Car myFastCar = new Car();
+									myFastCar.honk();
+									System.out.println(myFastCar.brand + " " + myFastCar.modelName);
+								  }
+								}
+		The final Keyword:
+								If you don't want other classes to inherit from a class, use the final keyword
+								If you try to access a final class, Java will generate an error.
+								
+								final class Vehicle {
+								  ...
+								}
+								class Car extends Vehicle { // cannot inherit from final Vehicle
+								  ...
+								}
+	Polymorphism:
+								Polymorphism means "many forms", and it occurs when we have many classes that are related to each other by inheritance.
+								Inheritance lets us inherit attributes and methods from another class. Polymorphism uses those methods to perform different tasks. This allows us to perform a single action
+								in different ways.													
+								Overloading là khả năng định nghĩa nhiều phương thức cùng tên trong một lớp, nhưng có số lượng hoặc kiểu dữ liệu tham số khác nhau. Khi gọi phương thức, Java sẽ xác định
+								phương thức cần gọi dựa trên số lượng và kiểu dữ liệu của tham số truyền vào. Điểm đặc biệt của overloading là phương thức có thể thực hiện các chức năng tương tự nhau nhưng với các đối số
+								khác nhau.
+								
+								class Animal {
+								  public void animalSound() {
+									System.out.println("The animal makes a sound");
+								  }
+								}
+								class Pig extends Animal {
+								  public void animalSound() {
+									System.out.println("The pig says: wee wee");
+								  }
+								}
+								class Dog extends Animal {
+								  public void animalSound() {
+									System.out.println("The dog says: bow wow");
+								  }
+								}
+								
+								class Animal {
+								  public void animalSound() {
+									System.out.println("The animal makes a sound");
+								  }
+								}
+								class Pig extends Animal {
+								  public void animalSound() {
+									System.out.println("The pig says: wee wee");
+								  }
+								}
+								class Dog extends Animal {
+								  public void animalSound() {
+									System.out.println("The dog says: bow wow");
+								  }
+								}
+								class Main {
+								  public static void main(String[] args) {
+									Animal myAnimal = new Animal();
+									Animal myPig = new Pig();
+									Animal myDog = new Dog();															
+									myAnimal.animalSound(); // The animal makes a sound
+									myPig.animalSound(); // The pig says: wee wee
+									myDog.animalSound(); // The dog says: bow wow
+								  }
+								}

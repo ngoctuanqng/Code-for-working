@@ -1,0 +1,535 @@
+Generic--JAVA:
+							
+							- Java Generics cho phép chúng ta viết một phương thức duy nhất có thể thực hiện các hoạt động trong nhiều loại đối tượng hỗ trợ phương thức đó. Sử dụng các lớp và phương thức Java Generic, lập
+							trình viên có thể chỉ định một tập hợp các phương thức có liên quan với một khai báo phương thức chung / chung hoặc với một khai báo một lớp.
+							- Một lớp Generic trong Java có thể là một  lớp tham chiếu đến bất kỳ kiểu nào. Để tạo một  lớp chung của một kiểu cụ thể, chúng ta đặt tham số kiểu T. Dấu ngoặc nhọn <> được sử dụng để chỉ
+							định các kiểu tham số trong tạo lớp chung của Java.
+							- Thuật ngữ Generics trong Java đại diện cho một tập hợp các tính năng trong một ngôn ngữ, liên quan đến việc xác định và sử dụng các phương thức và kiểu chung. Generics là một tính năng của
+							Java giúp cho lập trình viên có thể chỉ định rõ kiểu dữ liệu mà họ muốn làm việc với một class, một interface hay một phương thức nào đó Trong Java, các phương thức và kiểu chung chung khác
+							với các phương thức và kiểu thông thường. Chúng khác nhau vì các phương thức chung có tham số kiểu.
+							
+	Quy tắc xác định các phương thức Generics:
+	
+							- Nên có một phần tham số kiểu trong tất cả các khai báo phương thức chung, được phân cách bằng dấu ngoặc nhọn <> đứng trước kiểu trả về của phương thức.
+							- Nếu có nhiều hơn một tham số trong danh sách tham số thì mỗi tham số kiểu phải được phân tách bằng dấu phẩy.
+							- Chúng ta cũng có thể sử dụng các tham số kiểu để khai báo kiểu trả về và để chúng hoạt động như trình giữ chỗ cho các kiểu đối số được truyền cho phương thức chung, được gọi là đối số kiểu thực.
+							- Phần thân phương thức của một phương thức chung được khai báo tương tự như bất kỳ phương thức không chung nào khác.
+							- Tham số kiểu trong một phương thức chỉ có thể đại diện cho các kiểu tham chiếu, các kiểu không nguyên thủy như int, double và char.
+	
+	Cách tạo lớp Generics trong Java:
+	
+							Việc khai báo một lớp generic tương tự như việc khai báo lớp non-generic. Sự khác biệt duy nhất là tên lớp generic được theo sau bởi một phần tham số kiểu. Đoạn mã dưới đây cho thấy ví dụ tạo
+							một lớp chung. Ở đây, kiểu T chỉ ra rằng nó có thể tham chiếu đến bất kỳ kiểu lớp nào như số nguyên, chuỗi, ký tự,...Kiểu lớp được chỉ định sẽ lưu trữ và truy xuất dữ liệu cùng.
+							
+							class MyGenClass<T>
+							{
+								   T obj;
+								   void add(T obj)
+								   {
+
+										  this.obj=obj;
+								   }
+								   T getObj()
+								   {
+										  return obj;
+								   }
+							}
+							
+							package com.techvidvan.javagenerics;
+							class Test<T, U>
+							{
+							  T obj1; // An object of type T
+							  U obj2; // An object of type U
+							  // constructor
+							  Test(T obj1, U obj2)
+							  {
+								this.obj1 = obj1;
+								this.obj2 = obj2;
+							  }
+							  // To print objects of T and U
+							  public void getObject()
+							  {
+								System.out.println(“String value: “ +obj1);
+								System.out.println(“Integer value: ” +obj2);
+							  }
+							}
+							class Main
+							{
+							  public static void main (String[] args)
+							  {
+								Test <String, Integer> obj = new Test<String, Integer>("TechVidvan", 15);
+								obj.getObject();
+							  }
+							}
+
+	Quy ước đặt tên tham số:
+
+							T - Type
+							E - Element
+							K - Key
+							N - Number
+							V - Value
+	
+	Lớp Generic trong java:
+
+		Một lớp có thể tham chiếu bất kỳ kiểu đối tượng nào được gọi là lớp generic.
+
+							package vn.viettuts.generics;
+							class MyGeneric<T> {
+								T obj;							
+								void add(T obj) {
+									this.obj = obj;
+								}							 
+								T get() {
+									return obj;
+								}
+							}
+							
+		Ví dụ khi bạn định nghĩa MyGeneric<Integer> tức là T = Integer, lúc này bạn có thể hình dung lớp MyGeneric có dạng như sau:
+	
+							package vn.viettuts.generics;
+							class MyGeneric {
+								Integer obj;							
+								void add(Integer obj) {
+									this.obj = obj;
+								}						 
+								Integer get() {
+									return obj;
+								}
+							}
+		Trong lớp trên, tại dòng lệnh thứ 6 chúng ta khai báo như sau MyGeneric<Integer>, có nghĩa là kiểu chung T sẽ là Integer. Tại dòng lệnh thứ 11 chúng ta khai báo như sau MyGeneric<String>, có nghĩa là kiểu chung T sẽ
+		là String
+	
+							package vn.viettuts.generics;
+							public class TestGenerics3 {
+								public static void main(String args[]) {
+									// use Integer
+									MyGeneric<Integer> m1 = new MyGeneric<Integer>();
+									m1.add(2);
+									System.out.println(m1.get()); // 2
+									// use String
+									MyGeneric<String> m2 = new MyGeneric<String>();
+									m2.add("Hello");
+									System.out.println(m2.get()); // hello
+								}
+							}
+	Phương thức Generic trong java:
+	
+		Giống như lớp generic, chúng ta có thể tạo phương thức generic có thể chấp nhận bất kỳ kiểu đối số nào.
+		
+							package vn.viettuts.generics;
+							public class TestGenerics4 {							 
+								public static <E> void printArray(E[] elements) {
+									for (E element : elements) {
+										System.out.print(element + " ");
+									}
+									System.out.println();
+								}							 
+								public static void main(String args[]) {
+									Integer[] intArray = { 10, 20, 30, 40, 50 };
+									Character[] charArray = { 'J', 'A', 'V', 'A' };						 
+									System.out.print("In mảng số nguyên: "); // In mảng số nguyên: 10 20 30 40 50 
+									printArray(intArray);						 
+									System.out.print("In mảng ký tự: "); // In mảng ký tự: J A V A
+									printArray(charArray);
+								}
+							}
+
+		Ký tự đại diện trong Java Generics:
+		
+							Ký tự ? (dấu chấm hỏi) tượng trưng cho phần tử ký tự đại diện. Nó có nghĩa là bất kỳ loại nào. Nếu chúng ta viết <? mở rộng Number>, nó có nghĩa là bất kỳ lớp con của Number ví dụ như Integer,
+							Float, Double vv.
+							
+							package vn.viettuts.generics;
+							import java.util.ArrayList;
+							import java.util.List;							
+							abstract class Shape {
+								abstract void draw();
+							}							 
+							class Rectangle extends Shape {
+								void draw() {
+									System.out.println("ve hinh chu nhat.");
+								}
+							}						 
+							class Circle extends Shape {
+								void draw() {
+									System.out.println("ve hinh tron.");
+								}
+							}							 
+							public class GenericTest5 {
+								// tao phuong thuc chi chap nhan tham so la lop con cua Shape
+								public static void drawShapes(List<? extends Shape> lists) {
+									for (Shape s : lists) {
+										s.draw();// goi phuong thuc cua lop Shape boi lop con
+									}
+								}							 
+								public static void main(String args[]) {
+									List<Rectangle> list1 = new ArrayList<Rectangle>();
+									list1.add(new Rectangle());			 
+									List<Circle> list2 = new ArrayList<Circle>();
+									list2.add(new Circle());
+									list2.add(new Circle());				 
+									drawShapes(list1);
+									drawShapes(list2);
+								}
+							}
+							
+		Sử dụng Generics trong các đối tượng Collection:
+		
+							Trước Generics, chúng ta có thể lưu trữ bất kỳ loại đối tượng nào trong collection như Non-generic. Với generics, được các lập trình java áp dụng để lưu trữ các kiểu cụ thể của các đối tượng.
+							Ở đây, chúng ta sử dụng lớp ArrayList, nhưng bạn có thể sử dụng bất kỳ lớp Collection khác như ArrayList, LinkedList, HashSet, TreeSet, HashMap, Comparator, vv
+							
+							package vn.viettuts.generics;
+							import java.util.ArrayList;
+							import java.util.Iterator;							 
+							class TestGenerics1 {
+								public static void main(String args[]) {
+									ArrayList<String> list = new ArrayList<String>();
+									list.add("Java");
+									list.add("PHP");
+									list.add("C++");
+									// list.add(32);//compile time error						 
+									// show list
+									Iterator<String> itr = list.iterator();
+									while (itr.hasNext()) {
+										System.out.println(itr.next());
+									}
+								}
+							}
+							
+		Lợi thế của Generics trong Java:
+		
+			Kiểu đối tượng an toàn:
+
+							Chúng ta chỉ có thể lưu một kiểu đối tượng duy nhất trong generics. Nó không cho phép lưu trữ 2 đối tượng có kiểu khác nhau.
+
+			Không cần phải ép kiểu:
+			
+				Trước Generics chúng ta cần phải ép kiểu, ví dụ:
+
+							List list = new ArrayList();
+							list.add("hello");
+							String s = (String) list.get(0);// ép kiểu
+							
+				Sau Generics chúng ta không cần phải ép kiểu đối tượng, ví dụ:
+				
+							List<String> list = new ArrayList<String>();
+							list.add("hello");
+							String s = list.get(0);
+							
+			Kiểm tra lúc biên dịch:
+				
+				Nó kiểm tra lỗi khi biên dịch nên sẽ không bị lỗi lúc runtime.
+
+							List<String> list = new ArrayList<String>();
+							list.add("hello");
+							list.add(32);// Compile Time Error
+
+		Tạo class Generic với kiểu tham số generic
+			
+			class Dictionary<K, V> {
+				private K key;
+				private V value;
+				public Dictionary(K key, V value) {
+					this.key = key;
+					this.value = value;
+				}	
+				public K getKey() {
+					return key;
+				}
+				public void setKey(K key) {
+					this.key = key;
+				}
+				public V getValue() {
+					return value;
+				}
+				public void setValue(V value) {
+					this.value = value;
+				}
+			}
+			
+			K và V được gọi là 1 kiểu tham số chiếu nào đó của Dictionary<K,V>. Khi sử dụng class này chúng ta phải xác định 1 kiểu tham số cụ thể.
+				
+				public class DemoGeneric {
+					public static void main(String[] args) {
+						Dictionary<String, String> d = new Dictionary<String, String>("Study", "hoc");
+						String english = d.getKey();
+						String vietnamese = d.getValue();
+						System.out.println(english + ": " + vietnamese); //Ouput: Study: hoc
+					}
+				}
+				
+		Thừa kế lớp Generics
+			
+			Cách quy định kiểu cho tham số Generics.
+				
+				class Book extends Dictionary<String, String> {
+					public Book(String key, String value) {
+						super(key, value);
+					}
+				}
+
+				public class Demo {
+					public static void main(String[] args) {
+						Book l = new Book("Study", "hoc");
+						String english = l.getKey();
+						String vietnamese = l.getValue();
+						System.out.println(english + ": " + vietnamese); // Ouput: Study: hoc
+					}
+				}
+			
+			Cách quy định giữ nguyên các tham số generic.
+				
+				class Book<K, V> extends Dictionary<K, V> {
+					public Book(K key, V value) {
+						super(key, value);
+					}
+				}
+
+				public class Demo {
+					public static void main(String[] args) {
+						Book<String, String> l = new Book<String, String>("Study", "hoc");
+						String english = l.getKey();
+						String vietnamese = l.getValue();
+						System.out.println(english + ": " + vietnamese); // Ouput: Study: hoc
+					}
+				}
+				
+				Note: Chúng ta có thể vừa quy định trước 1 kiểu cụ thể vừa giữ nguyên tham số generic
+					
+				class Book<V> extends Dictionary<String, V> {
+					public Book(String key, V value) {
+						super(key, value);
+					}
+				}
+				public class Demo {
+					public static void main(String[] args) {
+						Book<String> l = new Book<String>("Study", "hoc");
+						String english = l.getKey();
+						String vietnamese = l.getValue();
+						System.out.println(english + ": " + vietnamese); // Ouput: Study: hoc
+					}
+				}
+				
+			Cách thêm các tham số Generics vào 1 Class generic khác.
+				
+				class Book<K, V, I> extends Dictionary<K, V> {
+					private I info; // khởi tạo thêm tham số generic 
+					public Book(K key, V value) {
+						super(key, value);
+					}
+					public Book(K key, V value, I info) {
+						super(key, value);
+						this.info = info; // truyền Kiểu generic mới vào 
+					}
+					public I getInfo() {
+						return info;
+					}
+					public void setInfo(I info) {
+						this.info = info;
+					}
+				}
+
+				public class Demo {
+					public static void main(String[] args) {
+						Book<String, String, Integer> l = new Book<String, String, Integer>("Study", "hoc", 123);
+						String english = l.getKey();
+						String vietnamese = l.getValue();
+						int quanity = l.getInfo();
+						System.out.println(english + ": " + vietnamese + "\nQuantity: " + quanity);
+						// Ouput:
+						// Study: hoc
+						// Quanity: 123
+					}
+				}
+		Generics Interface
+		
+				Chúng ta khởi tạo 1 interface sau đó để 1 class implements lên là chúng ta đã có thể sử dụng.
+					
+					interface writer<T> {
+						void update(T obj);
+						void delete(T obj);
+						void write(T obj);
+					}
+
+					class Book<T> implements writer<T> {
+						@Override
+						public void update(T obj) {
+							// do something
+						}
+						@Override
+						public void delete(T obj) {
+							// do something
+						}
+						@Override
+						public void write(T obj) {
+							// do something
+						}
+					}
+					public class Demo {
+						public static void main(String[] args) {
+							Book<String> t = new Book<String>();
+							t.write("Add data to book");
+						}
+					}
+					
+		Các thao tác trên Generic
+		
+			Khởi tạo phương thức generic
+			
+				class Store {
+					// Arraylist sẽ chứa các phần tử E
+					// ta sẽ trả về phần tử đầu tiền trong arr khi được gọi
+					public static <E> E getFirstElement(ArrayList<E> arr) {
+						if (arr.isEmpty())
+							return null;
+						E first = arr.get(0);
+						return first;
+					}
+				}
+				public class Demo {
+					public static void main(String[] args) {
+						ArrayList<String> list = new ArrayList<>();
+						list.add("Codelearn.io");
+						list.add("Google.com");
+						list.add("Azure");
+						list.add("GCF");
+						System.out.println(Store.getFirstElement(list));
+						// output: Codelearn.io
+					}
+				}
+				
+			Khởi tạo đối tượng Generic
+			
+				Chúng ta không được phép khởi tạo đối tương obj theo kiểu này.
+				
+					T obj = new T(); // error
+				
+				Vì khi khởi tạo <T> không hề tồn tại ở thời điểm java khởi chạy. Nó chỉ có ý nghĩa với trình biên dịch kiểm soát code của người lập trình. Mọi kiểu <T> đều là Object tại thời điểm chạy của Java.
+					
+					package Generics;
+					class Codelearn {
+						public Codelearn() {
+						}
+						public void sayHi() {
+							System.out.println("chúc các bạn học tốt!");
+						}
+					}
+					class MyGeneric<T> {
+						private T obj; // khởi tạo đối tượng lưu tham số generic
+						public MyGeneric(Class<T> classObject) throws InstantiationException, IllegalAccessException {
+							// lấy tên Class và gán nó vào đối tượng obj
+							this.obj = (T) classObject.newInstance();
+						}
+						public T getObj() {
+							return obj; // trả về obj
+						}
+					}
+
+					public class Demo {
+						public static void main(String[] args) throws InstantiationException, IllegalAccessException {
+							// khởi tạo đối tượng Codelearn trên myObj
+							MyGeneric<Codelearn> myObj = new MyGeneric<Codelearn>(Codelearn.class);
+							// bây giờ myObj đã có đối tượng Codelearn
+							// t chỉ cần gọi đối tượng đó ra bằng method getObj()
+							myObj.getObj().sayHi();
+						}
+					}
+					
+					Output:
+						chúc các bạn học tốt!
+		
+		Khởi tạo mảng Mảng Generic
+		
+			Cũng tương tự như tạo đối tượng generic chúng ta không thể tạo theo cách thông thường, nhưng chúng ta có thể khai báo nó 1 cách bình thường.
+				
+				T obj[] = new T[5]; // error
+				T obj[]; // ok
+				
+				Để khởi tạo mảng trình biên dịch của Java cần biết rõ <T> là cái gì mới có thể biên dịch (compile) new T[5]. Nếu không biết rõ nó mặc định coi <T> là Object.
+					
+				Các khởi tạo mảng cũng tương tự như khi tạo đối tượng.
+						
+					class MyArrayGeneric<T> {
+						private T[] array; // khởi tạo mảng
+						public MyArrayGeneric(T[] array) {
+							this.array = array;
+						}
+						public T[] getArray() {
+							return array;
+						}
+						public T getFirstElement() {
+							if (this.array.length == 0) {
+								return null;
+							}
+							return this.array[0];
+						}
+						public T getLastElement() {
+							if (this.array.length == 0) {
+								return null;
+							}
+							return this.array[this.array.length - 1];
+						}
+					}
+					public class Demo {
+						public static void main(String[] args) {
+							String[] names = new String[] { "Dat", "Khoa", "Tin" };
+							// truyền array names vào trong MyArrayGeneric để gắn mảng vào trong nó
+							MyArrayGeneric<String> myArrayGeneric = new MyArrayGeneric<String>(names);
+							// ta có thể dổi thành các kiểu khác như Double, Integer, ...
+							System.out.println("First name: " + myArrayGeneric.getFirstElement());
+							System.out.println("Last name: " + myArrayGeneric.getLastElement());
+						}
+					}
+					
+		Generics với ký tự đại diện Generic method (wildcard):
+			
+			Trong Generic, dấu chấm hỏi (?) được gọi là một đại diện (wildcard), nó là kiểu không xác định.
+			
+			Wildcard có thể được sử dụng cho rất nhiều tính huống ví dụ như kiểu tham số, trường hoặc biến cục bộ; đôi khi là một kiểu trả về.
+			
+			Tùy vào ví trí của Wildcard mà nó sẽ có những ý nghĩa khác nhau:
+				
+				Collection<?>: mô tả một tập hợp chấp nhận tất cả các loại đối số (chứa mọi kiểu đối tượng).
+				List<? extends Number>: mô tả một danh sách, nơi mà các phần tử là kiểu Number hoặc kiểu con của Number.
+				Comparator<? super String>: Mô tả một bộ so sánh (Comparator) mà thông số phải là String hoặc cha của String.
+			
+			Ví dụ:
+				
+				package Generics;
+				import java.util.ArrayList;
+				import java.util.List;
+				abstract class Shape {
+					abstract void draw();
+				}
+				class Circle extends Shape {
+					void draw() {
+						System.out.println("ve hinh tron");
+					}
+				}
+				class Square extends Shape {
+					void draw() {
+						System.out.println("ve hinh Vuong");
+					}
+				}
+				public class Demo {
+					// drawShapes chỉ chấp nhận các kiểu thuộc lớp Shape hoặc con của nó
+					public static void drawShapes(List<? extends Shape> lists) {
+						for (Shape s : lists) {
+							s.draw(); // call method của lớp Shape từ lớp con
+						}
+					}
+					public static void main(String args[]) {
+						List<Square> list1 = new ArrayList<Square>();
+						list1.add(new Square());
+						List<Circle> list2 = new ArrayList<Circle>();
+						list2.add(new Circle());
+						list2.add(new Circle());
+						drawShapes(list1);
+						drawShapes(list2);
+					}
+				}
+				Output:
+					ve hinh Vuong
+					ve hinh tron
+					ve hinh tron	

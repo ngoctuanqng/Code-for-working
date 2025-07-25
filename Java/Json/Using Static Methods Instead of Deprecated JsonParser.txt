@@ -1,0 +1,74 @@
+Using Static Methods Instead of Deprecated JsonParser--JAVA:
+
+	Introduction
+	
+		Efficient JSON parsing is one of the most important tasks in Java programming when it comes to data manipulation and communication.
+		
+		Efficient JSON parsing is one of the most important tasks in Java programming when it comes to data manipulation and communication.
+		
+		In this tutorial, we’ll delve into how to utilize the static methods instead of the deprecated JsonParser for efficient JSON parsing in Java.
+	
+	Deprecated JsonParser
+		
+		Here is an example of using the deprecated JsonParser to parse a JSON string:
+			
+			String jsonString = "{\"name\": \"John\", \"age\":30, \"city\":\"New York\"}";
+			JsonObject jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();
+		
+		The deprecated JsonParser instance may still function, but developers are encouraged to move on with new and improved practices.
+	
+	Embracing Static Methods
+		
+		The Gson library offers static methods as replacements for the deprecated ones. Moreover, it is a more elegant and easier-to-understand parsing way of JSON.
+		
+		Parse from String
+			
+			We can parse a JSON string directly into JsonObject without using a deprecated instance of JsonParser using the parseString() static method.
+			
+			Firstly, let’s set up a JSON string describing person-related data and read an associated JsonObject with given keys like name, age, and city underlying class
+			constructor of DeprecatedJsonParserUnitTest:
+				
+				String jsonString = "{\"name\": \"John\", \"age\":30, \"city\":\"New York\"}";
+				JsonObject expectedJsonObject = new JsonObject();
+				DeprecatedJsonParserUnitTest() {
+					expectedJsonObject.addProperty("name", "John");
+					expectedJsonObject.addProperty("age", 30);
+					expectedJsonObject.addProperty("city", "New York");
+				}
+				
+			Now, let’s parse the jsonString directly into JsonObject:
+				
+				@Test
+				public void givenJsonString_whenUsingParseString_thenJsonObjectIsExpected() {
+					JsonObject jsonObjectAlt = JsonParser.parseString(jsonString).getAsJsonObject();
+					assertEquals(expectedJsonObject, jsonObjectAlt);
+				}
+				
+			In this test method, we verify that the parsed jsonObjectAlt matches the expectedJsonObject created earlier.
+		
+		Parse from StringReader
+			
+			There are cases when the obtained JSON data comes from a StringReader. We can use the parseReader() static method to get the same result without using obsolete components:
+				
+				@Test
+				public void givenJsonString_whenUsingParseReader_thenJsonObjectIsExpected() {
+					StringReader reader = new StringReader(jsonString);
+					JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+					assertEquals(expectedJsonObject, jsonObject);
+				}
+				
+			Here, we initialize a StringReader called reader. Then, we use the JsonParser.parseReader() method to parse the JSON data into a JsonObject.
+		
+		Parse from JsonReader
+			
+			When dealing with a JsonReader, the parseReader() static method is still an effective and contemporary decision that avoids outdated constructions. Let’s take an example:
+				
+				@Test
+				public void givenJsonReader_whenParseUsingJsonReader_thenJsonObjectIsExpected() {
+					JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
+					JsonObject jsonObject = JsonParser.parseReader(jsonReader).getAsJsonObject();
+					assertEquals(expectedJsonObject, jsonObject);
+				}
+			
+			In the above test method, we begin by instantiating a JsonReader named jsonReader with the contents of the JSON string. Then, we utilize the JsonParser.parseReader() method to
+			parse such JSON data into a JsonObject.

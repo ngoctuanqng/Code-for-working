@@ -1,0 +1,126 @@
+Calendar--Ngày và giờ trong Java:
+
+									Lớp Calendar trong java là một lớp trừu tượng (abstract) cung cấp phương thức chuyển đổi ngày giữa một thời điểm cụ thể theo thời gian và một tập hợp các trường
+									của calendar như MONTH, YEAR, HOUR, ... Nó kế thừa lớp Object và implements giao diện Comparable.
+	
+	--- Các phương thức của lớp Calendar trong java
+		
+		abstract void add(int field, int amount)
+			
+			Nó được sử dụng để thêm hoặc trừ số lượng thời gian nhất định vào trường calendar đã cho, dựa trên các quy tắc của calendar.
+		
+		int get(int field)
+			
+			Nó được sử dụng để trả lại giá trị của trường calendar đã cho.
+		
+		static Calendar getInstance()
+			
+			Nó được dùng để lấy calendar sử dụng time zone và locale mặc định.
+		
+		abstract int getMaximum(int field)
+			
+			Nó được sử dụng để trả về giá trị MAX cho trường calendar đã cho của thể hiện Calendar hiện tại.
+		
+		abstract int getMinimum(int field)
+			
+			Nó được sử dụng để trả về giá trị MIN cho trường calendar đã cho của thể hiện Calendar hiện tại.
+		
+		void set(int field, int value)
+			
+			Nó được sử dụng để thiết lập trường cho trước với giá trị đã cho.
+		
+		void setTime(Date date)
+			
+			Nó được sử dụng để thiết lập time của Calendar với Date đã cho.
+		
+		Date getTime()
+			
+			Nó được sử dụng để trả về đối tượng Date biểu diễn giá trị time của Calendar.
+			
+	--- Ví dụ về Calendar trong java
+	
+											package vn.viettuts.date;													
+											import java.util.Calendar;													 
+											public class CalendarExample1 {
+												public static void main(String[] args) {
+													Calendar calendar = Calendar.getInstance();
+													System.out.println("Ngay gio hien tai: " + calendar.getTime());
+													calendar.add(Calendar.DATE, -15);
+													System.out.println("15 ngay sau: " + calendar.getTime());
+													calendar.add(Calendar.MONTH, 4);
+													System.out.println("4 thang sau: " + calendar.getTime());
+													calendar.add(Calendar.YEAR, 2);
+													System.out.println("2 nam sau: " + calendar.getTime());
+												}
+											}@
+											Kết quả:
+											Ngay gio hien tai: Mon Sep 11 09:33:11 ICT 2017
+											15 ngay sau: Sun Aug 27 09:33:11 ICT 2017
+											4 thang sau: Wed Dec 27 09:33:11 ICT 2017
+											2 nam sau: Fri Dec 27 09:33:11 ICT 2019
+											
+	--- Ví dụ về Calendar trong java - phương thức get()
+	
+											package vn.viettuts.date;												 
+											import java.util.Calendar;												 
+											public class CalendarExample2 {
+												public static void main(String[] args) {
+													Calendar calendar = Calendar.getInstance();
+													System.out.println("YEAR: " + calendar.get(Calendar.YEAR));
+													System.out.println("MONTH: " + calendar.get(Calendar.MONTH));
+													System.out.println("DAY: " + calendar.get(Calendar.DATE));
+													System.out.println("DAY_OF_WEEK: " + calendar.get(Calendar.DAY_OF_WEEK));
+												}
+											}
+											Kết quả:
+											YEAR: 2017
+											MONTH: 8
+											DAY: 11
+											DAY_OF_WEEK: 2
+	
+	--- Ví dụ về Calendar trong java - phương thức getTime()
+	
+											package vn.viettuts.date;													 
+											import java.util.Calendar;													 
+											public class CalendarExample3 {
+												public static void main(String[] args) {
+													Calendar calendar = Calendar.getInstance();
+													System.out.print("Date And Time: " + calendar.getTime());
+												}
+											}
+											Kết quả:
+											Date And Time: Mon Sep 11 09:50:21 ICT 2017
+											
+	--- Ví dụ về Calendar trong java - phương thức getMaximum()
+												
+											package vn.viettuts.date;														 
+											import java.util.Calendar;													 
+											public class CalendarExample4 {
+												public static void main(String[] args) {
+													Calendar calendar = Calendar.getInstance();
+													int maximum = calendar.getMaximum(Calendar.DAY_OF_WEEK);
+													System.out.println("Gia tri MAX cua so ngay trong tuan: " + maximum);
+													maximum = calendar.getMaximum(Calendar.WEEK_OF_YEAR);
+													System.out.println("Gia tri MAX cua so tuan trong nam: " + maximum);
+												}
+											}
+											Kết quả:
+											Gia tri MAX cua so ngay trong tuan: 7
+											Gia tri MAX cua so tuan trong nam: 53
+											
+	--- Ví dụ về Calendar trong java - phương thức getMinimum()
+	
+											package vn.viettuts.date;													 
+											import java.util.Calendar;													 
+											public class CalendarExample5 {
+												public static void main(String[] args) {
+													Calendar cal = Calendar.getInstance();
+													int minimum = cal.getMinimum(Calendar.DAY_OF_WEEK);
+													System.out.println("Gia tri MIN cua so ngay trong tuan: " + minimum);
+													maximum = cal.getMinimum(Calendar.WEEK_OF_YEAR);
+													System.out.println("Gia tri MIN cua so tuan trong nam: " + minimum);
+												}
+											}
+											Kết quả:
+											Gia tri MIN cua so ngay trong tuan: 1
+											Gia tri MIN cua so tuan trong nam: 1	

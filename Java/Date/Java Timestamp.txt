@@ -1,0 +1,124 @@
+Java Timestamp--Ngày và giờ trong Java:
+
+	Java Timestamp class
+		
+		Timestamp provides formatting and parsing operations to support JDBC escape syntax. It also adds the ability to hold the SQL TIMESTAMP fractional seconds value.
+	
+	Methods
+		
+		after()	
+	
+			Returns Boolean value true if this Timestamp object comes later than given Timestamp object.
+		
+		before()	
+	
+			Returns Boolean value true if this Timestamp object comes earlier than given Timestamp object.
+		
+		compareTo()	
+	
+			Compares this Timestamp object to the given Timestamp object or to the given date object
+		
+		equals()	
+	
+			Returns a Boolean value true if this Timestamp object is equal specified object or to the given Timestamp object .
+		
+		from()	
+	
+			Obtains an instance of Timestamp from an Instant object
+		
+		getNanos()	
+	
+			Fetches the Timestamp object's nanos value
+		
+		getTime()	
+	
+			Returns the number of milliseconds since January 1, 1970, 00:00:00 GMT
+		
+		hashCode()	
+	
+			Returns a hash code value for this object
+		
+		setNanos()	
+	
+			Sets a nanos value for the specified integer value
+		
+		setTime()	
+	
+			Sets this class's object to indicate a point in time (milliseconds) after January 1, 1970 00:00:00 GMT
+		
+		toInstant()	
+	
+			Coverts the Timespan object to an Instant which represents the same point on the time-line as this Timestamp
+		
+		toLocalDateTime()	
+	
+			Converts this Timespan object to a LocalDateTime which represents the same date-time value as this Timestamp
+		
+		toString()	
+	
+			Converts the Timespan object in JDBC timestamp escape format
+		
+		valueOf()	
+	
+			Converts the string object to Timestamp value or obtains an instance of Timestamp from a LocalDateTime object.
+	
+	Example 1
+	
+		import java.sql.Timestamp;  
+		import java.time.Instant;  
+		public class JavaTimestampFromExample_1 {  
+			public static void main(String[] args) {  
+			   Timestamp instant= Timestamp.from(Instant.now());  // 2018-09-06 12:42:53.885. from() method Obtains an instance of Timestamp from an Instant object  
+				String str="2018-09-01 09:01:15";  
+				Timestamp timestamp= Timestamp.valueOf(str);  // 2018-09-01 09:01:15.0. valueOf() method returns a Timestamp value corresponding to the given string  
+				Integer val=timestamp.getNanos(); // 0. getNanos() method gets the Timestamp obejct's nanos value  
+				Timestamp ts2 = Timestamp.valueOf("2018-09-01 09:01:16"); // true
+				System.out.println("4. Boolean value returned : "+timestamp.before(ts2)); // true. before() returns Boolean value true if this ts1 comes earlier than given ts2						
+			}  
+		}
+		
+	Example 2
+		
+		import java.sql.Timestamp;  
+		import java.time.Instant;  
+		public class JavaTimespanExample2 {  
+			public static void main(String[] args) {  
+				Timestamp ts1 = Timestamp.valueOf("2018-09-01 09:01:15"); // 2018-09-01 09:01:15.0
+				Long val=ts1.getTime(); // 1535772675000. getTime() method returns the number of milliseconds  
+				Integer val1=ts1.hashCode(); // -1825617187. hashCode() method returns the hash code for this object.  
+				ts1.setNanos(54647); // 2018-09-01 09:01:15.000054647. setNanos() method sets nanos value for the specified integer value.  
+				Instant instant = ts1.toInstant(); // 2018-09-01T03:31:15.000054647Z. toInstant() method returns an Instant which represents the same point on the time-line as this Timestamp  
+			}  
+		}
+		
+	Chuyển Date thành Timestamp và Timestamp thành Date
+		
+		- Date ở đây là class thuộc gói java.util (java.util.Date)
+		
+		- Timestamp là class thuộc gói java.sql (java.sql.Timestamp)
+		
+		- Sở dĩ có khi bạn gặp trường hợp này là vì MySQL và một số Hệ quản trị CSDL khác có một kiểu dữ liệu là Timestamp, muốn insert được dữ liệu vào CSDL cho các trường có kiểu dữ liệu này thì trong Java
+		bạn cũng phải khai báo kiểu dữ liệu Timestamp cho các dữ liệu đó. Mà mặt khác, việc thao tác với dữ liệu kiểu Date dễ dàng hơn nhiều so với Timestamp nên nhiều lúc đang làm việc với Date nhưng lại
+		chuyển về Timestamp và ngược lại.
+		
+		Ví dụ
+		
+			package com.ngockhuong;
+			import java.sql.Timestamp;
+			import java.util.Date;
+			public class DateToTimestamp {
+				public static void main(String[] args) {
+					// lấy ngày giờ hiện tại
+					Date now = new Date();
+					System.out.println(now);							
+					// chuyển Date sang Timestamp
+					Timestamp timestamp = new Timestamp(now.getTime());
+					System.out.println(timestamp);								
+					// chuyển Timestamp sang Date 
+					Date last = new Date(timestamp.getTime());
+					System.out.println(last);
+				}
+			}
+			Tue Feb 14 01:53:24 ICT 2017
+			2017-02-14 01:53:24.981
+			Tue Feb 14 01:53:24 ICT 2017

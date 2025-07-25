@@ -1,0 +1,142 @@
+Modifiers--JAVA:
+	Access Modifiers:
+										Controls the access level
+		classes:
+													public:
+																		The class is accessible by any other class
+																		
+																		public class Main {
+																		  public static void main(String[] args) {
+																			System.out.println("Hello World"); // Hello World
+																		  }
+																		}
+													default:
+																		The class is only accessible by classes in the same package. This is used when you don't specify a modifier.
+																		
+																		class MyClass {
+																		  public static void main(String[] args) {
+																			System.out.println("Hello World"); // Hello World
+																		  }
+																		}
+		attributes, methods and constructors:
+													public:				
+																		The code is accessible for all classes
+											
+																		public class Main {
+																		  public String fname = "John";
+																		  public String lname = "Doe";
+																		  public String email = "john@doe.com";
+																		  public int age = 24;
+																		}
+													private:
+																		The code is only accessible within the declared class
+																		
+																		public class Main {
+																		  private String fname = "John";
+																		  private String lname = "Doe";
+																		  private String email = "john@doe.com";
+																		  private int age = 24;																			  
+																		  public static void main(String[] args) {
+																			Main myObj = new Main();
+																			System.out.println("Name: " + myObj.fname + " " + myObj.lname); // Name: John Doe
+																			System.out.println("Email: " + myObj.email); // Email: john@doe.com
+																			System.out.println("Age: " + myObj.age); // Age: 24
+																		  }
+																		}
+													default:
+																		The code is only accessible in the same package. This is used when you don't specify a modifier.
+																		
+																		class Person {
+																		  String fname = "John";
+																		  String lname = "Doe";
+																		  String email = "john@doe.com";
+																		  int age = 24;																		  
+																		  public static void main(String[] args) {
+																			Person myObj = new Person();
+																			System.out.println("Name: " + myObj.fname + " " + myObj.lname);
+																			System.out.println("Email: " + myObj.email);
+																			System.out.println("Age: " + myObj.age);
+																		  }
+																		}
+													protected:
+																		The code is accessible in the same package and subclasses.
+																		
+																		class Person {
+																		  protected String fname = "John";
+																		  protected String lname = "Doe";
+																		  protected String email = "john@doe.com";
+																		  protected int age = 24;
+																		}
+																		class Student extends Person {
+																		  private int graduationYear = 2018;
+																		  public static void main(String[] args) {
+																			Student myObj = new Student();
+																			System.out.println("Name: " + myObj.fname + " " + myObj.lname); // Name: John Doe
+																			System.out.println("Email: " + myObj.email); // Email: john@doe.com
+																			System.out.println("Age: " + myObj.age); // Age: 24
+																			System.out.println("Graduation Year: " + myObj.graduationYear); // Graduation Year: 2018
+																		  }
+																		}
+	Non-Access Modifiers:
+		classes:
+													final:
+																		The class cannot be inherited by other classes
+																		
+																		final class Vehicle {
+																		  protected String brand = "Ford";
+																		  public void honk() {
+																			System.out.println("Tuut, tuut!");
+																		  }
+																		}
+																		class Main extends Vehicle {
+																		  private String modelName = "Mustang";
+																		  public static void main(String[] args) {
+																			Main myFastCar = new Main();
+																			myFastCar.honk();
+																			System.out.println(myFastCar.brand + " " + myFastCar.modelName); // lỗi, cannot inherit from final Vehicle
+																		  }
+																		}
+													abstract:
+																		The class cannot be used to create objects (To access an abstract class, it must be inherited from another class.)
+																		
+																		// abstract class
+																		abstract class Main {
+																		  public String fname = "John";
+																		  public String lname = "Doe";
+																		  public String email = "john@doe.com";
+																		  public int age = 24;
+																		  public abstract void study(); // abstract method 
+																		}
+																		// Subclass
+																		class Student extends Main {
+																		  public int graduationYear = 2018;
+																		  public void study() {
+																			System.out.println("Studying all day long");
+																		  }
+																		}
+																		class Second {
+																		  public static void main(String[] args) {
+																			// create an object of the Student class (which inherits attributes and methods from Main)
+																			Student myObj = new Student(); 																			
+																			System.out.println("Name: " + myObj.fname + " " + myObj.lname); // Name: John Doe
+																			System.out.println("Email: " + myObj.email); // Email: john@doe.com
+																			System.out.println("Age: " + myObj.age); // Age: 24
+																			System.out.println("Graduation Year: " + myObj.graduationYear); // Graduation Year: 2018
+																			myObj.study(); // call abstract method. Studying all day long
+																		  }
+																		}
+		attributes and methods:
+													
+													final:
+																		Attributes and methods cannot be overridden/modified
+													static:
+																		Attributes and methods belongs to the class, rather than an object
+													abstract:
+																		Can only be used in an abstract class, and can only be used on methods. The method does not have a body, for example
+																		abstract void run();. The body is provided by the subclass (inherited from).
+													transient
+																		Attributes and methods are skipped when serializing the object containing them
+													synchronized:
+																		Methods can only be accessed by one thread at a time
+													volatile:
+																		The value of an attribute is not cached thread-locally, and is always read from the "main memory"

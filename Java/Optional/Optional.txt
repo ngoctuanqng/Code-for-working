@@ -1,0 +1,34 @@
+	Optional--JAVA:				Optional<String> optional = Optional.of("Hello");
+		Optional.empty:			Optional<String> emptyOptional = Optional.empty();
+		Optional.of:			Optional<String> ofOptional = Optional.of("Hello");
+		Optional.ofNullable:	
+								String nullableValue = null;
+								Optional<String> nullableOptional = Optional.ofNullable(nullableValue); // nullableValue là null
+																										// nên nullableOptional sẽ là một Optional không chứa giá trị nào (empty).
+		isPresent:				
+								Optional<String> presentOptional = Optional.of("World");
+								if (presentOptional.isPresent()) {
+									System.out.println("Value is present: " + presentOptional.get()); // Value is present: World
+								}
+		ifPresent:			
+								Optional<String> presentOptional = Optional.of("World");
+								presentOptional.ifPresent(value -> System.out.println("Value is present: " + value)); // Value is present: World
+		orElse:					String result = optional.orElse("Default Value"); // Hello
+		orElseGet:				String resultSupplier = optional.orElseGet(() -> "Default Value from Supplier"); // Hello. Phương thức này hoạt động tương tự như orElse(), nhưng thay vì trả về một giá
+																												 // trị mặc định ngay lập tức, nó sẽ trả về kết quả của một Supplier nếu Optional trống.
+		orElseThrow:			
+								try {
+									String resultThrow = optional.orElseThrow(() -> new RuntimeException("No value present")); // Hello. Phương thức này trả về giá trị bên trong Optional nếu tồn tại.
+																															   // Nếu Optional trống, nó sẽ ném ra một ngoại lệ mà bạn cung cấp.
+								} catch (Exception e) {
+									System.out.println("Exception caught: " + e.getMessage());
+								}
+		map:					Optional<String> mappedOptional = optional.map(s -> s + " World"); // Hello World
+		filter:					Optional<String> filteredOptional = optional.filter(s -> s.length() > 5);
+		get:					
+								try {
+									String value = optional.get(); // Phương thức này trả về giá trị bên trong Optional nếu tồn tại. Nếu Optional trống, nó sẽ ném ra một NoSuchElementException.
+									System.out.println("Value is present: " + value); // Hello
+								} catch (Exception e) {
+									System.out.println("Exception caught: " + e.getMessage());
+								}

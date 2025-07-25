@@ -1,0 +1,353 @@
+JsonNode Working with Tree Model Nodes in Jackson--JAVA:
+
+	We’ll use JsonNode for various conversions as well as adding, modifying, and removing nodes.
+	
+	Creating a Node
+	
+		The first step in the creation of a node is to instantiate an ObjectMapper object by using the default constructor:
+			
+			ObjectMapper mapper = new ObjectMapper();
+		
+		Since the creation of an ObjectMapper object is expensive, it’s recommended that we reuse the same one for multiple operations.
+		
+		Next, we have three different ways to create a tree node once we have our ObjectMapper.
+		
+		Construct a Node from Scratch
+			
+			This is the most common way to create a node out of nothing:
+				
+				JsonNode node = mapper.createObjectNode();
+			
+			Alternatively, we can also create a node via the JsonNodeFactory:
+				
+				JsonNode node = JsonNodeFactory.instance.objectNode();
+		
+		Parse from a JSON Source
+			
+			This method is well covered in the Jackson – Marshall String to JsonNode article. Please refer to it for more info.
+		
+		Convert from an Object
+			
+			A node may be converted from a Java object by calling the valueToTree(Object fromValue) method on the ObjectMapper:
+				
+				JsonNode node = mapper.valueToTree(fromValue);
+			
+			The convertValue API is also helpful here:
+				
+				JsonNode node = mapper.convertValue(fromValue, JsonNode.class);
+			
+			Let’s see how it works in practice.
+			
+			Assume we have a class named NodeBean:
+				
+				public class NodeBean {
+					private int id;
+					private String name;
+					public NodeBean() {
+					}
+					public NodeBean(int id, String name) {
+						this.id = id;
+						this.name = name;
+					}
+					// standard getters and setters
+				}
+				
+			Let’s write a test that makes sure that the conversion happens correctly:
+				
+				@Test
+				public void givenAnObject_whenConvertingIntoNode_thenCorrect() {
+					NodeBean fromValue = new NodeBean(2016, "baeldung.com");
+
+					JsonNode node = mapper.valueToTree(fromValue);
+
+					assertEquals(2016, node.get("id").intValue());
+					assertEquals("baeldung.com", node.get("name").textValue());
+				}
+				
+	Transforming a Node
+	
+		Write out as JSON
+		
+			This is the basic method to transform a tree node into a JSON string, where the destination can be a File, an OutputStream or a Writer:
+				
+				mapper.writeValue(destination, node);
+			
+			By reusing the class NodeBean declared in Section 2.3, a test makes sure this method works as expected:
+				
+				final String pathToTestFile = "node_to_json_test.json";
+				@Test
+				public void givenANode_whenModifyingIt_thenCorrect() throws IOException {
+					String newString = "{\"nick\": \"cowtowncoder\"}";
+					JsonNode newNode = mapper.readTree(newString);
+					JsonNode rootNode = ExampleStructure.getExampleRoot();
+					((ObjectNode) rootNode).set("name", newNode);
+					assertFalse(rootNode.path("name").path("nick").isMissingNode());
+					assertEquals("cowtowncoder", rootNode.path("name").path("nick").textValue());
+				}
+				
+		Convert to an Object
+			
+			The most convenient way to convert a JsonNode into a Java object is the treeToValue API:
+				
+				NodeBean toValue = mapper.treeToValue(node, NodeBean.class);
+			
+			This is functionally equivalent to the following:
+				
+				NodeBean toValue = mapper.convertValue(node, NodeBean.class)
+			
+			We can also do that through a token stream:
+				
+				JsonParser parser = mapper.treeAsTokens(node);	
+				NodeBean toValue = mapper.readValue(parser, NodeBean.class);
+			
+			Finally, let’s implement a test that verifies the conversion process:
+				
+				@Test
+				public void givenANode_whenConvertingIntoAnObject_thenCorrect()
+				  throws JsonProcessingException {
+					JsonNode node = mapper.createObjectNode();
+					((ObjectNode) node).put("id", 2016);
+					((ObjectNode) node).put("name", "baeldung.com");
+					NodeBean toValue = mapper.treeToValue(node, NodeBean.class);
+					assertEquals(2016, toValue.getId());
+					assertEquals("baeldung.com", toValue.getName());
+				}
+				
+	Manipulating Tree Nodes
+		
+		We’ll use the following JSON elements, contained in a file named example.json, as a base structure for actions to be taken on:
+			
+			{
+				"name": 
+					{
+						"first": "Tatu",
+						"last": "Saloranta"
+					},
+
+				"title": "Jackson founder",
+				"company": "FasterXML"
+			}
+			
+		This JSON file, located on the classpath, is parsed into a model tree:
+			
+			public class ExampleStructure {
+				private static ObjectMapper mapper = new ObjectMapper();
+				static JsonNode getExampleRoot() throws IOException {
+					InputStream exampleInput = 
+					  ExampleStructure.class.getClassLoader()
+					  .getResourceAsStream("example.json");				
+					JsonNode rootNode = mapper.readTree(exampleInput);
+					return rootNode;
+				}
+			}
+			
+		Note that the root of the tree will be used when illustrating operations on nodes in the following subsections.
+		
+		Locating a Node
+		
+			Before working on any node, the first thing we need to do is to locate and assign it to a variable.
+			
+			If we know the path to the node beforehand, that’s pretty easy to do.
+			
+			Say we want a node named last, which is under the name node:
+				
+				JsonNode locatedNode = rootNode.path("name").path("last");
+			
+			Alternatively, the get or with APIs can also be used instead of path.
+
+			If the path isn’t known, the search will, of course, become more complex and iterative.
+
+			We can see an example of iterating over all the nodes in Section 5 – Iterating Over the Nodes.
+		
+		Adding a New Node
+			
+			A node can be added as a child of another node:
+				
+				ObjectNode newNode = ((ObjectNode) locatedNode).put(fieldName, value);
+			
+			Many other similar methods are also available, including putArray, putObject, PutPOJO, putRawValue and putNull.
+			
+			Finally, let’s have a look at an example where we add an entire structure to the root node of the tree:
+				
+				"address":
+				{
+					"city": "Seattle",
+					"state": "Washington",
+					"country": "United States"
+				}
+				
+			Here’s the full test going through all of these operations and verifying the results:
+				
+				@Test
+				public void givenANode_whenAddingIntoATree_thenCorrect() throws IOException {
+					JsonNode rootNode = ExampleStructure.getExampleRoot();
+					ObjectNode addedNode = ((ObjectNode) rootNode).putObject("address");
+					addedNode
+					  .put("city", "Seattle")
+					  .put("state", "Washington")
+					  .put("country", "United States");
+					assertFalse(rootNode.path("address").isMissingNode());
+					assertEquals("Seattle", rootNode.path("address").path("city").textValue());
+					assertEquals("Washington", rootNode.path("address").path("state").textValue());
+					assertEquals(
+					  "United States", rootNode.path("address").path("country").textValue();
+				}
+				
+			Editing a Node
+				
+				An ObjectNode instance may be modified by invoking set(String fieldName, JsonNode value) method:
+					
+					JsonNode locatedNode = locatedNode.set(fieldName, value);
+				
+				Similar results might be achieved by using replace or setAll methods on objects of the same type.
+				
+				To verify that the method works as expected, we’ll change the value of the field name under root node from an object of first and last into another one consisting of only nick field in a test:
+					
+					@Test
+					public void givenANode_whenModifyingIt_thenCorrect() throws IOException {
+						String newString = "{\"nick\": \"cowtowncoder\"}";
+						JsonNode newNode = mapper.readTree(newString);
+						JsonNode rootNode = ExampleStructure.getExampleRoot();
+						((ObjectNode) rootNode).set("name", newNode);
+						assertFalse(rootNode.path("name").path("nick").isMissingNode());
+						assertEquals("cowtowncoder", rootNode.path("name").path("nick").textValue());
+					}
+					
+			Removing a Node
+			
+				A node can be removed by calling the remove(String fieldName) API on its parent node:
+					
+					JsonNode removedNode = locatedNode.remove(fieldName);
+				
+				In order to remove multiple nodes at once, we can invoke an overloaded method with the parameter of Collection<String> type, which returns the parent node instead of the one to be removed:
+					
+					ObjectNode locatedNode = locatedNode.remove(fieldNames);
+				
+				In the extreme case when we want to delete all subnodes of a given node, the removeAll API comes in handy.
+				
+				The following test will focus on the first method mentioned above, which is the most common scenario:
+					
+					@Test
+					public void givenANode_whenRemovingFromATree_thenCorrect() throws IOException {
+						JsonNode rootNode = ExampleStructure.getExampleRoot();
+						((ObjectNode) rootNode).remove("company");
+						assertTrue(rootNode.path("company").isMissingNode());
+					}
+					
+		Ví dụ:
+		
+			package com.poscdx.odc.ampro015.domain.entity;
+			import com.fasterxml.jackson.databind.JsonNode;
+			import com.fasterxml.jackson.databind.ObjectMapper;
+			import com.google.gson.JsonArray;
+			import com.google.gson.JsonObject;
+			import com.google.gson.JsonParser;
+			import com.poscdx.odc.ampro015.domain.enums.LogAction;
+			import com.poscdx.odc.ampro015.domain.enums.EntityType;
+			import com.poscoict.base.share.util.json.JsonUtil;
+			import lombok.AllArgsConstructor;
+			import lombok.Builder;
+			import lombok.Getter;
+			import lombok.Setter;
+			import java.sql.Timestamp;
+			import java.time.Instant;
+			import java.util.*;
+			@Getter
+			@Setter
+			@Builder
+			@AllArgsConstructor
+			public class Pme00Log {
+				private int id;
+				private String empId;
+				private Timestamp logTime;
+				private String type;
+				private String action;
+				private String targetId;
+				private String targetIdSub;
+				private String content;
+				private String detail;
+				private EntityType entityType;
+				private LogAction logAction;
+				private String empName;
+				private String avatar;
+				private String oldDataJSON;
+				private String newDataJSON;
+				public Pme00Log() {
+					this.logTime = Timestamp.from(Instant.now());
+				}
+				public void setContent() {
+					this.content = logAction.getMessage() + " " + entityType.getMessage() + " ID: " + this.targetId;
+					if (this.targetIdSub != null) {
+						this.content += "-" + this.targetIdSub;
+					}
+				}
+				public void setLogAction(LogAction logAction) {
+					this.logAction = logAction;
+					this.action = logAction.getValue();
+				}
+				public void setEntityType(EntityType entityType) {
+					this.entityType = entityType;
+					this.type = entityType.getValue();
+				}
+				public void setOldDataJSON(String oldDataJSON) {
+					this.oldDataJSON = oldDataJSON;
+					if (this.oldDataJSON != null && this.newDataJSON != null) getDetailFromData();
+				}
+				public void setNewDataJSON(String newDataJSON) {
+					this.newDataJSON = newDataJSON;
+					if (this.oldDataJSON != null && this.newDataJSON != null) getDetailFromData();
+				}
+				private void getDetailFromData() {
+					JsonObject detailObject = new JsonObject();
+					detailObject.add("oldData", JsonParser.parseString(this.oldDataJSON));
+					detailObject.add("newData", JsonParser.parseString(this.newDataJSON));
+					ObjectMapper mapper = new ObjectMapper();
+					try {
+						JsonNode node1 = mapper.readTree(this.oldDataJSON);
+						JsonNode node2 = mapper.readTree(this.newDataJSON);
+						Map<String, Object> changedMap = getChangeMap(node1, node2);
+						this.detail = changedMap.toString();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				private Map<String, Object> getChangeMap(JsonNode oldJSON, JsonNode newJSON) {
+					Map<String, Object> oldDataMap = new HashMap<>();
+					Map<String, Object> newDataMap = new HashMap<>();
+					List<String> changedList = new ArrayList<>();
+					Map<String, Object> result = new HashMap<>();
+					compareJsonObjects(oldJSON, newJSON, oldDataMap, newDataMap, changedList);
+					result.put("oldData", oldDataMap);
+					result.put("newData", newDataMap);
+					JsonArray detailArray = new JsonArray();
+					for (String item : changedList) {
+						detailArray.add(item);
+					}
+					result.put("changedList", detailArray);
+					return result;
+				}
+				private void compareJsonObjects(JsonNode oldJSON, JsonNode newJSON,
+												Map<String, Object> oldDataMap, Map<String, Object> newDataMap,
+												List<String> changedList) {
+					for (Iterator<String> it = oldJSON.fieldNames(); it.hasNext(); ) {
+						String fieldName = it.next();
+						JsonNode oldValue = oldJSON.get(fieldName);
+						JsonNode newValue = newJSON.get(fieldName);
+						if (newValue != null) {
+							if (oldValue.isObject() || newValue.isObject()) {
+								compareJsonObjects(oldValue, newValue, oldDataMap, newDataMap, changedList);
+							} else if (oldValue == null || !oldValue.equals(newValue)) {
+								changedList.add(fieldName);
+								oldDataMap.put(fieldName, oldValue);
+								newDataMap.put(fieldName, newValue);
+							}
+						}
+					}
+				}
+				public static Pme00Log fromJson(String json) {
+					return JsonUtil.fromJson(json, Pme00Log.class);
+				}
+				public String toJson() {
+					return JsonUtil.toJson(this);
+				}
+			}

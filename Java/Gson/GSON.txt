@@ -1,0 +1,842 @@
+GSON--JAVA:
+							- GSON là một thư viện mã nguồn mở được sử dụng trong Java để chuyển đổi các đối tượng Java thành định dạng JSON và ngược lại.
+							- Chuyển đổi đối tượng Java thành JSON (serialization).
+							- Chuyển đổi JSON thành đối tượng Java (deserialization).
+							- Hỗ trợ tùy chỉnh cấu hình và quy tắc chuyển đổi.
+							- Xử lý các kiểu dữ liệu đặc biệt như null, số nguyên, số thực, mảng, danh sách, v.v.
+							- Hỗ trợ cho các tính năng như trích xuất dữ liệu, thực thi ghi chú.
+							- toJson() : phương thức dùng để chuyển Java Object sang chuỗi Json (quá trình này được gọi là Serialization). Phương thức này có 1 đối số là đối tượng cần chuyển sang chuỗi Json.
+							- fromJson() : phương thức dùng để chuyển chuỗi Json sang Java Object (quá trình này được gọi là Deserialization). Phương thức này có 2 đối số, đối số đầu tiên là chuỗi json, đối
+							số thứ hai là kiểu dữ liệu Java Object ứng với chuỗi json.
+
+							<dependencies>  
+							 <dependency>
+								 <groupId>com.google.code.gson</groupId>
+								 <artifactId>gson</artifactId>
+								 <version>2.8.5</version>
+								 <scope>compile</scope>
+							 </dependency>
+							</dependencies>
+																								
+							public class Address {
+								private String street;									
+								private String houseNumber;									
+								private String city;									
+								private String country;
+								public Address(String street, String houseNumber, String city, String country) {
+									this.street = street;
+									this.houseNumber = houseNumber;
+									this.city = city;
+									this.country = country;
+								}
+							}
+							public class NestedObject {
+								private String name;							
+								private String email;								
+								private int age;								
+								private boolean isDeveloper;								
+								private Address address;
+								public NestedObject(String name, String email, int age, boolean isDeveloper, Address address) {
+									this.name = name;
+									this.email = email;
+									this.age = age;
+									this.isDeveloper = isDeveloper;
+									this.address = address;
+								}
+							}
+							
+							{
+							  "userAddress": {
+								"city": "Da Nang",
+								"country": "Viet Nam",
+								"houseNumber": "tang 4 FHome",
+								"street": "ly thuong kiet"
+							  },
+							  "age": 22,
+							  "email": "anh@gmail.com",
+							  "isDeveloper": true,
+							  "name": "anh"
+							}
+							Gson gson = new Gson();
+							NestedObject nestedObject = new Gson().fromJson(json, NestedObject.class);
+							
+	Tại sao Gson ra đời--GSON Java:
+	
+								- Trước khi biết đến gson chắc các bạn đã từng Parse Json trong android bằng cách tạo ra các đối tượng JSONObject hoặc JSONArray. Nếu như đối tượng json của chúng ta khá phức tạp
+								thì công việc đó trở nên rất khó khăn, tốn thời gian và nhiều code hơn, khiến dự án ta phình lên một cách không cần thiết.
+								- May mắn cho chúng ta là Google đã biết đến điều đó và tạo ra một thư viện vô cùng mạnh mẽ trong việc chuyển đổi tự động từ 'Object' sang 'json' và ngược lại.
+	
+	Cài đặt thư viện Json--GSON Java:
+	
+								Chúng ta có những cách sau đây để cài đặt nó:
+								
+									Thứ nhất: Cách mình vẫn hay sử dụng nhất là sử dụng grandle đặt vào mục dependencies. implementation 'com.google.code.gson:gson:2.8.5
+									Thứ hai: Sử dụng Maven:
+									
+										<dependencies>  
+										 <dependency>
+											 <groupId>com.google.code.gson</groupId>
+											 <artifactId>gson</artifactId>
+											 <version>2.8.5</version>
+											 <scope>compile</scope>
+										 </dependency>
+										</dependencies>
+							
+	Gson làm được những gì?--GSON Java:
+	
+								- Chuyển đổi qua lại giữa Json và Java Object chưa bao giờ dễ đến thế
+								
+									Đầu tiên ta xem cách chuyển đổi từ Object sang Json trước nhé. Dữ liệu mình đang dùng chỉ là fake dưới local thôi nhé.
+									
+										public class User {  
+											String name;
+											String email;
+											int age;
+											boolean isDeveloper;										
+											public User(String name, String email, int age, boolean isDeveloper) {
+												this.name = name;
+												this.email = email;
+												this.age = age;
+												this.isDeveloper = isDeveloper;
+											}
+										}
+										
+									Tiếp theo thực hiện khởi tạo một đối tượng Gson và parse object của chúng ta thành json nào.
+										
+										User user = new User("Sun", "dong.bin@sun-asterisk.com", "4", true)
+										Gson gson = new Gson(); 
+										String userJson = gson.toJson(user);
+										
+									Và đây là kết quả sau khi mình đã format cho các bạn dễ nhìn :
+										
+										{
+										  "age": 4,
+										  "email": "dong.bin@sun-asterisk.com",
+										  "isDeveloper": true,
+										  "name": "Sun"
+										}
+										
+										Các bạn có thể thấy phần json kết quả trả về có gì đặc biệt không nào. Nó có { key : value } key là tên thuộc tính và value là phần giá trị mà ta khởi tạo ở trên. Ở đây là mình để mặc
+										định nhé các bạn. Mình biết điều bạn đang thắc mắc nhưng để qua phần dưới nhé.
+										
+								- Tiếp theo ta tìm hiểu cách cách chuyển đổi từ Json sang Object như thế nào nhé !
+								- Dấu gạch chéo ngược (\) trong chuỗi Java (hoặc các ngôn ngữ lập trình tương tự) được sử dụng như một ký tự thoát (escape character). Nó cho phép bạn bao gồm các ký tự
+								đặc biệt trong chuỗi, mà nếu không, chúng có thể bị hiểu sai hoặc không được chấp nhận.
+								
+											
+											Ta có đoạn json:
+											
+												String json = ""{\"age\":4,\"email\":\"dong.bin@sun-asterisk.com\"," // dấu \" được sử dụng để thể hiện dấu " trong chuỗi
+													+ "\"isDeveloper\":true,\"name\":\"Sun\"}""
+													
+											Nào tương tự bước trên cùng tạo một đối tượng Gson và sử dụng phương thức fromJson để convert lại đối tượng của ta nào.
+											
+												Gson gson = new Gson();
+												User user = gson.fromJson(json, User.class); // mAge = 4. mEmail = dong.bin@sun-asterisk.com. mIsDeveloper = true. mName = "Sun"
+									
+	Đối tượng lồng nhau thì làm thế nào ?--GSON Java:
+	
+								Ta có một lớp Address như bên dưới:
+								
+									public class Address {
+										private String street;								
+										private String houseNumber;									
+										private String city;								
+										private String country;
+										public Address(String street, String houseNumber, String city, String country) {
+											this.street = street;
+											this.houseNumber = houseNumber;
+											this.city = city;
+											this.country = country;
+										}
+									}
+								
+									public class NestedObject {
+										private String name;							
+										private String email;									
+										private int age;									
+										private boolean isDeveloper;								
+										private Address address;
+										public NestedObject(String name, String email, int age, boolean isDeveloper, Address address) {
+											this.name = name;
+											this.email = email;
+											this.age = age;
+											this.isDeveloper = isDeveloper;
+											this.address = address;
+										}
+									}
+																
+								Bắt đầu thực hiện nào!!!
+								
+									Address address = new Address("ly thuong kiet", "tang 4 FHome", "Da Nang", "Viet Nam");
+									NestedObject nestedObject = new NestedObject("anh", "anh@gmail.com", 22, true, address);
+									String result = new Gson().toJson(nestedObject);
+									
+								- Bạn khoan hãy nhìn kết quả và hãy tự tưởng tượng thử nào !  Ở phần trên chúng ta đã thấy kết quả là nó sẽ parse nguyên một đối tượng sang json vậy thì bây giờ có thêm một đối tượng
+								bên trong sẽ như thế nào? Và đây:
+								- Khi Gson gặp khóa "userAddress" trong JSON, nó sẽ tìm một trường trong lớp NestedObject có tên userAddress và có kiểu Address. Vì vậy, nó sẽ tự động tạo một đối tượng Address và
+								ánh xạ các giá trị của userAddress từ JSON vào đối tượng này.
+								
+									{
+									  "userAddress": {
+										"city": "Da Nang",
+										"country": "Viet Nam",
+										"houseNumber": "tang 4 FHome",
+										"street": "ly thuong kiet"
+									  },
+									  "age": 22,
+									  "email": "anh@gmail.com",
+									  "isDeveloper": true,
+									  "name": "anh"
+									}
+									
+								Phần chuyển từ json trở lại đối tượng không khác gì phần trước các bạn tự kiểm tra nhé :
+								
+									Gson gson = new Gson();
+									NestedObject nestedObject = new Gson().fromJson(json, NestedObject.class);
+							
+	Chuyển đổi qua lại của Array và List các Object--GSON Java:
+	
+								- Trong java có nhiều cách để lưu trữ kiểu dữ liệu danh sách. Nhưng ở đây chúng ta đề cập đến 2 cách đó là Array và List. Mỗi cái sẽ có sự khác nhau riêng trong việc parse
+								qua json. Trong định dạng của json thì nó không có khái niệm array và list. Vậy chỉ có sự khác biệt nằm ở phía java. Vậy bây giờ chúng ta hãy đi so sánh chúng qua một vài ví dụ
+								bên dưới nhé. Chuyển đổi đối tượng sang json Cả array và list đều tương tự như nhau nhé.
+								
+									Tạo một lớp Restaurant với một List các đối tượng MenuItem
+									
+										public class MenuItem {
+											private String description;
+											private float price;
+											public MenuItem(String description, float price) {
+												this.description = description;
+												this.price = price;
+											}
+										}
+										public class Restaurant {
+											private String name;
+											private List<MenuItem> menuItems;
+											public Restaurant(String name, List<MenuItem> menuItems) {
+												this.name = name;
+												this.menuItems = menuItems;
+											}
+										}
+										
+										List<MenuItem> menuItems = new ArrayList<>();
+										menuItems.add(new MenuItem("egg", 12.5f));
+										menuItems.add(new MenuItem("chicken", 2.5f));
+										menuItems.add(new MenuItem("vegetable", 7.5f));
+										menuItems.add(new MenuItem("pig", 11.55f));
+										Restaurant menu = new Restaurant("VN Food", menuItems);
+										String json = new Gson().toJson(menu, Restaurant.class);
+									
+									Xem kết quả nào
+									
+										{
+										  "menu": [
+											{
+											  "description": "egg",
+											  "price": 12.5
+											},
+											{
+											  "description": "chicken",
+											  "price": 2.5
+											},
+											{
+											  "description": "vegetable",
+											  "price": 7.5
+											},
+											{
+											  "description": "pig",
+											  "price": 11.55
+											}
+										  ],
+										  "name": "VN Food"
+										}
+										Thứ tự thuộc tính nó sắp xếp theo thứ tự bảng chữ cái nhé các bạn.
+								
+								Chuyển đổi json sang đối tượng
+								
+									Ví dụ có một file json như thế này:
+									
+										[
+										  {
+											"name": "Hoa Hong",
+											"count": 1
+										  },
+										  {
+											"name": "Hoa Lan",
+											"count": 3
+										  },
+										  {
+											"name": "Hoa Mai",
+											"count": 2
+										  }
+										]
+										
+									Ta có một class tương ứng với json như sau:
+										
+										public class Flower {
+											@SerializedName("name")
+											private String mName;
+											@SerializedName("count")
+											private int mCount;
+										}
+										
+									Trường hợp 1: Ta muốn trả về 1 mảng các đối tượng.
+									
+										// file json mình đã để bên trên
+										Flower[] flowers = new Gson().fromJson(json, (Type) Flower[].class);
+										
+										Type là một giao diện (interface) trong Java thuộc gói java.lang.reflect. Nó là một giao diện chung cho các đối tượng mô tả các kiểu (type) trong Java, bao gồm các
+										kiểu đơn giản (primitive), các kiểu tham chiếu (reference), và các kiểu generic (tổng quát hóa).
+										Trong trường hợp này, (Type) Flower[].class là một cách để ép kiểu (cast) đối tượng Class<Flower[]> thành một đối tượng Type. Điều này cần thiết vì phương
+										thức fromJson(String json, Type typeOfT) của Gson yêu cầu đối số thứ hai phải là một Type, không phải là một Class.
+										
+									Trường hợp 2: Ta muốn trả về 1 list các đối tượng Chúng ta không thể trực tiếp parse ra list các đối tượng từ json. Để cho Gson hiểu cấu trúc List đó bạn phải chỉ
+									ra kiểu của nó. Thật là may mắn. Gson có một lớp TypeToken để giúp chúng ta tìm đúng kiểu của dữ liệu.
+									
+										// file json tương tự như trên nhé các bạn.
+										Gson gson = new Gson();
+										Type flowerList = new TypeToken<ArrayList<Flower>>(){}.getType();
+										List<Flower> founderList = gson.fromJson(json, flowerList);
+							
+	Chuyển đổi giá trị null thì sao nhỉ?--GSON Java:
+	
+								User user = new User(null, "mva@gmail.com", 22, true);
+								String json = new Gson().toJson(user); // ??
+								
+								Đối với những thuộc tính có giá trị null thì Gson sẽ bỏ qua. Kết quả:
+									
+									{"age":22,"email":"mva@gmail.com","isDeveloper":true}
+									
+								Thế json nếu như không có thuộc tính giống như đối tượng thì sẽ như thế nào
+								
+									Câu trả lời là nó sẽ về giá trị mặc định theo từng kiểu dữ liệu. String là null, int là 0...
+									
+	Thay đổi tên các trường cho phù hợp với json--GSON Java:
+	
+								Ở các ví dụ trên mình đã để key của các field trong json là tên biến của lớp luôn.
+								
+								Điều đó thì rất bất tiện
+								
+									Thứ nhất: về Code Style sẽ không đúng chuẩn
+									Thứ hai: khi chúng ta vào dự án thực tế thì json sẽ phụ thuộc từ phía server. Mà chúng ta không thể nào đặt tên giống hoàn toàn theo nó được. Để thực hiện điều đó ta sử
+									dụng các chú thích @SerializedName để định nghĩa tên trường cho nó. Quay lại với ví dụ User, thực hiện một số thay đổi nhé các bạn.
+									
+									private String name;
+									//replace by
+									@SerializedName(value = "name")
+									private String mName;
+								
+								Ở đây mình có một trường hợp phòng hờ cho các bạn, nếu như phía API vì một lý do nào đó cùng trả về đối tượng đó nhưng tên field của thuộc tính có chút thay đổi để phù hợp
+								về mặt ngữ nghĩa của phía Backend. Thì phía chúng ta không thể nào lấy được giá trị đó phải không nào (phần 3.4) mình có đề cập tới vấn đề này rồi nhé.
+								Nhắc lại là nó sẽ trả về thuộc tính của đối tượng là null nếu như không có field trùng tên với @SerializedName() mình đã đặt nhé.
+								
+								Cách giải quyết là Gson hỗ trợ cho ta một thuộc tính thay thế alternate
+									
+									@SerializedName(value = "name", alternate = "other_name")
+									
+	Cách bỏ qua sự chuyển đổi của các field--GSON Java:
+	
+								- Lại là một vấn đề hay nữa, chắc chắn một số bạn mới tìm hiểu khi đọc code của người khác sẽ thắc mắc từ khóa transient và @Expose là gì phải không? Thì đây chính là
+								từ khóa để giải quyết vấn đề nêu trên transient
+									
+									private boolean transient mIsDeveloper;
+								
+								- Sẽ không thể nào chuyển đổi qua lại giữa đối tượng và json đối với thuộc tính này của User nhé các bạn @Expose Tương tự như transient nhưng nó có sự tùy chỉnh nên rất
+								thuận tiện. Mình sẽ giải thích trong code bên dưới nhé
+									
+									@Expose() // Đây là kiểu mặc định và cho phép thực hiện cả hai sự chuyển đổi
+													// việc bạn thêm 2 tham số (serialize = true, deserialize = true) thì cũng như vậy
+													// và sẽ có lời nhắc từ IDE là hãy xóa đi
+									@SerializedName(value = "name", alternate = "other_name")
+									private String mName; 
+
+									@Expose(deserialize = false) // Chỉ cho phép chúng ta chuyển từ đối tượng sang json thôi nhé
+									@SerializedName("email")
+									private String mEmail;// equals serialize and not deserialize
+
+									@Expose(serialize = false, deserialize = false) // cái này y chang như transient các bạn ạ. :)
+									@SerializedName("age")
+									private int mAge;  // neither serialize nor deserialize
+
+									@Expose(serialize = false) // đoán xem nào
+									@SerializedName("isDeveloper")
+									private boolean mIsDeveloper; // not serialize
+									
+									- Chưa xong đâu các bạn ạ, nếu đã sử dụng @Expose thì phải nói cho Gson nó biết là mình dùng cái này nữa  Y chang như những ví dụ ở trên nhưng việc khởi tạo Gson
+									có khác một chút nhé.
+									
+									Gson gson = new Gson();
+									// thay thế bởi
+									Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+									GsonBuilder là một kiểu Design Patterns - Builder Pattern. Nó giúp khởi tạo một đối tượng Gson bằng cách gán giá trị cho từng thuộc tính của đối tượng.
+								
+	Tùy chỉnh đối tượng gson của chúng ta--GSON Java:
+	
+								- Có rất nhiều kiểu tùy chỉnh cho gson, khi các bạn kết hợp với retrofit thì việc tùy chỉnh sẽ sảy ra rất thường xuyên. Ở đây mình có một ví dụ nhỏ về tùy chỉnh:
+									
+									Gson gson = new GsonBuilder().serializeNulls().create();
+									
+								- Ở đây mình cũng khởi tạo một đối tượng Gson bằng builder như ở trên nhé. Các bạn đã biết là với những giá trị null thì mặc định Gson sẽ không chuyển đổi nhưng với một đối
+								tượng gson đã chuyển đổi như trên thì việc đó không còn đúng nữa nhé. Nó sẽ tạo ra field tương ứng với value bằng null đấy.
+								
+	Others--GSON Java:
+	
+								- Kiến thức về Gson thì rất là nhiều. Việc chúng ta đang học ở đây nhằm có thể thực hiện những việc thường gặp trong quá trình lập trình mà thôi nhé các bạn. Nếu trong một vài
+								trường hợp đặc biệt thì mình xin đề xuất các bạn thêm một vài phần nữa về Gson:
+									
+									Mappings of Map
+									Mappings of Set.
+									Gson with Lenient Vân vân và mây mây nữa nhé các bạn!
+									
+	Sử dụng Gson với Collection và Generic Type--GSON Java:
+	
+								package com.gpcoder.gson;						 
+								import java.lang.reflect.Type;
+								import java.util.ArrayList;
+								import java.util.List;							 
+								import com.google.gson.Gson;
+								import com.google.gson.GsonBuilder;
+								import com.google.gson.reflect.TypeToken;							 
+								public class CollectionExample2 {
+									public static void main(String[] args) {
+										// Gson gson = new Gson();
+										Gson gson = new GsonBuilder().setPrettyPrinting().create();
+										List<Person> persons = new ArrayList<Person>();
+										persons.add(new Person("GP Coder", "Viet Nam"));
+										persons.add(new Person("Vincent", "Canada"));							 
+										// Serialization
+										String json = gson.toJson(persons);  
+										System.out.println(json);							 
+										// Deserialization
+										Type collectionType = new TypeToken<List<Person>>(){}.getType();
+										List<Person> persons2 = gson.fromJson(json, collectionType);
+										// ==> persons2 is same as persons
+									}
+								}
+								
+								Kết quả thực thi chương trình trên:
+								
+									[
+									  {
+										"name": "GP Coder",
+										"location": "Viet Nam"
+									  },
+									  {
+										"name": "Vincent",
+										"location": "Canada"
+									  }
+									]
+									
+								Trong ví dụ trên tôi khởi tạo đối tượng Gson sử dụng phương thức GsonBuilder().setPrettyPrinting().create() để tạo chuỗi Json có format.
+								
+	Sử dụng Gson với Map--GSON Java:
+	
+								package com.gpcoder.gson;						 
+								import java.lang.reflect.Type;
+								import java.util.HashMap;
+								import java.util.Map;						 
+								import com.google.gson.Gson;
+								import com.google.gson.reflect.TypeToken;						 
+								public class MapExample {
+									public static void main(String[] args) {
+										Map<String, String> inputMap = new HashMap<String, String>();
+										inputMap.put("name", "GP Coder");
+										inputMap.put("site", "https://gpcoder.com");
+										System.out.println("Input Map: " + inputMap);									 
+										Gson gson = new Gson();
+										// Serialization
+										String json = gson.toJson(inputMap);
+										System.out.println("Json: " + json); // {"site":"https://gpcoder.com","name":"GP Coder"}							 
+										// Deserialization
+										Type mapType = new TypeToken<Map<String, Object>>(){}.getType();
+										Map<String, String> outputMap = gson.fromJson(json, mapType);
+										System.out.println("Output Map: " + outputMap);
+									}
+								}
+								
+	Chuyển đổi qua lại giữa JSON và Java Object--GSON Java:
+	
+		Chuyển đổi từ Object sang Json
+		
+			Ví dụ mình có class sau:
+			
+				public class Person {
+					private String name;
+					private int age;
+					private String address;
+					public Person(String name, int age, String address) {
+						this.name = name;
+						this.age = age;
+						this.address = address;
+					}
+					public String toString() {
+						return name + " - " + age + " - " + address;
+					}
+				}
+				
+			Tiếp theo để có thể sử dụng các phương thức của Gson ta cần tạo đối tượng Gson. Để chuyển đổi một object sang JSON sử dụng phương thức toJson()
+			
+				import com.google.gson.Gson;
+				public class Main {
+					public static void main(String[] args) {
+						//Tạo đối tượng Gson
+						Gson gson = new Gson();
+						Person person = new Person("Ngọc", 5, "Hà Giang");
+						//Chuyển đổi từ Object sang JSON
+						String result = gson.toJson(person);
+						System.out.println(result);
+					}
+				}
+				
+				Kết quả nhận được:
+					
+					{"name":"Ngọc","age":5,"address":"Hà Giang"}
+					
+		Chuyển đổi từ JSON thành Object
+		
+			Để chuyển đổi từ JSON sang Object ta cũng cần tạo đối tượng Gson và sử dụng phương thức fromJson() để chuyển đổi
+			
+				import com.google.gson.Gson;
+				public class Main {
+					public static void main(String[] args) {
+						//Tạo đối tượng Gson
+						Gson gson = new Gson();
+						//Chuyển đổi từ JSON sang Object
+						String json = "{\"name\":\"Linh\",\"age\":8,\"address\":\"Hà Nội\"}";
+						Person newPerson = gson.fromJson(json, Person.class);
+						System.out.println(newPerson);
+					}
+				}
+				
+				Kết quả:
+				
+					Linh - 8 - Hà Nội
+	
+	Chuyển đổi giữa JSON và mảng--GSON Java:
+	
+		Chuyển đổi từ JSON sang mảng
+		
+			Giả sử mình có một file JSON như sau:
+			
+				[{
+					"name": "Jimmy Buncom",
+					"age": 30,
+					"address": "Indonesia"
+					}, {
+					"name": "Lucille Pollastrone",
+					"age": 24,
+					"address": "Poland"
+					}, {
+					"name": "Hort Tall",
+					"age": 15,
+					"address": "Indonesia"
+					}, {
+					"name": "Ruprecht Plampeyn",
+					"age": 21,
+					"address": "China"
+					}, {
+					"name": "Erhard Liles",
+					"age": 26,
+					"address": "Dominican Republic"
+					}, {
+					"name": "Fremont Murrow",
+					"age": 20,
+					"address": "North Korea"
+				}]
+				
+				import com.google.gson.Gson;
+				import java.io.FileNotFoundException;
+				import java.io.FileReader;
+				public class Main {
+					public static void main(String[] args) {
+						//Tạo đối tượng Gson
+						Gson gson = new Gson();
+						//Chuyển đổi từ JSON sang mảng
+						Person[] persons = null;
+						try {
+							FileReader reader = new FileReader("person.json");
+							persons = gson.fromJson(reader, Person[].class);
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						}
+						for (Person p : persons){
+							System.out.println(p);
+						}
+					}
+				}
+				
+				Kết quả trả về:
+				
+					Jimmy Buncom - 30 - Indonesia
+					Lucille Pollastrone - 24 - Poland
+					Hort Tall - 15 - Indonesia
+					Ruprecht Plampeyn - 21 - China
+					Erhard Liles - 26 - Dominican Republic
+					
+		Chuyển đổi từ mảng sang JSON
+		
+			import com.google.gson.Gson;
+			public class Main {
+				public static void main(String[] args) {
+					//Tạo đối tượng Gson
+					Gson gson = new Gson();
+					//Chuyển đổi từ mảng sang JSON
+					Person arr[] = new Person[5];
+					arr[0] = new Person("John", 25, "American");
+					arr[1] = new Person("Chris", 30, "France");
+					arr[2] = new Person("Madeline", 19, "Colombia");
+					arr[3] = new Person("Anna", 21, "Russia");
+					arr[4] = new Person("Hoàng", 27, "Việt Nam");
+					String rs = gson.toJson(arr);
+					System.out.println(rs);
+				}
+			}
+			
+			Kết quả
+				[
+					{"name": "John","age": 25,"address": "American"},
+					{"name": "Chris","age": 30,"address": "France"},
+					{"name": "Madeline","age": 19,"address": "Colombia"},
+					{"name": "Anna","age": 21,"address": "Russia"},
+					{"name": "Hoàng","age": 27,"address": "Việt Nam"}
+				]
+	
+	Chuyển đổi qua lại giữa JSON và Collection--GSON Java:
+	
+		Với Collection mình sẽ sử dụng ArrayList để thực hiện ví dụ. Mình vẫn sử dụng file JSON ban nãy
+		
+		Chuyển đổi từ JSON sang ArrayList
+		
+			Để Gson hiểu được cấu trúc của ArrayList đó ta cần chỉ tới kiểu của nó. Thật may mắn khi Gson có một lớp để giúp ra tìm đúng kiểu dữ liệu đó là TypeToken
+				
+				import com.google.gson.Gson;
+				import com.google.gson.reflect.TypeToken;
+				import java.io.FileNotFoundException;
+				import java.io.FileReader;
+				import java.lang.reflect.Type;
+				import java.util.ArrayList;
+				public class Main {
+					public static void main(String[] args) {
+						//Tạo đối tượng Gson
+						Gson gson = new Gson();
+						//Chuyển đổi từ JSON sang ArrayList
+						ArrayList<Person> list = new ArrayList<>();
+						try {
+							FileReader reader = new FileReader("person.json");
+							Type type = new TypeToken<ArrayList<Person>>(){}.getType();
+							list = gson.fromJson(reader, type);
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						}
+						for(Person p : list){
+							System.out.println(p);
+						}
+					}
+				}
+				
+				Kết quả:
+				
+					Jimmy Buncom - 30 - Indonesia
+					Lucille Pollastrone - 24 - Poland
+					Hort Tall - 15 - Indonesia
+					Ruprecht Plampeyn - 21 - China
+					Erhard Liles - 26 - Dominican Republic
+					
+			Còn đối với chuyển đổi từ ArrayList sang JSON thì cũng chỉ cần thực hiện tương tự như với chuyển đổi từ mảng sang JSON		
+			
+	JsonElement--GSON Java:
+	
+					- JsonElement trong thư viện Gson (Google's Gson) là một interface cơ bản để biểu diễn một giá trị JSON. Nó là một phần của API của Gson và được sử dụng để tương tác với dữ liệu JSON.
+					
+					- JsonElement có các loại cụ thể sau:
+						JsonPrimitive: Đại diện cho một giá trị JSON nguyên thủy như số, boolean, hoặc string.
+						JsonObject: Đại diện cho một đối tượng JSON, bao gồm tập hợp các cặp key-value.
+						JsonArray: Đại diện cho một mảng JSON, bao gồm một tập hợp các giá trị.
+						JsonNull: Đại diện cho giá trị JSON null.
+						
+					- JsonElement cung cấp các phương thức để kiểm tra và truy cập loại của giá trị JSON, chẳng hạn như:
+						isJsonNull(): Kiểm tra nếu giá trị là null.
+						isJsonPrimitive(): Kiểm tra nếu giá trị là một JsonPrimitive.
+						isJsonObject(): Kiểm tra nếu giá trị là một JsonObject.
+						isJsonArray(): Kiểm tra nếu giá trị là một JsonArray.
+						getAsString(), getAsNumber(), getAsBoolean(): Truy cập giá trị của JsonPrimitive.
+						getAsJsonObject(), getAsJsonArray(): Lấy giá trị dưới dạng JsonObject hoặc JsonArray.
+						
+					- Ví dụ:
+					
+						Gson gson = new Gson();
+						JsonElement jsonElement = gson.fromJson("{\"name\":\"John\",\"age\":30}", JsonElement.class);
+						if (jsonElement.isJsonObject()) {
+							JsonObject jsonObject = jsonElement.getAsJsonObject();
+							String name = jsonObject.getAsJsonPrimitive("name").getAsString();
+							int age = jsonObject.getAsJsonPrimitive("age").getAsInt();
+							System.out.println("Name: " + name + ", Age: " + age);
+						}
+						
+	registerTypeAdapter--GSON Java:
+	
+		- Trong Spring, đặc biệt là khi sử dụng Spring Boot với Gson để xử lý JSON, bạn có thể tùy chỉnh cách mà dữ liệu JSON được chuyển đổi bằng cách sử dụng registerTypeAdapter từ thư
+		viện Gson. Điều này giúp bạn định nghĩa cách mà các đối tượng Java được chuyển đổi thành JSON và ngược lại, với sự kiểm soát chi tiết hơn về quá trình chuyển đổi.
+		- Tạo Adapter Tùy Chỉnh:
+		
+			Trước tiên, bạn cần tạo một adapter tùy chỉnh bằng cách kế thừa từ JsonSerializer hoặc JsonDeserializer (hoặc cả hai, tùy thuộc vào nhu cầu của bạn).
+			
+			import com.google.gson.JsonElement;
+			import com.google.gson.JsonPrimitive;
+			import com.google.gson.JsonSerializationContext;
+			import com.google.gson.JsonSerializer;
+			import java.text.SimpleDateFormat;
+			import java.util.Date;
+			public class DateSerializer implements JsonSerializer<Date> {
+				private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				@Override
+				public JsonElement serialize(Date date, Type typeOfSrc, JsonSerializationContext context) {
+					return new JsonPrimitive(dateFormat.format(date));
+				}
+			}
+			
+		- Cấu Hình Gson trong Spring Boot:
+		
+			Trong Spring Boot, bạn có thể cấu hình Gson bằng cách tạo một bean của Gson trong lớp cấu hình của ứng dụng. Dưới đây là cách bạn có thể làm điều đó.
+			
+			import com.google.gson.Gson;
+			import com.google.gson.GsonBuilder;
+			import org.springframework.context.annotation.Bean;
+			import org.springframework.context.annotation.Configuration;
+			@Configuration
+			public class GsonConfig {
+				@Bean
+				public Gson gson() {
+					GsonBuilder gsonBuilder = new GsonBuilder();
+					gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
+					return gsonBuilder.create();
+				}
+			}
+			
+		- Sử Dụng Gson Đã Cấu Hình:
+		
+			Khi bạn đã cấu hình Gson như trên, Spring Boot sẽ tự động sử dụng cấu hình Gson của bạn khi chuyển đổi giữa các đối tượng Java và JSON.
+			
+			import org.springframework.web.bind.annotation.GetMapping;
+			import org.springframework.web.bind.annotation.RequestMapping;
+			import org.springframework.web.bind.annotation.RestController;
+			import java.util.Date;
+			@RestController
+			@RequestMapping("/api")
+			public class MyController {
+				private final Gson gson;
+				public MyController(Gson gson) {
+					this.gson = gson;
+				}
+				@GetMapping("/date")
+				public String getDate() {
+					Date now = new Date();
+					return gson.toJson(now); // Sẽ sử dụng DateSerializer đã cấu hình
+				}
+			}
+			
+	GsonHttpMessageConverter--GSON Java:
+	
+		GsonHttpMessageConverter là một lớp trong Spring Framework, thuộc module spring-web và được sử dụng để chuyển đổi giữa các đối tượng Java và dữ liệu JSON trong
+		các ứng dụng web sử dụng Spring MVC.
+		Chuyển đổi Dữ liệu JSON: Đọc dữ liệu JSON từ yêu cầu HTTP và chuyển đổi nó thành các đối tượng Java, và ngược lại, chuyển đổi các đối tượng Java thành dữ liệu
+		JSON để trả về trong phản hồi HTTP.
+		Tích hợp Gson vào Spring MVC: Cung cấp cách dễ dàng để sử dụng Gson cho việc chuyển đổi JSON trong các ứng dụng Spring MVC, thay vì sử dụng Jackson (thư viện
+		chuyển đổi JSON mặc định của Spring).
+		
+		Cấu Hình GsonHttpMessageConverter:
+		
+			Thêm Dependencies:
+			
+				<dependency>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-web</artifactId>
+					<version>5.3.23</version> <!-- Phiên bản tương thích với Spring Framework -->
+				</dependency>
+				<dependency>
+					<groupId>com.google.code.gson</groupId>
+					<artifactId>gson</artifactId>
+					<version>2.8.9</version> <!-- Phiên bản của Gson -->
+				</dependency>
+				
+			Cấu Hình GsonHttpMessageConverter:
+			
+				import org.springframework.context.annotation.Configuration;
+				import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+				import org.springframework.http.converter.HttpMessageConverter;
+				import org.springframework.http.converter.json.GsonHttpMessageConverter;
+				import java.util.List;
+				import com.google.gson.Gson;
+				import com.google.gson.GsonBuilder;
+				@Configuration
+				public class WebConfig implements WebMvcConfigurer {
+					@Override
+					public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+						// Tạo một instance của Gson
+						Gson gson = new GsonBuilder()
+										.setPrettyPrinting()  // Tùy chọn định dạng JSON đẹp
+										.create();
+						// Tạo và cấu hình GsonHttpMessageConverter
+						GsonHttpMessageConverter gsonConverter = new GsonHttpMessageConverter();
+						gsonConverter.setGson(gson);
+						// Thêm GsonHttpMessageConverter vào danh sách converters
+						converters.add(gsonConverter);
+					}
+				}
+				
+			Sử Dụng GsonHttpMessageConverter Trong Controller:
+			
+				Khi bạn đã cấu hình GsonHttpMessageConverter, bạn có thể sử dụng các phương thức xử lý yêu cầu trong Spring MVC để nhận và trả về dữ liệu JSON.
+			
+				import org.springframework.web.bind.annotation.GetMapping;
+				import org.springframework.web.bind.annotation.RequestMapping;
+				import org.springframework.web.bind.annotation.RestController;
+				@RestController
+				@RequestMapping("/api")
+				public class ExampleController {
+					@GetMapping("/example")
+					public MyObject getExample() {
+						MyObject obj = new MyObject("example", 123);
+						return obj;
+					}
+				}
+				
+				public class MyObject {
+					private String name;
+					private int number;
+					// Constructor, Getters and Setters
+					public MyObject(String name, int number) {
+						this.name = name;
+						this.number = number;
+					}
+					public String getName() {
+						return name;
+					}
+					public void setName(String name) {
+						this.name = name;
+					}
+					public int getNumber() {
+						return number;
+					}
+					public void setNumber(int number) {
+						this.number = number;
+					}
+				}
+				
+			Ví dụ khác:
+			
+				package com.poscodx.odc.ampro015.config;
+				import com.poscoict.base.share.util.json.JsonUtil;
+				import org.springframework.context.annotation.Bean;
+				import org.springframework.context.annotation.Configuration;
+				import org.springframework.http.converter.json.GsonHttpMessageConverter;
+				@Configuration
+				public class GsonHttpMessageConverterConfiguration {
+					@Bean
+					public GsonHttpMessageConverter gsonHttpMessageConverter() {
+						GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
+						converter.setGson(JsonUtil.getGson());
+						return converter;
+					}
+				}

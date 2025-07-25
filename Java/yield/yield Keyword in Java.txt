@@ -1,0 +1,91 @@
+yield Keyword in Java--Java:
+
+	- We may often use a switch statement to convert from one value to another. In earlier versions of Java, this required us to either embed the switch in a
+	separate function and use the return statement from each case or it required us to assign a temporary variable from each case for use later in the function.
+	
+	- The yield Keyword
+		
+		The yield keyword lets us exit a switch expression by returning a value that becomes the value of the switch expression.
+		
+		This means we can assign the value of a switch expression to a variable.
+		
+		Lastly, by using yield in a switch expression, we get an implicit check that we’re covering our cases, which makes our code more robust.
+		
+		yield with Arrow Operator
+			
+			To start, let’s say we have the following enum and switch statement:
+				
+				public enum Number {
+					ONE, TWO, THREE, FOUR;
+				}
+
+				String message;
+				switch (number) {
+					case ONE:
+						message = "Got a 1";
+						break;
+					case TWO:
+						message = "Got a 2";
+						break;
+					default:
+						message = "More than 2";
+				}
+				
+			Let’s convert this to a switch expression and use the yield keyword along with the arrow operator:
+				
+				String message = switch (number) {
+					case ONE -> {
+						yield "Got a 1";
+					}
+					case TWO -> {
+						yield "Got a 2";
+					}
+					default -> {
+						yield "More than 2";
+					}
+				};
+				
+		yield with Colon Delimiter
+			
+			We can also create a switch expression using yield with the colon delimiter:
+				
+				String message = switch (number) {
+					case ONE:
+						yield "Got a 1";
+					case TWO:
+						yield "Got a 2";
+					default:
+						yield "More than 2";
+				};				
+				This code behaves the same as in the previous section. But the arrow operator is clearer and also less prone to forgetting yield (or break) statements.
+			
+			We should note that we can’t mix colon and arrow delimiters within the same switch expression.
+	
+	- Exhaustiveness
+		
+		Another nice feature of using the switch expression and yield is if we are missing case coverage, we’ll see a compile error. Let’s remove our default case from the arrow operator switch expression to check:
+			
+			String message = switch (number) {
+				case ONE -> {
+					yield "Got a 1";
+				}
+				case TWO -> {
+					yield "Got a 2";
+				}
+			};			
+			The above code gives us an error on number: “the switch expression does not cover all possible input values“.
+		
+		We could add the default case back in, or we could specifically cover the rest of the possible values of number:
+			
+			String message = switch (number) {
+				case ONE -> {
+					yield "Got a 1";
+				}
+				case TWO -> {
+					yield "Got a 2";
+				}
+				case THREE, FOUR -> {
+					yield "More than 2";
+				}
+			};				
+			The switch expression forced our case coverage to be exhaustive.	

@@ -1,0 +1,20 @@
+instanceof--JAVA:
+					Trong Java, instanceof có thể được sử dụng để kiểm tra xem một đối tượng có thuộc về một lớp cụ thể hoặc một giao diện không. Do đó, kiểu dữ liệu nào cũng có thể được sử
+					dụng với instanceof miễn là nó là một loại dữ liệu đối tượng (object type). Điều này bao gồm:
+						Lớp (Class):						
+															Bạn có thể sử dụng instanceof để kiểm tra xem một đối tượng có phải là một thể hiện của một lớp cụ thể không.
+															Ví dụ: object instanceof MyClass.
+						Giao diện (Interface):				
+															Bạn cũng có thể sử dụng instanceof để kiểm tra xem một đối tượng có thực thi một giao diện cụ thể không.
+															Ví dụ: object instanceof MyInterface.
+						Lớp trừu tượng (Abstract class):
+															Tương tự như lớp cụ thể, bạn có thể sử dụng instanceof để kiểm tra xem một đối tượng có phải là một thể hiện của một lớp trừu tượng
+															cụ thể không.
+						Lớp gốc (Object class):
+															Mọi đối tượng trong Java đều là thể hiện của lớp Object, vì vậy bạn có thể sử dụng instanceof để kiểm tra xem một đối tượng có phải 
+															là một thể hiện của Object hay không.
+															
+						Object obj = new MyClass();
+						if (obj instanceof MyClass) {
+							System.out.println("obj là một thể hiện của MyClass");
+						}

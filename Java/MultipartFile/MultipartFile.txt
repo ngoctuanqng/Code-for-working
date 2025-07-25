@@ -1,0 +1,9 @@
+MultipartFile--JAVA:			
+
+								public void processUploadedFile(MultipartFile file) throws IOException {}
+	
+	getOriginalFilename:		String originalFilename = file.getOriginalFilename(); // Trả về tên gốc của tệp được tải lên từ người dùng
+	getContentType:				String contentType = file.getContentType(); // Trả về loại nội dung của tệp
+	getBytes:					byte[] bytes = file.getBytes(); // Trả về nội dung của tệp dưới dạng một mảng byte
+	getInputStream:				InputStream inputStream = file.getInputStream(); // Trả về một luồng đọc từ tệp
+	new File(java.io.File):		File destFile = new File("destination.txt");  // Chuyển dữ liệu tệp đến một vị trí đích

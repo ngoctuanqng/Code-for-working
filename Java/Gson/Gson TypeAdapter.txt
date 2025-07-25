@@ -1,0 +1,395 @@
+Gson TypeAdapter--JAVA:
+
+	Giới thiệu
+	
+		Trong bài viết Gson Custom Serialization và Deserialization, tôi đã hướng dẫn cách custom dữ liệu được chuyển đổi sang/ từ chuỗi JSON sử dụng thư viện GSON. Tuy nhiên, các lớp JsonSerializer và
+		JsonDeserializer sử dụng một lớp trung gian của các đối tượng. Các đối tượng Java hoặc JSON lần đầu tiên được chuyển thành JsonElement (lớp trung gian) và sau đó chuyển sang chuỗi Java hoặc JSON
+		như được hiển thị trong hình ảnh sau:
+		
+			Lớp trung gian này có thể tránh được bằng cách sử dụng TypeAdapter thay vì JsonSerializer hoặc JsonDeserializer. TypeAdapter hiệu quả hơn JsonSerializer và JsonDeserializer khi nó bỏ qua lớp trung gian.
+		
+		Với JsonSerializer và JsonDeserializer cung cấp đệm an toàn rất tiện lợi vì nó làm giảm nguy cơ tạo chuỗi JSON không hợp lệ. Hình ảnh được hiển thị ở trên cho thấy cách các đối tượng được tuần tự hóa
+		bằng cách sử dụng JsonSerializer. Đầu tiên các đối tượng Java được chuyển sang JsonElements, và sau đó chuyển sang chuỗi JSON. Quá trình này tạo ra một tập hợp các đối tượng tạm thời, sau đó được chuyển
+		đổi thành chuỗi JSON. Các đối tượng này được chuyển thành chuỗi JSON sử dụng một thực hiện nội bộ của TypeAdapter. TypeAdapter có thể lấy bất kỳ đối tượng Java (bao gồm các đối tượng thuộc kiểu JsonElement)
+		và chuyển nó sang chuỗi JSON như thể hiện trong hình dưới đây:
+		
+		TypeAdapter là một lớp trừu tượng, có hai phương thức trừu tượng:
+		
+			Phương thức write() lấy một thể hiện của JsonWriter và đối tượng được nối tiếp. Đối tượng được ghi vào JsonWriter một cách tương tự như một đối tượng được in tới PrintStream.
+			
+			Phương thức read() lấy một thể hiện của JsonReader và trả về một thể hiện của đối tượng deserialised.
+		
+		Tương tự như JsonSerializer và JsonDeserializer, TypeAdapter cần được đăng ký thông qua GsonBuilder trước khi nó có thể được sử dụng như sau:
+			
+			final GsonBuilder gsonBuilder = new GsonBuilder();
+			gsonBuilder.registerTypeAdapter(Book.class, new BookTypeAdapter());
+			final Gson gson = gsonBuilder.create();
+		
+		Trong phần dưới đây chúng ta sẽ thấy cách sử dụng TypeAdapter để chuyển các đối tượng Java sang chuỗi JSON (serialise) và ngược lại (deserialise).
+	
+	Ví dụ sử dụng TypeAdapter
+		
+		Book.java
+			
+			public class Book {
+				private String title;
+				private String[] authors;
+				private String isbn10;
+				private String isbn13;
+				private Double price;
+				private Date publishedDate;				 
+					// Getters and setters ...
+			}
+			
+		BookTypeAdapter.java
+		
+			package com.gpcoder.gson.adapter;
+			import java.io.IOException;
+			import java.text.ParseException;
+			import java.text.SimpleDateFormat;
+			import java.util.ArrayList;
+			import java.util.Date;
+			import java.util.List;
+			import com.google.gson.TypeAdapter;
+			import com.google.gson.stream.JsonReader;
+			import com.google.gson.stream.JsonWriter;
+			import com.gpcoder.gson.object.Book;
+			public class BookTypeAdapter extends TypeAdapter<Book> {
+				public static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");			 
+				@Override
+				public Book read(final JsonReader in) throws IOException {
+					final Book book = new Book();		 
+					in.beginObject();
+					while (in.hasNext()) {
+						switch (in.nextName()) {
+						case "title":
+							book.setTitle(in.nextString());
+							break;
+						case "isbn-10":
+							book.setIsbn10(in.nextString());
+							break;
+						case "isbn-13":
+							book.setIsbn13(in.nextString());
+							break;
+						case "price":
+							book.setPrice(in.nextDouble());
+							break;
+						case "publishedDate":
+							Date publishedDate = null;
+							try {
+								publishedDate = sdf.parse(in.nextString());
+							} catch (ParseException e) {
+								e.printStackTrace();
+							}
+							book.setPublishedDate(publishedDate);
+							break;
+						case "authors":
+							in.beginArray();
+							final List<String> authors = new ArrayList<>();
+							while (in.hasNext()) {
+								authors.add(in.nextString());
+							}
+							in.endArray();
+							book.setAuthors(authors.toArray(new String[authors.size()]));
+							break;
+						}
+					}
+					in.endObject();
+			 
+					return book;
+				}			 
+				@Override
+				public void write(final JsonWriter out, final Book book) throws IOException {
+					out.beginObject();
+					out.name("title").value(book.getTitle());
+					out.name("isbn-10").value(book.getIsbn10());
+					out.name("isbn-13").value(book.getIsbn13());
+					out.name("price").value(book.getPrice());
+					out.name("publishedDate").value(sdf.format(book.getPublishedDate()));
+					out.name("authors");
+					out.beginArray();
+					for (final String author : book.getAuthors()) {
+						out.value(author);
+					}
+					out.endArray();
+					out.endObject();
+				}
+			}
+			
+		GsonCustomTypeAdapterExample.java
+			
+			package com.gpcoder.gson.adapter;	 
+			import java.io.IOException;
+			import java.util.Calendar;	 
+			import com.google.gson.Gson;
+			import com.google.gson.GsonBuilder;
+			import com.gpcoder.gson.object.Book;	 
+			public class GsonCustomTypeAdapterExample {	 
+				public static void main(final String[] args) throws IOException {
+					final GsonBuilder gsonBuilder = new GsonBuilder();
+					gsonBuilder.registerTypeAdapter(Book.class, new BookTypeAdapter());
+					gsonBuilder.setPrettyPrinting(); 
+					final Gson gson = gsonBuilder.create(); 
+					final Book book = new Book();
+					book.setTitle("Head First Design Patterns");
+					book.setIsbn10("0596007124");
+					book.setIsbn13("978-0596007126");
+					book.setPrice(52.41);	 
+					Calendar c = Calendar.getInstance();
+					c.set(2004, Calendar.OCTOBER, 1);
+					book.setPublishedDate(c.getTime()); 
+					String[] authors = new String[] { "Eric Freeman", "Bert Bates", "Kathy Sierra", "Elisabeth Robson" };
+					book.setAuthors(authors); 
+					System.out.println("Convert Book object to JSON string: ");
+					final String json = gson.toJson(book);
+					System.out.println(json); 
+					System.out.println("Convert JSON String to Book object: ");
+					final Book parsedBook = gson.fromJson(json, Book.class);
+					System.out.println(parsedBook);
+				}
+			}
+			
+			Kết quả thực thi chương trình trên:
+				Convert Book object to JSON string: 
+				{
+				  "title": "Head First Design Patterns",
+				  "isbn-10": "0596007124",
+				  "isbn-13": "978-0596007126",
+				  "price": 52.41,
+				  "publishedDate": "01/10/2004",
+				  "authors": [
+					"Eric Freeman",
+					"Bert Bates",
+					"Kathy Sierra",
+					"Elisabeth Robson"
+				  ]
+				}
+	 
+				Convert JSON String to Book object: 
+				Book [title=Head First Design Patterns, authors=[Eric Freeman, Bert Bates, Kathy Sierra, Elisabeth Robson], isbn10=0596007124, isbn13=978-0596007126, price=52.41, publishedDate=Fri Oct 01 00:00:00 ICT 2004]
+	
+	So sánh hiệu suất của TypeAdapter với JsonSerializer
+		
+		Như đã nói ở trên, hiệu suất khi sử dụng TypeAdapter tốt hơn so với JsonSerializer bởi vì nó bỏ qua lớp trung gian. Trong phần tiếp theo, tôi sẽ chứng minh cho các bạn thấy điều này.
+		
+		LargeData
+			
+			package com.gpcoder.gson.object;	 
+			public class LargeData {			 
+				private long[] numbers;			 
+				public void create(final int length) {
+					numbers = new long[length];
+					for (int i = 0; i < length; i++) {
+						numbers[i] = i;
+					}
+				}			 
+				public long[] getNumbers() {
+					return numbers;
+				}		 
+			}
+		JsonSerializer
+		
+			LargeDataserializer.java
+			
+				package com.gpcoder.gson.performance;
+				import java.lang.reflect.Type;			 
+				import com.google.gson.JsonArray;
+				import com.google.gson.JsonElement;
+				import com.google.gson.JsonObject;
+				import com.google.gson.JsonPrimitive;
+				import com.google.gson.JsonSerializationContext;
+				import com.google.gson.JsonSerializer;
+				import com.gpcoder.gson.object.LargeData;			 
+				public class LargeDataserializer implements JsonSerializer<LargeData> {			 
+					@Override
+					public JsonElement serialize(final LargeData data, final Type typeOfSrc, final JsonSerializationContext context) {
+						final JsonArray jsonNumbers = new JsonArray();
+						for (final long number : data.getNumbers()) {
+							jsonNumbers.add(new JsonPrimitive(number));
+						}			 
+						final JsonObject jsonObject = new JsonObject();
+						jsonObject.add("numbers", jsonNumbers);
+						return jsonObject;
+					}
+				}
+			
+			LargeDataserializerTest.java
+				
+				package com.gpcoder.gson.performance;
+				import java.io.File;
+				import java.io.IOException;
+				import java.io.PrintStream;				 
+				import org.apache.commons.lang3.time.StopWatch;				 
+				import com.google.gson.Gson;
+				import com.google.gson.GsonBuilder;
+				import com.gpcoder.gson.object.LargeData;
+				 
+				public class LargeDataserializerTest {				 
+					public static void main(final String[] args) throws IOException {
+						StopWatch stopWatch = new StopWatch();
+						stopWatch.start();				 
+						// Configure GSON
+						final GsonBuilder gsonBuilder = new GsonBuilder();
+						gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataserializer());
+						gsonBuilder.setPrettyPrinting();				 
+						final Gson gson = gsonBuilder.create();				 
+						final LargeData data = new LargeData();
+						data.create(10485760);				 
+						final String json = gson.toJson(data);				 
+						final File dir = new File("data");
+						dir.mkdirs();				 
+						try (PrintStream out = new PrintStream(new File(dir, "outputserializer.json"), "UTF-8")) {
+							out.println(json);
+						}			 
+						stopWatch.stop();
+						System.out.println("Done in " + stopWatch.getTime());
+					}
+				}
+				
+			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi của JsonSerializer khoảng 15950 ms. Một file outputserializer.json được tạo ra trong thư mục data có kích thước là 129 MB. Bộ nhớ sử dụng khoảng 1.1 GB.
+		
+		TypeAdapter
+			
+			LargeDataTypeAdapter.java
+			
+				package com.gpcoder.gson.performance;
+				import java.io.IOException;		 
+				import com.google.gson.TypeAdapter;
+				import com.google.gson.stream.JsonReader;
+				import com.google.gson.stream.JsonWriter;
+				import com.gpcoder.gson.object.LargeData;
+				 
+				public class LargeDataTypeAdapter extends TypeAdapter<LargeData> {					 
+					@Override
+					public LargeData read(final JsonReader in) throws IOException {
+						throw new UnsupportedOperationException("Coming soon");
+					}					 
+					@Override
+					public void write(final JsonWriter out, final LargeData data) throws IOException {
+						out.beginObject();
+						out.name("numbers");
+						out.beginArray();
+						for (final long number : data.getNumbers()) {
+							out.value(number);
+						}
+						out.endArray();
+						out.endObject();
+					}
+				}
+									
+			LargeDataTypeAdapterTest.java
+			
+				package com.gpcoder.gson.performance;
+				import java.io.File;
+				import java.io.IOException;
+				import java.io.PrintStream;		 
+				import org.apache.commons.lang3.time.StopWatch;			 
+				import com.google.gson.Gson;
+				import com.google.gson.GsonBuilder;
+				import com.gpcoder.gson.object.LargeData;
+				 
+				public class LargeDataTypeAdapterTest {					 
+					public static void main(final String[] args) throws IOException {
+						StopWatch stopWatch = new StopWatch();
+						stopWatch.start();					 
+						// Configure GSON
+						final GsonBuilder gsonBuilder = new GsonBuilder();
+						gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataTypeAdapter());
+						gsonBuilder.setPrettyPrinting();					 
+						final Gson gson = gsonBuilder.create();					 
+						final LargeData data = new LargeData();
+						data.create(10485760);					 
+						final String json = gson.toJson(data);				 
+						final File dir = new File("data");
+						dir.mkdirs();				 
+						try (PrintStream out = new PrintStream(new File(dir, "outputTypeAdapter.json"), "UTF-8")) {
+							out.println(json);
+						}				 
+						stopWatch.stop();
+						System.out.println("Done in " + stopWatch.getTime());
+					}
+				}
+				
+				Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi của TypeAdapter chỉ khoảng 3293 ms, nhanh hơn rất nhiều so với 15950 ms của JsonSerializer. Một file outputTypeAdapter.json được tạo ra trong
+				thư mục data có kích thước là 129 MB, bằng với kích thước được tạo ra khi sử dụng JsonSerializer. Bộ nhớ sử dụng khoảng 640 MB.
+		
+		Kết hợp JsonSerializer và Streams
+			
+			package com.gpcoder.gson.performance.serializer;	 
+			import java.io.BufferedWriter;
+			import java.io.File;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			import java.io.OutputStream;
+			import java.io.OutputStreamWriter;				 
+			import org.apache.commons.lang3.time.StopWatch;				 
+			import com.google.gson.Gson;
+			import com.google.gson.GsonBuilder;
+			import com.gpcoder.gson.object.LargeData;
+			 
+			public class LargeDataserializerStreamingTest {				 
+				public static void main(final String[] args) throws IOException {
+					StopWatch stopWatch = new StopWatch();
+					stopWatch.start();				 
+					// Configure GSON
+					final GsonBuilder gsonBuilder = new GsonBuilder();
+					gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataserializer());
+					gsonBuilder.setPrettyPrinting();				 
+					final Gson gson = gsonBuilder.create();				 
+					final LargeData data = new LargeData();
+					data.create(10485760);			 
+					final File dir = new File("data");
+					dir.mkdirs();			 
+					try (OutputStream os = new FileOutputStream(new File(dir, "outputserializerStreaming.json"));
+							BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"))) {
+						gson.toJson(data, out);
+					}		 
+					stopWatch.stop();
+					System.out.println("Done in " + stopWatch.getTime());
+				}
+			}
+			
+			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi là 12511 ms, nhanh hơn so với 15950 ms của JsonSerializer không sử dụng Stream. Một file outputTypeAdapterStreaming.json được tạo ra trong thư
+			mục data có cùng kích thước là 129 MB. Bộ nhớ sử dụng khoảng 727 MB.
+		
+		Kết hợp TypeAdapter và Streams
+		
+			package com.gpcoder.gson.performance.typeadapter;		 
+			import java.io.BufferedWriter;
+			import java.io.File;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			import java.io.OutputStream;
+			import java.io.OutputStreamWriter;			 
+			import org.apache.commons.lang3.time.StopWatch;			 
+			import com.google.gson.Gson;
+			import com.google.gson.GsonBuilder;
+			import com.gpcoder.gson.object.LargeData;
+			 
+			public class LargeDataTypeAdapterStreamingTest {				 
+				public static void main(final String[] args) throws IOException {				 
+					StopWatch stopWatch = new StopWatch();
+					stopWatch.start();				 
+					// Configure GSON
+					final GsonBuilder gsonBuilder = new GsonBuilder();
+					gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataTypeAdapter());
+					gsonBuilder.setPrettyPrinting();				 
+					final Gson gson = gsonBuilder.create();				 
+					final LargeData data = new LargeData();
+					data.create(10485760);				 
+					final File dir = new File("data");
+					dir.mkdirs();				 
+					try (OutputStream os = new FileOutputStream(new File(dir, "outputTypeAdapterStreaming.json"));
+							BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"))) {
+						gson.toJson(data, out);
+					}				 
+					stopWatch.stop();
+					System.out.println("Done in " + stopWatch.getTime());
+				}
+			}
+			
+			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi là 2247 ms, nhanh hơn so với 3293 ms của TypeAdapter không sử dụng Stream. Một file outputTypeAdapterStreaming.json được tạo ra trong thư mục
+			data có cùng kích thước là 129 MB. Bộ nhớ sử dụng khoảng 160 MB.
+			
+	Tóm lại, TypeAdapter tốt hơn về mặt hiệu suất so với JsonSerializer do bỏ qua lớp đệm. Tuy nhiên, với JsonSerializer và JsonDeserializer cung cấp đệm an toàn rất tiện lợi vì nó làm giảm nguy cơ tạo chuỗi JSON
+	không hợp lệ. Luôn cố gắng kết hợp TypeAdapter với Stream hoặc JsonSerializer với Stream để có được hiệu suất tốt nhất.	

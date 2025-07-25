@@ -1,0 +1,119 @@
+DateFormat--Ngày và giờ trong Java:				
+
+											- Trong Java, DateFormat là một abstract class được sử dụng để định dạng và phân tích các định dạng ngày tháng trong các chuỗi và các đối tượng Date.
+											- Không có constructor như SimpleDateFormat mà thay vào đó dùng các loại get instance để lấy các loại format
+
+											Date currentDate = new Date(); // Mon Sep 11 10:36:12 ICT 2017
+	
+	DateFormat.getInstance().format:											
+	
+											String dateToStr = DateFormat.getInstance().format(currentDate); // 17/09/11 10:36
+	
+	DateFormat.getDateInstance().format:										
+	
+											dateToStr = DateFormat.getDateInstance().format(currentDate); // 2017/09/11
+	
+	DateFormat.getTimeInstance().format:										
+	
+											dateToStr = DateFormat.getTimeInstance().format(currentDate); // 10:36:12
+	
+	DateFormat.getDateTimeInstance().format:									
+	
+											dateToStr = DateFormat.getDateTimeInstance().format(currentDate); // 2017/09/11 10:36:12
+	
+	DateFormat.getTimeInstance(DateFormat.SHORT).format:						
+	
+											dateToStr = DateFormat.getTimeInstance(DateFormat.SHORT).format(currentDate); // 10:36
+	
+	DateFormat.getTimeInstance(DateFormat.MEDIUM).format:						
+	
+											dateToStr = DateFormat.getTimeInstance(DateFormat.MEDIUM).format(currentDate); // 10:36:12
+	
+	DateFormat.getTimeInstance(DateFormat.LONG).format:							
+	
+											dateToStr = DateFormat.getTimeInstance(DateFormat.LONG).format(currentDate); // 10:36:12 ICT
+	
+	DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format:	
+	
+											dateToStr = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(currentDate); // 2017/09/11 10:36
+	
+	DateFormat.getDateInstance().parse:											
+	
+											Date date = DateFormat.getDateInstance().parse("2017/11/09"); // Thu Nov 09 00:00:00 ICT 2017
+											
+	Ví dụ về DateFormat trong java - chuyển đổi date thành string:
+	
+											package vn.viettuts.date;
+											 
+											import java.text.DateFormat;
+											import java.util.Date;												 
+											public class DateFormatExample1 {
+												public static void main(String[] args) {
+													Date currentDate = new Date();
+													System.out.println("Date hien tai: " + currentDate);
+													String dateToStr = DateFormat.getInstance().format(currentDate);
+													System.out.println("Date Format su dung getInstance(): " + dateToStr);
+												}
+											}		
+											Kết quả:
+											Date hien tai: Mon Sep 11 10:32:45 ICT 2017
+											Date Format su dung getInstance(): 17/09/11 10:32
+											
+											package vn.viettuts.date;													 
+											import java.text.DateFormat;
+											import java.util.Date;													 
+											public class DateFormatExample2 {
+												public static void main(String[] args) {
+													Date currentDate = new Date();													 
+													System.out.println("Date hien tai: " + currentDate);													 
+													String dateToStr = DateFormat.getInstance().format(currentDate);
+													System.out.println("Su dung getInstance(): " + dateToStr);													 
+													dateToStr = DateFormat.getDateInstance().format(currentDate);
+													System.out.println("Su dung getDateInstance(): " + dateToStr);													 
+													dateToStr = DateFormat.getTimeInstance().format(currentDate);
+													System.out.println("Su dung getTimeInstance(): " + dateToStr);														 
+													dateToStr = DateFormat.getDateTimeInstance().format(currentDate);
+													System.out.println("Su dung getDateTimeInstance(): " + dateToStr);													 
+													dateToStr = DateFormat.getTimeInstance(DateFormat.SHORT)
+															.format(currentDate);
+													System.out.println("Su dung getTimeInstance(DateFormat.SHORT): "
+														   + dateToStr);													 
+													dateToStr = DateFormat.getTimeInstance(DateFormat.MEDIUM)
+															.format(currentDate);
+													System.out.println("Su dung getTimeInstance(DateFormat.MEDIUM): "
+															+ dateToStr);														 
+													dateToStr = DateFormat.getTimeInstance(DateFormat.LONG)
+															.format(currentDate);
+													System.out.println("Su dung getTimeInstance(DateFormat.LONG): "
+															+ dateToStr);													 
+													dateToStr = DateFormat.getDateTimeInstance(DateFormat.LONG, 
+															DateFormat.SHORT).format(currentDate);
+													System.out.println("Su dung "
+															+ "getDateTimeInstance(DateFormat.LONG,DateFormat.SHORT): "
+															+ dateToStr);
+												}
+											}	
+											Kết quả:														
+											Date hien tai: Mon Sep 11 10:36:12 ICT 2017
+											Su dung getInstance(): 17/09/11 10:36
+											Su dung getDateInstance(): 2017/09/11
+											Su dung getTimeInstance(): 10:36:12
+											Su dung getDateTimeInstance(): 2017/09/11 10:36:12
+											Su dung getTimeInstance(DateFormat.SHORT): 10:36
+											Su dung getTimeInstance(DateFormat.MEDIUM): 10:36:12
+											Su dung getTimeInstance(DateFormat.LONG): 10:36:12 ICT
+											Su dung getDateTimeInstance(DateFormat.LONG,DateFormat.SHORT): 2017/09/11 10:36
+											
+	Ví dụ về DateFormat trong java - chuyển đổi string thành date:
+
+											package vn.viettuts.date;													 
+											import java.text.DateFormat;
+											import java.util.Date;												 
+											public class DateFormatExample3 {
+												public static void main(String[] args) throws Exception {
+													Date date = DateFormat.getDateInstance().parse("2017/11/09");
+													System.out.println("Date: " + date);
+												}
+											}			
+											Kết quả:
+											Date: Thu Nov 09 00:00:00 ICT 2017

@@ -1,0 +1,30 @@
+So sánh equals và ==--Java:
+													public class Main {
+														public static void main(String[] args) {
+															String str1 = new String("Hello");
+															String str2 = new String("Hello");
+															System.out.println(str1.equals(str2));  // true
+															System.out.println(str1 == str2);       // false
+															Integer num1 = new Integer(5);
+															Integer num2 = new Integer(5);
+															System.out.println(num1.equals(num2));  // true
+															System.out.println(num1 == num2);       // false
+															String str3 = "Hello";
+															String str4 = "Hello";
+															System.out.println(str3.equals(str4));  // true
+															System.out.println(str3 == str4);       // true
+															Integer num3 = 5;
+															Integer num4 = 5;
+															System.out.println(num3.equals(num4));  // true
+															System.out.println(num3 == num4);       // true
+														}
+													}
+	equals():
+													Phương pháp equals() được sử dụng để so sánh giá trị của hai đối tượng.
+													Nếu hai đối tượng có giá trị tương đương, phương pháp equals() sẽ trả về true.
+													Phương pháp equals() được ghi đè từ lớp Object và có thể được ghi đè lại trong các lớp con để cung cấp việc so sánh tùy chỉnh cho đối tượng.
+													Thường được sử dụng cho so sánh giá trị của các đối tượng không thuộc kiểu nguyên thủy.
+	==:
+													Toán tử == được sử dụng để so sánh hai đối tượng để xem liệu chúng có cùng tham chiếu hay không.
+													Nếu hai đối tượng có cùng tham chiếu, tức là chúng đều trỏ đến cùng một vị trí bộ nhớ, thì toán tử == sẽ trả về true.
+													Toán tử == không thể được ghi đè và chỉ hoạt động với kiểu nguyên thủy và tham chiếu.

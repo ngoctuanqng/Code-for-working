@@ -1,0 +1,12 @@
+DateTimeFormatter--Ngày và giờ trong Java:
+
+		Formatter for displaying and parsing date-time objects
+		
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+		String formattedDateTime = currentDateTime.format(formatter); // định dạng currentDateTime thành một chuỗi theo định dạng đã được chỉ định bởi formatter.
+																	  // 26/02/2024 15:48:30
+		String dateTimeString = "25/02/2024 15:30:00";
+		LocalDateTime parsedDateTime = LocalDateTime.parse(dateTimeString, formatter); // parse chuỗi dateTimeString thành một đối tượng LocalDateTime.
+		                                                                               // 2024-02-25T15:30:00
+																					   // parse là chuyển một input thành kiểu của nó

@@ -1,0 +1,747 @@
+Export Excel--JAVA:
+
+	XSSFWorkbook--Export Excel:
+	
+		XSSFWorkbook là một lớp trong thư viện Apache POI, cụ thể là module poi-ooxml, được sử dụng để làm việc với các tệp Excel định dạng .xlsx (Excel 2007 và các phiên bản mới hơn). Lớp này
+		đại diện cho một workbook (sổ tay) trong Excel.
+		Tạo và Quản Lý Workbook: XSSFWorkbook cho phép bạn tạo mới hoặc mở một workbook Excel, và quản lý các sheet, hàng, ô, và các thuộc tính khác của bảng tính.
+		Chuyển Đổi Dữ Liệu: Đọc, viết, và chỉnh sửa dữ liệu trong các sheet của workbook.
+		
+		Các Phương Thức Quan Trọng Của XSSFWorkbook:
+		
+			createSheet(String sheetName): Tạo một sheet mới trong workbook với tên cụ thể.
+			getSheet(String sheetName): Lấy sheet dựa trên tên của sheet.
+			getSheetAt(int index): Lấy sheet dựa trên chỉ số của nó trong workbook.
+			removeSheetAt(int index): Xóa sheet tại chỉ số cụ thể.
+			getSheetIndex(String sheetName): Lấy chỉ số của sheet dựa trên tên của nó.
+			write(OutputStream stream): Ghi workbook vào một OutputStream, chẳng hạn như một file.
+			
+		Tạo Workbook Mới:
+		
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class XSSFWorkbookExample {
+				public static void main(String[] args) {
+					try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+						// Tạo một sheet mới
+						workbook.createSheet("Sheet1");
+						// Lưu workbook vào file
+						try (FileOutputStream fileOut = new FileOutputStream("workbook.xlsx")) {
+							workbook.write(fileOut);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		Đọc Workbook Từ Tệp:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import java.io.FileInputStream;
+			import java.io.IOException;
+			public class ReadXSSFWorkbookExample {
+				public static void main(String[] args) {
+					try (FileInputStream fileIn = new FileInputStream("workbook.xlsx");
+						 XSSFWorkbook workbook = new XSSFWorkbook(fileIn)) {
+						// Lấy sheet đầu tiên
+						Sheet sheet = workbook.getSheetAt(0);
+						// Đọc dữ liệu từ hàng và ô
+						Row row = sheet.getRow(0);
+						Cell cell = row.getCell(0);
+						String cellValue = cell.getStringCellValue();
+						System.out.println("Cell Value: " + cellValue);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		Quản Lý Sheet:
+		
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import org.apache.poi.ss.usermodel.Sheet;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class ManageSheetsExample {
+				public static void main(String[] args) {
+					try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+						// Tạo các sheet mới
+						workbook.createSheet("Sheet1");
+						workbook.createSheet("Sheet2");
+						// Xóa một sheet
+						workbook.removeSheetAt(1); // Xóa sheet thứ hai
+						// Lưu workbook vào file
+						try (FileOutputStream fileOut = new FileOutputStream("managedSheets.xlsx")) {
+							workbook.write(fileOut);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		Thiết Lập Định Dạng và Style:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class StyleExample {
+				public static void main(String[] args) {
+					try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+						Sheet sheet = workbook.createSheet("StyledSheet");
+						// Tạo kiểu ô
+						CellStyle style = workbook.createCellStyle();
+						style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+						style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+						// Tạo hàng và ô
+						Row row = sheet.createRow(0);
+						Cell cell = row.createCell(0);
+						cell.setCellValue("Styled Cell");
+						cell.setCellStyle(style);
+						// Lưu workbook vào file
+						try (FileOutputStream fileOut = new FileOutputStream("styledWorkbook.xlsx")) {
+							workbook.write(fileOut);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+
+
+
+
+	XSSFSheet--Export Excel:
+	
+		Thư viện Apache POI: Apache POI là thư viện Java để làm việc với các tài liệu Microsoft Office, bao gồm Excel, Word, và PowerPoint.
+		XSSFSheet: Lớp này thuộc vào org.apache.poi.xssf.usermodel và cung cấp các phương thức để thao tác với các sheet trong file Excel .xlsx.
+		
+		Các Phương Thức Quan Trọng của XSSFSheet:
+		
+			createRow(int rownum): Tạo một hàng mới tại chỉ số hàng cụ thể.
+			getRow(int rownum): Lấy một hàng từ sheet theo chỉ số hàng.
+			createCell(int column): Tạo một ô mới trong hàng cụ thể.
+			getCell(int column): Lấy một ô từ hàng theo chỉ số cột.
+			getLastRowNum(): Lấy chỉ số của hàng cuối cùng trong sheet.
+			getPhysicalNumberOfRows(): Lấy số lượng hàng thực tế có dữ liệu trong sheet.
+			setColumnWidth(int columnIndex, int width): Đặt độ rộng của cột.
+			autoSizeColumn(int column): Tự động điều chỉnh độ rộng của cột dựa trên nội dung của nó.
+			addMergedRegion(CellRangeAddress region): Hợp nhất các ô trong phạm vi được chỉ định.
+			removeMergedRegion(int index): Loại bỏ phạm vi ô hợp nhất tại chỉ số cụ thể.
+		
+		Tạo Workbook và Sheet:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class XSSFSheetExample {
+				public static void main(String[] args) {
+					// Tạo workbook và sheet
+					try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+						XSSFSheet sheet = workbook.createSheet("Sheet1");
+						// Tạo một hàng
+						Row row = sheet.createRow(0);
+						// Tạo ô và gán giá trị
+						Cell cell = row.createCell(0);
+						cell.setCellValue("Hello, World!");
+						// Ghi workbook vào file
+						try (FileOutputStream fileOut = new FileOutputStream("example.xlsx")) {
+							workbook.write(fileOut);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		Đọc Dữ Liệu Từ Sheet:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import java.io.FileInputStream;
+			import java.io.IOException;
+			public class XSSFSheetReadExample {
+				public static void main(String[] args) {
+					try (FileInputStream fileIn = new FileInputStream("example.xlsx");
+						 XSSFWorkbook workbook = new XSSFWorkbook(fileIn)) {
+						// Lấy sheet từ workbook
+						XSSFSheet sheet = workbook.getSheetAt(0);
+						// Lấy hàng đầu tiên
+						Row row = sheet.getRow(0);
+						// Lấy ô đầu tiên của hàng
+						Cell cell = row.getCell(0);
+						// Đọc giá trị từ ô
+						String cellValue = cell.getStringCellValue();
+						System.out.println("Cell Value: " + cellValue);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+	CellRangeAddress--Export Excel:
+	
+		CellRangeAddress là một lớp trong thư viện Apache POI, một thư viện phổ biến để làm việc với tài liệu Microsoft Office, đặc biệt là Excel trong Java. CellRangeAddress được sử dụng để định
+		nghĩa một phạm vi các ô trong một bảng tính Excel.
+		
+		import org.apache.poi.ss.usermodel.*;
+		import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+		import org.apache.poi.ss.util.CellRangeAddress;
+		import java.io.FileOutputStream;
+		import java.io.IOException;
+		public class MergeCellsExample {
+			public static void main(String[] args) throws IOException {
+				// Tạo workbook và sheet
+				Workbook workbook = new XSSFWorkbook();
+				Sheet sheet = workbook.createSheet("Sheet1");
+				// Tạo phạm vi các ô để merge
+				CellRangeAddress cellRange = new CellRangeAddress(
+					0,  // hàng bắt đầu
+					1,  // hàng kết thúc
+					0,  // cột bắt đầu
+					2   // cột kết thúc
+				);
+				sheet.addMergedRegion(cellRange);
+				// Thêm một ô với giá trị để thấy rõ việc merge
+				Row row = sheet.createRow(0);
+				Cell cell = row.createCell(0);
+				cell.setCellValue("Merged Region");
+				// Lưu workbook vào file
+				try (FileOutputStream fileOut = new FileOutputStream("workbook.xlsx")) {
+					workbook.write(fileOut);
+				}
+				// Đóng workbook
+				workbook.close();
+			}
+		}
+		
+	RegionUtil--Export Excel:
+	
+		RegionUtil là một lớp tiện ích trong thư viện Apache POI, được sử dụng để thực hiện các thao tác trên các vùng ô (regions)
+		trong bảng tính Excel, như là merge ô hoặc áp dụng định dạng cho một phạm vi ô.
+		
+		Các Phương Thức Quan Trọng:
+		
+			setBorderTop(BorderStyle style, CellRangeAddress region, Sheet sheet): Thiết lập đường viền trên cho phạm vi ô.
+			setBorderBottom(BorderStyle style, CellRangeAddress region, Sheet sheet): Thiết lập đường viền dưới cho phạm vi ô.
+			setBorderLeft(BorderStyle style, CellRangeAddress region, Sheet sheet): Thiết lập đường viền trái cho phạm vi ô.
+			setBorderRight(BorderStyle style, CellRangeAddress region, Sheet sheet): Thiết lập đường viền phải cho phạm vi ô.
+			setCellStyle(CellStyle style, CellRangeAddress region, Sheet sheet): Áp dụng kiểu ô cho phạm vi (được sử dụng ít hơn so với các phương thức thiết lập đường viền).
+
+		Chức Năng Của RegionUtil:
+			
+			Merge Cells: Hợp nhất các ô trong một phạm vi nhất định.
+			Set Border: Thiết lập đường viền cho các ô trong một phạm vi.
+			Apply Cell Style: Áp dụng kiểu ô (cell style) cho các ô trong một phạm vi.
+			
+		Merge Cells:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import org.apache.poi.ss.util.CellRangeAddress;
+			import org.apache.poi.ss.util.RegionUtil;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class MergeCellsExample {
+				public static void main(String[] args) throws IOException {
+					Workbook workbook = new XSSFWorkbook();
+					Sheet sheet = workbook.createSheet("Sheet1");
+					// Tạo phạm vi để merge
+					CellRangeAddress cellRange = new CellRangeAddress(
+						0,  // hàng bắt đầu
+						1,  // hàng kết thúc
+						0,  // cột bắt đầu
+						2   // cột kết thúc
+					);
+					sheet.addMergedRegion(cellRange);
+					// Thêm dữ liệu vào ô đầu tiên của phạm vi merge
+					Row row = sheet.createRow(0);
+					Cell cell = row.createCell(0);
+					cell.setCellValue("Merged Region");
+					// Áp dụng đường viền cho phạm vi merge
+					RegionUtil.setBorderBottom(BorderStyle.THIN, cellRange, sheet);
+					RegionUtil.setBorderTop(BorderStyle.THIN, cellRange, sheet);
+					RegionUtil.setBorderLeft(BorderStyle.THIN, cellRange, sheet);
+					RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
+					// Lưu workbook vào file
+					try (FileOutputStream fileOut = new FileOutputStream("workbook.xlsx")) {
+						workbook.write(fileOut);
+					}
+					workbook.close();
+				}
+			}
+			
+		Set Border:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import org.apache.poi.ss.util.CellRangeAddress;
+			import org.apache.poi.ss.util.RegionUtil;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class BorderExample {
+				public static void main(String[] args) throws IOException {
+					Workbook workbook = new XSSFWorkbook();
+					Sheet sheet = workbook.createSheet("Sheet1");
+					// Tạo phạm vi ô
+					CellRangeAddress cellRange = new CellRangeAddress(
+						0,  // hàng bắt đầu
+						1,  // hàng kết thúc
+						0,  // cột bắt đầu
+						2   // cột kết thúc
+					);
+					sheet.addMergedRegion(cellRange);
+					// Áp dụng đường viền cho phạm vi ô
+					RegionUtil.setBorderBottom(BorderStyle.THIN, cellRange, sheet);
+					RegionUtil.setBorderTop(BorderStyle.THIN, cellRange, sheet);
+					RegionUtil.setBorderLeft(BorderStyle.THIN, cellRange, sheet);
+					RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
+					// Lưu workbook vào file
+					try (FileOutputStream fileOut = new FileOutputStream("borderExample.xlsx")) {
+						workbook.write(fileOut);
+					}
+					workbook.close();
+				}
+			}
+
+	CellStyle--Export Excel:
+	
+		CellStyle là một lớp trong thư viện Apache POI, dùng để định dạng các ô trong bảng tính Excel. Khi bạn muốn tùy chỉnh cách mà dữ liệu xuất hiện trong các ô của một bảng
+		tính Excel, bạn sẽ sử dụng CellStyle để thiết lập các thuộc tính như kiểu chữ, màu sắc, đường viền, và kiểu nền của ô.
+		
+		Các Tính Năng Chính của CellStyle:
+		
+			Font: Thiết lập kiểu chữ, kích thước, màu sắc, và các thuộc tính chữ khác.
+			Fill: Đặt màu nền cho ô.
+			Border: Thiết lập đường viền cho các cạnh của ô.
+			Alignment: Căn chỉnh nội dung của ô (trái, phải, giữa).
+			Data Format: Định dạng dữ liệu trong ô, như số, ngày tháng, tiền tệ, v.v.
+			
+		Các Phương Thức Quan Trọng của CellStyle:
+		
+			setFont(Font font): Đặt kiểu chữ cho ô.
+			setFillForegroundColor(short color): Đặt màu nền cho ô.
+			setFillPattern(FillPatternType pattern): Đặt kiểu nền cho ô.
+			setBorderBottom(BorderStyle style): Đặt đường viền dưới cho ô.
+			setBorderTop(BorderStyle style): Đặt đường viền trên cho ô.
+			setBorderLeft(BorderStyle style): Đặt đường viền trái cho ô.
+			setBorderRight(BorderStyle style): Đặt đường viền phải cho ô.
+			setAlignment(HorizontalAlignment align): Đặt căn chỉnh ngang cho nội dung ô.
+			setVerticalAlignment(VerticalAlignment align): Đặt căn chỉnh dọc cho nội dung ô.
+			setDataFormat(short format): Đặt định dạng dữ liệu cho ô, như số, tiền tệ, ngày tháng.
+			
+		Tạo CellStyle và Áp Dụng Kiểu Chữ:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class CellStyleExample {
+				public static void main(String[] args) {
+					try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+						Sheet sheet = workbook.createSheet("StyledSheet");
+						// Tạo kiểu chữ
+						Font font = workbook.createFont();
+						font.setFontHeightInPoints((short) 14);
+						font.setFontName("Arial");
+						font.setBold(true);
+						font.setColor(IndexedColors.RED.getIndex());
+						// Tạo kiểu ô
+						CellStyle style = workbook.createCellStyle();
+						style.setFont(font);
+						// Tạo hàng và ô
+						Row row = sheet.createRow(0);
+						Cell cell = row.createCell(0);
+						cell.setCellValue("Styled Text");
+						cell.setCellStyle(style);
+						// Lưu workbook vào file
+						try (FileOutputStream fileOut = new FileOutputStream("styledCell.xlsx")) {
+							workbook.write(fileOut);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		Đặt Màu Nền và Đường Viền:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class FillAndBorderExample {
+				public static void main(String[] args) {
+					try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+						Sheet sheet = workbook.createSheet("SheetWithBorder");
+						// Tạo kiểu ô với màu nền và đường viền
+						CellStyle style = workbook.createCellStyle();
+						style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+						style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+						// Đặt đường viền cho các cạnh của ô
+						style.setBorderBottom(BorderStyle.THIN);
+						style.setBorderTop(BorderStyle.THIN);
+						style.setBorderLeft(BorderStyle.THIN);
+						style.setBorderRight(BorderStyle.THIN);
+						// Tạo hàng và ô
+						Row row = sheet.createRow(0);
+						Cell cell = row.createCell(0);
+						cell.setCellValue("Styled Cell with Border");
+						cell.setCellStyle(style);
+						// Lưu workbook vào file
+						try (FileOutputStream fileOut = new FileOutputStream("filledAndBorderedCell.xlsx")) {
+							workbook.write(fileOut);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		Căn Chỉnh Nội Dung và Định Dạng Dữ Liệu:
+		
+			import org.apache.poi.ss.usermodel.*;
+			import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			public class AlignmentAndFormatExample {
+				public static void main(String[] args) {
+					try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+						Sheet sheet = workbook.createSheet("SheetWithFormatting");
+						// Tạo kiểu ô với căn chỉnh và định dạng dữ liệu
+						CellStyle style = workbook.createCellStyle();
+						style.setAlignment(HorizontalAlignment.CENTER);
+						style.setVerticalAlignment(VerticalAlignment.CENTER);
+						style.setDataFormat(workbook.createDataFormat().getFormat("#,##0.00"));
+						// Tạo hàng và ô
+						Row row = sheet.createRow(0);
+						Cell cell = row.createCell(0);
+						cell.setCellValue(12345.678);
+						cell.setCellStyle(style);
+						// Lưu workbook vào file
+						try (FileOutputStream fileOut = new FileOutputStream("formattedCell.xlsx")) {
+							workbook.write(fileOut);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+
+
+
+	Javascript--Export Excel:
+	
+		const handleExportExcel = async () => {
+			try {
+				await onExportExcel(searchData).then(response => {
+					if (response.status === 200) {
+						const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+						const link = document.createElement('a');
+						link.href = window.URL.createObjectURL(blob);
+						const filename = 'Project_Status_' + format(new Date(), "yyyyMMdd_HHmmss") + ".xlsx";
+						link.download = filename;
+						document.body.appendChild(link);
+						link.click();
+						document.body.removeChild(link);
+						console.info('Successfully!', response)
+					} else {
+						console.info('Failed!')
+					}
+				});
+			} catch (e) {
+				console.info('Error!', e)
+			}
+		};
+		
+		export const onExportExcel = (data) => {
+			const groups = data?.searchByGroup;
+			const statuses = data?.searchByStatus;
+			const name = data?.searchByProjectName;
+			return instance.get(`${Constants.Api.BASE_URL}/project-status/export-excel?groups=${groups}&statuses=${statuses}&name=${name}`, { responseType: 'blob' },);
+		}			
+
+	Java--Export Excel:
+	
+		@GetMapping("/export-excel")
+		public void exportToExcel(HttpServletResponse response,
+								  Pme00ProjectStatusRequest request) throws IOException {
+			response.setContentType("application/octet-stream");
+			DateFormat dateFormatter = new SimpleDateFormat("yy-MM-dd_HH:mm:ss");
+			String currentDateTime = dateFormatter.format(new Date());
+			String headerKey = "Content-Disposition";
+			String headerValue = "attachment; filename=project_status_" + currentDateTime + ".xlsx";
+			response.setHeader(headerKey, headerValue);
+			PosLogger.developerLog(PosLogWriterIF.INFO, "Export Excel project_status_" + currentDateTime + ".xlsx", this);
+			this.serviceLifecycle.requestLevel2ProjectStatusService().exportExcel(serviceLifecycle, response, request);
+		}
+		
+		@Data
+		public class Pme00ProjectStatusRequest extends CommonPaginationRequest {
+			private List<String> groups;
+			private List<String> statuses;
+			private String name;
+		}			
+
+		void exportExcel(ServiceLifecycle serviceLifecycle, HttpServletResponse response, Pme00ProjectStatusRequest request) throws IOException;
+
+		@Override
+		public void exportExcel(ServiceLifecycle serviceLifecycle, HttpServletResponse response, Pme00ProjectStatusRequest request) throws IOException {
+			CommonPaginationResponse<Pme00ProjectStatus> Pme00ProjectStatusResponse = serviceLifecycle.requestPme00ProjectInfoService().search(request);
+			List<M00Codes030> statuses = serviceLifecycle.requestM00Codes030Service().getListCategories(64, 56);
+			Map<String, M00Codes030> statusByCodeMap = statuses.stream()
+					.collect(Collectors.toMap(M00Codes030::getCdV, e -> e));
+			Pme00ProjectStatusResponse.getList().forEach(e -> {
+				e.setStatus(statusByCodeMap.get(e.getStatusCode()));
+			});
+			ExportExcelProjectStatus exporter = new ExportExcelProjectStatus(Pme00ProjectStatusResponse.getList());
+			exporter.export(response);
+		}
+
+		package com.poscdx.odc.ampro015.domain.utils;
+		import com.poscdx.odc.ampro015.domain.entity.Pme00ProjectStatus;
+		import com.poscdx.odc.ampro015.domain.entity.payload.request.ExportBodyRequest;
+		import org.apache.poi.ss.usermodel.Cell;
+		import org.apache.poi.ss.usermodel.CellStyle;
+		import org.apache.poi.ss.usermodel.Row;
+		import org.apache.poi.xssf.usermodel.XSSFFont;
+		import org.apache.poi.xssf.usermodel.XSSFSheet;
+		import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+		import javax.servlet.ServletOutputStream;
+		import javax.servlet.http.HttpServletResponse;
+		import java.io.IOException;
+		import java.util.List;
+		import java.util.Map;
+		public class ExportExcelProjectStatus extends ReportAbstract{
+			private final List<Pme00ProjectStatus> projectStatuses;
+			public ExportExcelProjectStatus(List<Pme00ProjectStatus> projectStatuses) {
+				this.projectStatuses = projectStatuses;
+			}
+			public void writeDataLines() {
+				int rowCount = 2;
+				for (Pme00ProjectStatus status : this.projectStatuses) {
+					Row row = sheet.createRow(rowCount++);
+					int columnCount = 0;
+					createCell(row, columnCount++, status.getNo(), cellStyle);
+					createCell(row, columnCount++, status.getGroupName(), cellStyle);
+					createCell(row, columnCount++, status.getProjectCode(), cellStyle);
+					createCell(row, columnCount++, status.getProjectKrName(), cellStyle);
+					createCell(row, columnCount++, status.getProjectEnName(), cellStyle);
+					createCell(row, columnCount++, status.getPmName(), cellStyle);
+					createCell(row, columnCount++, status.getPlId() + " - " + status.getPlName(),cellStyle);
+					createCell(row, columnCount++, status.getStartDate(), cellStyle);
+					createCell(row, columnCount++, status.getEndDate(), cellStyle);
+					createCell(row, columnCount++, status.getPeriod(), cellStyle);
+					createCell(row, columnCount++, status.getMemberCount(), cellStyle);
+					createCell(row, columnCount++, status.getTaskCount(), cellStyle);
+					createCell(row, columnCount++, status.getProgress(), cellStyle);
+					if(status.getStatus() == null) {
+						createCell(row, columnCount++, "", cellStyle);
+					} else {
+						createCell(row, columnCount++, status.getStatus().getCdvMeaning(), cellStyle);
+					}
+					createCell(row, columnCount, status.getFramework(), cellStyle);
+				}
+			}
+			public void export(HttpServletResponse response) throws IOException {
+				newReportExcel();
+				// response  writer to excel
+				initResponseForExportExcel(response, "ProjectStatus");
+				ServletOutputStream outputStream = response.getOutputStream();
+				// White sheet, title & header
+				String[] headers = new String[]{
+				"No",
+				"Group",
+				"PJT Code",
+				"PJT Name (Kor)",
+				"PJT Name (Eng)",
+				"Kor PM",
+				"Leader",
+				"Start Date",
+				"End Date",
+				"Period (Month)",
+				"Members",
+				"Tasks",
+				"Progress (%)",
+				"Status",
+				"Framework"
+				};
+				writeTableHeaderExcel("Project Statuses", "Project Status", headers);
+				// White data rows
+				writeDataLines();
+				workbook.write(outputStream);
+				workbook.close();
+				outputStream.close();
+			}
+			@Override
+			public void export(HttpServletResponse response, ExportBodyRequest request) throws IOException {
+			}
+		}
+
+		public void newReportExcel() {
+			workbook = new XSSFWorkbook();
+			createCellStyle();
+		}
+
+		package com.poscdx.odc.ampro015.domain.utils;
+		import com.google.gson.internal.LinkedTreeMap;
+		import com.poscdx.odc.ampro015.domain.entity.payload.request.ExportBodyRequest;
+		import org.apache.poi.ss.usermodel.*;
+		import org.apache.poi.ss.util.CellRangeAddress;
+		import org.apache.poi.xssf.usermodel.XSSFFont;
+		import org.apache.poi.xssf.usermodel.XSSFSheet;
+		import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+		import javax.servlet.http.HttpServletResponse;
+		import java.io.IOException;
+		import java.math.BigDecimal;
+		import java.math.BigInteger;
+		import java.text.DateFormat;
+		import java.text.SimpleDateFormat;
+		import java.util.Date;
+		import java.util.List;
+		public abstract class ReportAbstract {
+			public XSSFWorkbook workbook;
+			public XSSFSheet sheet;
+			public CellStyle cellStyle;
+			public void newReportExcel() {
+				workbook = new XSSFWorkbook();
+				createCellStyle();
+			}
+			public void createCellStyle() {
+				cellStyle = workbook.createCellStyle();
+				// setCentered to cell
+				cellStyle.setAlignment(HorizontalAlignment.CENTER);
+				cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+				//setBorder to cell
+				cellStyle.setBorderBottom(BorderStyle.THIN);
+				cellStyle.setBorderTop(BorderStyle.THIN);
+				cellStyle.setBorderRight(BorderStyle.THIN);
+				cellStyle.setBorderLeft(BorderStyle.THIN);
+				XSSFFont font = workbook.createFont();
+				font.setFontHeight(14);
+				cellStyle.setFont(font);
+			}
+			public void initResponseForExportExcel(HttpServletResponse response, String fileName) {
+				response.setContentType("application/octet-stream");
+				DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+				String currentDateTime = dateFormatter.format(new Date());
+				String headerKey = "Content-Disposition";
+				String headerValue = "attachment; filename=" + fileName + "_" + currentDateTime + ".xlsx";
+				response.setHeader(headerKey, headerValue);
+			}
+			public void writeTableHeaderExcel(String sheetName, String titleName, String[] headers) {
+				// sheet
+				sheet = workbook.createSheet(sheetName);
+				Row row = sheet.createRow(0);
+				CellStyle style = workbook.createCellStyle();
+				// setBackground to header
+				style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+				style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+				// setBorder to header cell
+				style.setBorderBottom(BorderStyle.THIN);
+				style.setBorderTop(BorderStyle.THIN);
+				style.setBorderRight(BorderStyle.THIN);
+				style.setBorderLeft(BorderStyle.THIN);
+				XSSFFont font = workbook.createFont();
+				font.setBold(true);
+				font.setFontHeight(20);
+				style.setFont(font);
+				style.setAlignment(HorizontalAlignment.CENTER);
+				// title
+				createCell(row, 0, titleName, style);
+				sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, headers.length - 1));
+				font.setFontHeightInPoints((short) 10);
+				// header
+				row = sheet.createRow(1);
+				font.setBold(true);
+				font.setFontHeight(16);
+				style.setFont(font);
+				for (int i = 0; i < headers.length; i++) {
+					createCell(row, i, headers[i], style);
+				}
+			}
+			public void writeTableHeaderExcel(String sheetName, String titleName, List<String> headers) {
+				// sheet
+				sheet = workbook.createSheet(sheetName);
+				Row row = sheet.createRow(0);
+				CellStyle style = workbook.createCellStyle();
+				// ADD HEADER STYLES
+				// setBackground to header
+				style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+				style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+				// setBorder to header cell
+				style.setBorderBottom(BorderStyle.THIN);
+				style.setBorderTop(BorderStyle.THIN);
+				style.setBorderRight(BorderStyle.THIN);
+				style.setBorderLeft(BorderStyle.THIN);
+				XSSFFont font = workbook.createFont();
+				font.setBold(true);
+				font.setFontHeight(20);
+				style.setFont(font);
+				style.setAlignment(HorizontalAlignment.CENTER);
+				// title
+				createCell(row, 0, titleName, style);
+				sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, headers.size() - 1));
+				font.setFontHeightInPoints((short) 10);
+				// header
+				row = sheet.createRow(1);
+				font.setBold(true);
+				font.setFontHeight(16);
+				style.setFont(font);
+				for (int i = 0; i < headers.size(); i++) {
+					createCell(row, i, headers.get(i), style);
+				}
+			}
+			public void createCell(org.apache.poi.ss.usermodel.Row row, int columnCount, Object value, CellStyle style) {
+				sheet.autoSizeColumn(columnCount);
+				Cell cell = row.createCell(columnCount);
+				if (value instanceof Integer) {
+					cell.setCellValue((Integer) value);
+				} else if (value instanceof Double) {
+					cell.setCellValue((Double) value);
+				} else if (value instanceof Boolean) {
+					cell.setCellValue((Boolean) value);
+				} else if (value instanceof Long) {
+					cell.setCellValue((Long) value);
+				} else if (value instanceof BigInteger) {
+					cell.setCellValue(String.valueOf(value));
+				} else if(value instanceof BigDecimal){
+					cell.setCellValue(String.valueOf(value));
+				} else {
+					cell.setCellValue((String) value);
+				}
+				cell.setCellStyle(style);
+			}
+			public CellStyle getFontContentExcel() {
+				CellStyle style = workbook.createCellStyle();
+				XSSFFont font = workbook.createFont();
+				font.setFontHeight(14);
+				style.setFont(font);
+				return style;
+			}
+			public void writeDataLines(List<String> cellIds, ExportBodyRequest request) {
+				// Start row number
+				int startRow = 2;
+				List<LinkedTreeMap<String, String>> dataObjects = request.getExportData();
+
+				for (LinkedTreeMap<String, String> object: dataObjects) {
+					Row row = sheet.createRow(startRow++);
+					int columnCount = 0;
+					for (String id : cellIds) {
+						createCell(row, columnCount++,  object.get(id), cellStyle);
+					}
+				}
+			}
+			public abstract void writeDataLines();
+			public abstract void export(HttpServletResponse response) throws IOException;
+			public abstract void export(HttpServletResponse response, ExportBodyRequest request) throws IOException;
+
+
+		}

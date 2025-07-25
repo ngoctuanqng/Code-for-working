@@ -1,0 +1,87 @@
+	LinkedList--JAVA:
+							The LinkedList class is a collection which can contain many objects of the same type, just like the ArrayList.
+							The LinkedList class has all of the same methods as the ArrayList class because they both implement the List interface. This means that you can add items, change items, remove items and clear the list
+							in the same way.
+							However, while the ArrayList class and the LinkedList class can be used in the same way, they are built very differently.
+		addFirst():
+							import java.util.LinkedList;
+							public class Main {
+							  public static void main(String[] args) {
+								LinkedList<String> cars = new LinkedList<String>();
+								cars.add("Volvo");
+								cars.add("BMW");
+								cars.add("Ford");								
+								// Use addFirst() to add the item to the beginning
+								cars.addFirst("Mazda");
+								System.out.println(cars); // [Mazda, Volvo, BMW, Ford]
+							  }
+							}
+		addLast():
+							import java.util.LinkedList;
+							public class Main {
+							  public static void main(String[] args) {
+								LinkedList<String> cars = new LinkedList<String>();
+								cars.add("Volvo");
+								cars.add("BMW");
+								cars.add("Ford");							
+								// Use addLast() to add the item to the end
+								cars.addLast("Mazda");
+								System.out.println(cars); // [Volvo, BMW, Ford, Mazda]
+							  }
+							}
+		removeFirst():
+							import java.util.LinkedList;
+							public class Main {
+							  public static void main(String[] args) {
+								LinkedList<String> cars = new LinkedList<String>();
+								cars.add("Volvo");
+								cars.add("BMW");
+								cars.add("Ford");
+								cars.add("Mazda");
+								
+								// Use removeFirst() remove the first item from the list
+								cars.removeFirst();
+								System.out.println(cars); [BMW, Ford, Mazda]
+							  }
+							}
+		removeLast():
+							import java.util.LinkedList;
+							public class Main {
+							  public static void main(String[] args) {
+								LinkedList<String> cars = new LinkedList<String>();
+								cars.add("Volvo");
+								cars.add("BMW");
+								cars.add("Ford");
+								cars.add("Mazda");							
+								// Use removeLast() remove the last item from the list
+								cars.removeLast();
+								System.out.println(cars); // [Volvo, BMW, Ford]
+							  }
+							}
+		getFirst():
+							import java.util.LinkedList;
+							public class Main {
+							  public static void main(String[] args) {
+								LinkedList<String> cars = new LinkedList<String>();
+								cars.add("Volvo");
+								cars.add("BMW");
+								cars.add("Ford");
+								cars.add("Mazda");						
+								// Use getFirst() to display the first item in the list
+								System.out.println(cars.getFirst()); // Volvo
+							  }
+							}
+		getLast():
+							import java.util.LinkedList;
+							public class Main {
+							  public static void main(String[] args) {
+								LinkedList<String> cars = new LinkedList<String>();
+								cars.add("Volvo");
+								cars.add("BMW");
+								cars.add("Ford");
+								cars.add("Mazda");
+								
+								// Use getLast() to display the last item in the list
+								System.out.println(cars.getLast()); // Mazda
+							  }
+							}			

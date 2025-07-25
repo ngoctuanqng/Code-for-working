@@ -1,0 +1,96 @@
+TimeZone--Ngày và giờ trong Java:
+
+											Lớp TimeZone trong java được sử dụng để biểu diễn múi giờ. TimeZone là một lớp trừu tượng (abstract) kế thừa lớp Object và implements các giao diện Serializable,
+											Cloneable.
+											
+	Các phương thức của lớp TimeZone trong java
+		static String[] getAvailableIDs()
+		
+											Nó được sử dụng để nhận được tất cả các ID có sẵn được hỗ trợ.
+		
+		static TimeZone getDefault()
+			
+											Nó được sử dụng để lấy TimeZone mặc định cho máy chủ hiện tại.
+		
+		String getDisplayName()
+			
+											Nó được sử dụng để trả về tên của múi giờ phù hợp để trình bày cho người dùng ở vùng miền mặc định.
+		
+		String getID()
+			
+											Nó được sử dụng để lấy ID của múi giờ hiện tại.
+		
+		int getOffset(long date)
+			
+											Nó được sử dụng để trả về offset của múi giờ này từ UTC tại một date nhất định.
+		
+		void setID(String ID)
+			
+											Nó được sử dụng để thiết lập ID cho múi giờ hiện tại.
+											
+		Ví dụ về TimeZone trong java - phương thức getAvailableIDs()
+											
+											package vn.viettuts.date;													 
+											import java.util.TimeZone;													 
+											public class TimeZoneExample1 {
+												public static void main(String args[]) {
+													String[] id = TimeZone.getAvailableIDs();
+													System.out.println("Danh sach id co san la: ");
+													for (int i = 0; i < id.length; i++) {
+														System.out.println(id[i]);
+													}
+												}
+											}
+											Kết quả:
+											Danh sach id co san la: 
+											Africa/Abidjan
+											Africa/Accra
+											Africa/Addis_Ababa
+											Africa/Algiers
+											Africa/Asmara
+											...
+											PST
+											SST
+											VST
+		
+		Ví dụ về TimeZone trong java - phương thức getOffset()
+											
+											package vn.viettuts.date;
+											import java.util.Calendar;
+											import java.util.TimeZone;												 
+											public class TimeZoneExample2 {
+												public static void main(String args[]) {
+													TimeZone zone = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
+													System.out.println("Gia tri Offset cua TimeZone: "
+															+ zone.getOffset(Calendar.ZONE_OFFSET));
+												}
+											}
+											Kết quả:
+											Gia tri Offset cua TimeZone: 28800000
+		
+		Ví dụ về TimeZone trong java - phương thức getID()
+		
+											package vn.viettuts.date;													 
+											import java.util.TimeZone;													 
+											public class TimeZoneExample3 {
+												public static void main(String args[]) {
+													TimeZone timezone = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
+													System.out.println("Gia tri cua ID la: " + timezone.getID());
+												}
+											}
+											Kết quả:
+											Gia tri cua ID la: Asia/Ho_Chi_Minh
+											
+		Ví dụ về TimeZone trong java - phương thức getDisplayName()
+											
+											package vn.viettuts.date;												 
+											import java.util.TimeZone;													 
+											public class TimeZoneExample4 {
+												public static void main(String args[]) {
+													TimeZone zone = TimeZone.getDefault();
+													String name = zone.getDisplayName();
+													System.out.println("Ten hien thi mac dinh cua mui gio: " + name);
+												}
+											}
+											Kết quả:
+											Ten hien thi mac dinh cua mui gio: Indochina Time	

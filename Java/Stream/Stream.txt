@@ -1,0 +1,49 @@
+	Stream--JAVA:			List<Integer> numbers1 = Arrays.asList(1, 2, 3, 4, 5, 3, 2, 1);
+							List<Integer> numbers2 = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+		
+		- map, filter, limit, skip, distinct, sorted:				        
+																		
+							List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 3, 2, 1);
+							List<Integer> squaredDistinctNumbers = numbers.stream()
+									.map(x -> x * x)                // map(): ánh xạ từng phần tử thành bình phương của nó
+									.filter(x -> x % 2 == 0)        // filter(): lọc các số chẵn
+									.distinct()                     // distinct(): loại bỏ các phần tử trùng lặp
+									.sorted()                       // sorted(): sắp xếp các phần tử
+									.limit(3)                       // limit(): giới hạn số lượng phần tử
+									.skip(1)                        // skip(): bỏ qua n phần tử đầu tiên
+									.collect(Collectors.toList());  // thu thập kết quả vào một danh sách // [4, 16, 36]
+																				
+		- forEach:			numbers.stream().forEach(System.out::print); // 123456789
+		- reduce:			int sum = numbers.stream().reduce(0, Integer::sum); // 45
+		- count:			long count = numbers.stream().count(); // 9 elements
+		- min:				Optional<Integer> min = numbers.stream().min(Integer::compare); // 1
+		- max:				Optional<Integer> max = numbers.stream().max(Integer::compare); // 9
+		- collect:			
+							List<Integer> evenNumbers = numbers.stream()
+															   .filter(x -> x % 2 == 0)
+															   .collect(Collectors.toList()); // [2, 4, 6, 8]
+							
+							Stream<Integer> numbers = Stream.of(1, 2, 3, 4, 5, 5);
+							Set<Integer> numberSet = numbers.collect(Collectors.toSet());
+							System.out.println(numberSet); // Output: [1, 2, 3, 4, 5]
+							
+							Stream<String> countries = Stream.of("Vietnam", "USA", "France");
+							Map<String, Integer> countryLengthMap = countries.collect(Collectors.toMap(country -> country, String::length));
+							System.out.println(countryLengthMap); // Output: {Vietnam=7, USA=3, France=6}
+							
+							Stream<String> words = Stream.of("Hello", "world", "Java");
+							String joinedString = words.collect(Collectors.joining(" "));
+							System.out.println(joinedString); // Output: Hello world Java
+							
+							Stream<String> fruits = Stream.of("apple", "banana", "orange", "grape", "banana");
+							Map<Integer, List<String>> lengthGroup = fruits.collect(Collectors.groupingBy(String::length));
+							System.out.println(lengthGroup); // Output: {5=[apple, grape], 6=[orange], 6=[banana, banana]}
+							
+							Stream<Integer> numbers = Stream.of(1, 2, 3, 4, 5);
+							Map<Boolean, List<Integer>> partitionedMap = numbers.collect(Collectors.partitioningBy(num -> num % 2 == 0));
+							System.out.println(partitionedMap); // Output: {false=[1, 3, 5], true=[2, 4]}
+		- allMatch:			boolean allEven = numbers.stream().allMatch(x -> x % 2 == 0); // false
+		- anyMatch:			boolean anyEven = numbers.stream().anyMatch(x -> x % 2 == 0); // true
+		noneMatch:			boolean noneEven = numbers.stream().noneMatch(x -> x % 2 == 0); // false
+		findAny:			Optional<Integer> anyElement = numbers.stream().findAny(); // 1
+		- findFirst:		Optional<Integer> firstElement = numbers.stream().findFirst(); // 1

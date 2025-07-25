@@ -1,0 +1,16 @@
+java.util.Objects--JAVA:
+	requireNonNull:		        String str = null;
+								Objects.requireNonNull(str, "String str must not be null"); // Kiểm tra xem str có khác null không,
+																							// nếu không sẽ ném ra ngoại lệ NullPointerException
+								String str = null;
+								Objects.requireNonNull(str); // Sẽ ném ra NullPointerException
+	equals:						String str1 = "Hello";
+								String str2 = "World";
+								boolean isEqual = Objects.equals(str1, str2); // false
+
+	isNull:						String str = null;
+								boolean isNull = Objects.isNull(str); // true			
+	nonNull:					String str = "Hello";
+								boolean isNonNull = Objects.nonNull(str); // true	
+	toString:					String str = "Hello";
+								String strValue = Objects.toString(str); // "Hello"

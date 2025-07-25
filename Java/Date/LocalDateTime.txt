@@ -1,0 +1,706 @@
+LocalDateTime--Ngày và giờ trong Java:	
+
+						Represents both a date and a time (yyyy-MM-dd-HH-mm-ss-ns)
+						
+						LocalDateTime currentDateTime = LocalDateTime.now();
+						LocalDateTime specificDateTime = LocalDateTime.of(2022, 12, 31, 15, 30); // 2022-12-31T15:30
+						int year = currentDateTime.getYear();
+						int month = currentDateTime.getMonthValue();
+						int day = currentDateTime.getDayOfMonth();
+						int hour = currentDateTime.getHour();
+						int minute = currentDateTime.getMinute();
+						int second = currentDateTime.getSecond();
+
+	Lớp LocalDateTime đại diện cho ngày tháng và thời gian địa phương (local date time) trong hệ thống lịch ISO, nó không bao gồm thông tin múi giờ.
+							
+							public final class LocalDateTime
+							implements Temporal, TemporalAdjuster, ChronoLocalDateTime<LocalDate>, Serializable
+	
+	Lớp LocalDateTime nằm trong package java.time. Cũng giống như các lớp khác được giới thiệu trong Java 8 Date Time API, LocalDateTime là bất biến (immutable) điều này có nghĩa là tất cả các tính toán
+	trên LocalDateTime đều tạo ra một đối tượng LocalDateTime mới, vì vậy nó an toàn khi được sử dụng trong môi trường multithreading.
+	
+	Static Factory methodsLocalDateTime--LocalDateTime Java:
+	
+		Lớp LocalDateTime không cung cấp bất kỳ một constructor nào, nhưng nó cung cấp các phương thức nhà máy tĩnh (static factory method) để tạo ra một đối tượng mới:
+								
+								public static LocalDateTime now()  
+								public static LocalDateTime now(ZoneId zone)  
+								public static LocalDateTime now(Clock clock)
+								public static LocalDateTime of(int year, Month month, int dayOfMonth,
+															   int hour, int minute)
+								public static LocalDateTime of(int year, Month month, int dayOfMonth,
+															   int hour, int minute, int second)
+								public static LocalDateTime of(int year, Month month, int dayOfMonth,
+															   int hour, int minute, int second, int nanoOfSecond)
+								public static LocalDateTime of(int year, int month, int dayOfMonth,
+															   int hour, int minute)
+								public static LocalDateTime of(int year, int month, int dayOfMonth,
+															   int hour, int minute, int second)
+								public static LocalDateTime of(int year, int month, int dayOfMonth,
+															   int hour, int minute, int second, int nanoOfSecond)
+								public static LocalDateTime of(LocalDate date, LocalTime time)
+								public static LocalDateTime ofInstant(Instant instant, ZoneId zone)
+								public static LocalDateTime ofEpochSecond(long epochSecond, int nanoOfSecond, ZoneOffset offset)
+								public static LocalDateTime from(TemporalAccessor temporal)  
+								public static LocalDateTime parse(CharSequence text)
+								public static LocalDateTime parse(CharSequence text, DateTimeFormatter formatter)
+		
+		Tạo đối tượng LocalDateTime đại diện cho ngày tháng và thời gian hiện thời từ đồng hồ hệ thống và múi giờ mặc định (Trên máy tính của bạn).
+		
+								// Ex: Current Date Time from the system clock in the default time-zone.
+								LocalDateTime dt1 = LocalDateTime.now();
+								System.out.println("dt1: " + dt1);
+								
+								// Ex: Current Date Time from the specified clock.
+								Clock clock2 = Clock.systemDefaultZone();
+								LocalDateTime dt2 = LocalDateTime.now(clock2);
+								System.out.println("dt2: " + dt2);
+								
+								// Ex: Current Date Time from the system clock in the specified time-zone.
+								ZoneId zoneId3 = ZoneId.systemDefault();
+								LocalDateTime dt3 = LocalDateTime.now(zoneId3);
+								System.out.println("dt3: " + dt3);
+								
+								Output:
+									dt1: 2021-06-02T21:33:45.249967
+									dt2: 2021-06-02T21:33:45.250606
+									dt3: 2021-06-02T21:33:45.250714
+		
+		Tạo đối tượng LocalDateTime từ các giá trị ngày, tháng, năm, giờ, phút, giây,.. được chỉ định:
+								
+								// Ex: of(int year, Month month, int dayOfMonth, int hour, int minute)
+								LocalDateTime dt1 = LocalDateTime.of(2000, Month.MAY, 20, 13, 45, 30);  
+								System.out.println("dt1: " + dt1); // 2000-05-20T13:45:30
+								
+								// Ex: of(int year, int month, int dayOfMonth, int hour, int minute, int second, int nanoOfSecond)
+								LocalDateTime dt2 = LocalDateTime.of(2000, 5, 20, 13, 45, 30, 12345);
+								System.out.println("dt2: " + dt2); // 2000-05-20T13:45:30.000012345
+		
+		Tạo đối tượng LocalDateTime bằng cách kết hợp 2 đối tượng LocalDate và LocalTime:
+								
+								LocalDate date = LocalDate.parse("2020-05-15");
+								LocalTime time = LocalTime.parse("13:45:30");										
+								// Ex: of(LocalDate date, LocalTime time)
+								LocalDateTime dt  = LocalDateTime.of(date, time);
+								System.out.println("Date time: " + dt); // 2020-05-15T13:45:30
+		
+		Tạo một đối tượng LocalDateTime từ một đối tượng TemporalAccessor:
+		
+								// TemporalAccessor
+								ZonedDateTime z = ZonedDateTime.of(2016, 10, 12,
+																   15, 20, 30, 0,
+																   ZoneId.systemDefault());
+								System.out.println("ZonedDateTime: " + z); // 2016-10-12T15:20:30+06:00[Asia/Bishkek]
+								// from(TemporalAccessor temporal)
+								LocalDateTime dateTime = LocalDateTime.from(z);
+								System.out.println("dateTime: " + dateTime); // 2016-10-12T15:20:30
+		
+		Tạo đối tượng LocalDateTime từ các đối tượng Instant và ZoneId:
+		
+								Instant instant = Instant.now();
+								ZoneId zoneId = ZoneId.systemDefault();
+								// ofInstant(Instant instant, ZoneId zone)
+								LocalDateTime dateTime = LocalDateTime.ofInstant(instant, zoneId);
+								System.out.println("dateTime: " + dateTime); // 2021-06-02T21:07:39.970782
+		
+		Tạo đối tượng LocalDateTime từ việc phân tích một văn bản có định dạng ngày tháng và thời gian:
+		
+								- Không có format phía sau thì phải theo chuẩn yyyy-MM-ddTmm:HH:ss.SSS, còn không phải có format rõ ràng
+								- Đã về dạng kiểu datetime thì phải luôn là dạng yyyy-MM-ddTmm:HH:ss.SSS
+		
+								// Default Format: yyyy-MM-ddTmm:HH:ss
+								LocalDateTime dt1 = LocalDateTime.parse("2011-11-20T13:45:30");
+								System.out.println("dt1: " + dt1); // 2011-11-20T13:45:30
+								
+								// Default Format: yyyy-MM-ddTmm:HH:ss.SSS
+								LocalDateTime dt2 = LocalDateTime.parse("2011-11-20T13:45:30.12345");
+								System.out.println("dt2: " + dt2); // 2011-11-20T13:45:30.123450
+								
+								// Ex: parse(CharSequence text, DateTimeFormatter formatter)
+								DateTimeFormatter fmt3 = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+								LocalDateTime dt3 = LocalDateTime.parse("20/11/2020 13:45:30", fmt3);
+								System.out.println("dt3: " + dt3); // 2020-11-20T13:45:30
+	
+	isAfter(..), isBefore(..)--LocalDateTime Java:
+	
+		Phương thức isBefore(ChronoLocalDate) được sử dụng để kiểm tra đối tượng LocalDateTime này có đứng trước (before) một đối tượng được chỉ định khác trên dòng thời gian hay không.
+								
+								// Inherited from ChronoLocalDateTime interface
+								public boolean isBefore(ChronoLocalDateTime<?> other)
+							
+		Phương thức isAfter(ChronoLocalDate) được sử dụng để kiểm tra đối tượng LocalDateTime này có đứng sau (after) một đối tượng được chỉ định khác trên dòng thời gian hay không.
+								
+								// Inherited from ChronoLocalDateTime interface
+								public boolean isAfter(ChronoLocalDateTime<?> other)
+	
+	format(DateTimeFormatter)--LocalDateTime Java:
+	
+							Định dạng đối tượng LocalDateTime này bằng một DateTimeFormatter được chỉ định.
+								
+								public String format(DateTimeFormatter formatter)
+							
+							Ví dụ:
+							
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 5, 15, 20, 59);
+								System.out.println("localDateTime: " + localDateTime); // 2020-May-15 20:59
+								System.out.println();
+								// For example:
+								// '2011-12-03T10:15:30',
+								// '2011-12-03T10:15:30+01:00' if has offset
+								// '2011-12-03T10:15:30+01:00[Europe/Paris]' if has time-zone
+								DateTimeFormatter fmt1 = DateTimeFormatter.ISO_DATE_TIME;
+								System.out.println("ISO_DATE_TIME: " + localDateTime.format(fmt1)); // 2020-05-15T20:59:00  
+								// Custom Formatter:
+								DateTimeFormatter fmt2 = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss.SSS");  
+								// 15/05/2020 20:59:00.000
+								System.out.println("dd/MM/yyyy HH:mm:ss.SSS: " + localDateTime.format(fmt2));
+	
+	getX() *--LocalDateTime Java:
+	
+							Phương thức getYear() trả về năm được biểu thị bởi LocalDateTime này, nó tương đương với việc gọi phương thức get(ChronoField.YEAR), nếu muốn lấy năm trong kỷ nguyên (year of era)
+							hãy gọi phương thức get(ChronoField.YEAR_OF_ERA).
+								
+								public int getYear()
+								public int getMonthValue()  
+								public Month getMonth()  
+								public int getDayOfMonth()  
+								public int getDayOfYear()   
+								public DayOfWeek getDayOfWeek()
+								public int getHour()  
+								public int getMinute()
+								public int getSecond()
+								public int getNano()
+							
+							Ví dụ:
+								
+								LocalDateTime dateTime = LocalDateTime.parse("2020-05-15T13:45:30.12345");
+								System.out.println("Date Time: " + dateTime); // 2020-05-15T13:45:30.123450
+								System.out.println();										
+								System.out.println("getDayOfYear(): " + dateTime.getDayOfYear()); // 136
+								System.out.println("getDayOfMonth(): " + dateTime.getDayOfMonth()); // 15
+								System.out.println("getYear(): " + dateTime.getYear());  // 2020
+								System.out.println("getMonth(): " + dateTime.getMonth());  // Month.MAY (enum)
+								System.out.println("getMonthValue(): " + dateTime.getMonthValue()); // 5
+								System.out.println("getDayOfWeek(): " + dateTime.getDayOfWeek()); // DayOfWeek.FRIDAY (enum)
+								System.out.println("getHour(): " + dateTime.getHour());  // 13
+								System.out.println("getMinute(): " + dateTime.getMinute()); // 45
+								System.out.println("getSecond(): " + dateTime.getSecond()); // 30
+								System.out.println("getNano(): " + dateTime.getNano());  // 123450000
+	
+	get(TemporalField)--LocalDateTime Java:
+	
+							Trả về giá trị của trường (field) đã chỉ định của đối tượng LocalDateTime này dưới dạng một số nguyên 32 bit.
+								
+								public int get(TemporalField field)
+							
+							Chú ý: Một số trường có thể không được hỗ trợ bởi LocalDateTime và UnsupportedTemporalTypeException sẽ được ném ra. Để chắc chắn, hãy sử dụng phương thức isSupported(TemporalField) để kiểm tra xem một trường nào đó có được LocalDateTime hỗ trợ hay không.
+							
+							Ví dụ:
+								
+								LocalDateTime dt = LocalDateTime.parse("2020-05-15T13:45:30.12345");
+								System.out.println("Date Time: " + dt); // 2020-05-15T13:45:30.123450
+								System.out.println();
+								// int get(TemporalField field)
+								System.out.println("DAY_OF_MONTH: " + dt.get(ChronoField.DAY_OF_MONTH)); // 15
+								System.out.println("DAY_OF_WEEK: " + dt.get(ChronoField.DAY_OF_WEEK)); // 5
+								System.out.println("DAY_OF_YEAR: " + dt.get(ChronoField.DAY_OF_YEAR)); // 136
+								System.out.println("ERA: " + dt.get(ChronoField.ERA)); // 1
+								System.out.println("YEAR: " + dt.get(ChronoField.YEAR)); // 2020
+								System.out.println("YEAR_OF_ERA: " + dt.get(ChronoField.YEAR_OF_ERA)); // 2020
+								System.out.println("ALIGNED_DAY_OF_WEEK_IN_MONTH: " + dt.get(ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH)); // 1
+								System.out.println("ALIGNED_DAY_OF_WEEK_IN_YEAR: " + dt.get(ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR)); // 3
+								System.out.println("ALIGNED_WEEK_OF_MONTH: " + dt.get(ChronoField.ALIGNED_WEEK_OF_MONTH)); // 3
+								System.out.println("ALIGNED_WEEK_OF_YEAR: " + dt.get(ChronoField.ALIGNED_WEEK_OF_YEAR)); // 20
+								// Use getLong() instead
+								// System.out.println("PROLEPTIC_MONTH: " + dt.get(ChronoField.PROLEPTIC_MONTH)); // 24244
+								// System.out.println("EPOCH_DAY: " + dt.get(ChronoField.EPOCH_DAY)); // 18397
+								// Time:
+								System.out.println("AMPM_OF_DAY: " + dt.get(ChronoField.AMPM_OF_DAY)); // 13
+								System.out.println("CLOCK_HOUR_OF_AMPM: " + dt.get(ChronoField.CLOCK_HOUR_OF_AMPM)); // 1
+								System.out.println("CLOCK_HOUR_OF_DAY: " + dt.get(ChronoField.CLOCK_HOUR_OF_DAY)); // 13
+								System.out.println("HOUR_OF_AMPM: " + dt.get(ChronoField.HOUR_OF_AMPM)); // 1
+								System.out.println("HOUR_OF_DAY: " + dt.get(ChronoField.HOUR_OF_DAY)); // 13
+								System.out.println("MILLI_OF_DAY: " + dt.get(ChronoField.MILLI_OF_DAY)); // 49530123
+								System.out.println("MILLI_OF_SECOND: " + dt.get(ChronoField.MILLI_OF_SECOND)); // 123
+								System.out.println("MINUTE_OF_DAY: " + dt.get(ChronoField.MINUTE_OF_DAY)); // 825
+								System.out.println("MINUTE_OF_HOUR: " + dt.get(ChronoField.MINUTE_OF_HOUR)); // 45
+								System.out.println("MICRO_OF_SECOND: " + dt.get(ChronoField.MICRO_OF_SECOND)); // 123450
+								System.out.println("NANO_OF_SECOND: " + dt.get(ChronoField.NANO_OF_SECOND)); // 123450000
+								System.out.println("SECOND_OF_DAY: " + dt.get(ChronoField.SECOND_OF_DAY)); // 49530
+								System.out.println("SECOND_OF_MINUTE: " + dt.get(ChronoField.SECOND_OF_MINUTE)); // 30
+								// Use getLong() instead
+								// System.out.println("NANO_OF_DAY: " + dt.get(ChronoField.NANO_OF_DAY)); // 49530123450000
+								// Unsupported
+								// System.out.println("INSTANT_SECONDS: " + dt.get(ChronoField.INSTANT_SECONDS));
+								// System.out.println("OFFSET_SECONDS: " + dt.get(ChronoField.OFFSET_SECONDS));
+	
+	getLong(TemporalField)--LocalDateTime Java:
+	
+							Trả về giá trị của trường (field) đã chỉ định của đối tượng LocalDateTime này dưới dạng một số nguyên 64 bit.
+								
+								public long getLong(TemporalField field)
+							
+							Chú ý: Một số trường có thể không được hỗ trợ bởi LocalDateTime và UnsupportedTemporalTypeException sẽ được ném ra. Để chắc chắn, hãy sử dụng phương thức isSupported(TemporalField) để kiểm tra xem một trường nào đó có được LocalDateTime hỗ trợ hay không.
+							
+							Ví dụ:
+								
+								LocalDateTime dt = LocalDateTime.parse("2020-05-15T13:45:30.12345");
+								System.out.println("Date Time: " + dt); // 2020-05-15T13:45:30.123450
+								System.out.println();
+								// long getLong(TemporalField field)
+								System.out.println("DAY_OF_MONTH: " + dt.getLong(ChronoField.DAY_OF_MONTH)); // 15
+								System.out.println("DAY_OF_WEEK: " + dt.getLong(ChronoField.DAY_OF_WEEK)); // 5
+								System.out.println("DAY_OF_YEAR: " + dt.getLong(ChronoField.DAY_OF_YEAR)); // 136
+								System.out.println("ERA: " + dt.getLong(ChronoField.ERA)); // 1
+								System.out.println("YEAR: " + dt.getLong(ChronoField.YEAR)); // 2020
+								System.out.println("YEAR_OF_ERA: " + dt.getLong(ChronoField.YEAR_OF_ERA)); // 2020
+								System.out.println("ALIGNED_DAY_OF_WEEK_IN_MONTH: " + dt.getLong(ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH)); // 1
+								System.out.println("ALIGNED_DAY_OF_WEEK_IN_YEAR: " + dt.getLong(ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR)); // 3
+								System.out.println("ALIGNED_WEEK_OF_MONTH: " + dt.getLong(ChronoField.ALIGNED_WEEK_OF_MONTH)); // 3
+								System.out.println("ALIGNED_WEEK_OF_YEAR: " + dt.getLong(ChronoField.ALIGNED_WEEK_OF_YEAR)); // 20
+								//
+								System.out.println("PROLEPTIC_MONTH: " + dt.getLong(ChronoField.PROLEPTIC_MONTH)); // 24244
+								System.out.println("EPOCH_DAY: " + dt.getLong(ChronoField.EPOCH_DAY)); // 18397
+								// Time:
+								System.out.println("AMPM_OF_DAY: " + dt.getLong(ChronoField.AMPM_OF_DAY)); // 13
+								System.out.println("CLOCK_HOUR_OF_AMPM: " + dt.getLong(ChronoField.CLOCK_HOUR_OF_AMPM)); // 1
+								System.out.println("CLOCK_HOUR_OF_DAY: " + dt.getLong(ChronoField.CLOCK_HOUR_OF_DAY)); // 13
+								System.out.println("HOUR_OF_AMPM: " + dt.getLong(ChronoField.HOUR_OF_AMPM)); // 1
+								System.out.println("HOUR_OF_DAY: " + dt.getLong(ChronoField.HOUR_OF_DAY)); // 13
+								System.out.println("MILLI_OF_DAY: " + dt.getLong(ChronoField.MILLI_OF_DAY)); // 49530123
+								System.out.println("MILLI_OF_SECOND: " + dt.getLong(ChronoField.MILLI_OF_SECOND)); // 123
+								System.out.println("MINUTE_OF_DAY: " + dt.getLong(ChronoField.MINUTE_OF_DAY)); // 825
+								System.out.println("MINUTE_OF_HOUR: " + dt.getLong(ChronoField.MINUTE_OF_HOUR)); // 45
+								System.out.println("MICRO_OF_SECOND: " + dt.getLong(ChronoField.MICRO_OF_SECOND)); // 123450
+								System.out.println("NANO_OF_SECOND: " + dt.getLong(ChronoField.NANO_OF_SECOND)); // 123450000
+								System.out.println("SECOND_OF_DAY: " + dt.getLong(ChronoField.SECOND_OF_DAY)); // 49530
+								System.out.println("SECOND_OF_MINUTE: " + dt.getLong(ChronoField.SECOND_OF_MINUTE)); // 30
+								//  
+								System.out.println("NANO_OF_DAY: " + dt.getLong(ChronoField.NANO_OF_DAY)); // 49530123450000
+								// Unsupported
+								// System.out.println("INSTANT_SECONDS: " + dt.getLong(ChronoField.INSTANT_SECONDS));
+								// System.out.println("OFFSET_SECONDS: " + dt.getLong(ChronoField.OFFSET_SECONDS));
+	
+	toLocalDate()--LocalDateTime Java:
+	
+							Trả về phần LocalDate của đối tượng LocalDateTime này.
+								
+								// Inherited from ChronoLocalDateTime interface
+								public LocalDate toLocalDate()
+							
+							Ví dụ:
+								
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 05, 15, 13, 30, 45, 123);
+								System.out.println("localDateTime: " + localDateTime); // 2020-05-15T13:30:45.000000123
+								System.out.println();
+								LocalDate localDate = localDateTime.toLocalDate();
+								System.out.println("localDate: " + localDate); // 2020-05-15
+	
+	toLocalTime()--LocalDateTime Java:
+	
+							Trả về phần LocalTime của đối tượng LocalDateTime này.
+								
+								// Inherited from ChronoLocalDateTime interface
+								public LocalTime toLocalTime()
+							
+							Ví dụ:
+								
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 05, 15, 13, 30, 45, 123);
+								System.out.println("localDateTime: " + localDateTime); // 2020-05-15T13:30:45.000000123
+								System.out.println();
+								LocalTime localTime = localDateTime.toLocalTime();
+								System.out.println("localTime: " + localTime); // 13:30:45.000000123
+	
+	atZone(ZoneId)--LocalDateTime Java:
+	
+							Phương thức atZone(ZoneId) được sử dụng để kết hợp đối tượng LocalDateTime này với đối tượng ZoneId được chỉ định để tạo ra một đối tượng ZonedDateTime.
+								
+								// Inherited from ChronoLocalDateTime interface
+								public ZonedDateTime atZone(ZoneId zone)
+							
+							Ví dụ:
+								
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 05, 15, 13, 30, 45, 123);
+								System.out.println(localDateTime); // 2020-05-15T13:30:45.000000123
+								System.out.println();
+								ZoneId parisZoneId = ZoneId.of("Europe/Paris");
+								ZonedDateTime zonedDateTime = localDateTime.atZone(parisZoneId);
+								System.out.println(zonedDateTime); // 2020-05-15T13:30:45.000000123+02:00[Europe/Paris]
+	
+	atOffset(ZoneOffset)--LocalDateTime Java:
+	
+							Phương thức atOffset(ZoneOffset) được sử dụng để kết hợp đối tượng LocalDateTime này với đối tượng ZoneOffset được chỉ định để tạo ra một đối tượng OffsetDateTime.
+								
+								public OffsetDateTime atOffset(ZoneOffset offset)
+							
+							Ví dụ:
+								
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 05, 15, 13, 30, 45, 123);
+								System.out.println(localDateTime); // 2020-05-15T13:30:45.000000123
+								System.out.println();
+								ZoneOffset zoneOffset2H30 = ZoneOffset.ofHoursMinutes(2, 30);
+								OffsetDateTime offsetDateTime = localDateTime.atOffset(zoneOffset2H30);
+								System.out.println(offsetDateTime); // 2020-05-15T13:30:45.000000123+02:30
+	
+	plusX(..) *--LocalDateTime Java:
+	
+						- Các phương thức plusSeconds(seconds) trả về một bản sao của đối tượng LocalDateTime này với một số lượng giây chỉ định được thêm vào.
+						- Các phương thức plusNanos(nanos), plusHours(hours),... cũng được hiểu tương tự như cái tên của chúng.
+								
+								public LocalDateTime plusYears(long years)  
+								public LocalDateTime plusMonths(long months)  
+								public LocalDateTime plusWeeks(long weeks)  
+								public LocalDateTime plusDays(long days)  
+								public LocalDateTime plusHours(long hours)
+								public LocalDateTime plusMinutes(long minutes)  
+								public LocalDateTime plusSeconds(long seconds)  
+								public LocalDateTime plusNanos(long nanos)
+						
+						Ví dụ:
+								
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 5, 15, 13, 30, 45);
+								System.out.println("localDateTime: " + localDateTime); // 2020-05-15T13:30:45
+								System.out.println();
+								// plusDays(long daysToAdd)
+								LocalDateTime localDateTime1 = localDateTime.plusDays(10);
+								System.out.println("localDateTime1: " + localDateTime1); // 2020-05-25T13:30:45
+								LocalDateTime localDateTime2 = localDateTime.plusDays(-15);
+								System.out.println("localDateTime2: " + localDateTime2); // 2020-04-30T13:30:45
+								// plusHours(long hoursToAdd)
+								LocalDateTime localDateTime3 = localDateTime.plusHours(12);
+								System.out.println("localDateTime3: " + localDateTime3); // 2020-05-16T01:30:45
+	
+	plus(TemporalAmount)--LocalDateTime Java:
+	
+							Trả về một bản sao của đối tượng LocalDateTime này với một giá trị chỉ định được thêm vào.
+								
+								// Inherited from Temporal interface
+								public LocalDateTime plus(TemporalAmount amountToAdd)
+							
+							Ví dụ:
+							
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 5, 15, 13, 30, 45);
+								System.out.println("localDateTime: " + localDateTime); // 2020-05-15T13:30:45
+								System.out.println();
+								// plus(TemporalAmount amountToAdd)
+								TemporalAmount amount1 = Period.ofDays(5);
+								LocalDateTime localDateTime1 = localDateTime.plus(amount1);
+								System.out.println("localDateTime1: " + localDateTime1); // 2020-05-20T13:30:45
+								// plus(TemporalAmount amountToAdd)
+								LocalDateTime from = LocalDateTime.of(2020, 5, 10, 0, 0, 0);
+								LocalDateTime to = LocalDateTime.of(2020, 5, 12, 12, 0, 0);
+								TemporalAmount amount2 = Duration.between(from, to); // 2 days 12 hours
+								LocalDateTime localDateTime2 = localDateTime.plus(amount2);
+								System.out.println("localDateTime2: " + localDateTime2); // 2020-05-18T01:30:45
+	
+	plus(long, TemporalUnit)--LocalDateTime Java:
+	
+							Trả về một bản sao của đối tượng LocalDateTime này với một giá trị chỉ định được thêm vào theo đơn vị tính đã cho.
+								
+								// Inherited from Temporal interface
+								
+								public LocalDateTime plus(long amountToAdd, TemporalUnit unit)
+							
+							Ví dụ:
+								
+								LocalDateTime localDateTime =  LocalDateTime.of(2020, 5, 15, 13, 30, 45);
+								System.out.println("localDateTime: " + localDateTime); // 2020-05-15T13:30:45
+								System.out.println();
+								// plus(long amountToAdd, TemporalUnit unit)
+								LocalDateTime localDateTime1 = localDateTime.plus(20, ChronoUnit.DAYS);
+								System.out.println("localDateTime1: " + localDateTime1); // 2020-06-04T13:30:45
+								// plus(long amountToAdd, TemporalUnit unit)
+								LocalDateTime localDateTime2 = localDateTime.plus(50, ChronoUnit.MINUTES);
+								System.out.println("localDateTime2: " + localDateTime2); // 2020-05-15T14:20:45
+
+	minusX(..) *--LocalDateTime Java:
+	
+							- Các phương thức minusSeconds(seconds) trả về một bản sao của đối tượng LocalDateTime này với một số lượng giây chỉ định được trừ đi.
+							- Các phương thức minusNanos(nanos), minusHours(hours),... cũng được hiểu tương tự như cái tên của chúng.
+								
+								public LocalDateTime minusYears(long years)  
+								public LocalDateTime minusMonths(long months)  
+								public LocalDateTime minusWeeks(long weeks)  
+								public LocalDateTime minusDays(long days)  
+								public LocalDateTime minusHours(long hours)  
+								public LocalDateTime minusMinutes(long minutes)  
+								public LocalDateTime minusSeconds(long seconds)  
+								public LocalDateTime minusNanos(long nanos)
+								
+							Ví dụ:
+								
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 5, 15, 13, 30, 45);
+								System.out.println("localDateTime: " + localDateTime); // 2020-05-15T13:30:45
+								System.out.println();
+								// minusDays(long daysToSubtract)
+								LocalDateTime localDateTime1 = localDateTime.minusDays(10);
+								System.out.println("localDateTime1: " + localDateTime1); // 2020-05-05T13:30:45
+								LocalDateTime localDateTime2 = localDateTime.minusDays(-15);
+								System.out.println("localDateTime2: " + localDateTime2); // 2020-05-30T13:30:45
+								// minusHours(long monthsToSubtract)
+								LocalDateTime localDateTime3 = localDateTime.minusHours(15);
+								System.out.println("localDateTime3: " + localDateTime3); // 2020-05-14T22:30:45
+	
+	minus(TemporalAmount)--LocalDateTime Java:
+	
+							Trả về một bản sao của đối tượng LocalDateTime này với một giá trị chỉ định được trừ đi.
+								
+								// Inherited from Temporal interface
+								public LocalDateTime minus(TemporalAmount amountToSubtract)
+							
+							Ví dụ:
+								
+								LocalDateTime localDateTime = LocalDateTime.of(2020, 5, 15, 13, 30, 45);
+								System.out.println("localDateTime: " + localDateTime); // 2020-05-15T13:30:45
+								System.out.println();
+								// minus(TemporalAmount amountToSubtract)
+								TemporalAmount amount1 = Period.ofDays(20);
+								LocalDateTime localDateTime1 = localDateTime.minus(amount1);
+								System.out.println("localDateTime1: " + localDateTime1); // 2020-04-25T13:30:45
+								// minus(TemporalAmount amountToSubtract)
+								LocalDateTime from = LocalDateTime.of(2020, 5, 10, 0, 0, 0);
+								LocalDateTime to = LocalDateTime.of(2020, 5, 12, 15, 0, 0);
+								TemporalAmount amount2 = Duration.between(from, to); // 2 days 15 hours
+								LocalDateTime localDateTime2 = localDateTime.minus(amount2);
+								System.out.println("localDateTime2: " + localDateTime2); // 2020-05-12T22:30:45
+	
+	minus(long, TemporalUnit)--LocalDateTime Java:
+	
+							Trả về một bản sao của đối tượng LocalDateTime này với một giá trị chỉ định được trừ đi theo đơn vị tính đã cho.
+								
+								// Inherited from Temporal interface
+								public LocalDateTime minus(long amountToSubtract, TemporalUnit unit)
+							
+							Ví dụ:
+								
+								LocalDateTime localDateTime =  LocalDateTime.of(2020, 5, 15, 13, 30, 45);
+								System.out.println("localDateTime: " + localDateTime); // 2020-05-15T13:30:45
+								System.out.println();
+								// minus(long amountToSubtract, TemporalUnit unit)
+								LocalDateTime localDateTime1 = localDateTime.minus(20, ChronoUnit.DAYS);
+								System.out.println("localDateTime1: " + localDateTime1); // 2020-04-25T13:30:45
+								// minus(long amountToSubtract, TemporalUnit unit)
+								LocalDateTime localDateTime2 = localDateTime.minus(50, ChronoUnit.MINUTES);
+								System.out.println("localDateTime2: " + localDateTime2); // 2020-05-15T12:40:45
+	
+	withX(..) *--LocalDateTime Java:
+	
+							- Phương thức withYear(year) trả về một bản sao của đối tượng LocalDateTime này với năm đã được thay đổi thành giá trị được chỉ định.
+							- Các phương thức khác như withMonths(months), withDayOfMonth(dayOfMonth),... cũng được hiểu tương tự như cái tên của chúng.
+								
+								public LocalDateTime withYear(int year)
+								public LocalDateTime withMonth(int month)
+								public LocalDateTime withDayOfMonth(int dayOfMonth)
+								public LocalDateTime withDayOfYear(int dayOfYear)
+								public LocalDateTime withHour(int hour)
+								public LocalDateTime withMinute(int minute)
+								public LocalDateTime withSecond(int second)
+								public LocalDateTime withNano(int nanoOfSecond)
+							
+							Phương thức withYear(year) trả về một bản sao của đối tượng LocalDateTime này với năm đã được thay đổi. Nếu ngày trong tháng (day-of-month) không hợp lệ trong năm, ngày đó sẽ được thay
+							đổi thành ngày trong tháng hợp lệ cuối cùng.
+								
+								LocalDateTime ldt1 = LocalDateTime.parse("2020-02-29T13:30:45").withYear(2024);  
+								System.out.println("ldt1: " + ldt1); // 2024-02-29T13:30:45
+								LocalDateTime ldt2 = LocalDateTime.parse("2020-02-29T13:30:45").withYear(2019); // Important Note!
+								System.out.println("ldt2: " + ldt2); // 2019-02-28T13:30:45
+								LocalDateTime ldt3 = LocalDateTime.parse("2020-02-28T13:30:45").withYear(2019);  
+								System.out.println("ldt3: " + ldt3); // 2019-02-28T13:30:45
+								LocalDateTime ldt4 = LocalDateTime.parse("2020-02-21T13:30:45").withYear(2019);  
+								System.out.println("ldt4: " + ldt4); // 2019-02-21T13:30:45
+							
+							Phương thức withMonth(month) trả về một bản sao của đối tượng LocalDateTime này với tháng đã được thay đổi. Nếu ngày trong tháng (day-of-month) không hợp lệ trong năm, ngày đó sẽ được
+							thay đổi thành ngày trong tháng hợp lệ cuối cùng.
+								
+								LocalDateTime ldt1 = LocalDateTime.parse("2020-03-31T13:30:45").withMonth(2); // Important Note!
+								System.out.println("ldt1: " + ldt1); // 2020-02-29T13:30:45
+								LocalDateTime ldt2 = LocalDateTime.parse("2020-03-31T13:30:45").withMonth(2); // Important Note!
+								System.out.println("ldt2: " + ldt2); // 2020-02-29T13:30:45
+								LocalDateTime ldt3 = LocalDateTime.parse("2020-03-29T13:30:45").withMonth(2);  
+								System.out.println("ldt3: " + ldt3); // 2020-02-29T13:30:45
+								LocalDateTime ldt4 = LocalDateTime.parse("2020-03-21T13:30:45").withMonth(2);  
+								System.out.println("ldt4: " + ldt4); // 2020-02-21T13:30:45
+	
+	with(TemporalAdjuster)--LocalDateTime Java:
+	
+							Trả về bản sao của đối tượng LocalDateTime này, với dữ liệu ngày tháng và thời gian được điều chỉnh bởi đối tượng TemporalAdjuster.
+								
+								// Inherited from Temporal interface
+								public LocalDateTime with(TemporalAdjuster adjuster)
+							
+							Ví dụ:
+								
+								LocalDateTime now = LocalDateTime.now();
+								System.out.println("Now is: " + now);
+								System.out.println();
+								// TemporalAdjuster: First day-of-month
+								TemporalAdjuster adjuster1 = TemporalAdjusters.firstDayOfMonth();
+								LocalDateTime firstDayOfMonth = now.with(adjuster1);
+								System.out.println("firstDayOfMonth: " + firstDayOfMonth);
+								// TemporalAdjuster: Next monday.
+								TemporalAdjuster adjuster2 = TemporalAdjusters.next(DayOfWeek.MONDAY);
+								LocalDateTime nextMonday = now.with(adjuster2);
+								System.out.println("nextMonday: " + nextMonday);
+								// TemporalAdjuster: First day of next year.
+								TemporalAdjuster adjuster3 = TemporalAdjusters.firstDayOfNextYear();
+								LocalDateTime firstDayOfNextYear = now.with(adjuster3);
+								System.out.println("firstDayOfNextYear: " + firstDayOfNextYear);
+								Output:
+									Now is: 2021-07-08T18:01:05.965972
+									firstDayOfMonth: 2021-07-01T18:01:05.965972
+									nextMonday: 2021-07-12T18:01:05.965972
+									firstDayOfNextYear: 2022-01-01T18:01:05.965972
+	
+	with(TemporalField, long)--LocalDateTime Java:
+	
+							Trả về bản sao của đối tượng LocalDateTime này với trường (field) chỉ định được thay đổi sang giá trị mới.
+								
+								// Inherited from Temporal interface
+								public LocalDateTime with(TemporalField field, long newValue)
+							
+							Trong một số trường hợp, việc thay đổi trường (field) được chỉ định có thể khiến ngày kết quả trở nên không hợp lệ, chẳng hạn như việc thay đổi tháng từ ngày 31 tháng 1 sang tháng 2 sẽ làm cho ngày trong tháng (day-of-month) không hợp lệ. Trong những trường hợp như thế này, vấn đề đã được phương thức này xử lý. Thông thường, nó sẽ chọn ngày hợp lệ trước đó, sẽ là ngày hợp lệ cuối cùng của tháng 2 trong ví dụ này.
+								
+								LocalDateTime myDateTime = LocalDateTime.parse("2021-05-29T13:30:45");
+								System.out.println("myDateTime is: " + myDateTime); // 2021-05-29T13:30:45
+								System.out.println("myDateTime day of week: " + myDateTime.get(ChronoField.DAY_OF_WEEK));  // 6
+								System.out.println("myDateTime day of month: " + myDateTime.get(ChronoField.DAY_OF_MONTH)); // 29
+								System.out.println();
+								LocalDateTime localDateTime1 =    myDateTime.with(ChronoField.DAY_OF_WEEK, 3);   
+								System.out.println("localDateTime1: " + localDateTime1); // 2021-05-26T13:30:45
+								LocalDateTime localDateTime2 =    myDateTime.with(ChronoField.DAY_OF_MONTH, 10);  
+								System.out.println("localDateTime2: " + localDateTime2);  // 2021-05-10T13:30:45
+								// February 2021 has only 28 days.
+								LocalDateTime localDateTime3 =    myDateTime.with(ChronoField.MONTH_OF_YEAR, 2);  
+								System.out.println("localDateTime3: " + localDateTime3);  // 2021-02-28T13:30:45  (***)
+								Output:
+									myDateTime is: 2021-05-29T13:30:45
+									myDateTime day of week: 6
+									myDateTime day of month: 29
+									localDateTime1: 2021-05-26T13:30:45
+									localDateTime2: 2021-05-10T13:30:45
+									localDateTime3: 2021-02-28T13:30:45
+	
+	adjustInto(Temporal)--LocalDateTime Java:
+	
+							Phương thức adjustInto(Temporal) trả về bản sao của đối tượng Temporal đã chỉ định với dữ liệu ngày tháng và thời gian được điều chỉnh để nó giống với đối tượng LocalDateTime này.
+								
+								// Inherited from TemporalAdjuster interface
+								public Temporal adjustInto(Temporal temporal)
+							
+							Về cơ bản, hai cách tiếp cận dưới đây là tương tự nhau:
+								
+								Temporal copiedTemporal = thisLocalDateTime.adjustInfo(aTemporal);  // (1)
+								// Same as:
+								Temporal copiedTemporal = aTemporal.with(thisLocalDateTime);           // (2)
+							
+							Ví dụ:
+								
+								ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+								System.out.println("Now is: " + zonedDateTime);
+								LocalDateTime localDateTime = LocalDateTime.parse("1999-01-01T00:30:30");
+								zonedDateTime = (ZonedDateTime) localDateTime.adjustInto(zonedDateTime);
+								System.out.println("After adjusting: " + zonedDateTime);
+								Output:
+									Now is: 2021-07-08T20:05:56.439468+07:00[Asia/Ho_Chi_Minh]
+									After adjusting: 1999-01-01T00:30:30+07:00[Asia/Ho_Chi_Minh]
+	
+	query(TemporalQuery<R>)--LocalDateTime Java:
+	
+								Truy vấn đối tượng LocalDateTime này bằng đối tượng TemporalQuery đã cho để trích ra thông tin.
+								
+								// Inherited from TemporalAccessor interface
+								public <R> R query(TemporalQuery<R> query)
+	
+	until(Temporal, TemporalUnit)--LocalDateTime Java:
+	
+							Tính lượng thời gian cho đến ngày-giờ khác theo đơn vị được chỉ định.
+								
+								// Inherited from Temporal interface
+								public long until(Temporal endExclusive, TemporalUnit unit)
+							
+							Ví dụ:
+								
+								LocalDateTime localDateTime_from = LocalDateTime.of(2020, 5, 15, 0, 0, 0);
+								System.out.println("Date Time From: " + localDateTime_from); // 2020-05-15T00:00
+								LocalDateTime localDateTime_to = LocalDateTime.of(2020, 5, 15, 13, 30, 59);  
+								System.out.println("Date Time To: " + localDateTime_to); // 2020-05-15T13:30:59
+								System.out.println();
+								long hours = localDateTime_from.until(localDateTime_to, ChronoUnit.HOURS);
+								System.out.println("hours: " + hours); // 13
+								long minutes = localDateTime_from.until(localDateTime_to, ChronoUnit.MINUTES);
+								System.out.println("minutes: " + minutes); // 810
+							
+							Bạn cũng có thể sử dụng phương thức TemporalUnit.between(Temporal,Temporal) để có kết quả tương tự:
+								
+								LocalDateTime localDateTime_from = LocalDateTime.of(2020, 5, 15, 0, 0, 0);
+								System.out.println("Date Time From: " + localDateTime_from); // 2020-05-15T00:00
+								LocalDateTime localDateTime_to = LocalDateTime.of(2020, 5, 15, 13, 30, 59);  
+								System.out.println("Date Time To: " + localDateTime_to); // 2020-05-15T13:30:59
+								System.out.println();
+								long hours = ChronoUnit.HOURS.between(localDateTime_from, localDateTime_to);
+								System.out.println("hours: " + hours); // 13
+								long minutes = ChronoUnit.MINUTES.between(localDateTime_from, localDateTime_to);
+								System.out.println("minutes: " + minutes); // 810
+	
+	isSupported(TemporalField)--LocalDateTime Java:
+	
+							Kiểm tra xem một TemporalField đã cho có được hỗ trợ bởi đối tượng LocalDateTime này hay không.
+								
+								// Inherited from TemporalAccessor interface
+								public boolean isSupported(TemporalField field)
+							
+							Về cơ bản, LocalDateTime hỗ trợ các TemporalField tiêu chuẩn sau:
+								
+								ChronoField.NANO_OF_SECOND
+								ChronoField.NANO_OF_DAY
+								ChronoField.MICRO_OF_SECOND
+								ChronoField.ChronoField.MICRO_OF_DAY
+								ChronoField.MILLI_OF_SECOND
+								ChronoField.MILLI_OF_DAY
+								ChronoField.SECOND_OF_MINUTE
+								ChronoField.SECOND_OF_DAY
+								ChronoField.MINUTE_OF_HOUR
+								ChronoField.MINUTE_OF_DAY
+								ChronoField.HOUR_OF_AMPM
+								ChronoField.CLOCK_HOUR_OF_AMPM
+								ChronoField.HOUR_OF_DAY
+								ChronoField.CLOCK_HOUR_OF_DAY
+								ChronoField.AMPM_OF_DAY
+								ChronoField.DAY_OF_WEEK
+								ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH
+								ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR
+								ChronoField.DAY_OF_MONTH
+								ChronoField.DAY_OF_YEAR
+								ChronoField.EPOCH_DAY
+								ChronoField.ALIGNED_WEEK_OF_MONTH
+								ChronoField.ALIGNED_WEEK_OF_YEAR
+								ChronoField.MONTH_OF_YEAR
+								ChronoField.PROLEPTIC_MONTH
+								ChronoField.YEAR_OF_ERA
+								ChronoField.YEAR
+								ChronoField.ERA
+	
+	isSupported(TemporalUnit)--LocalDateTime Java:
+	
+							Kiểm tra xem một TemporalUnit đã cho có được hỗ trợ bởi đối tượng LocalDateTime này hay không.
+								
+								// Inherited from Temporal interface
+								public boolean isSupported(TemporalUnit unit)
+							
+							Về cơ bản, LocalDateTime hỗ trợ các TemporalUnit tiêu chuẩn sau:
+								
+								ChronoUnit.NANOS
+								ChronoUnit.MICROS
+								ChronoUnit.MILLIS
+								ChronoUnit.SECONDS
+								ChronoUnit.MINUTES
+								ChronoUnit.HOURS
+								ChronoUnit.HALF_DAYS
+								ChronoUnit.DAYS
+								ChronoUnit.WEEKS
+								ChronoUnit.MONTHS
+								ChronoUnit.YEARS
+								ChronoUnit.DECADES
+								ChronoUnit.CENTURIES
+								ChronoUnit.MILLENNIA
+								ChronoUnit.ERAS

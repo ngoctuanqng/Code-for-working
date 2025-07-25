@@ -1,0 +1,40 @@
+	String--JAVA:			String str1 = "Hello";
+							String str2 = "World";
+		- length:			int length = str1.length(); // 5
+		- isEmpty:			str1.isEmpty(); // false
+		- equals:			str1.equals(str2); // false
+		- contains:			str1.contains("World"); // false
+		- charAt:			str1.charAt(2); // l
+		- concat:			str1.concat(" ").concat(str2); // Hello World
+		- toUpperCase:		str1.toUpperCase(); // HELLO
+		- toLowerCase:		str2.toLowerCase(); // world
+		- replace:			str1.replace("l", "X"); // HeXXo
+		- trim:				
+							String trimmedStr1 = "   " + str1 + "   ";
+							String trimmedStr2 = trimmedStr1.trim(); // Hello
+		- startsWith:		str1.startsWith("Hello"); // true
+		- endsWith:			str2.endsWith("World"); // true
+		- valueOf:			
+							int number = 123;
+							String numberStr2 = String.valueOf(number); // Chuyển đối một giá trị sang chuỗi
+		- indexOf:			str1.indexOf("H"); // 0
+		- lastIndexOf:		str2.lastIndexOf("o"); // 4
+		- split:			
+							Chia một chuỗi thành một mảng các chuỗi con dựa trên một biểu thức chính quy (regex) hoặc một chuỗi phân tách (delimiter) được chỉ định.
+		
+							String str3 = "Java Programming";
+							String[] words = str3.split(" "); // Java
+															  // Programming
+		- substring:		
+							String substring1 = str1.substring(1, 4); // ell, cut start at index 1, before at index 4
+							String substring2 = str2.substring(3); // ld
+		- compareTo:		
+							String str1 = "apple";
+							String str2 = "banana";
+							String str3 = "apple";
+							int result1 = str1.compareTo(str2); // Khi so sánh "apple" với "banana", kết quả là -1 vì "apple" đứng trước "banana" trong thứ tự từ điển. -1
+							int result2 = str1.compareTo(str3); // 0
+							int result3 = str2.compareTo(str1); // Khi so sánh "banana" với "apple", kết quả là 1 vì "banana" đứng sau "apple" trong thứ tự từ điển. 1
+		- join:				String joinString1 = String.join("-", "welcome", "to", "java"); // welcome-to-java	
+		- format:			projectMonitoringViewDto.setFinishedPercent(((taskCount != 0 ? String.format("%.2f", (100.0 * finishedCount / taskCount)) : "0") + "%")); // chuỗi đại đã làm tròn đến 2 chữ số thập phân phía sau, 
+																																									  // kết hợp với ký tự "%".
