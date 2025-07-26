@@ -1,0 +1,13 @@
+Reading Objects with JPA(EntityManager)--SPRING:
+
+		@Override
+		public Student findById(Integer id) {
+			return entityManager.find(Student.class, id);
+		}
+		
+		@Bean
+		public CommandLineRunner commandLineRunner(StudentDAO studentDAO) {
+			return runner -> {
+				readStudent(studentDAO);
+			};
+		}

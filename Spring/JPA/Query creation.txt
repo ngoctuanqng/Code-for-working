@@ -1,0 +1,77 @@
+Query creation--SPRING:
+								
+		JpaRepository<Customer, Integer> thì sẽ chỉ select trong table được define ở đây là Customer, Integer là kiểu dữ liệu của primary key
+
+		package stackjava.com.querycreation.repository;
+		import java.util.List;
+		import org.springframework.data.jpa.repository.JpaRepository;
+		import org.springframework.stereotype.Repository;
+		import stackjava.com.querycreation.entities.Customer;
+		@Repository
+		public interface CustomerRepository extends JpaRepository<Customer, Integer> {				
+		
+			List<Customer> findAllByOrderByNameDesc(); // SELECT * FROM table_name ORDER BY name DESC;	
+													
+			List<Customer> findByName(String name); // SELECT * FROM table_name WHERE name = 'value';
+													
+			List<Customer> findByNameAndAddress(String name, String address); // SELECT * FROM table_name WHERE name = 'name' AND address = 'address';
+																			
+			List<Customer> findByNameLike(String name); // SELECT * FROM table_name WHERE name LIKE '%name%';
+														
+			List<Customer> findByIdIn(List<Integer> ids); // SELECT * FROM table_name WHERE id IN (id1, id2, ...);
+														
+			List<Customer> findByIdLessThan(int index); // SELECT * FROM table_name WHERE id < index;
+														
+			Product findDistinctByName(String name); // SELECT DISTINCT * FROM product WHERE name = 'name';
+			
+			List<String> findNameByLastname(String lastname); // SELECT p.name FROM Person p WHERE p.lastname = :lastname
+			
+		}
+		
+		Optional<Product> findById(Long id); // SELECT * FROM product WHERE id = id;
+											
+		List<Product> findByPriceGreaterThan(BigDecimal price); // SELECT * FROM product WHERE price > price;
+																
+		List<Product> findByNameContaining(String name); // SELECT * FROM product WHERE name LIKE '%name%';
+														
+		List<Product> findByPriceBetween(BigDecimal startPrice, BigDecimal endPrice); // SELECT * FROM product WHERE price BETWEEN startPrice AND endPrice;
+																					
+		Person findPersonByLastname(String lastname); // SELECT * FROM person WHERE lastname = 'lastname'.
+													
+		Person findAllByLastname(String lastname); // SELECT * FROM person WHERE lastname = 'lastname';
+		
+		List<Person> findByEmailAddressAndLastname(EmailAddress emailAddress, String lastname); // SELECT * FROM person WHERE email_address = 'emailAddress' AND lastname = 'lastname';
+		
+		List<Person> findDistinctPeopleByLastnameOrFirstname(String lastname, String firstname); // SELECT DISTINCT * FROM person WHERE lastname = 'lastname' OR firstname = 'firstname';
+		
+		List<Person> findPeopleDistinctByLastnameOrFirstname(String lastname, String firstname); // SELECT DISTINCT * FROM person WHERE lastname = 'lastname' OR firstname = 'firstname';
+		
+		List<Person> findByLastnameIgnoreCase(String lastname); // SELECT * FROM person WHERE LOWER(lastname) = LOWER('lastname');
+		
+		List<Person> findByLastnameAndFirstnameAllIgnoreCase(String lastname, String firstname); // SELECT * FROM person WHERE LOWER(lastname) = LOWER('lastname') AND LOWER(firstname) = LOWER('firstname');
+		
+		List<Person> findByAddressZipCode(ZipCode zipCode); // SELECT * FROM person WHERE address_zip_code = 'zipCode';
+															
+		findPersonByLastname(String lastname); // Nó sẽ trả về một đối tượng Person. Nếu không có kết quả nào khớp, nó có thể trả về null hoặc Optional.empty() tùy thuộc vào cấu hình.
+		
+		findAllByLastname(String lastname); // Kết quả trả về sẽ là một danh sách (List) các đối tượng Person.
+		
+		findByLastname(String lastname); // Kết quả trả về sẽ là một danh sách (List) các đối tượng Person.												
+
+	@Query:
+		
+		public interface UserRepository extends JpaRepository<User, Long> {								
+			@Query("SELECT u FROM User u WHERE u.status = :status and u.name = :name") // JPQL
+			User findUserByNamedParams(@Param("status") Integer status, @Param("name") String name);								
+			@Query(value = "SELECT * FROM Users u WHERE u.status = :status and u.name = :name", nativeQuery = true) // Native SQL
+			User findUserByNamedParamsNative(@Param("status") Integer status, @Param("name") String name);
+		}
+		
+		public interface UserRepository extends JpaRepository<User, Long> {
+
+			@Query("select u from User u where u.emailAddress = ?1") // Khi được gắn @Query, thì tên của method không còn tác dụng nữa. Đây là JPQL
+																	 // Cách truyền tham số là gọi theo thứ tự các tham số của method bên dưới ?1, ?2
+			User myCustomQuery(String emailAddress);								
+			@Query(value = "select * from User u where u.email_address = ?1", nativeQuery = true) // Đây là Native SQL
+			User myCustomQuery2(String emailAddress);
+		}

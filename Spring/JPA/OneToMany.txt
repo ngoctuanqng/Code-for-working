@@ -1,0 +1,901 @@
+@OneToMany--SPRING:
+
+		- Chú ý trong mối quan hệ một nhiều, foreign key sẽ nằm ở bảng nhiều, không nằm ở bảng một
+		- Khi sử dụng @OneToMany, Spring sẽ hiểu rằng có một quan hệ một-nhiều giữa hai entity và sẽ tự động quản lý việc lưu trữ và truy xuất dữ liệu theo quan hệ này. Nếu không sử
+		dụng @OneToMany, bạn sẽ cần tự tay quản lý việc lưu trữ và truy xuất dữ liệu giữa các entity.
+		- Việc sử dụng @OneToMany có thể giúp bạn viết mã một cách ngắn gọn và dễ hiểu hơn, vì Spring tự động xử lý nhiều công việc cho bạn. Tuy nhiên, nếu bạn cần kiểm soát
+		hoàn toàn cách dữ liệu được lưu trữ và truy xuất, bạn có thể muốn tự quản lý các quan hệ mà không sử dụng @OneToMany.
+		- Bảng cha không chứa foreign key (bảng trong java có mapped) thì khi add data của bảng foreign xong phải set lại data của bảng foreign key với giá trị là con trỏ this.
+		- @ManyToOne áp dụng cho bảng một cái này tương ứng với nhiều cái kia
+		- @OneToMany áp dụng cho bảng nhiều cái này tương ứng với một cái kia
+		- Khi sử dụng @OneToMany, Spring Data JPA tự động sinh ra các câu truy vấn SQL phù hợp để thực hiện các thao tác CRUD (tạo, đọc, cập nhật, xóa) cho mối quan hệ này.
+		- Nếu không sử dụng @OneToMany, bạn sẽ cần phải thực hiện việc quản lý mối quan hệ một cách thủ công. Điều này bao gồm việc tạo các bảng liên kết, viết các câu truy vấn
+		SQL thủ công để thực hiện các thao tác CRUD cho mối quan hệ đó. Các thao tác này sẽ mất nhiều thời gian và công sức hơn so với việc sử dụng các tính năng tự động hóa được
+		cung cấp bởi Spring Data JPA thông qua @OneToMany.
+		- Để duy trì tính nhất quán giữa các đối tượng Instructor và Course, cả hai đều cần biết về nhau.
+		- Khóa ngoại đặt ở bảng phía "nhiều".
+												
+	Ví dụ khi có @OneToMany không cần phải lưu đến database riêng từng cái:
+	
+													private void createInstructorWithCourses(AppDAO appDAO) {
+														
+														Instructor tempInstructor = // create the instructor
+																new Instructor("Susan", "Public", "susan.public@luv2code.com");													
+														tempInstructor.setInstructorDetail(tempInstructorDetail); // associate the objects										
+														Course tempCourse1 = new Course("Air Guitar - The Ultimate Guide"); // create some courses
+														Course tempCourse2 = new Course("The Pinball Masterclass");
+														// add courses to instructor
+														tempInstructor.add(tempCourse1);
+														tempInstructor.add(tempCourse2);
+														// save the instructor
+														//
+														// NOTE: this will ALSO save the courses
+														// because of CascadeType.PERSIST
+														//
+														System.out.println("Saving instructor: " + tempInstructor);
+														System.out.println("The courses: " + tempInstructor.getCourses());
+														appDAO.save(tempInstructor);
+														System.out.println("Done!");
+													}
+			
+	Ví dụ One-To-Many Unidirectional Relationship
+	
+													package com.example.springdatajpa.entities;
+													import jakarta.persistence.*;
+													import lombok.*;
+													import java.util.HashSet;
+													import java.util.Set;
+													@Entity
+													@Table(name = "authors")
+													@Data
+													public class Author
+													{
+														@Id
+														@GeneratedValue(strategy = GenerationType.SEQUENCE)
+														private Long authorId;
+														private String name;
+														@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+														@JoinColumn(name = "author_id", referencedColumnName = "authorId")
+														private Set<Book> books = new HashSet<>();
+														// Uni-directional One to Many mapping -> One Author can have Many Books
+														// Here, extra column 'author_id' will be created on the many side of the relationship i.e. in the Books table
+													}
+													
+													package com.example.springdatajpa.entities;
+													import jakarta.persistence.*;
+													import lombok.*;
+													@Entity
+													@Table(name = "books")
+													@Data
+													public class Book
+													{
+														@Id
+														@GeneratedValue(strategy = GenerationType.IDENTITY)
+														private Long bookId;
+														private String title;
+													}
+												
+													package com.example.springdatajpa.entities;
+													import jakarta.persistence.*;
+													import lombok.*;
+													@Entity
+													@Table(name = "books")
+													@Data
+													public class Book
+													{
+														@Id
+														@GeneratedValue(strategy = GenerationType.IDENTITY)
+														private Long bookId;
+														private String title;
+													}
+													
+													package com.example.springdatajpa;
+													import com.example.springdatajpa.entities.*;
+													import com.example.springdatajpa.repositories.AuthorRepository;
+													import com.example.springdatajpa.repositories.BookRepository;
+													import com.example.springdatajpa.repositories.ProductRepository;
+													import com.example.springdatajpa.repositories.StockRepository;
+													import lombok.extern.slf4j.Slf4j;
+													import org.springframework.boot.SpringApplication;
+													import org.springframework.boot.autoconfigure.SpringBootApplication;
+													import org.springframework.context.ApplicationContext;
+													@SpringBootApplication
+													@Slf4j
+													public class SpringDataJpaApplication
+													{
+													 public static void main(String[] args)
+													 {
+													  ApplicationContext context = SpringApplication.run(SpringDataJpaApplication.class, args);
+													  AuthorRepository authorRepository = context.getBean(AuthorRepository.class);
+													  BookRepository bookRepository = context.getBean(BookRepository.class);
+													  // Create authors
+													  Author author1 = new Author();
+													  author1.setName("Deepak Kumar");
+													  Author author2 = new Author();
+													  author2.setName("Katty Janes");
+													  // Create books
+													  Book book1 = new Book();
+													  book1.setTitle("Welcome to CSS");
+													  Book book2 = new Book();
+													  book2.setTitle("Javascript Programming");
+													  // Associate books with authors
+													  author1.getBooks().add(book1);
+													  author2.getBooks().add(book2);
+													  // Save authors (and cascade to save associated books)
+													  authorRepository.save(author1);
+													  authorRepository.save(author2);
+													  // Retrieve and print saved authors (optional)
+													  System.out.println("Saved Authors:");
+													  authorRepository.findAll().forEach(System.out::println);
+													 }
+													}
+		
+	Ví dụ One-To-Many Bidirectional Relationship
+													
+													@Entity
+													@Table(name = "BLOG_DETAILS")
+													public class Blog {
+														@Id
+														@GeneratedValue(strategy = GenerationType.IDENTITY)
+														@Column(name = "ID")
+														private int id;
+														@Column(name = "title")
+														private String title;
+														@Column(name = "category")
+														private String category;
+														@Column(name = "content")
+														private String content;
+														@ManyToOne(cascade = CascadeType.ALL)
+														@JoinColumn(name = "owner_id")
+														private Owner owner;
+														public Blog() { }
+														public Blog(String title, String category, String content) {
+															this.title = title;
+															this.category = category;
+															this.content = content;
+														}
+														public int getId() { return id; }
+														public void setId(int id) { this.id = id; }
+														public String getTitle() { return title; }
+														public void setTitle(String title) { this.title = title; }
+														public String getCategory() { return category; }
+														public void setCategory(String category) { this.category = category; }
+														public String getContent() { return content; }
+														public void setContent(String content) { this.content = content; }
+														public Owner getOwner() { return owner; }
+														public void setOwner(Owner owner) { this.owner = owner; }
+														@Override
+														public String toString() {
+															return "Blog{" + "id=" + id + ", title='" + title + '\'' + ", category='" + category + '\'' +
+																	", content='" + content + '\'' + '}';
+														}
+													}
+													
+													@Entity
+													@Table(name = "OWNER_DETAILS")
+													public class Owner {													
+														@Id
+														@GeneratedValue(strategy = GenerationType.IDENTITY)
+														@Column(name = "ID")
+														private int id;
+														@Column(name = "name")
+														private String name;
+														@Column(name = "email")
+														private String email;
+														@OneToMany(fetch = FetchType.LAZY, mappedBy = "owner", cascade = CascadeType.ALL)
+														private List<Blog> blogList;
+														public Owner() { }
+														public Owner(String name, String email) {
+															this.name = name;
+															this.email = email;
+														}
+														public int getId() { return id; }
+														public void setId(int id) { this.id = id; }
+														public String getName() {return name; }
+														public void setName(String name) { this.name = name; }
+														public String getEmail() { return email; }
+														public void setEmail(String email) { this.email = email; }
+														public List<Blog> getBlogList() { return blogList; }
+														public void setBlogList(List<Blog> blogList) { this.blogList = blogList; }
+														@Override
+														public String toString() {
+															return "Owner{" + "id=" + id + ", name='" + name + '\'' + ", email='" + email + '\'' + '}';
+														}
+													}
+														
+													@RestController
+													@RequestMapping("/owner")
+													public class OwnerController {
+														@Autowired
+														private OwnerRepository ownerRepository;
+														@Autowired
+														private BlogRepository blogRepository;
+														@PostMapping("/saveOwner")
+														public String saveOwner(@RequestBody Owner owner) {
+															System.out.println("Owner save called...");
+														// a new Owner
+															Owner ownerIn = new Owner(owner.getName(), owner.getEmail());
+														// list of Blog
+															List<Blog> blogs = new ArrayList<>();
+															for (Blog blogIn : owner.getBlogList()) {
+																// new Blog
+																Blog blog = new Blog(blogIn.getTitle(), blogIn.getCategory(), blogIn.getContent());
+																// set owner to Blog
+																blog.setOwner(ownerIn);
+																// add blog to list
+																blogs.add(blog);
+															}													
+															// add blog list to Owner
+															ownerIn.setBlogList(blogs);
+														// save Owner
+															Owner ownerOut = ownerRepository.save(ownerIn);
+															System.out.println("Owner out :: " + ownerOut);
+															System.out.println("Saved!!!");
+															return "Owner saved!!!";
+														}
+														@PostMapping("/saveBlog")
+														public String saveBlog(@RequestParam(name = "id") String id) {
+															System.out.println("Blog save called...");													
+														// fetch Ower
+															Owner ownerTemp = ownerRepository.getById(Integer.valueOf(id));
+														// list of Blog
+															List<Blog> blogs = new ArrayList<>();
+														// new Blog
+															Blog blog = new Blog("Build application server using NodeJs", "nodeJs",
+																	"We will build REStful api using nodeJs.");
+														// set owner to blog
+															blog.setOwner(ownerTemp);
+															// add Blog to list
+															blogs.add(blog);
+															blog = new Blog("Single Page Application using Angular", "Angular",
+																	"We can build robust application using Angular framework.");
+														// set owner to blog
+															blog.setOwner(ownerTemp);
+															blogs.add(blog);
+														// add Blog list to Owner
+															ownerTemp.setBlogList(blogs);
+														// save Owner
+															ownerRepository.save(ownerTemp);
+															System.out.println("Saved!!!");
+															return "Blog saved!!!";
+														}
+														@GetMapping("/getOwner/{id}")
+														public String getOwner(@PathVariable(name = "id") String id) {
+															System.out.println("Owner get called...");
+														// fetch Owner
+															Owner ownerOut = ownerRepository.getById(Integer.valueOf(id));
+															System.out.println("\nOwner details :: \n" + ownerOut);
+															System.out.println("\nList of Blogs :: \n" + ownerOut.getBlogList());
+															System.out.println("\nDone!!!");
+															return "Owner fetched...";
+														}
+														@GetMapping("/getBlog/{id}")
+														public String getBlog(@PathVariable(name = "id") String id) {
+															System.out.println("Blog get called...");
+														// fetch Blog
+															Blog blogOut = blogRepository.getById(Integer.valueOf(id));
+															System.out.println("\nBlog details :: \n" + blogOut);
+															System.out.println("\nOwner details :: \n" + blogOut.getOwner());
+															System.out.println("\nDone!!!");
+															return "Blog fetched...";
+														}
+													}
+
+	Example 1:
+	
+												@Entity
+												@Table(name="course")
+												public class Course {
+													…
+													@ManyToOne
+													@JoinColumn(name="instructor_id")
+													private Instructor instructor;
+													…
+													// constructors, getters / setters
+												}
+												
+												@Entity
+												@Table(name="instructor")
+												public class Instructor {
+													…
+													@OneToMany(mappedBy="instructor")
+													private List<Course> courses;
+													public List<Course> getCourses() {
+														return courses;
+													}
+													public void setCourses(List<Course> courses) {
+														this.courses = courses;
+													} …
+												}
+	Example 2:
+						
+												@Entity
+												@Table(name="CART")
+												public class Cart {
+													//...
+													@OneToMany(mappedBy="cart")
+													private Set<Item> items;												
+													// getters and setters
+												}
+												
+												@Entity
+												@Table(name="ITEMS")
+												public class Item {													
+													//...
+													@ManyToOne
+													@JoinColumn(name="cart_id", nullable=false)
+													private Cart cart;
+													public Item() {}												
+													// getters and setters
+												}
+												
+	Example 3:
+	
+												Course chứa foreign key của Instructor
+	
+		sql:
+		
+												DROP SCHEMA IF EXISTS `hb-04-one-to-many-uni`;
+												CREATE SCHEMA `hb-04-one-to-many-uni`;
+												use `hb-04-one-to-many-uni`;
+												SET FOREIGN_KEY_CHECKS = 0;
+												CREATE TABLE `instructor_detail` (
+												  `id` int NOT NULL AUTO_INCREMENT,
+												  `youtube_channel` varchar(128) DEFAULT NULL,
+												  `hobby` varchar(45) DEFAULT NULL,
+												  PRIMARY KEY (`id`)
+												) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+												CREATE TABLE `instructor` (
+												  `id` int NOT NULL AUTO_INCREMENT,
+												  `first_name` varchar(45) DEFAULT NULL,
+												  `last_name` varchar(45) DEFAULT NULL,
+												  `email` varchar(45) DEFAULT NULL,
+												  `instructor_detail_id` int DEFAULT NULL,
+												  PRIMARY KEY (`id`),
+												  KEY `FK_DETAIL_idx` (`instructor_detail_id`),
+												  CONSTRAINT `FK_DETAIL` FOREIGN KEY (`instructor_detail_id`) 
+												  REFERENCES `instructor_detail` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+												) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+												CREATE TABLE `course` (
+												  `id` int NOT NULL AUTO_INCREMENT,
+												  `title` varchar(128) DEFAULT NULL,
+												  `instructor_id` int DEFAULT NULL,												 
+												  PRIMARY KEY (`id`),												  
+												  UNIQUE KEY `TITLE_UNIQUE` (`title`),								  
+												  KEY `FK_INSTRUCTOR_idx` (`instructor_id`),								  
+												  CONSTRAINT `FK_INSTRUCTOR` 
+												  FOREIGN KEY (`instructor_id`) 
+												  REFERENCES `instructor` (`id`) 					  
+												  ON DELETE NO ACTION ON UPDATE NO ACTION
+												) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+												CREATE TABLE `review` (
+												  `id` int NOT NULL AUTO_INCREMENT,
+												  `comment` varchar(256) DEFAULT NULL,
+												  `course_id` int DEFAULT NULL,
+												  PRIMARY KEY (`id`),
+												  KEY `FK_COURSE_ID_idx` (`course_id`),
+												  CONSTRAINT `FK_COURSE` 
+												  FOREIGN KEY (`course_id`) 
+												  REFERENCES `course` (`id`) 
+												  ON DELETE NO ACTION ON UPDATE NO ACTION
+												) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+												SET FOREIGN_KEY_CHECKS = 1;
+			
+		Course.java:
+	
+												package com.luv2code.cruddemo.entity;
+												import jakarta.persistence.*;
+												import java.util.ArrayList;
+												import java.util.List;
+												@Entity
+												@Table(name="course")
+												public class Course {
+													// define our fields
+													// define constructors
+													// define getter setters
+													// define toString
+													// annotate fields
+													@Id
+													@GeneratedValue(strategy = GenerationType.IDENTITY)
+													@Column(name="id")
+													private int id;
+													@Column(name="title")
+													private String title;
+													@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+																		  CascadeType.DETACH, CascadeType.REFRESH})
+													@JoinColumn(name="instructor_id")
+													private Instructor instructor;
+													@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+													@JoinColumn(name = "course_id")
+													private List<Review> reviews;
+													public Course() {
+													}
+													public Course(String title) {
+														this.title = title;
+													}
+													public int getId() {
+														return id;
+													}
+													public void setId(int id) {
+														this.id = id;
+													}
+													public String getTitle() {
+														return title;
+													}
+													public void setTitle(String title) {
+														this.title = title;
+													}
+													public Instructor getInstructor() {
+														return instructor;
+													}
+													public void setInstructor(Instructor instructor) {
+														this.instructor = instructor;
+													}
+													public List<Review> getReviews() {
+														return reviews;
+													}
+													public void setReviews(List<Review> reviews) {
+														this.reviews = reviews;
+													}
+													// add a convenience method
+													public void addReview(Review theReview) {
+														if (reviews == null) {
+															reviews = new ArrayList<>();
+														}
+														reviews.add(theReview);
+													}
+													@Override
+													public String toString() {
+														return "Course{" +
+																"id=" + id +
+																", title='" + title + '\'' +
+																'}';
+													}
+												}
+												
+	Instructor.java:
+												
+												package com.luv2code.cruddemo.entity;
+												import jakarta.persistence.*;
+												import java.util.ArrayList;
+												import java.util.List;
+												@Entity
+												@Table(name="instructor")
+												public class Instructor {
+													// annotate the class as an entity and map to db table
+													// define the fields
+													// annotate the fields with db column names
+													// ** set up mapping to InstructorDetail entity
+													// create constructors
+													// generate getter/setter methods
+													// generate toString() method
+													@Id
+													@GeneratedValue(strategy = GenerationType.IDENTITY)
+													@Column(name="id")
+													private int id;
+													@Column(name="first_name")
+													private String firstName;
+													@Column(name="last_name")
+													private String lastName;
+													@Column(name="email")
+													private String email;
+													@OneToOne(cascade = CascadeType.ALL)
+													@JoinColumn(name = "instructor_detail_id")
+													private InstructorDetail instructorDetail;
+													@OneToMany(mappedBy = "instructor",
+															   fetch = FetchType.LAZY,
+															   cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+																		  CascadeType.DETACH, CascadeType.REFRESH})
+													private List<Course> courses;
+													public Instructor() {
+													}
+													public Instructor(String firstName, String lastName, String email) {
+														this.firstName = firstName;
+														this.lastName = lastName;
+														this.email = email;
+													}
+													public int getId() {
+														return id;
+													}
+													public void setId(int id) {
+														this.id = id;
+													}
+													public String getFirstName() {
+														return firstName;
+													}
+													public void setFirstName(String firstName) {
+														this.firstName = firstName;
+													}
+													public String getLastName() {
+														return lastName;
+													}
+													public void setLastName(String lastName) {
+														this.lastName = lastName;
+													}
+													public String getEmail() {
+														return email;
+													}
+													public void setEmail(String email) {
+														this.email = email;
+													}
+													public InstructorDetail getInstructorDetail() {
+														return instructorDetail;
+													}
+													public void setInstructorDetail(InstructorDetail instructorDetail) {
+														this.instructorDetail = instructorDetail;
+													}
+													@Override
+													public String toString() {
+														return "Instructor{" +
+																"id=" + id +
+																", firstName='" + firstName + '\'' +
+																", lastName='" + lastName + '\'' +
+																", email='" + email + '\'' +
+																", instructorDetail=" + instructorDetail +
+																'}';
+													}
+													public List<Course> getCourses() {
+														return courses;
+													}
+													public void setCourses(List<Course> courses) {
+														this.courses = courses;
+													}
+													// add convenience methods for bi-directional relationship
+													public void add(Course tempCourse) {
+														if (courses == null) {
+															courses = new ArrayList<>();
+														}
+														courses.add(tempCourse);
+														tempCourse.setInstructor(this);
+													}
+												}
+												
+	AppDAOImpl.java:											
+												
+												package com.luv2code.cruddemo.dao;
+												import com.luv2code.cruddemo.entity.Course;
+												import com.luv2code.cruddemo.entity.Instructor;
+												import com.luv2code.cruddemo.entity.InstructorDetail;
+												import jakarta.persistence.EntityManager;
+												import jakarta.persistence.TypedQuery;
+												import org.springframework.beans.factory.annotation.Autowired;
+												import org.springframework.stereotype.Repository;
+												import org.springframework.transaction.annotation.Transactional;
+												import java.util.List;
+												@Repository
+												public class AppDAOImpl implements AppDAO {
+													// define field for entity manager
+													private EntityManager entityManager;
+													// inject entity manager using constructor injection
+													@Autowired
+													public AppDAOImpl(EntityManager entityManager) {
+														this.entityManager = entityManager;
+													}
+													@Override
+													@Transactional
+													public void save(Instructor theInstructor) {
+														entityManager.persist(theInstructor);
+													}
+													@Override
+													public Instructor findInstructorById(int theId) {
+														return entityManager.find(Instructor.class, theId);
+													}
+													@Override
+													@Transactional
+													public void deleteInstructorById(int theId) {
+														// retrieve the instructor
+														Instructor tempInstructor = entityManager.find(Instructor.class, theId);
+														// get the courses
+														List<Course> courses = tempInstructor.getCourses();
+														// break association of all courses for the instructor
+														for (Course tempCourse : courses) {
+															tempCourse.setInstructor(null);
+														}
+														// delete the instructor
+														entityManager.remove(tempInstructor);
+													}
+													@Override
+													public InstructorDetail findInstructorDetailById(int theId) {
+														return entityManager.find(InstructorDetail.class, theId);
+													}
+													@Override
+													@Transactional
+													public void deleteInstructorDetailById(int theId) {
+														// retrieve instructor detail
+														InstructorDetail tempInstructorDetail = entityManager.find(InstructorDetail.class, theId);
+														// remove the associated object reference
+														// break bi-directional link
+														//
+														tempInstructorDetail.getInstructor().setInstructorDetail(null);
+														// delete the instructor detail
+														entityManager.remove(tempInstructorDetail);
+													}
+													@Override
+													public List<Course> findCoursesByInstructorId(int theId) {
+														// create query
+														TypedQuery<Course> query = entityManager.createQuery(
+																					"from Course where instructor.id = :data", Course.class);
+														query.setParameter("data", theId);
+														// execute query
+														List<Course> courses = query.getResultList();
+														return courses;
+													}
+													@Override
+													public Instructor findInstructorByIdJoinFetch(int theId) {
+														// create query
+														TypedQuery<Instructor> query = entityManager.createQuery(
+																								"select i from Instructor i "
+																									+ "JOIN FETCH i.courses "
+																									+ "JOIN FETCH i.instructorDetail "
+																									+ "where i.id = :data", Instructor.class);
+														query.setParameter("data", theId);
+														// execute query
+														Instructor instructor = query.getSingleResult();
+														return instructor;
+													}
+													@Override
+													@Transactional
+													public void update(Instructor tempInstructor) {
+														entityManager.merge(tempInstructor);
+													}
+													@Override
+													@Transactional
+													public void update(Course tempCourse) {
+														entityManager.merge(tempCourse);
+													}
+													@Override
+													public Course findCourseById(int theId) {
+														return entityManager.find(Course.class, theId);
+													}
+													@Override
+													@Transactional
+													public void deleteCourseById(int theId) {
+														// retrieve the course
+														Course tempCourse = entityManager.find(Course.class, theId);
+														// delete the course
+														entityManager.remove(tempCourse);												}
+													@Override
+													@Transactional
+													public void save(Course theCourse) {
+														entityManager.persist(theCourse);
+													}
+													@Override
+													public Course findCourseAndReviewsByCourseId(int theId) {
+														// create query
+														TypedQuery<Course> query = entityManager.createQuery(
+																"select c from Course c "
+																+ "JOIN FETCH c.reviews "
+																+ "where c.id = :data", Course.class);
+														query.setParameter("data", theId);
+														// execute query
+														Course course = query.getSingleResult();
+														return course;
+													}
+												}
+												
+		CruddemoApplication.java:
+		
+												package com.luv2code.cruddemo;
+												import com.luv2code.cruddemo.dao.AppDAO;
+												import com.luv2code.cruddemo.entity.Course;
+												import com.luv2code.cruddemo.entity.Instructor;
+												import com.luv2code.cruddemo.entity.InstructorDetail;
+												import com.luv2code.cruddemo.entity.Review;
+												import org.springframework.boot.CommandLineRunner;
+												import org.springframework.boot.SpringApplication;
+												import org.springframework.boot.autoconfigure.SpringBootApplication;
+												import org.springframework.context.annotation.Bean;
+												import java.util.List;
+												@SpringBootApplication
+												public class CruddemoApplication {
+													public static void main(String[] args) {
+														SpringApplication.run(CruddemoApplication.class, args);
+													}
+													@Bean
+													public CommandLineRunner commandLineRunner(AppDAO appDAO) {
+														return runner -> {
+															// createCourseAndReviews(appDAO);
+															// retrieveCourseAndReviews(appDAO);
+															deleteCourseAndReviews(appDAO);
+														};
+													}
+													private void deleteCourseAndReviews(AppDAO appDAO) {
+														int theId = 10;
+														System.out.println("Deleting course id: " + theId);
+														appDAO.deleteCourseById(theId);
+														System.out.println("Done!");
+													}
+													private void retrieveCourseAndReviews(AppDAO appDAO) {
+														// get the course and reviews
+														int theId = 10;
+														Course tempCourse = appDAO.findCourseAndReviewsByCourseId(theId);
+														// print the course
+														System.out.println(tempCourse);
+														// print the reviews
+														System.out.println(tempCourse.getReviews());
+													}
+													private void createCourseAndReviews(AppDAO appDAO) {
+														// create a course
+														Course tempCourse = new Course("Pacman - How To Score One Million Points");
+														// add some reviews
+														tempCourse.addReview(new Review("Great course ... loved it!"));
+														tempCourse.addReview(new Review("Cool course, job well done."));
+														tempCourse.addReview(new Review("What a dumb course, you are an idiot!"));
+														// save the course ... and leverage the cascade all
+														System.out.println("Saving the course");
+														System.out.println(tempCourse);
+														System.out.println(tempCourse.getReviews());
+														appDAO.save(tempCourse);
+														System.out.println("Done!");
+													}
+													private void deleteCourse(AppDAO appDAO) {
+														int theId = 10;
+														System.out.println("Deleting course id: " + theId);
+														appDAO.deleteCourseById(theId);
+														System.out.println("Done!");
+													}
+													private void updateCourse(AppDAO appDAO) {
+														int theId = 10;
+														// find the course
+														System.out.println("Finding course id: " + theId);
+														Course tempCourse = appDAO.findCourseById(theId);
+														// update the course
+														System.out.println("Updating course id: " + theId);
+														tempCourse.setTitle("Enjoy the Simple Things");
+														appDAO.update(tempCourse);
+														System.out.println("Done!");
+													}
+													private void updateInstructor(AppDAO appDAO) {
+														int theId = 1;
+														// find the instructor
+														System.out.println("Finding instructor id: " + theId);
+														Instructor tempInstructor = appDAO.findInstructorById(theId);
+														// update the instructor
+														System.out.println("Updating instructor id: " + theId);
+														tempInstructor.setLastName("TESTER");
+														appDAO.update(tempInstructor);
+														System.out.println("Done!");
+													}
+													private void findInstructorWithCoursesJoinFetch(AppDAO appDAO) {
+														int theId = 1;
+														// find the instructor
+														System.out.println("Finding instructor id: " + theId);
+														Instructor tempInstructor = appDAO.findInstructorByIdJoinFetch(theId);
+														System.out.println("tempInstructor: " + tempInstructor);
+														System.out.println("the associated courses: " + tempInstructor.getCourses());
+														System.out.println("Done!");
+													}
+													private void findCoursesForInstructor(AppDAO appDAO) {
+														int theId = 1;
+														// find instructor
+														System.out.println("Finding instructor id: " + theId);
+														Instructor tempInstructor = appDAO.findInstructorById(theId);
+														System.out.println("tempInstructor: " + tempInstructor);
+														// find courses for instructor
+														System.out.println("Finding courses for instructor id: " + theId);
+														List<Course> courses = appDAO.findCoursesByInstructorId(theId);
+														// associate the objects
+														tempInstructor.setCourses(courses);
+														System.out.println("the associated courses: " + tempInstructor.getCourses());
+														System.out.println("Done!");
+													}
+													private void findInstructorWithCourses(AppDAO appDAO) {
+														int theId = 1;
+														System.out.println("Finding instructor id: " + theId);
+														Instructor tempInstructor = appDAO.findInstructorById(theId);
+														System.out.println("tempInstructor: " + tempInstructor);
+														System.out.println("the associated courses: " + tempInstructor.getCourses());
+														System.out.println("Done!");
+													}
+													private void createInstructorWithCourses(AppDAO appDAO) {
+														// create the instructor
+														Instructor tempInstructor =
+																new Instructor("Susan", "Public", "susan.public@luv2code.com");
+														// create the instructor detail
+														InstructorDetail tempInstructorDetail =
+																new InstructorDetail(
+																		"http://www.youtube.com",
+																		"Video Games");
+														// associate the objects
+														tempInstructor.setInstructorDetail(tempInstructorDetail);
+														// create some courses
+														Course tempCourse1 = new Course("Air Guitar - The Ultimate Guide");
+														Course tempCourse2 = new Course("The Pinball Masterclass");
+														// add courses to instructor
+														tempInstructor.add(tempCourse1);
+														tempInstructor.add(tempCourse2);
+														// save the instructor
+														//
+														// NOTE: this will ALSO save the courses
+														// because of CascadeType.PERSIST
+														//
+														System.out.println("Saving instructor: " + tempInstructor);
+														System.out.println("The courses: " + tempInstructor.getCourses());
+														appDAO.save(tempInstructor);
+														System.out.println("Done!");
+													}
+													private void deleteInstructorDetail(AppDAO appDAO) {
+														int theId = 3;
+														System.out.println("Deleting instructor detail id: " + theId);
+														appDAO.deleteInstructorDetailById(theId);
+														System.out.println("Done!");
+													}
+													private void findInstructorDetail(AppDAO appDAO) {
+														// get the instructor detail object
+														int theId = 2;
+														InstructorDetail tempInstructorDetail = appDAO.findInstructorDetailById(theId);
+														// print the instructor detail
+														System.out.println("tempInstructorDetail: " + tempInstructorDetail);
+														// print the associated instructor
+														System.out.println("the associated instructor: " + tempInstructorDetail.getInstructor());
+														System.out.println("Done!");
+													}
+													private void deleteInstructor(AppDAO appDAO) {
+														int theId = 1;
+														System.out.println("Deleting instructor id: " + theId);
+														appDAO.deleteInstructorById(theId);
+														System.out.println("Done!");
+													}
+													private void findInstructor(AppDAO appDAO) {
+														int theId = 2;
+														System.out.println("Finding instructor id: " + theId);
+														Instructor tempInstructor = appDAO.findInstructorById(theId);
+														System.out.println("tempInstructor: " + tempInstructor);
+														System.out.println("the associated instructorDetail only: " + tempInstructor.getInstructorDetail());
+													}
+													private void createInstructor(AppDAO appDAO) {
+														/*
+														// create the instructor
+														Instructor tempInstructor =
+																new Instructor("Chad", "Darby", "darby@luv2code.com");
+														// create the instructor detail
+														InstructorDetail tempInstructorDetail =
+																new InstructorDetail(
+																		"http://www.luv2code.com/youtube",
+																		"Luv 2 code!!!");
+														*/
+														// create the instructor
+														Instructor tempInstructor =
+																new Instructor("Madhu", "Patel", "madhu@luv2code.com");
+														// create the instructor detail
+														InstructorDetail tempInstructorDetail =
+																new InstructorDetail(
+																		"http://www.luv2code.com/youtube",
+																		"Guitar");
+														// associate the objects
+														tempInstructor.setInstructorDetail(tempInstructorDetail);
+														// save the instructor
+														//
+														// NOTE: this will ALSO save the details object
+														// because of CascadeType.ALL
+														//
+														System.out.println("Saving instructor: " + tempInstructor);
+														appDAO.save(tempInstructor);
+														System.out.println("Done!");
+													}
+												}
+	
+	Add convenience methods for bi-directional:
+													@Entity
+													@Table(name="instructor")
+													public class Instructor {
+														…															
+														public void add(Course tempCourse) { // add convenience methods for bi-directional relationship
+														if (courses == null) {
+															courses = new ArrayList<>();
+														}
+														courses.add(tempCourse);
+														tempCourse.setInstructor(this);
+														}…
+													}
+	Delete Instructor:								@Override
+													@Transactional
+													public void deleteInstructorById(int theId) {																														
+														Instructor tempInstructor = entityManager.find(Instructor.class, theId); // retrieve the instructor
+														List<Course> courses = tempInstructor.getCourses();																														
+														for (Course tempCourse : courses) { // break associations of all courses for instructor
+															tempCourse.setInstructor(null); // Remove the instructor from the courses
+														}																														
+														entityManager.remove(tempInstructor); // We only delete the instructor …
+																							  // not the associated course based on our cascade types
+													}			

@@ -1,0 +1,19 @@
+Các Annatation tạo bean--SPRING:
+	@Component: 											
+						Đây là một annotation cơ bản được sử dụng để đánh dấu một class là một Spring component (bean). Nó có thể được sử dụng
+						cho bất kỳ class nào trong ứng dụng của bạn.
+	@Controller: 		
+						Đây là một annotation được sử dụng để đánh dấu một class là một Spring MVC controller. Nó cho phép Spring hiểu rằng class
+						này là một thành phần quản lý bởi Spring và có thể xử lý các yêu cầu HTTP.
+	@Service: 			
+						Đây là một annotation được sử dụng để đánh dấu một class là một Spring service. Nó thường được sử
+						dụng để xử lý logic kinh doanh trong ứng dụng.
+	@Repository: 		
+						Đây là một annotation được sử dụng để đánh dấu một class là một Spring repository (hoặc DAO - Data Access Object). Nó làm
+						nhiệm vụ tương tác với cơ sở dữ liệu và cung cấp các phương thức để truy vấn và thao tác dữ liệu.
+	@Configuration: 	
+						Đây là một annotation được sử dụng để đánh dấu một class là một Spring configuration. Nó cho phép bạn cấu hình các
+						bean và các thành phần khác của ứng dụng thông qua các phương thức được đánh dấu bởi @Bean.
+	@Bean: 				
+						Đây là một annotation được sử dụng để đánh dấu một phương thức trong một class được đánh dấu bởi @Configuration. Phương
+						thức được đánh dấu sẽ trả về một đối tượng, và đối tượng này sẽ được quản lý bởi Spring IoC container như một bean.

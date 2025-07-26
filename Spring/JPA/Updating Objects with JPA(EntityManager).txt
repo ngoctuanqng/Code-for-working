@@ -1,0 +1,18 @@
+Updating Objects with JPA(EntityManager)--SPRING:
+
+	Update a Student:
+	
+				@Override
+				@Transactional
+				public void update(Student theStudent) {
+					entityManager.merge(theStudent);
+				}
+				
+				Student myStudent = studentDAO.findById(studentId);
+				// change first name to "Scooby"
+				myStudent.setFirstName("Scooby");
+				studentDAO.update(myStudent);
+												
+	Update last name for all students:
+
+				int numRowsUpdated = entityManager.createQuery("UPDATE Student SET lastName=‘Tester’”).executeUpdate();

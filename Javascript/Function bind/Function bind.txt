@@ -1,0 +1,99 @@
+Function bind()--Các kiến thức nền tảng JAVASCRIPT:
+	Function Borrowing:
+									With the bind() method, an object can borrow a method from another object.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>JavaScript Function bind()</h1>
+									<p>This example creates 2 objects (person and member).</p>
+									<p>The member object borrows the fullname method from person:</p> 
+									<p id="demo"></p>
+									<script>
+									const person = {
+									  firstName:"John",
+									  lastName: "Doe",
+									  fullName: function() {
+										return this.firstName + " " + this.lastName;
+									  }
+									}
+									const member = {
+									  firstName:"Hege",
+									  lastName: "Nilsen",
+									}
+									let fullName = person.fullName.bind(member);
+									document.getElementById("demo").innerHTML = fullName(); // Hege Nilsen
+									</script>
+									</body>
+									</html>
+	Preserving this:
+									- Sometimes the bind() method has to be used to prevent loosing this.
+									- Khi bạn truyền một hàm như một callback cho một hàm khác như setTimeout, hàm callback được gọi trong một ngữ cảnh khác và không trực tiếp từ đối tượng gốc. Thông thường, ngữ cảnh
+									this sẽ thay đổi và trở thành đối tượng khác hoặc toàn cục (global object) trong trường hợp không sử dụng strict mode.\
+									- Trong JavaScript, từ khóa this thường được sử dụng để truy cập đến đối tượng mà hàm hiện tại đang được gọi trên. Tuy nhiên, khi một hàm được sử dụng như một callback, ngữ cảnh và giá
+									trị của this có thể thay đổi hoặc không được xác định rõ ràng.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>JavaScript Function bind()</h1>
+									<p>In this example, the person object has a display method:</p>
+									<p id="demo"></p>
+									<script>
+									const person = {
+									  firstName:"John",
+									  lastName: "Doe",
+									  display: function() {
+										let x = document.getElementById("demo");
+										x.innerHTML = this.firstName + " " + this.lastName; // John Doe
+									  }
+									}
+									person.display();
+									</script>
+									</body>
+									</html>
+		
+		When a function is used as a callback, this is lost:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>JavaScript Function bind()</h1>
+									<p>This example will try to display a person name after 3 seconds.</p>
+									<p id="demo"></p>
+									<script>
+									const person = {
+									  firstName:"John",
+									  lastName: "Doe",
+									  display: function() {
+										let x = document.getElementById("demo");
+										x.innerHTML = this.firstName + " " + this.lastName; // undefined undefined. Nguyên nhân chính là việc mất mát ngữ cảnh this khi sử dụng hàm như một callback.
+									  }
+									}
+									setTimeout(person.display, 3000);
+									</script>
+									</body>
+									</html>
+									
+		The bind() method solves this problem:
+
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>JavaScript Function bind()</h1>
+									<p>This example will display a person name after 3 seconds:</p>
+									<p id="demo"></p>
+									<script>
+									const person = {
+									  firstName:"John",
+									  lastName: "Doe",
+									  display: function() {
+										let x = document.getElementById("demo");
+										x.innerHTML = this.firstName + " " + this.lastName; // John Doe
+									  }
+									}
+									let display = person.display.bind(person);
+									setTimeout(display, 3000);
+									</script>
+									</body>
+									</html>

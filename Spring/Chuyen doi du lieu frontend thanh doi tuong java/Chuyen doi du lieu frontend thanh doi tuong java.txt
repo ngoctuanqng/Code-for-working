@@ -1,0 +1,108 @@
+Chuyển đổi dữ liệu frontend thành đối tượng java--SPRING:
+
+		Với @RequestParam, dữ liệu thường được truyền dưới dạng chuỗi khi đến backend. Điều này đặc biệt đúng khi bạn truyền dữ liệu thông qua query string của URL
+		trong yêu cầu HTTP. Dữ liệu thường được truyền dưới dạng key=value, và trong trường hợp của chuỗi, giá trị sẽ được đưa vào trong dấu ngoặc kép. Spring sẽ tự
+		động chuyển đổi chuỗi này thành các kiểu dữ liệu Java phù hợp nếu cần thiết.
+		
+		Với @RequestBody, dữ liệu thường không được truyền dưới dạng chuỗi khi đến backend. Thay vào đó, dữ liệu thường được truyền dưới dạng một đối tượng JSON
+		(JavaScript Object Notation) từ phần thân của yêu cầu HTTP. Spring sẽ tự động chuyển đổi đối tượng JSON này thành một đối tượng Java tương ứng để bạn có thể
+		làm việc với nó trong mã backend của mình.
+		
+		@PathVariable: Dữ liệu khi mới đến backend từ @PathVariable thường là một phần của URL, được trích xuất từ mẫu đường dẫn (URL pattern). Dữ liệu này thường là
+		một giá trị cụ thể (ví dụ: số nguyên, chuỗi,..) và không phải là một chuỗi JSON hoặc bất kỳ dạng dữ liệu nào khác.
+
+		{
+		  "name": "John Doe",
+		  "age": 30,
+		  "isStudent": false, 
+		  "height": 175.5,
+		  "weight": 70.2,
+		  "address": {
+			"street": "123 Main St",
+			"city": "Springfield",
+			"zipCode": "12345"
+		  },
+		  "emails": [
+			"john@example.com",
+			"john.doe@example.com"
+		  ],
+		  "registrationDate": "2024-02-28",
+		  "lastLoginTime": "2024-02-28T09:30:00",
+		  "preferences": {
+			"theme": "dark",
+			"language": "en"
+		  }
+		}
+		import java.util.List;
+		import java.time.LocalDate;
+		import java.time.LocalDateTime;
+		public class User {
+			private String name;
+			private int age;
+			private boolean isStudent;
+			private double height;
+			private double weight;
+			private Address address;
+			private List<String> emails;
+			private LocalDate registrationDate;
+			private LocalDateTime lastLoginTime;
+			private Preferences preferences;
+
+			// Constructors, getters và setters
+		}
+		import org.springframework.web.bind.annotation.PostMapping;
+		import org.springframework.web.bind.annotation.RequestBody;
+		import org.springframework.web.bind.annotation.RestController;
+		@RestController
+		public class UserController {
+
+			@PostMapping("/users")
+			public String createUser(@RequestBody User user) {
+				...
+			}
+		}
+
+		@PostMapping("/search-include-task")
+		@PreAuthorize("hasAnyAuthority('GET_PROJECT,GET_PROJECT_OWNER')")
+		public Map<String, Object> findProjectListWithTask(@RequestBody ProjectManagementDto dto,
+														   @RequestParam(required = false, defaultValue = "0", name = "pageNo") int pageNo,
+														   @RequestParam(required = false, defaultValue = "20", name = "pageSize") int pageSize) {
+			PosLogger.developerLog(PosLogWriterIF.INFO, "Project -> " + dto, this);
+			if (Utils.checkPermission("GET_PROJECT_OWNER")) {
+				String id = Utils.getLoginUserDetail();
+				if (id != null) {
+					return this.serviceLifecycle.requestLevel2ProjectService().getProjectListWithTask(serviceLifecycle, dto, id, pageNo, pageSize);
+				}
+			}
+			return this.serviceLifecycle.requestLevel2ProjectService().getProjectListWithTask(serviceLifecycle, dto, null, pageNo, pageSize);
+		}
+
+		@GetMapping("/search/{contentId}/{type}")
+		@PreAuthorize("hasAnyAuthority('GET_TAG,GET_TAG_OWNER')")
+		public ResponseEntity<?> searchTags(@PathVariable("contentId") int contentId,
+											@PathVariable("type") int type) {
+			return this.serviceLifecycle.requestCms06TagsService().searchTags(contentId,type);
+		}
+		
+		@GetMapping("/api/foos")
+		@ResponseBody
+		public String getFoos(@RequestParam Optional<String> id){
+			return "ID: " + id.orElseGet(() -> "not provided");
+		}
+		http://localhost:8080/spring-mvc-basics/api/foos?id=abc
+		
+		@PostMapping("/api/foos")
+		@ResponseBody
+		public String updateFoos(@RequestParam Map<String,String> allParams) {
+			return "Parameters are " + allParams.entrySet();
+		}
+		curl -X POST -F 'name=abc' -F 'id=123' http://localhost:8080/spring-mvc-basics/api/foos
+		Parameters are {[name=abc], [id=123]}
+		
+		@GetMapping("/api/foos")
+		@ResponseBody
+		public String getFoos(@RequestParam List<String> id) {
+			return "IDs are " + id;
+		}
+		http://localhost:8080/spring-mvc-basics/api/foos?id=1,2,3
+		IDs are [1,2,3]

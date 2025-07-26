@@ -1,0 +1,122 @@
+Promise & Async & Await--Các kiến thức nền tảng JAVASCRIPT:
+	Promise:
+								- Là một đối tượng đại diện cho kết quả của một hoạt động bất đồng bộ. Sử dụng để xử lý các hoạt động bất đồng bộ và xác định cách xử lý kết quả thành công hoặc lỗi của chúng.
+								- Promise có các trạng thái: "pending" (đang chờ), "fulfilled" (hoàn thành) và "rejected" (bị từ chối).  Cung cấp phương thức ".then()" để xử lý kết quả thành công và ".catch()" để xử
+								lý lỗi.		
+								
+	Async & Await:
+								- Là một cú pháp đơn giản và trực quan để xử lý Promise.
+								- "async" được sử dụng để khai báo một hàm bất đồng bộ, trong đó có thể sử dụng từ khóa "await" để đợi cho kết quả của một Promise.
+								- "await" được sử dụng để tạm dừng thực thi hàm async và chờ đợi cho kết quả của một Promise trước khi tiếp tục.
+								- Khi sử dụng "async/await", mã có thể được viết theo cách tương tự với mã đồng bộ, làm cho nó dễ đọc và dễ hiểu hơn.
+								- "async" là một từ khóa để khai báo một hàm bất đồng bộ, trong khi "Promise" là một đối tượng được sử dụng để xử lý kết quả của một hoạt động bất đồng bộ.
+								- "async" và "await" thường được sử dụng cùng với Promise để xử lý kết quả của các hoạt động bất đồng bộ một cách dễ dàng và đồng bộ hơn. Bằng cách sử dụng "await" trong một hàm async, ta
+								có thể đợi cho một Promise trả về kết quả trước khi tiếp tục thực hiện các lệnh tiếp theo.
+		Async Syntax:
+									The keyword async before a function makes the function return a promise
+									Or simpler, since you expect a normal value (a normal response, not an error)
+									
+									myFunction().then(
+									  function(value) { /* code if successful */ },
+									  function(error) { /* code if some error */ }
+									);
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript async / await</h2>
+									<p id="demo"></p>
+									<script>
+									function myDisplayer(some) {
+									  document.getElementById("demo").innerHTML = some;
+									}
+									async function myFunction() {return "Hello";}
+									myFunction().then(
+									  function(value) {myDisplayer(value);},
+									  function(error) {myDisplayer(error);}
+									);</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript async / await</h2>
+									<p id="demo"></p>
+									<script>
+									function myDisplayer(some) {
+									  document.getElementById("demo").innerHTML = some;
+									}
+									async function myFunction() {return "Hello";}
+									myFunction().then(
+									  function(value) {myDisplayer(value);}
+									);
+									</script>
+									</body>
+									</html>
+		Await Syntax:
+									The await keyword can only be used inside an async function.
+									The await keyword makes the function pause the execution and wait for a resolved promise before it continues
+									The two arguments (resolve and reject) are pre-defined by JavaScript.
+									We will not create them, but call one of them when the executor function is ready.
+									Very often we will not need a reject function.
+							
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript async / await</h2>
+									<h1 id="demo"></h1>
+									<script>
+									async function myDisplay() {
+									  let myPromise = new Promise(function(resolve, reject) {
+										resolve("I love You !!");
+									  });
+									  document.getElementById("demo").innerHTML = await myPromise;
+									}
+									myDisplay();
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript async / await</h2>
+									<h1 id="demo"></h1>
+									<script>
+									async function myDisplay() {
+									  let myPromise = new Promise(function(resolve) {
+										resolve("I love You !!");
+									  });
+									  document.getElementById("demo").innerHTML = await myPromise;
+									}
+									myDisplay();
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript async / await</h2>
+									<p id="demo"></p>
+									<script>
+									async function getFile() {
+									  let myPromise = new Promise(function(resolve) {
+										let req = new XMLHttpRequest();
+										req.open('GET', "mycar.html");
+										req.onload = function() {
+										  if (req.status == 200) {
+											resolve(req.response);
+										  } else {
+											resolve("File not Found");
+										  }
+										};
+										req.send();
+									  });
+									  document.getElementById("demo").innerHTML = await myPromise;
+									}
+									getFile();
+									</script>
+									</body>
+									</html>

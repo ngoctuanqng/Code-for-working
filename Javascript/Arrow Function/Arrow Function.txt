@@ -1,0 +1,295 @@
+Arrow Function--JAVASCRIPT:
+										- Arrow function sẽ phân ra là có 1 statement và nhiều statement
+												Nếu là 1 statement và có return:	 		thì có thể bỏ {} và return.
+												Nếu là 1 statement và nhiều statement:	 	thì không làm như này được, mục đích của cái này là mong muốn viết tất cả hàm trong 1 hàng
+												Nếu chỉ có 1 parameter:						thì có thể bỏ qua dấu ()
+										- Trường hợp có dấu {}, bạn cần sử dụng thêm từ khóa return để trả về giá trị của hàm.
+										- Bằng cách sử dụng arrow function, chúng ta tránh được việc phải gõ từ khoá function, return và dấu ngoặc nhọn.
+	
+	Arrow function sử dụng kí tự =>--Arrow Function:
+										let sayHi = () => {
+										  console.log("Hi");
+										}
+										sayHi();
+										// => Hi
+										
+	Function sử dụng từ khoá function--Arrow Function:
+										
+										let sayHi = function() {
+										  console.log("Hi");
+										}
+										sayHi();
+										// => Hi
+										
+	Arrow function có thể được sử dụng giống như function expression--Arrow Function:
+	
+										let isVietnamese = confirm("Bạn có phải người Việt Nam không?");
+										let welcome = isVietnamese
+										  ? () => console.log("Chào bạn!")
+										  : () => console.log("Hello!");
+										welcome();
+										
+	Ví dụ sử dụng arrow function làm hàm callback--Arrow Function:
+
+										function ask(question, handleYes, handleNo) {
+										  const answer = confirm(question);
+										  if (answer) {
+											handleYes();
+										  } else {
+											handleNo();
+										  }
+										}
+										ask(
+										  "Bạn muốn tiếp tục thực hiện chương trình không?",
+										  () => console.log("Bạn đã chọn Yes!"),
+										  () => console.log("Bạn đã chọn No!")
+										);
+										
+	Ví dụ về một số trường hợp sử dụng phổ biến--Arrow Function:
+		
+		Trong trường hợp nhiều tham số:
+		
+										Trong trường hợp chỉ có một biểu thức thì không cần tới dấu ngoặc nhọn
+										
+										// ES5 
+										var multiply = function(x, y) {
+											return x * y;
+										}; 										 
+										// ES6 
+										var multiply = (x, y) => { return x * y };
+										
+										var multiply = (x, y) => x * y ;
+										
+		Trong trường hợp 1 tham số:
+		
+										Dấu ngoặc đơn là optional khi chỉ có một tham số
+										
+										//ES5 
+										var phraseSplitterEs5 = function phraseSplitter(phrase) { 
+											return phrase.split(' '); 
+										}; 										 
+										//ES6 
+										var phraseSplitterEs6 = phrase => phrase.split(" "); 								 
+										console.log(phraseSplitterEs6("ES6 Awesomeness"));  // ["ES6", "Awesomeness"]
+										
+		Trong trường hợp không có tham số:
+		
+										Dấu ngoặc đơn là bắt buộc khi không có tham số.
+										
+										//ES5 
+										var docLogEs5 = function docLog() { 
+											console.log(document); 
+										}; 										 
+										//ES6 
+										var docLogEs6 = () => { console.log(document); } 
+										docLogEs6(); // #document... <html> ….
+										
+		Cú pháp với Object literal:
+		
+										Arrow function cũng tương tự như biểu thức function, có thể được sử dụng để trả về một object literal. Phần body của function cần được bao bọc trong ngoặc tròn, để phân biệt giữa
+										object và function block (cả hai đều sử dụng dấu ngoặc nhọn).
+										
+										//ES5 
+										var setNameIdsEs5 = function setNameIds(id, name) { 
+											return { 
+												id: id, 
+												name: name 
+											}; 
+										}; 										 
+										// ES6 
+										var setNameIdsEs6 = (id, name) => ({ id: id, name: name }); 										 
+										(setNameIdsEs6 (4, "Kyle"));   // Object {id: 4, name: "Kyle"}
+										 
+	Khi nào thì nên sử dụng arrow function--Arrow Function:
+	
+										Một usecase phổ biến áp dung arrow function là thao tác mảng, thông thường là khi dùng map hoặc reduce.
+										
+										var smartPhones = [ 
+											{ name: 'iphone', price: 649 }, 
+											{ name: 'Galaxy S6', price: 576 }, 
+											{ name: 'Galaxy Note 5', price: 489 } 
+										];
+										// ES5 
+										console.log(smartPhones.map(function(smartPhone){
+											return smartPhone.price;
+										}); // [649, 576, 489]
+										// ES6 
+										console.log(smartPhones.map(smartPhone => smartPhone.price)); // [649, 576, 489]
+										
+	Lưu ý trong việc sử dụng arrow function--Arrow Function:
+		this:
+										- Từ khóa this hoạt động khác hoàn toàn trong arrow function. Các phương thức call (), apply (), và bind () sẽ không thay đổi giá trị của this trong arrow function. (Trong thực tế, giá
+										trị của this bên trong một hàm đơn giản là không thể thay đổi - nó sẽ luôn là giá trị tương tự như khi hàm được gọi) Nếu bạn cần bind đến một giá trị khác, cần sử dụng function
+										expression như bình thường.
+										- Arrow function không định nghĩa giá trị this của riêng nó giống như function.
+				
+				Ví dụ sử dụng function:
+				
+										Trong chế độ none-strict, function print định nghĩa this chính là đối tượng global (đối với trình duyệt thì đó là window). Do đó, this.x tương đương với window.x và bằng 0.
+										var x = 0;
+										function DelayPrint(x, timeout) {
+										  this.x = x;
+										  setTimeout(function print() {
+											console.log(`The value is ${this.x}.`);
+										  }, timeout);
+										}
+										let p = new DelayPrint(1, 1000);
+										// => The value is 0.
+										
+										Để đoạn code trên hoạt động theo đúng mong muốn thì bạn phải sửa lại như sau:
+										var x = 0;
+										function DelayPrint(x, timeout) {
+										  this.x = x;
+										  let self = this;
+
+										  setTimeout(function print() {
+											console.log(`The value is ${self.x}.`);
+										  }, timeout);
+										}
+										let p = new DelayPrint(1, 1000);
+										// => The value is 1.
+										
+				Ví dụ sử dụng arrow function:
+				
+										Ngược lại với function, arrow function không định nghĩa lại this. Do đó, giá trị của this sẽ ứng với ngữ cảnh gần nhất của nó. Vì vậy, trong đoạn code trên this.x sẽ tương ứng với giá
+										trị x được truyền vào và bằng 1.
+										
+										var x = 0;
+										function DelayPrint(x, timeout) {
+										  this.x = x;
+										  setTimeout(() => {
+											console.log(`The value is ${this.x}.`);
+										  }, timeout);
+										}
+										let p = new DelayPrint(1, 1000);
+										// => The value is 1.
+		Constructors:
+										Arrow function không thể được sử dụng làm constructor như function. Nếu khởi tạo new với arrow function, nó sẽ throw ra lỗi. Arrow function không có thuộc tính prototype hay internal
+										methods. Trong trường hợp đó nên dùng cú pháp tạo class của ES6.
+										
+										Trước khi ES6 ra đời, người ta có thể sử dụng function làm hàm khởi tạo cho object.
+										function Dog(name, color) {
+										  this.name = name;
+										  this.color = color;
+										}
+										let myDog = new Dog("Nick", "White");
+										console.log(myDog.name, myDog.color);
+										// => Nick White
+										
+										Nếu thay đoạn code trên bằng arrow function thì bạn sẽ bị lỗi: TypeError: Dog is not a constructor.
+										let Dog = (name, color) => {
+										  this.name = name;
+										  this.color = color;
+										}
+										let myDog = new Dog("Nick", "White");
+										console.log(myDog.name, myDog.color);
+										// => TypeError: Dog is not a constructor
+										
+		Arrow function không phù hợp làm method cho object:
+		
+										- Chính vì arrow function không định nghĩa giá trị this của riêng nó, nên cũng không phù hợp là method cho object.
+										- Vì vậy, nếu muốn định nghĩa method cho object thì bạn nên sử dụng function.
+										
+										let obj = {
+										  a: 1,
+										  b: () => console.log(this.a, this),
+										  c: function() {
+											console.log(this.a, this);
+										  }
+										}
+										obj.b(); // prints undefined, Window {...} (or the global object)
+										obj.c(); // prints 1, Object {...}
+										
+		Tốt nhất nên cân đối giữa việc dùng function và dùng arrow function như sau:
+		
+										Sử dụng function trong global scope trong Object.prototype properties
+										Sử dụng class cho object constructors.
+										Sử dụng => ở những chố còn lại
+										
+		Arrow function không bind arguments:
+		
+										- Tương tự như đối với this, arrow function cũng không định nghĩa giá trị arguments của riêng nó.
+										- Đối tượng arguments đặc biệt hữu ích đối với những function không xác định trước số lượng tham số.
+										function sum() {
+										  return Array.from(arguments).reduce(
+											(accumulator, currentValue) => accumulator + currentValue
+										  );
+										}
+										console.log(sum(1, 2));         // => 3
+										console.log(sum(1, 2, 3));      // => 6
+										console.log(sum(1, 2, 3, 4));   // => 10
+										
+										- Đối với arrow function, sử dụng arguments sẽ lỗi vì biến này không được định nghĩa ở arrow function.
+										let sum = () => {
+										  return Array.from(arguments).reduce(
+											(accumulator, currentValue) => accumulator + currentValue
+										  );
+										}
+										console.log(sum(1, 2));
+										// Uncaught ReferenceError: arguments is not defined
+										
+										- Tuy nhiên, bạn vẫn có thể sử dụng rest parameters để thay thế cho arguments.
+										let sum = (...args) => {
+										  return Array.from(args).reduce(
+											(accumulator, currentValue) => accumulator + currentValue
+										  );
+										}
+										console.log(sum(1, 2));         // => 3
+										console.log(sum(1, 2, 3));      // => 6
+										console.log(sum(1, 2, 3, 4));   // => 10
+										
+		Arrow function không có thuộc tính prototype:
+		
+										Về cơ bản, mọi đối tượng trong JavaScript đều có thuộc tính prototype và kế thừa cũng theo prototype.
+										Tuy nhiên, nếu arrow function không thể sử dụng làm constructor thì mình cho rằng điều này cũng hợp lý.										
+										let Foo = () => {};
+										console.log(Foo.prototype); // undefined
+
+										
+		Arrow function không được hoisted:
+		
+										Về cơ bản, hoisting được hiểu là biến và hàm số được đưa lên đầu của phạm vi biến, hàm số trước khi đoạn code đó được thực hiện.
+										Arrow function không được hoisted: nghĩa là bạn phải định nghĩa arrow function trước khi sử dụng nó.
+										
+										let myFunc1 = () => {}
+										myFunc1(); // OK
+										myFunc2(); // => ReferenceError: myFunc2 is not defined
+										let myFunc2 = () => {}	
+										
+										Ngược lại, function declaration được hoisted nên bạn có thể gọi hàm trước khi định nghĩa nó.
+										myFunc(); // OK
+										function myFunc() {}
+		
+		Click handle:
+		
+										Đầu tiên. mình có một button lớn, có thể đặt tên cho nó là “push me”:
+										<button id="pushy">Push me</button>
+										<style>
+											button { font-size: 100px; }
+											.on { background: #ffc600; }
+										</style>
+										
+										Khi ai đó click vào nút, mình muốn nút này chuyển (thay đổi) class thành on và nút sẽ chuyển sang màu vàng.
+										const button = document.querySelector('#pushy');
+										button.addEventListener('click', () => {
+											this.classList.toggle('on');
+										});
+										
+										Nhưng nếu bạn click vào nút này thì bạn sẽ nhận được lỗi trả về là:
+										Uncaught TypeError: Cannot read property 'toggle' of undefined
+										
+										Vậy điều này có nghĩa là gì? this trong trường hợp này, nó là thuộc tính window của trình duyệt. Bạn có thể sử dụng console.log để confirm nó.
+										const button = document.querySelector('#pushy');
+										button.addEventListener('click', () => {
+											console.log(this); // Window!
+											this.classList.toggle('on');
+										});
+										
+										Hãy nhớ rằng: Chúng ta đang nói về việc sử dụng Arrow functions, vậy nên this không bị ràng buộc bởi button này. Ngược lại, nếu chúng ta sử dụng function thông thường, this sẽ bị
+										ràng buộc vào button mà bạn click vào đó.
+										Hiển nhiên khi console.log(this) kết quả trả về chính là button mà chúng ta vừa click, và button ban đầu sẽ chuyển sang màu vàng như ý muốn.
+										const button = document.querySelector('#pushy');
+										button.addEventListener('click', function() {
+											console.log(this);
+											this.classList.toggle('on');
+										});

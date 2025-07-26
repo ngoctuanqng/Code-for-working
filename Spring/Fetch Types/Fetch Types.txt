@@ -1,0 +1,36 @@
+Fetch Types--SPRING:
+
+	FetchType Eager:
+	
+				- FetchType eager (tạm dịch: nhanh chóng) được sử dụng để nạp dữ liệu từ cơ sở dữ liệu vào đối
+				tượng Java ngay lập tức khi đối tượng cha được truy vấn.
+				- Khi sử dụng FetchType eager, JPA sẽ tự động nạp tất cả các dữ liệu liên quan (trong trường hợp mối
+				quan hệ là một-nhiều hoặc nhiều-nhiều) hoặc các dữ liệu tham chiếu (trong trường hợp mối quan hệ
+				là một-một) từ cơ sở dữ liệu vào đối tượng Java.
+				- FetchType eager thường được sử dụng khi ta cần truy cập đến các dữ liệu liên quan một cách thường
+				xuyên và khi dữ liệu liên quan không quá lớn để gây ra vấn đề hiệu suất.
+												
+	FetchType Lazy:
+	
+				- FetchType lazy (tạm dịch: lười biếng) được sử dụng để trì hoãn việc nạp dữ liệu từ cơ sở dữ liệu
+				vào đối tượng Java cho đến khi có yêu cầu cụ thể.
+				- Khi sử dụng FetchType lazy, JPA chỉ nạp dữ liệu khi ta yêu cầu truy cập đến nó lần đầu tiên. Điều
+				này giúp tránh việc tải quá nhiều dữ liệu không cần thiết và cải thiện hiệu suất ứng dụng.
+				- FetchType lazy thường được sử dụng khi ta cần tối ưu hóa hiệu suất và tránh việc tải nhiều
+				dữ liệu không cần thiết.
+
+	Specify the fetch type: EAGER or LAZY:
+	
+				@Entity
+				@Table(name="instructor")
+				public class Instructor {
+					…
+					@OneToMany(fetch=FetchType.LAZY, mappedBy=“instructor”)
+					private List<Course> courses;
+					…
+				}
+	Default Fetch Type:
+				@OneToOne    	FetchType.EAGER
+				@OneToMany  	FetchType.LAZY
+				@ManyToOne  	FetchType.EAGER
+				@ManyToMany 	FetchType.LAZY

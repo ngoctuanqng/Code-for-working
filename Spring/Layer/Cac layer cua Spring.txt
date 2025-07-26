@@ -1,0 +1,24 @@
+Các layer của Spring--SPRING:
+	Controller Layer: 			
+								Trong tầng Controller, bạn xác định các lớp controller (hoặc các phương thức trong các lớp controller) để xử lý
+								các yêu cầu HTTP từ phía client.
+								
+								Chúng tiếp nhận các yêu cầu, xử lý chúng và gửi lại kết quả cho client. Controller thường là điểm bắt đầu của ứng
+								dụng và sử dụng các service layer để xử lý logic kinh doanh.
+	Service Layer:				
+								Tầng Service chứa các lớp service, nơi xử lý các logic kinh doanh và nghiệp vụ của ứng dụng. Những logic này thường không thể
+								xử lý trong controller và được trừu tượng hóa vào các service.
+								
+								Service sẽ gọi và sử dụng các thành phần DAO (Data Access Object) để truy xuất dữ liệu từ cơ sở dữ liệu.
+	Repository/DAO Layer:		
+								Tầng Repository hoặc DAO chứa các lớp Repository hoặc DAO, nơi thực hiện việc truy xuất và ghi dữ liệu vào cơ sở dữ liệu.
+								Các lớp này cung cấp các phương thức để tương tác với cơ sở dữ liệu, bao gồm các thao tác CRUD (Create, Read, Update, Delete).
+	Model Layer:				Tầng Model chứa các lớp Model hoặc Entity, đại diện cho các đối tượng dữ liệu trong ứng dụng. Đây là nơi mô tả cấu
+								trúc dữ liệu và quan hệ giữa các đối tượng.
+	View Layer:					Tầng View chứa các thành phần giao diện người dùng, ví dụ như các trang HTML, template engine (thường sử dụng trong ứng dụng web)
+								hoặc các giao diện người dùng khác.
+	Security Layer:				Tầng Security chứa các thành phần liên quan đến bảo mật trong ứng dụng, chẳng hạn như các cấu hình xác thực, ủy quyền và bảo mật truy cập tài nguyên.
+	Exception Handling Layer:	
+								Tầng Exception Handling chứa các thành phần xử lý các ngoại lệ (exception) xảy ra trong ứng dụng.
+								Nó giúp xử lý các tình huống ngoại lệ một cách chặt chẽ và cung cấp thông báo phản hồi hợp lý cho client.
+	Mapper:						Dùng để convert qua lại giữa entity và dto (không có cũng được)			

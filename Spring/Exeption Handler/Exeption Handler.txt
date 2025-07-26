@@ -1,0 +1,92 @@
+Exeption Handler--SPRING:
+	@ExceptionHandler:
+	
+			@ExceptionHandler
+			public ResponseEntity<StudentErrorResponse> handleException(StudentNotFoundException exc) {
+				StudentErrorResponse error = new StudentErrorResponse();
+				error.setStatus(HttpStatus.NOT_FOUND.value());
+				error.setMessage(exc.getMessage());
+				error.setTimeStamp(System.currentTimeMillis());
+				return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+			}
+						
+	@ControllerAdvice và @ExceptionHandler:
+	
+	
+				@ControllerAdvice
+				public class GlobalExceptionHandler {
+
+					@ExceptionHandler(NumberFormatException.class)
+					public ModelAndView handleNumberFormatException(NumberFormatException ex) {
+						ModelAndView modelAndView = new ModelAndView("error");
+						modelAndView.addObject("errorMessage", "Invalid number format. Please enter a valid number.");
+						return modelAndView;
+					}
+				}
+				
+				@ControllerAdvice
+				public class StudentRestExceptionHandler {
+					@ExceptionHandler
+					public ResponseEntity<StudentErrorResponse> handleException(StudentNotFoundException exc) {
+						StudentErrorResponse error = new StudentErrorResponse();
+						error.setStatus(HttpStatus.NOT_FOUND.value());
+						error.setMessage(exc.getMessage());
+						error.setTimeStamp(System.currentTimeMillis());
+						return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+					}
+				}
+				
+	@RestControllerAdvice:
+	
+				@RestControllerAdvice
+				public class GlobalExceptionHandler {
+					@ExceptionHandler({ ExceptionA.class, ExceptionB.class })  // Có thể bắt nhiều loại exception
+					public ResponseEntity<String> handleExceptionA(Exception e) {
+						return ResponseEntity.status(432).body(e.getMessage());
+					}																	
+					// Có thêm các @ExceptionHandler khác...	// Nên bắt cả Exception.class
+					@ExceptionHandler(Exception.class)
+					public ResponseEntity<String> handleUnwantedException(Exception e) {
+						// Log lỗi ra và ẩn đi message thực sự (xem phần 3.2)
+						e.printStackTrace();  // Thực tế người ta dùng logger
+						return ResponseEntity.status(500).body("Unknow error");
+					}
+				}
+															
+	@JsonAdapter:
+	
+				Trong thư viện Gson của Java, @JsonAdapter là một annotation được sử dụng để chỉ định một adapter tùy chỉnh để
+				chuyển đổi giữa đối tượng Java và JSON khi thực hiện quá trình serialize và deserialize. Adapter tùy chỉnh này
+				cho phép bạn kiểm soát cách mà Gson chuyển đổi các đối tượng thành JSON và ngược lại.
+				
+				import java.io.IOException;
+				import com.google.gson.Gson;
+				import com.google.gson.TypeAdapter;
+				import com.google.gson.annotations.JsonAdapter;
+				import com.google.gson.stream.JsonReader;
+				import com.google.gson.stream.JsonWriter;
+				public class JsonAdapterTest {
+				   public static void main(String[] args) {
+					  Gson gson = new Gson();
+					  System.out.println(gson.toJson(new Customer()));
+				   }
+				}
+				// Customer class
+				class Customer {
+				   @JsonAdapter(CustomJsonAdapter.class)
+				   Integer customerId = 101;
+				}
+				// CustomJsonAdapter class
+				class CustomJsonAdapter extends TypeAdapter<Integer> {
+				   @Override
+				   public Integer read(JsonReader jreader) throws IOException {
+					  return null;
+				   }
+				   @Override
+				   public void write(JsonWriter jwriter, Integer customerId) throws IOException {
+					  jwriter.beginObject();
+					  jwriter.name("customerId");
+					  jwriter.value(String.valueOf(customerId));
+					  jwriter.endObject();
+				   }
+				}			

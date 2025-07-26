@@ -1,0 +1,137 @@
+Numbers--JAVASCRIPT:
+
+												With JavaScript, methods and properties are also available to primitive values, because JavaScript treats primitive values as objects when executing methods and properties.
+												
+	The toString() Method--Numbers Javascript:
+	
+												- The toString() method returns a number as a string.
+												- All number methods can be used on any type of numbers (literals, variables, or expressions)
+												
+												<script>
+												let x = 123;
+												document.getElementById("demo").innerHTML =
+												  x.toString() + "<br>" + // 123
+												   (123).toString() + "<br>" + // 123
+												   (100 + 23).toString(); // 123
+												</script>
+												
+	The toExponential() Method--Numbers Javascript:
+	
+												- toExponential() returns a string, with a number rounded and written using exponential notation.
+												- A parameter defines the number of characters behind the decimal point
+												- The parameter is optional. If you don't specify it, JavaScript will not round the number.
+												
+												<script>
+												let x = 9.656;
+												document.getElementById("demo").innerHTML =
+												  x.toExponential() + "<br>" + // 9.656e+0 // 10
+												  x.toExponential(2) + "<br>" + // 9.66e+0 // 9.66
+												  x.toExponential(4) + "<br>" + // 9.6560e+0 // 9.6560
+												  x.toExponential(6); // 9.656000e+0 // 9.656000
+												</script>															
+												
+	The toFixed() Method--Numbers Javascript:
+	
+												toFixed() returns a string, with the number written with a specified number of decimals
+												
+												<script>
+												let x = 9.656;
+												document.getElementById("demo").innerHTML =
+												  x.toFixed(0) + "<br>" +
+												  x.toFixed(2) + "<br>" +
+												  x.toFixed(4) + "<br>" +
+												  x.toFixed(6);
+												</script>
+												
+	The toPrecision() Method--Numbers Javascript:
+	
+												toPrecision() returns a string, with a number written with a specified length:
+												
+												<script>
+												let x = 9.656;
+												document.getElementById("demo").innerHTML = 
+												  x.toPrecision() + "<br>" + // 9.656
+												  x.toPrecision(2) + "<br>" + // 9.7
+												  x.toPrecision(4) + "<br>" + // 9.656
+												  x.toPrecision(6); // 9.65600
+												</script>
+												
+	The valueOf() Method--Numbers Javascript:
+	
+												- valueOf() returns a number as a number.
+												- In JavaScript, a number can be a primitive value (typeof = number) or an object (typeof = object).
+												- The valueOf() method is used internally in JavaScript to convert Number objects to primitive values.
+												- There is no reason to use it in your code.
+												- All JavaScript data types have a valueOf() and a toString() method.
+												
+												<script>
+												let x = 123;
+												document.getElementById("demo").innerHTML = 
+												  x.valueOf() + "<br>" + // 123
+												  (123).valueOf() + "<br>" + // 123
+												  (100 + 23).valueOf(); // 123
+												</script>
+												
+	The Number() Method--Numbers Javascript:
+	
+												- Number() can be used to convert JavaScript variables to numbers:
+												- If the number cannot be converted, NaN (Not a Number) is returned.
+												
+												<script>
+												document.getElementById("demo").innerHTML = 
+												  Number(true) + "<br>" +
+												  Number(false) + "<br>" +
+												  Number("10") + "<br>" + 
+												  Number("  10") + "<br>" +
+												  Number("10  ") + "<br>" +
+												  Number(" 10  ") + "<br>" +
+												  Number("10.33") + "<br>" + 
+												  Number("10,33") + "<br>" +
+												  Number("10 33") + "<br>" +
+												  Number("John");
+												</script>
+												
+	The Number() Method Used on Dates--Numbers Javascript:
+	
+												- Number() can also convert a date to a number.
+												- The Number() method returns the number of milliseconds since 1.1.1970.
+
+												<script>
+												let x = new Date("1970-01-01");
+												document.getElementById("demo").innerHTML = Number(x); // 0
+												</script>
+												
+												<script>
+												let x = new Date("1970-01-03");
+												document.getElementById("demo").innerHTML = Number(x); // 172800000
+												</script>
+												
+	The parseInt() Method--Numbers Javascript:
+	
+												- parseInt() parses a string and returns a whole number. Spaces are allowed. Only the first number is returned
+												- If the number cannot be converted, NaN (Not a Number) is returned.
+												
+												<script>
+												document.getElementById("demo").innerHTML = 
+												  parseInt("-10") + "<br>" + // -10
+												  parseInt("-10.33") + "<br>" + // -10
+												  parseInt("10") + "<br>" + // 10
+												  parseInt("10.33") + "<br>" + // 10
+												  parseInt("10 6") + "<br>" + // 10
+												  parseInt("20 abc") + "<br>" + // 20  
+												  parseInt("abc 20"); // NaN
+												</script>
+												
+	The parseFloat() Method--Numbers Javascript:
+	
+												- parseFloat() parses a string and returns a number. Spaces are allowed. Only the first number is returned
+												- If the number cannot be converted, NaN (Not a Number) is returned.
+												
+												<script>
+												document.getElementById("demo").innerHTML = 
+												  parseFloat("10") + "<br>" + // 10
+												  parseFloat("10.33") + "<br>" + // 10.33
+												  parseFloat("10 6") + "<br>" +  // 10
+												  parseFloat("10 years") + "<br>" + // 10
+												  parseFloat("years 10"); // NaN
+												</script>

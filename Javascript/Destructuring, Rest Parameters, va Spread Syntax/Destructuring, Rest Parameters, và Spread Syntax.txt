@@ -1,0 +1,224 @@
+Destructuring, Rest Parameters, và Spread Syntax--JAVASCRIPT:
+	Destructuring:
+										Destructuring là một cú pháp cho phép bạn gán các thuộc tính của một Object hoặc một Array. Điều này có thể làm giảm đáng kể các dòng mã cần thiết để thao tác dữ liệu trong các cấu
+										trúc này
+		Destructuring Objects:
+										Destructuring Objects cho phép bạn tạo ra một hay nhiều new variables sử dụng những property của một Objects
+										
+										const note = {
+										   id: 1,
+										   website: 'abc.com',
+										   date: '17/07/2014',
+										}
+										const { id, website, date } = note
+		Destructuring Arrays:
+										Array destructuring cho phép bạn tạo ra một new variables bằng cách sử dụng giá trị mỗi index của Array.
+										
+										const date = ['2014', '17', '07']
+										const [year, month, day] = date
+	Rest Parameters:
+										Cũng như Spread Syntax (...) nhưng có tác dụng ngược lại.
+										Bạn có thể hiểu là 1 tính năng khai báo một hàm với số lượng tham số không xác định. Đúng như cái tên mà chúng ta có thể hiểu là tham số còn lại.
+										
+										function fn(...args) {
+										  console.log(args)
+										}
+										restTest(1, 2, 3, 4, 5, 6);// [1, 2, 3, 4, 5, 6]
+										
+										function sum(...args) { // args is the name for the array
+										  let sum = 0;
+										  args.forEach((arg) => sum += arg)
+										  return sum;
+										}
+										console.log( sum(1) ); // 1
+										console.log( sum(1, 2) ); // 3
+										console.log( sum(1, 2, 3) ); // 6
+										
+										const { name, ...rest } = props; // khi có 1 object và chỉ muốn lấy riêng ra 1 key thôi
+																		 // ta sẽ tạo ra 2 const name và rest thì name chính là key/value name của props còn rest sẽ bao gồm các phần còn lại mà không có name
+	Spread operator:
+										- Spread có thể tạo ra một cấu trúc dữ liệu shallow copy để tăng tính thao tác dữ liệu.
+										- Spread operator là ba dấu chấm ( ...), có thể chuyển đổi một mảng thành một chuỗi các tham số được phân tách bằng dấu phẩy. Nói cho dễ hiểu, nó giống như một cái xương và một
+										cái xương
+										sườn vậy, chia nhỏ một phần tử lớn thành những phần tử nhỏ riêng lẻ.
+		Spread với Array:
+		
+			Ví dụ về merge các Array thì có rất nhiều cách ở đây mình dùng concat method:
+			
+										const array1 = ['Em', 'yêu']
+										const array2 = ['Anh', 'nhưng lại hôn thằng đó']
+										const result = array1.concat(array2)
+										console.log(result)
+										
+			Nhưng thay thế bằng Spread mọi thứ lại đơn giản hơn:
+			
+										const result = [...array1, ...array2]
+										console.log(result)
+		Spread with Objects--Spread:
+			
+			Với Object để shallow copy một bạn có thể dùng Object.assign():
+			
+										const profile = {
+											name: 'Nguyen Xuan A',
+											age: 23,
+											birthday: '01/01/1997'
+										}
+										const cloneProfile = Object.assign({}, profile)
+										
+			Chúng ta hoàn toàn có thể sử dụng Spread để copy và mở rộng một object:
+			
+										const user = { 
+											name: 'Dung', 
+											age: 25 
+										}; 
+										const info = { 
+											email: 'khuat.van.dung@abc.xyz',
+											address: 'xyz-hanoi'
+										}; 
+										const profile = { ...user, ...info };
+										console.log(profile);
+										
+										let obj1 = { foo: 'bar', x: 42 };
+										let obj2 = { foo: 'baz', y: 13 };
+										let clonedObj = { ...obj1 }; // Object { foo: "bar", x: 42 }									
+										let mergedObj = { ...obj1, ...obj2 }; // Object { foo: "baz", x: 42, y: 13 }. Trường hợp thuộc tính của đối tượng đã có trước thì sẽ thực hiện việc cập nhật thay vì add mới.								
+										let updatedObj= { ...obj1, z: 19 }; // Object { foo: "bar", x: 42, z: 19 }
+			
+		Spread with Function Calls--Spread:
+			
+										// Tạo function
+										function fn(a, b, c) {
+										  return a * b * c
+										}
+										// Gọi như bth
+										fn(1, 2, 3) // 6
+										// Sử dụng Spread
+										const numbers = [1, 2, 3]
+										fn(...numbers) // 6
+			
+		Spread syntax with string--Spread:
+										Nên thay thế việc dùng split vì split sẽ không hiểu 1 số ký tự đặc biệt như emoji nhưng dùng spread hoặc dùng from sẽ hiểu.
+										
+										const pizza = 'pizza';								
+										const slicedPizza = pizza.split(''); // Old way
+										console.log(slicedPizza); // [ 'p', 'i', 'z', 'z', 'a' ]									
+										const slicedPizza2 = [...pizza]; // ES6: using Spread
+										console.log(slicedPizza2); // [ 'p', 'i', 'z', 'z', 'a' ]									
+										const slicedPizza3 = Array.from(pizza); // ES6: using Array.from
+										console.log(slicedPizza3); // [ 'p', 'i', 'z', 'z', 'a' ]
+										
+		Sử dụng Spread tương tự với concat()--Spread:
+
+										- Thay vì sử dụng concat, chúng ta có thể đạt được điều tương tự bằng cách sử dụng Spread. Mặc dù việc sử dụng Spread có thể giúp chúng ta đạt được kết quả giống với concat(), nhưng
+										với dữ liệu có size lớn thì chúng ta nên sử dụng concat(), vì việc sử dụng Spread gây mất thời gian hơn so với concat().
+										
+										let arr = [1,2,3]; 
+										let arr2 = [4,5]; 										  
+										const arr3 = [...arr, ...arr2];
+										console.log(arr);  // [ 1, 2, 3 ]
+										console.log(arr2);  // [ 4, 5 ]
+										console.log(arr3); // [ 1, 2, 3, 4, 5 ]
+			
+		Sử dụng Spread tương tự việc copy dữ liệu (splice)--Spread:
+			
+				Nếu như chúng ta thay đổi dữ liệu của newArr thì nó cũng sẽ ảnh hưởng đến arr:
+							
+										let arr = [1,2,3,4]; 
+										let newArr = arr; 
+										newArr.pop();
+										console.log(newArr); // [1,2,3] 
+										console.log(arr); // [1,2,3]
+										
+				Để tránh việc này, chúng ta hoàn toàn có thể dử dụng Spread để thực hiện copy value:
+				
+										let arr = [1,2,3,4]; 
+										let newArr = [...arr]; 
+										newArr.pop();
+										console.log(newArr); // [1,2,3] 
+										console.log(arr); // [1,2,3,4]
+			
+		Sử dụng Spread để mở rộng (expand)--Spread:
+			
+				Như bình thường, khi chúng ta mở rộng mảng chúng ta có thể dùng cách thông thường như dưới đây:
+				
+										let arr = ['a','b']; 
+										let arr2 = [arr,'c','d']; 
+										console.log(arr2);
+										
+				Bằng cách copy lần lượt các phần tử bên trong mảng arr sang mảng mới. Và lúc này đoạn code sẽ sửa như sau:
+				
+										let arr = ['a','b'];
+										let arr2 = [...arr,'c','d']; 
+										console.log(arr2);
+										
+		Spread với Math object--Spread:
+					
+										Ví dụ như nếu chúng ta có một mảng dữ liệu như sau [1,2,3,-1] . Để có thể tìm giá trị lớn nhất thì lúc này Math sẽ bị lỗi bởi vì Math không thể làm việc được với array.
+										Để giải quyết vấn đề này, chúng ta cũng có thể dùng Spread.
+										
+										const arr = [1,2,3,-1];
+										console.log(Math.max(...arr)); // "lan truyền" các phần tử của mảng arr thành các đối số độc lập với phương thức Math.max().
+										
+		Mặc dù thực tế rằng spread operator trải đều hoạt động trên cả array và object, bạn không thể trộn và khớp các loại dữ liệu này với nhau--Spread:
+			
+										let obj = {a:1, b:2, c:3}
+										let copy = [...obj] // this won't work!
+										
+		Sử dụng phương thức push () của mảng--Spread:
+			
+										Push () là phương thức hỗ trợ truyền nhiều tham số không xác định. Thông thường, người ta sử dụng phương thức apply () để lấp đầy mảng, nhưng điều đó không thuận tiện. Trên thực tế,
+										nó không cần quá rắc rối như vậy. Spread operator có thể giúp bạn thực hiện điều đó.
+										
+										const arr = [ ‘fatfish’, ‘medium’ ]
+										arr.push(…[ ‘JavaScript’, ‘NodeJs’ ])
+										console.log(arr) // [‘fatfish’, ‘medium’, ‘JavaScript’, ‘NodeJs’]
+			
+		Xóa các giá trị trùng lặp khỏi mảng--Spread:
+			
+										Có thể loại bỏ các mảng giá trị trùng lặp thông qua data structure đã đặt và spread operator.
+										
+										const arr = [ ‘fatfish’, ‘fatfish’, ‘medium’, ‘medium’ ]
+										const uniqueArray = [ …new Set(arr) ]
+										console.log(uniqueArray) // [‘fatfish’, ‘medium’]
+										
+		Chuyển đổi NodeList thành một mảng thực--Spread:
+			
+										Thao tác với DOM là việc các lập trình viên front-end làm hàng ngày như sử dụng document.querySelectorAll để có được NodeList. Thay vào đó, bạn có thể chuyển đổi nó thành một mảng nhờ
+										spread operator. Sau đó, bạn có thể sử dụng forEach, map, v.v.
+										
+										
+										const $divs = document.querySelectorAll(‘div’) // $divs is a NodeList									
+										const $arrayDivs = [ …$divs ] // $arrayDivs is An Array
+										console.log(Array.isArray($divs), Array.isArray($arrayDivs)) // false true
+										
+		Spread operator thường được sử dụng để hủy cấu trúc các mảng và đối tượng (Destructuring)--Spread:
+				
+										const [ num0, …others ] = [ 1, 2, 3, 4, 5, 6 ]
+										console.log(num0) // 1
+										console.log(others) // [2, 3, 4, 5, 6]
+										
+										const obj = { name: ‘fatfish’, age: 100, luckyNumber: 6 }
+										const { name, …other } = obj
+										console.log(name) // fatfish
+										console.log(other) // { age: 100, luckyNumber: 6 }
+			
+		Chuyển đổi chuỗi thành mảng--Spread:
+			
+										Với spread operator, bạn có thể chuyển đổi chuỗi thành mảng một cách dễ dàng và nhanh chóng. Ví dụ:
+										
+										const name = ‘fatfish’
+										const nameArray = [ …name ] // [‘f’, ‘a’, ‘t’, ‘f’, ‘i’, ‘s’, ‘h’]
+										
+		Thêm phần tử vào mảng--Spread:
+				
+										let arr1 = [1, 2, 3];										
+										arr1 = [...arr1, 4]; // Thêm phần tử vào mảng bằng toán tử Spread
+										console.log(arr1); // [1, 2, 3, 4]
+										
+		Thêm thuộc tính vào đối tượng--Spread:
+			
+										const SinhVien = {
+											ten: "Ngọc Anh",
+											gioiTinh: "Nữ"
+										};
+										const ketQua = {...SinhVien, tuoi: 18 }; // Thêm thuộc tính cho đối tượng bằng toán tử spread. { ten: "Ngọc Anh", gioiTinh: "Nữ", tuoi: 18 }

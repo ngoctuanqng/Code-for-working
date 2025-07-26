@@ -1,0 +1,121 @@
+FormData--JAVASCRIPT:
+									- Nếu bạn đang phát triển những ứng dụng web kiểu SPA (single-page application) hay sử dụng PPE (practicing progressive enhancement), bạn sẽ thường phải chặn việc submit form và sử
+									dụng ajax để xử lý dữ liệu form gửi lên. Chẳng hạn chúng ta có 2 bài toán:
+												Bạn có 1 form chỉ chứa các input text, password, không có nút submit. Làm sao để submit form đó?
+												Bạn có 1 form bao gồm các input text, password..., file input, không có nút submit. Làm sao để submit form đó?
+												Yêu cầu thêm: cần validate form:		
+																						Các input bắt buộc phải nhập.
+																						Các file input bắt buộc phải chọn, upload lên server.
+																						Chúng ta có thể xử lý bài toán này chẳng hạn như sử dụng jquery ajax, post, hay javascript submit.... Có rất nhiều cách hay để xử lý
+																						những yêu cầu như trên.
+									- Với HTML5 chúng ta có thể sử dụng FormData, nó cho phép chúng ta xây dựng các đối tượng form tự động, có thể bao gồm cả các tệp tin từ hệ thống tệp tin của người dùng và sau đó gửi
+									form này thông qua AJAX.
+									- Với FormData, chúng ta có thể submit dữ liệu lên server thông qua AJAX như là đang submit form bình thường.
+									- jQuery ajax mặc định sẽ truyền dữ liệu lên với ContentType: application/x-www-form-urlencoded, đối với việc truyền dữ liệu có upload cả file lên, chúng ta phải ngăn không
+									cho ajax truyền lên với ContentType mặc định.
+									- Việc sử dụng contentType: false, khi truyền dữ liệu lên, contentType sẽ được chuyển thành: multipart/form-data. Điều đó cho phép chúng ta có thể upload file lên dễ dàng.
+									- Vậy để 'nuốt gọn' bài toán đưa ra:
+											Với bài 1:
+															var formData = new FormData($('#formData')[0]);
+															$.ajax({
+																...
+																data: formData
+																...
+															});
+											Với bài 2:
+															var formData = new FormData($('#formData')[0]);
+															$.ajax({
+																...
+																processData: false,
+																contentType: false,
+																data: formData
+																...
+															});
+									- Có nhiều cách để khởi tạo một FormData, nó tương tự việc bạn serialize dữ liệu của một form để gửi lên server:
+												
+												var formData = new FormData(); // Không cần form													
+												var formData = new FormData(document.getElementById('formID')); // Sử dụng js thuần													
+												var formData = new FormData($('form#formID')[0]); // Sử dụng jquery
+	Phương thức append():
+												Thông thường để chèn thêm một giá trị nào đó mà không có input trên form, chúng ta thường dùng js chèn thêm input hidden. Phương thức append cho phép chúng ta chèn thêm một
+												cặp key => value vào trong FormData, chúng ta có thể sử dụng để chèn giá trị mới cho key có sẵn hoặc chèn mới tương tự việc update giá trị cho input hay chèn thêm input
+												hidden ở trong FormData
+												name: tên của input (field) sẽ chứa giá trị chèn vào.
+												value: giá trị của key, có thể là USVString hoặc Blob
+												filename: tên của file gửi lên server.
+																									
+												formData.append(name, value);
+												formData.append(name, value, filename);											
+	Phương thức delete():
+												Phương thức delete cho phép xóa key và value của nó ra khỏi FormData.
+												
+												formData.delete(name);
+	Phương thức get():
+												Phương thức get trả về giá trị đầu tiên tương ứng với key truyền vào.
+																								
+												var formData = new FormData(); // init form data
+												// append data
+												formData.append('username', 'Chris');
+												formData.append('username', 'Bob');												
+												formData.get('username'); // Returns "Chris" // get data
+	Phương thức getAll():
+												Phương thức này trả về tất cả giá trị tương ứng với key của FormData.
+												
+												
+												var formData = new FormData(); // init form data
+												// append data
+												formData.append('username', 'Chris');
+												formData.append('username', 'Bob');													
+												formData.get('username'); // Returns "Chris" // get first username
+												formData.getAll('username'); // Returns ["Chris", "Bob"]. get all username
+	Phương thức has():
+												Phương thức has trả về giá trị boolean kiểm tra xem FormData có chứa key truyền vào hay không.
+																								
+												var formData = new FormData(); // init form data
+												// Check form data has key
+												formData.has('username'); // Returns false
+												formData.append('username', 'Chris');
+												formData.has('username'); // Returns true
+	Phương thức entries():
+												Phương thức entries trả về một iterator cho phép truy xuất tất cả các cặp key/value.
+																								
+												var formData = new FormData(); // Create a test FormData object
+												formData.append('key1', 'value1');
+												formData.append('key2', 'value2');
+												// Display the key/value pairs
+												for(var pair of formData.entries()) {
+												   console.log(pair[0]+ ', '+ pair[1]); // key1, value1. key2, value2
+												}
+	Phương thức keys():
+												Phương thức keys trả về một đối tượng Iterator chứa các key trong FormData.
+																							
+												var formData = new FormData(); // Create a test FormData object
+												formData.append('key1', 'value1');
+												formData.append('key2', 'value2');
+												// Display the keys
+												for (var key of formData.keys()) {
+												   console.log(key); // key1 key2
+												}
+	Phương thức values():
+												Phương thức values trả về tất cả giá trị có trong FormData. Kết quả trả về là một Iterator
+																								
+												var formData = new FormData(); // Create a test FormData object
+												formData.append('key1', 'value1');
+												formData.append('key2', 'value2');
+												// Display the values
+												for (var value of formData.values()) {
+												   console.log(value); // value1 value2
+												}
+	Phương thức set():
+												Phương thức set giúp chúng ta gán giá trị cho một key tương ứng trong FormData, nếu key không tồn tại sẽ tạo mới, ngược lại sẽ ghi đè tất cả giá trị cũ bằng giá trị mới của key tương ứng.
+												name: tên của trường chúng ta cần gán giá trị (key).
+												value: giá trị cần gán.
+												filename: tên của file nếu cần.
+												
+												formData.set(name, value);
+												formData.set(name, value, filename);
+																								
+												var formData = new FormData();
+												formData.append('username', 'Chris');   // add new
+												formData.set('username', 'Bob');   // overwrite
+												formData.set('userpic', myFileInput.files[0], 'chris.jpg'); // add new

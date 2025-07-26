@@ -1,0 +1,17 @@
+Phân trang--SPRING:
+			Pageable:	
+								Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
+								Pageable pageable = PageRequest.of(0, 3, Sort.by("price").descending());
+								Pageable pageable = PageRequest.of(0, 5, Sort.by("price").descending().and(Sort.by("name")));
+								
+								Pageable pageable;
+								if(pageSize == 0){
+									pageable = Pageable.unpaged();
+								} else {
+									pageable = PageRequest.of(pageNo, pageSize, Sort.by("status"));
+								}
+								
+			Phân trang trong spring data jpa (Paging):	
+			
+								@Query("SELECT e FROM Customer e")
+								Page<Customer> findCustomers(Pageable pageable);

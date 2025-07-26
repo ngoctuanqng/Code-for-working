@@ -1,0 +1,56 @@
+Import và Export--JAVASCRIPT:
+						
+	- Trong JavaScript, có hai cách để import các thành phần từ một tệp (module) khác: import mặc định (default import) và import thông thường (named import). Cả hai cách đều cho
+	phép bạn sử dụng mã từ một tệp trong tệp khác, nhưng cú pháp và cách thức sử dụng có một số điểm khác nhau quan trọng.
+		Import mặc định (Default import): 		Được sử dụng khi một module xuất một giá trị duy nhất mà không cần tên, thường được sử dụng với export default. Khi bạn import một
+												module theo cách này, bạn có thể đặt tên bất kỳ cho giá trị được import.
+		Import thông thường (Named import): 	Được sử dụng khi một module xuất nhiều giá trị hoặc khi bạn muốn chọn những thành phần cụ thể mà bạn muốn import.
+												Khi bạn sử dụng cách này, tên của các thành phần cần phải trùng với tên đã được export.									
+		Export mà không có {} (Default export): Khi bạn sử dụng cú pháp này, bạn có thể export một giá trị duy nhất từ một module. Giá trị được export có thể là bất cứ loại dữ
+												liệu nào, bao gồm một class, một hàm, một biến hoặc một đối tượng.
+		Export với {} (Named export): 			Khi bạn sử dụng cú pháp này, bạn cần chỉ định tên của thành phần cụ thể mà bạn muốn export từ module. Điều này cho phép bạn xuất
+																		nhiều thành phần từ cùng một module, và khi import, bạn cũng cần chỉ định tên chính xác của thành phần đó.
+	
+	Export Default:
+												// Trong tệp MyClass.js
+												class MyClass {
+												  // ...
+												}
+												export default MyClass;
+												// Trong tệp khác
+												import MyClass from './MyClass';
+	Export Default với đối tượng chứa:
+												// Trong tệp MyClass.js
+												class MyClass {
+												  // ...
+												}
+												export default { MyClass };
+	Export bình thường:
+												// Trong tệp MyClass.js
+												export class MyClass {
+												  // ...
+												}
+												// Trong tệp khác
+												import { MyClass } from './MyClass';
+	Export nhiều thành phần:
+												// Trong tệp MyClass.js
+												export class MyClass1 {
+												  // ...
+												}
+												export class MyClass2 {
+												  // ...
+												}
+												// Trong tệp khác
+												import { MyClass1, MyClass2 } from './MyClass';
+	Export tất cả:
+												// Trong tệp MyClass.js
+												class MyClass1 {
+												  // ...
+												}
+												class MyClass2 {
+												  // ...
+												}
+												export { MyClass1, MyClass2 };
+												// Trong tệp khác
+												import * as MyClass from './MyClass';
+												// Sử dụng MyClass.MyClass1, MyClass.MyClass2

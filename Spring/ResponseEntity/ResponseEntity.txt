@@ -1,0 +1,122 @@
+ResponseEntity--SPRING:
+
+			Công thức chung:
+			
+				Trả về một đối tượng đơn giản với mã trạng thái HTTP:
+
+												new ResponseEntity<>(<body>, <HttpStatus>)
+											
+				Trả về một đối tượng với mã trạng thái HTTP và tiêu đề:
+				
+												new ResponseEntity<>(<body>, <headers>, <HttpStatus>)
+												
+				Sử dụng các phương thức tiện ích của ResponseEntity:
+				
+												ResponseEntity.ok(<body>)
+												ResponseEntity.status(<HttpStatus>).body(<body>)
+												ResponseEntity.notFound().build()
+												ResponseEntity.badRequest().body(<body>)
+												
+				Trả về đối tượng JSON:								
+												
+												ResponseEntity.ok(<object>)
+												
+				Trả về một danh sách các đối tượng:
+				
+												ResponseEntity.ok(<List<object>>)
+												
+				Trả về phản hồi với tiêu đề và nội dung tùy chỉnh:
+				
+												ResponseEntity.created(<URI>).body(<body>)
+																
+			HttpStatus.OK:						
+			
+												@GetMapping("/hello")
+												ResponseEntity<String> hello() {
+													return new ResponseEntity<>("Hello World!", HttpStatus.OK);
+												}
+			HttpStatus.UNAUTHORIZED:    		@GetMapping("/unauthorized")
+												public ResponseEntity<String> unauthorized() {
+													// Trả về một phản hồi lỗi "Unauthorized" với mã HTTP Status là 401 Unauthorized
+													return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
+												}
+			HttpStatus.NOT_FOUND:				@GetMapping("/notfound")
+												public ResponseEntity<String> notFound() {
+													// Trả về một phản hồi lỗi "Not Found" với mã HTTP Status là 404 Not Found
+													return new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
+												}
+										
+			HttpStatus.INTERNAL_SERVER_ERROR:	@GetMapping("/internalerror")
+												public ResponseEntity<String> internalError() {
+													// Trả về một phản hồi lỗi "Internal Server Error" với mã HTTP Status là 500 Internal Server Error
+													return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+												}
+			HTTP headers:						@GetMapping("/customHeader")
+												ResponseEntity<String> customHeader() {
+													HttpHeaders headers = new HttpHeaders();
+													headers.add("Custom-Header", "foo");
+														
+													return new ResponseEntity<>(
+													  "Custom header set", headers, HttpStatus.OK);
+												}
+			BodyBuilder.status:					@GetMapping("/example")
+												public ResponseEntity<String> example() {
+													return ResponseEntity.status(201).body("Example created");
+												}
+														
+													return new ResponseEntity<>(
+													  "Custom header set", headers, HttpStatus.OK);
+												}
+			BodyBuilder.body:					@GetMapping("/age")
+												ResponseEntity<String> age(@RequestParam("yearOfBirth") int yearOfBirth) {
+													if (isInFuture(yearOfBirth)) {
+														return ResponseEntity.badRequest()
+															.body("Year of birth cannot be in the future");
+													}
+
+													return ResponseEntity.status(HttpStatus.OK)
+														.body("Your age is " + calculateAge(yearOfBirth));
+												}
+			BodyBuilder.headers:				@GetMapping("/customHeader")
+												ResponseEntity<String> customHeader() {
+													return ResponseEntity.ok()
+														.header("Custom-Header", "foo")
+														.body("Custom header set");
+												}
+			HttpStatus.OK.value:
+												int statusCode = HttpStatus.OK.value(); // statusCode sẽ có giá trị 200
+			getBody(),
+			getStatusCode(),
+			getStatusCodeValue(),
+			getHeaders(),
+			hasBody(),
+			getRawStatusCode(),
+			getContentType()
+			
+									import org.springframework.http.HttpStatus;
+									import org.springframework.http.ResponseEntity;
+									public class ResponseEntityExample {
+										public static void main(String[] args) {
+											ResponseEntity<String> responseEntity = new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
+											// getStatusCode() và getStatusCodeValue()
+											HttpStatus statusCode = responseEntity.getStatusCode();
+											int statusCodeValue = responseEntity.getStatusCodeValue();
+											System.out.println("Status code: " + statusCode); // Status code: 401 UNAUTHORIZED
+											System.out.println("Status code value: " + statusCodeValue); // Status code value: 401
+											// getHeaders()
+											HttpHeaders headers = responseEntity.getHeaders();
+											System.out.println("Headers: " + headers); // Headers: [Content-Type:"application/octet-stream"]
+											// hasBody()
+											boolean hasBody = responseEntity.hasBody();
+											System.out.println("Has body: " + hasBody); // Has body: true
+											// getRawStatusCode()
+											int rawStatusCode = responseEntity.getRawStatusCode();
+											System.out.println("Raw status code: " + rawStatusCode); // Raw status code: 401
+											// getContentType()
+											MediaType contentType = responseEntity.getHeaders().getContentType();
+											System.out.println("Content-Type: " + contentType); // Content-Type: application/octet-stream
+											// getBody()
+											String body = responseEntity.getBody();
+											System.out.println("Response body: " + body); // Response body: Unauthorized
+										}
+									}

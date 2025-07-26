@@ -1,0 +1,310 @@
+MyBatis--SPRING:
+
+	MyBatis Example--MyBatis Spring:
+	
+		Các bước thực hiện:
+		
+			Tạo project “mybatis-spring-example”:
+			
+				Add các dependency vào file pom.xml:
+				
+							<dependencies>
+								<dependency>
+									<groupId>mysql</groupId>
+									<artifactId>mysql-connector-java</artifactId>
+									<version>5.1.6</version>
+								</dependency>
+								<!-- MyBatis -->
+								<dependency>
+									<groupId>org.mybatis</groupId>
+									<artifactId>mybatis</artifactId>
+									<version>3.3.0</version>
+								</dependency>
+								<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
+								<dependency>
+									<groupId>org.mybatis</groupId>
+									<artifactId>mybatis-spring</artifactId>
+									<version>1.3.1</version>
+								</dependency>
+								<!-- https://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
+								<dependency>
+									<groupId>org.springframework</groupId>
+									<artifactId>spring-jdbc</artifactId>
+									<version>4.3.6.RELEASE</version>
+								</dependency>
+								<!-- Spring core -->
+								<dependency>
+									<groupId>org.springframework</groupId>
+									<artifactId>spring-core</artifactId>
+									<version>4.3.6.RELEASE</version>
+									<scope>provided</scope>
+								</dependency>
+								<!-- Spring context -->
+								<dependency>
+									<groupId>org.springframework</groupId>
+									<artifactId>spring-context</artifactId>
+									<version>4.3.6.RELEASE</version>
+								</dependency>
+							</dependencies>
+			
+			Tạo bảng details.student
+			
+							CREATE TABLE  details.student(
+							   ID int(10) NOT NULL AUTO_INCREMENT,  
+							   NAME varchar(100) NOT NULL,
+							   BRANCH varchar(255) NOT NULL,
+							   PERCENTAGE int(3) NOT NULL,  
+							   PHONE int(10) NOT NULL,
+							   EMAIL varchar(255) NOT NULL,
+							   PRIMARY KEY ( ID )
+							);
+			
+			Tạo lớp Student trong package vn.viettuts.mapper.entity
+			package mybatis.mapper.entity;
+			 
+							public class Student {
+								private int id;
+								private String name;
+								private String branch;
+								private int percentage;
+								private int phone;
+								private String email;																	 
+								public Student() {
+								}																	 
+								public Student(String name, String branch, int percentage, int phone, String email) {
+									super();
+									this.name = name;
+									this.branch = branch;
+									this.percentage = percentage;
+									this.phone = phone;
+									this.email = email;
+								}																	 
+							   // các setter và getter																		 
+								@Override
+								public String toString() {
+									return getClass().getName() + "[" + "id = " + id + ", name = " + name + ", branch = " + branch 
+											+ ", percentage = " + percentage  + ", phone = " + phone  + ", email = " + email + "]"; 
+								}
+							}
+																
+			Tạo file cấu hình MyBatis SqlMapConfig.xml trong resources
+				
+				Trong file cấu hình này có sử dụng thẻ typeAliases tạo alias Student có type là lớp vn.viettuts.entity.Student. Bằng cách này trong các file cấu hình này hoặc trong các file mapper có thể sử dụng tên tắt
+				Student thay vì vn.viettuts.entity.Student.
+					
+					<?xml version = "1.0" encoding = "UTF-8"?>
+					<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">						 
+					<configuration>						 
+						<typeAliases>
+							<typeAlias alias="Student" type="vn.viettuts.entity.Student" />
+						</typeAliases>					 
+						<mappers>
+							<mapper resource="vn/viettuts/mapper/sql/Student.xml" />
+						</mappers>						 
+					</configuration>
+					
+					File cấu hình trỏ đển file mapper vn/viettuts/mapper/sql/Student.xml.
+			
+			Tạo file mapper Student.xml
+			
+				Đối với kết quả trả về của câu lệnh truy vấn select các bạn có thể dùng thuộc tính resultMap hoặc resultType như được khai báo dưới đây.
+					
+					<?xml version = "1.0" encoding = "UTF-8"?>
+					<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">						 
+					<mapper namespace="vn.viettuts.mapper.StudentMapper">
+						<insert id="insertStudent" parameterType="Student" >
+							INSERT INTO STUDENT (ID, NAME, BRANCH, PERCENTAGE, PHONE, EMAIL ) VALUES (#{id}, #{name}, #{branch}, #{percentage}, #{phone}, #{email});
+						</insert>						 
+						<update id="updateStudent" parameterType="Student">
+							UPDATE STUDENT SET EMAIL = #{email}, NAME = #{name}, BRANCH = #{branch}, PERCENTAGE = #{percentage}, PHONE = #{phone} WHERE ID = #{id};
+						</update>							 
+						<delete id="deleteStudentById" parameterType="int">
+							DELETE from STUDENT WHERE ID = #{id};
+						</delete>							 
+						<select id="selectAllStudent" resultMap="result">
+							SELECT * FROM STUDENT;
+						</select>						 
+						<select id="selectStudentById" parameterType="int" resultType="Student">
+							SELECT * FROM STUDENT WHERE ID = #{id};
+						</select>							 
+						<resultMap id = "result" type = "Student">
+						   <result property = "id" column = "ID"/>
+						   <result property = "name" column = "NAME"/>
+						   <result property = "branch" column = "BRANCH"/>
+						   <result property = "percentage" column = "PERCENTAGE"/>
+						   <result property = "phone" column = "PHONE"/>
+						   <result property = "email" column = "EMAIL"/>
+						</resultMap>
+					</mapper>
+					
+					Vì các tên cột của bảng details.student giống với các tên trường của lớp vn.viettuts.entity.Student (không phân biệt chữ hoa, chữ thường), nên trong câu lệnh select có id="selectStudentById" ta có thể
+					khai báo kết quả trả về là resultType="Student". Trong trường hợp này là hoàn toàn hợp lệ.
+					
+				Giả sử có tên cột của bảng trong database nào đó khác tên trường của lớp java thì ta dùng resultMap để ánh xạ chúng với nhau.
+				
+				File mapper Student.xml có namespace="vn.viettuts.mapper.StudentMapper"
+			
+			Tạo interface StudentMapper.java
+			
+				Tạo interface StudentMapper.java và định nghĩa các method có tên giống với các id của câu lệnh trong file mapper Student.xml. Và tham số truyền vào và giá trị trả về của phương thức có kiểu dữ
+				liệu tương ứng.
+					
+					package vn.viettuts.mapper;				 
+					import java.util.List;						 
+					import vn.viettuts.entity.Student;						 
+					public interface StudentMapper {
+						public int insertStudent(Student student);
+						public int updateStudent(Student student);
+						public int deleteStudentById(int studentId);
+						public List<Student> selectAllStudent();
+						public Student selectStudentById(int studentId);
+					}
+					
+			Tạo file AppConfig.java
+			
+				package vn.viettuts.config;			 
+				import java.io.IOException;
+				import java.io.InputStream;
+				import java.util.Properties;				 
+				import org.mybatis.spring.SqlSessionFactoryBean;
+				import org.mybatis.spring.SqlSessionTemplate;
+				import org.mybatis.spring.mapper.MapperScannerConfigurer;
+				import org.springframework.context.annotation.Bean;
+				import org.springframework.context.annotation.ComponentScan;
+				import org.springframework.context.annotation.Configuration;
+				import org.springframework.core.io.ClassPathResource;
+				import org.springframework.core.io.Resource;
+				import org.springframework.jdbc.datasource.DriverManagerDataSource;				 
+				import vn.viettuts.mapper.StudentMapper;				 
+				@Configuration
+				@ComponentScan(basePackages = { "vn.viettuts.service" })
+				public class AppConfig {				 
+					// Tạo bean dataSource
+					@Bean
+					public DriverManagerDataSource dataSource() throws IOException {
+						DriverManagerDataSource dataSource = new DriverManagerDataSource();
+						Properties properties = new Properties();
+						InputStream user_props = this.getClass()
+								.getResourceAsStream("/application.properties");
+						properties.load(user_props);
+						dataSource.setDriverClassName(
+								properties.getProperty("spring.datasource.driver-class-name"));
+						dataSource.setUrl(properties.getProperty("spring.datasource.url"));
+						dataSource.setUsername(
+								properties.getProperty("spring.datasource.username"));
+						dataSource.setPassword(
+								properties.getProperty("spring.datasource.password"));
+						return dataSource;
+					}
+				 
+					// đọc thông tin file cấu hình MyBatis
+					@Bean
+					public SqlSessionFactoryBean sqlSessionFactory() throws Exception {
+						Resource resource = new ClassPathResource("SqlMapConfig.xml");
+						SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
+						sqlSessionFactory.setDataSource(dataSource());
+						sqlSessionFactory.setConfigLocation(resource);
+						return sqlSessionFactory;
+					}
+				 
+					// scan tất cả những mapper package vn.viettuts.mapper
+					@Bean
+					public MapperScannerConfigurer mapperScannerConfigurer() {
+						MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
+						mapperScannerConfigurer.setBasePackage("vn.viettuts.mapper");
+						mapperScannerConfigurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
+						return mapperScannerConfigurer;
+					}
+				 
+					// Có thể tạo @Bean cho mỗi interface mapper thay vì scan toàn bộ package vn.viettuts.mapper
+					/*
+					@Bean (name = "studentMapper")
+					public StudentMapper studentMapper() throws Exception {
+						SqlSessionTemplate sessionTemplate = new SqlSessionTemplate(sqlSessionFactory().getObject());
+						return sessionTemplate.getMapper(StudentMapper.class);
+					}
+					*/
+				}
+				
+			Tạo Student Service
+			
+				package vn.viettuts.service;				 
+				import java.util.List;					 
+				import vn.viettuts.entity.Student;					
+				public interface StudentService {
+					public int insertStudent(Student student);
+					public int updateStudent(Student student);
+					public int deleteStudentById(int studentId);
+					public List<Student> selectAllStudent();
+					public Student selectStudentById(int studentId);
+				}
+				
+				package vn.viettuts.service;				 
+				import java.util.List;					 
+				import org.springframework.beans.factory.annotation.Autowired;
+				import org.springframework.stereotype.Service;					 
+				import vn.viettuts.entity.Student;
+				import vn.viettuts.mapper.StudentMapper;					 
+				@Service(value = "studentService")
+				public class StudentServiceImpl implements StudentService {
+					@Autowired
+					StudentMapper studentMapper;					 
+					public int insertStudent(Student student) {
+						return studentMapper.insertStudent(student);
+					}					 
+					public int updateStudent(Student student) {
+						return studentMapper.updateStudent(student);
+					}					 
+					public int deleteStudentById(int studentId) {
+						return studentMapper.deleteStudentById(studentId);
+					}					 
+					public List<Student> selectAllStudent() {
+						return studentMapper.selectAllStudent();
+					}					 
+					public Student selectStudentById(int studentId) {
+						return studentMapper.selectStudentById(studentId);
+					}
+				}
+				
+			Tạo class test StudentTest.java
+				
+				package vn.viettuts.main;				 
+				import java.util.List;					 
+				import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+				import org.springframework.context.support.AbstractApplicationContext;					 
+				import vn.viettuts.config.AppConfig;
+				import vn.viettuts.entity.Student;
+				import vn.viettuts.service.StudentService;				 
+				public class StudentTest {
+					public static void main(String[] args) {
+						AbstractApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+						StudentService studentService = (StudentService) context.getBean("studentService");						 
+						// create student
+						Student student1 = new Student("Jim", "Java Dev", 95, 1234568, "jimdev@gmail.com");							 
+						// insert student
+						studentService.insertStudent(student1);
+						System.out.println("insert : " + student1);							 
+						// select all student
+						List<Student> listStudents = studentService.selectAllStudent();
+						System.out.println("select all : ");
+						for (Student student : listStudents) {
+							System.out.println(student);
+						}							 
+						// select student by id
+						Student student2 = studentService.selectStudentById(1);									 
+						// update student
+						student2.setPercentage(99);
+						studentService.updateStudent(student2);
+						System.out.println("update : " + student2);							 
+						// delete student by id
+						studentService.deleteStudentById(student2.getId());
+						System.out.println("delete : " + student2);
+					}
+				}
+				
+				Kết quả:
+					select all : 
+					vn.viettuts.entity.Student[id = 1, name = Jim, branch = Java Dev, percentage = 95, phone = 1234568, email = jimdev@gmail.com]
+					insert : vn.viettuts.entity.Student[id = 1, name = Jim, branch = Java Dev, percentage = 95, phone = 1234568, email = jimdev@gmail.com]
+					update : vn.viettuts.entity.Student[id = 1, name = Jim, branch = Java Dev, percentage = 99, phone = 1234568, email = jimdev@gmail.com]
+					delete : vn.viettuts.entity.Student[id = 1, name = Jim, branch = Java Dev, percentage = 99, phone = 1234568, email = jimdev@gmail.com]	

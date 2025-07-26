@@ -1,0 +1,8 @@
+Regex--JAVASCRIPT:
+	split(/[\\/]/):
+										Ký tự nào là dấu gạch chéo (backslash) hoặc dấu gạch chéo chéo (forward slash). Trong biểu thức chính quy, dấu gạch chéo (\) cần được đặt trong dấu ngoặc vuông để thoát, vì dấu gạch chéo là một ký tự đặc biệt trong
+										biểu thức chính quy.
+										
+										const str = 'path\\to\\file';
+										const parts = str.split(/[\\/]/);
+										console.log(parts); // Kết quả: ['path', 'to', 'file']

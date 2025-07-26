@@ -1,0 +1,52 @@
+Bean Scopes--SPRING:
+	Explicitly Specify Bean Scope:
+	
+					@Component
+					@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+					public class CricketCoach implements Coach {
+						…
+					}
+												
+	Additional Spring Bean Scopes:
+	
+		singleton           	Create a single shared instance of the bean. Default scope.
+		prototype           	Creates a new bean instance for each container request.
+		session              	Scoped to an HTTP web session. Only used for web apps.
+		global-session   		Scoped to a global HTTP web session. Only used for web apps.
+		
+	Checking on the scope:
+	
+					private Coach myCoach;
+					private Coach anotherCoach;
+					@Autowired
+					public DemoController(
+							@Qualifier("cricketCoach") Coach theCoach,
+							@Qualifier("cricketCoach") Coach theAnotherCoach) {
+						myCoach = theCoach;
+						anotherCoach = theAnotherCoach;
+					}
+					@GetMapping("/check")
+					public String check() {
+						return "Comparing beans: myCoach == anotherCoach, " + (myCoach == anotherCoach); // Singleton: True
+																										 // Prototype: False
+					}
+					
+	Bean Lifecycle:
+					Container Started -> Bean Instantiated -> Dependencies Injected -> Internal Spring Processing
+					-> Your Custom Init Method -> Bean Is Ready For Use ->
+					
+					Container Is Shutdown -> Your Custom Destroy Method -> Stop
+					
+	Init: method configuration:		
+	
+					@PostConstruct
+					public void doMyStartupStuff() {
+						System.out.println("In doMyStartupStuff(): " + getClass().getSimpleName());
+					}
+										
+	Destroy: method configuration:
+	
+					@PreDestroy
+					public void doMyCleanupStuff() {
+						System.out.println("In doMyCleanupStuff(): " + getClass().getSimpleName());
+					}

@@ -1,0 +1,63 @@
+Comparison and Logical Operators--Các kiến thức nền tảng JAVASCRIPT:	
+
+	Conditional (Ternary) Operator:
+
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>JavaScript Comparison</h1>
+									<h2>The () ? : Ternary Operator</h2>
+									<p>Input your age and click the button:</p>
+									<input id="age" value="18" />
+									<button onclick="myFunction()">Try it</button>
+									<p id="demo"></p>
+									<script>
+									function myFunction() {
+									  let age = document.getElementById("age").value;
+									  let voteable = (age < 18) ? "Too young":"Old enough";
+									  document.getElementById("demo").innerHTML = voteable + " to vote.";
+									}
+									</script>
+									</body>
+									</html>
+									
+	The Nullish Coalescing Operator (??):
+	
+									Nếu biến đó có giá trị là null hoặc undefined, toán tử sẽ trả về giá trị bên phải của nó; nếu không, nó sẽ trả về giá trị bên trái.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>JavaScript Operators</h1>
+									<h2>The ?? Operator</h2>
+									<p>The ?? operator returns the first argument if it is null or undefined. Otherwise it returns the second.</p>
+									<p id="demo"></p>
+									<script>
+									let name = null;
+									let text = "missing";
+									let result = name ?? text;
+									document.getElementById("demo").innerHTML = "The name is " + result; // The name is missing
+									</script>
+									</body>
+									</html>
+									
+	The Optional Chaining Operator (?.):
+	
+									The ?. operator returns undefined if an object is undefined or null (instead of throwing an error).
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>JavaScript Operators</h1>
+									<h2>The ?. Operator</h2>
+									<p>The ?. operator returns undefined if an object is undefined or null (instead of throwing an error)..</p>
+									<p id="demo"></p>
+									<script>
+									let name = null;
+									let text = "missing";
+									let result = name ?. text;
+									document.getElementById("demo").innerHTML = "The name is " + result; // The name is undefined
+									</script>
+
+									</body>
+									</html>

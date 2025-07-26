@@ -1,0 +1,24 @@
+ModelMapper--SPRING:
+
+					- ModelMapper là một thư viện Java được sử dụng để tự động ánh xạ (mapping) dữ liệu giữa các đối tượng có cấu trúc khác
+					nhau. Nó rất hữu ích trong các ứng dụng Spring, đặc biệt trong việc chuyển đổi giữa các lớp DTO (Data Transfer Object) và
+					các lớp domain/entity.
+
+					@Getter
+					@Setter
+					class User {
+						private String username;
+						private String password;
+						private String displayName;
+						private int age;
+					}
+					@Getter
+					@Setter
+					class UserDto {
+						private String username;
+						private String displayName;
+						private int age;
+					}
+					User user = new User("john", "123456", "Nguyễn Văn John", 20); // Object nguồn							
+					ModelMapper mapper = new ModelMapper(); // Tạo mapper object						
+					UserDto userDto = mapper.map(user, UserDto.class); // Map thành object đích

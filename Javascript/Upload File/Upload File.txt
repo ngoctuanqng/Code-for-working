@@ -1,0 +1,324 @@
+Upload File--JAVASCRIPT--SPRING:
+										
+				- Lưu file chỉ cần lưu tên xuống database, lấy lên frontend sẽ chèn thêm url để tạo thành link.
+				- File được gửi riêng với FormData, backend sẽ bắt với MultipartFile. Chú ý sẽ gửi 2 data, 1 là file và 1 là tên file xuống backend
+				- Tạo 1 biến cờ để khi có sự kiện onChange ở thẻ input (khi có sự kiện onChange thì chắc chắn sẽ là update file) thì bật biến cờ này lên true
+				
+				const [selectedFile, setSelectedFile] = useState(null); // file
+				const [previewFileUrl, setPreviewFileUrl] = useState(""); // trả về một URL duy nhất đại diện cho tệp được chỉ định trong tham số file.
+				const [fileName, setFileName] = useState(""); // tên của file, chỉ để hiển thị ở frontend
+				const [file, setFile] = useState(""); // tên của file lấy từ backend, được gán url phía trước.
+				const [isDeleteFile, setIsDeleteFile] = useState(false);
+				const [isOpenFileDelete, setIsOpenFileDelete] = useState(false);
+				const [fileChange, setFileChange] = useState(false);
+				const uploadFileRef = useRef(null);
+				useEffect(() => {
+					if (isUpdate === true) {												  
+					  if (row.pme00ProjectInfo.image && row.pme00ProjectInfo.image !== '') {
+						setImage(row.pme00ProjectInfo.image);
+						setSelectedImg(new File([""], "temp"));
+						setPreviewImgUrl(row.pme00ProjectInfo.image);
+					  }
+					  if (row.pme00ProjectInfo.file && row.pme00ProjectInfo.file !== '') { // code block for processing file
+						setFile(row.pme00ProjectInfo.file);
+						setSelectedFile(new File([""], "temp"));
+						setPreviewFileUrl(row.pme00ProjectInfo.file);
+						const underscoreIndex = row.pme00ProjectInfo.file.indexOf("_");
+						const fileName = row.pme00ProjectInfo.file.substring(underscoreIndex + 1); // add file from backend to show file name
+						setFileName(fileName);
+					  }
+					} else {
+					  setCreatorId(loginUserInfo.id);
+					}
+				  }, [isUpdate, row]);										 
+				useEffect(() => {
+					if (isDeleteFile) {
+					  handleChooseAnotherFile();
+					  setIsDeleteFile(false);
+					}
+				}, [isAlertOpen])
+				const data = {
+					"pme00ProjectInfo": {
+					  "image": image.split(/[\\/]/).pop(),
+					  "file": file.split(/[\\/]/).pop() // cắt bởi vì tên file từ backend sẽ được gán thêm đuôi url đằng trước để chỉ link của file
+					},
+				}	
+				const handleSave = async () => {
+					const formData = new FormData();
+					if (selectedImg && imageChange) {
+					  const nameList = applyIdentifierToFileName(selectedImg, Date.now())
+					  data.pme00ProjectInfo.image = nameList[1].split(/[\\/]/).pop();
+					  formData.append("imageUpload", nameList[0]);
+					}
+					if (selectedFile && fileChange) {
+					  const nameList = applyIdentifierToFileName(selectedFile, Date.now())
+					  data.pme00ProjectInfo.file = nameList[1].split(/[\\/]/).pop(); // Trong JavaScript, một biểu thức chính quy được đặt giữa hai dấu gạch chéo /.../.
+																				     // Ký tự \ (backslash) là ký tự đặc biệt trong cả JavaScript và biểu thức chính quy, dùng để "escape"
+																					 // các ký tự đặc biệt khác.
+																					 // [ ... ] là một "character set" trong biểu thức chính quy, cho phép bạn chỉ định một tập hợp các ký tự
+																					 có thể khớp với vị trí đó trong chuỗi.
+					  formData.append("fileUpload", nameList[0]);
+					}
+					formData.append("data", JSON.stringify(data));
+					if (isUpdate) {
+					  await saveData(formData).then(res => {
+						if (res.data[0]) {
+						  SnackbarUtils.success("Update Success!!!");
+						  handleClose();
+						  searchAll();
+						} else {
+						  SnackbarUtils.error(res.data[1]);
+						}
+					  })
+						.catch(() => {
+						  SnackbarUtils.error("Network error. Please try again after!");
+						});
+					} else {
+					  await createNewData(formData).then(res => {
+						if (res.data[0]) {
+						  SnackbarUtils.success("Add Success!!!");
+						  handleClose();
+						  searchAll();
+						} else {
+						  SnackbarUtils.error(res.data[1]);
+						}
+					  })
+						.catch(() => {
+						  SnackbarUtils.error("Network error. Please try again after!");
+						});
+					}
+				}											  										  
+
+				const handleFileChange = (event) => {
+					setFileChange(true);
+					const file = event.target.files[0];
+					if (file.size > 50000000) {
+					  SnackbarUtils.error("This file is bigger than 50MB. Please change other file!");
+					  return;
+					} else {
+					  setFileName(file?.name)
+					  setSelectedFile(file);
+					  setPreviewFileUrl(URL.createObjectURL(file)); // để gán URL đại diện cho tệp vào một biến, hiển thị trước hoặc xem trước tệp trong ứng dụng, cho phép người dùng xem trước
+																	// tệp trước khi tải lên hoặc lưu trữ nó.
+					}
+				};
+
+				const handleChooseAnotherFile = () => {
+					uploadFileRef.current.value = '';
+					setSelectedFile(null);
+					setPreviewFileUrl("");
+					setFile("");
+					setFileName("");
+				};
+
+				const handleUploadFileClick = () => {
+					uploadFileRef.current.click();
+				}											  
+
+				<div className="textField txtFieldPop">
+					<TextField className="txtPM" label="Specification File"
+					  id="koreaPm"
+					  value={fileName}
+					  readOnly
+					  size="small"
+					  disabled
+					  InputProps={{
+						endAdornment: (
+						  <>
+							<IconButton
+							  color="default"
+							  size="small"
+							  sx={{ visibility: selectedFile ? "visible" : "hidden" }}
+							  onClick={() => {
+								fetch(previewFileUrl)
+								  .then(response => response.blob())
+								  .then(blob => {
+									const url = URL.createObjectURL(blob);
+									const link = document.createElement('a');
+									link.href = url;
+									link.setAttribute('download', fileName);
+									link.click();
+									URL.revokeObjectURL(url);
+								  });
+							  }}
+							>
+							  <DownloadIcon fontSize="small" />
+							</IconButton>
+							<IconButton
+							  color="default"
+							  size="small"
+							  sx={{ visibility: selectedFile ? "visible" : "hidden" }}
+							  onClick={() => {
+								setIsAlertOpen(true);
+								setIsOpenFileDelete(true);
+							  }}
+							>
+							  <Clear fontSize="small" />
+							</IconButton>
+						  </>
+						),
+					  }}
+					/>
+					<Button type="file" className="btnPM" variant="contained" size='medium'
+					  onClick={handleUploadFileClick}
+					>
+					  Choose
+					</Button>
+					<input
+					  style={{ display: "none" }}
+					  type="file"
+					  hidden
+					  onChange={handleFileChange}
+					  name="image"
+					  ref={uploadFileRef}
+					/>
+				</div>
+				
+				{
+					(isAlertOpen && isOpenFileDelete) && (
+					  <ConfirmDialog
+						open={isAlertOpen}
+						onConfirm={setIsDeleteFile}
+						setIsAlertOpen={setIsAlertOpen}
+						title="Are you sure want to delete this file?"
+						content="Make sure you think carefully before deleting."
+					  />
+					)
+				}				
+				
+				@PutMapping("")
+				@PreAuthorize("hasAnyAuthority('UPDATE_PROJECT,UPDATE_PROJECT_OWNER')")
+				public List<Object> modify(@RequestParam ("data") String dtoString,
+									  @RequestParam (value = "imageUpload", required = false) MultipartFile imageUpload,
+									  @RequestParam (value = "fileUpload", required = false) MultipartFile fileUpload) throws SQLException {
+					ProjectManagementDto dto = ProjectManagementDto.fromJson(dtoString);
+					if (!PermissionValidation.validateUpdateProject(dto)) {
+						List<Object> result = new ArrayList<>();
+						result.add(false);
+						result.add(Utils.NO_PERMISSION);
+						return result;
+					}
+					return this.serviceLifecycle
+							   .requestLevel2ProjectService()
+							   .modifyProject(serviceLifecycle, dto, imageUpload, fileUpload);
+				}	
+				
+				@Override
+				@Transactional(rollbackFor = { SQLException.class })
+				public List<Object> modifyProject(ServiceLifecycle serviceLifecycle, ProjectManagementDto dto,
+											 MultipartFile imageUpload, MultipartFile fileUpload) throws SQLException {
+					List<Object> resultList = new ArrayList<>();
+					// Check project code exists
+					if(!checkExistsM00Codes030(serviceLifecycle, Utils.CD_TP_ID, Utils.CATEGORY_GROUP_ID, dto.getM00Codes030().getCdV())
+							|| !checkExistsPme00ProjectInfo(serviceLifecycle, dto.getPme00ProjectInfo().getCdV())){
+						resultList.add(false);
+						resultList.add("Project not exists!");
+						return resultList;
+					}
+					//  Delete old file/image
+					String imageNew = dto.getPme00ProjectInfo().getImage();
+					String fileNew = dto.getPme00ProjectInfo().getFile();
+					if (imageUpload != null || fileUpload != null || imageNew.isEmpty() || fileNew.isEmpty()) {
+						Pme00ProjectInfo projectInfo = serviceLifecycle.requestPme00ProjectInfoService().find(dto.getM00Codes030().getCdV());
+						List<String> fileName = new ArrayList<>();
+						if (imageUpload != null || imageNew.isEmpty()) {
+							String imageString = projectInfo.getImage();
+							if (imageString != null) {
+								imageString = imageString.substring(imageString.lastIndexOf("/") + 1);
+								fileName.add(imageString);
+							}
+						}
+						if (fileUpload != null || fileNew.isEmpty()) {
+							String fileString = projectInfo.getFile();
+							if (fileString != null) {
+								fileString = fileString.substring(fileString.lastIndexOf("/") + 1);
+								fileName.add(fileString);
+							}
+						}
+						boolean result = serviceLifecycle.requestLevel2Service()
+								.removeFile(Utils.UPLOAD_BUCKET, "Project", fileName);
+						if (!result) {
+							resultList.add(false);
+							resultList.add("Project updated. However, file(s) could not be saved.");
+							return resultList;
+						}
+					}
+					// Update data M00Codes030
+					List<M00Codes030> lstCodes030 = new ArrayList<>();
+					M00Codes030 entityCodes030 = new M00Codes030();
+					entityCodes030.setCdTpId(Utils.CD_TP_ID);
+					entityCodes030.setCategoryGroupId(Utils.CATEGORY_GROUP_ID);
+					entityCodes030.setCdV(dto.getM00Codes030().getCdV());
+					entityCodes030.setCdvMeaning(dto.getM00Codes030().getCdvMeaning());
+					entityCodes030.setCdVExplain(dto.getM00Codes030().getCdVExplain());
+					entityCodes030.setCdVInquirySeq(dto.getM00Codes030().getCdVInquirySeq());
+					entityCodes030.setCreatedProgramId(dto.getM00Codes030().getCreatedProgramId());
+					entityCodes030.setCreationTimestamp(dto.getM00Codes030().getCreationTimestamp());
+					entityCodes030.setLastUpdateProgramId(dto.getM00Codes030().getLastUpdateProgramId());
+					entityCodes030.setLastUpdateTimestamp(dto.getM00Codes030().getLastUpdateTimestamp());
+					lstCodes030.add(entityCodes030);
+					serviceLifecycle.requestM00Codes030Service().modify(lstCodes030);
+					// Update data Pme00ProjectInfo
+					List<Pme00ProjectInfo> lstProjectInfo = new ArrayList<>();
+					Pme00ProjectInfo entityInfo = new Pme00ProjectInfo();
+					entityInfo.setCdV(dto.getPme00ProjectInfo().getCdV());
+					entityInfo.setPeriod(dto.getPme00ProjectInfo().getPeriod());
+					entityInfo.setStartDate(dto.getPme00ProjectInfo().getStartDate());
+					entityInfo.setEndDate(dto.getPme00ProjectInfo().getEndDate());
+					entityInfo.setKoreaPm(dto.getPme00ProjectInfo().getKoreaPm());
+					entityInfo.setVietnamPl(dto.getPme00ProjectInfo().getVietnamPl());
+					entityInfo.setStatus(dto.getPme00ProjectInfo().getStatus());
+					entityInfo.setFramework(dto.getPme00ProjectInfo().getFramework());
+					entityInfo.setImage(dto.getPme00ProjectInfo().getImage());
+					entityInfo.setFile(dto.getPme00ProjectInfo().getFile());
+					lstProjectInfo.add(entityInfo);
+					serviceLifecycle.requestPme00ProjectInfoService().modify(lstProjectInfo);
+					// Update data Pme00Member
+					// Delete old Pme00Member
+					serviceLifecycle.requestPme00MemberService().deleteMemberById(dto.getPme00ProjectInfo().getCdV(), null);
+					// Insert new Pme00Member
+					Pme00Member entityMember;
+					for (Pme00Member member : dto.getLstMember()) {
+						entityMember = new Pme00Member();
+						entityMember.setCdVId(dto.getM00Codes030().getCdV());
+						entityMember.setEmpId(member.getEmpId());
+						entityMember.setEmpName(member.getEmpName());
+						entityMember.setAvatar(member.getAvatar());
+						serviceLifecycle.requestPme00MemberService().register(entityMember);
+					}
+					if (imageUpload != null) {
+						String result = serviceLifecycle.requestLevel2Service().uploadFile(Utils.UPLOAD_BUCKET, "Project", imageUpload);
+						if (!result.contains("Project")) {
+							resultList.add(false);
+							resultList.add("Project created. However, image could not be saved.");
+							return resultList;
+						}
+					}
+					if (fileUpload != null) {
+						String result = serviceLifecycle.requestLevel2Service().uploadFile(Utils.UPLOAD_BUCKET, "Project", fileUpload);
+						if (!result.contains("Project")) {
+							resultList.add(false);
+							resultList.add("Project created. However, file could not be saved.");
+							return resultList;
+						}
+					}
+					resultList.add(true);
+					return resultList;
+				}	
+				
+				@Override
+				public String uploadFile(String bucketName, String serviceName, MultipartFile file) {
+					try {
+						final String fileName = serviceName + "/" + file.getOriginalFilename();
+						InputStream inputStream = file.getInputStream();
+						minioClient.putObject(PutObjectArgs.builder()
+								   .bucket(bucketName)
+								   .object(fileName)
+								   .stream(inputStream, inputStream.available(), -1)
+								   .contentType(file.getContentType())
+								   .build());
+						return fileName;
+					} catch (Exception e) {
+						return "Upload unsuccessfully!";
+					}
+				}

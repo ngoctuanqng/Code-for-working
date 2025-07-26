@@ -1,0 +1,116 @@
+Callbacks--Các kiến thức nền tảng JAVASCRIPT:
+
+									- A callback is a function passed as an argument to another function.
+									- Using a callback, you could call the calculator function (myCalculator) with a callback, and let the calculator function run the callback after the calculation is finished
+									- Where callbacks really shine are in asynchronous functions, where one function has to wait for another function (like waiting for a file to load).
+									Nghĩa là hàm callback sẽ chạy khi thi thực trong thân hàm thay vì chạy khi khai báo đối số
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Callbacks</h2>
+									<p>Do a calculation and then display the result.</p>
+									<p id="demo"></p>
+									<script>
+									function myDisplayer(something) {
+									  document.getElementById("demo").innerHTML = something;
+									}
+									function myCalculator(num1, num2, myCallback) {
+									  let sum = num1 + num2;
+									  myCallback(sum);
+									}
+									myCalculator(5, 5, myDisplayer);
+									</script>
+									</body>
+									</html>
+Class Inheritance--Các kiến thức nền tảng JAVASCRIPT:
+	Class Inheritance:	
+									To create a class inheritance, use the extends keyword.
+									The super() method refers to the parent class.
+									By calling the super() method in the constructor method, we call the parent's constructor method and gets access to the parent's properties and methods.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Class Inheritance</h2>
+									<p>Use the "extends" keyword to inherit all methods from another class.</p>
+									<p>Use the "super" method to call the parent's constructor function.</p>
+									<p id="demo"></p>
+									<script>
+									class Car {
+									  constructor(brand) {
+										this.carname = brand;
+									  }
+									  present() {
+										return 'I have a ' + this.carname;
+									  }
+									}
+									class Model extends Car {
+									  constructor(brand, mod) {
+										super(brand);
+										this.model = mod;
+									  }
+									  show() {
+										return this.present() + ', it is a ' + this.model;
+									  }
+									}
+									let myCar = new Model("Ford", "Mustang");
+									document.getElementById("demo").innerHTML = myCar.show();
+									</script>
+									</body>
+									</html>
+	Getters and Setters:
+									Classes also allows you to use getters and setters.
+									It can be smart to use getters and setters for your properties, especially if you want to do something special with the value before returning them, or before you set them.
+									To add getters and setters in the class, use the get and set keywords.
+									Note: even if the getter is a method, you do not use parentheses when you want to get the property value.
+									The name of the getter/setter method cannot be the same as the name of the property, in this case carname.
+									Many programmers use an underscore character _ before the property name to separate the getter/setter from the actual property
+									To use a setter, use the same syntax as when you set a property value, without parentheses:
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Class Gettter/Setter</h2>
+									<p>Using an underscore character is common practice when using getters/setters in JavaScript, but not mandatory, you can name them anything you like.</p>
+									<p id="demo"></p>
+									<script>
+									class Car {
+									  constructor(brand) {
+										this._carname = brand;
+									  }
+									  get carname() {
+										return this._carname;
+									  }
+									  set carname(x) {
+										this._carname = x;
+									  }
+									}
+									let myCar = new Car("Ford");
+									document.getElementById("demo").innerHTML = myCar.carname;
+									</script>
+									</body>
+									</html>
+	Hoisting:
+									Unlike functions, and other JavaScript declarations, class declarations are not hoisted.
+									That means that you must declare a class before you can use it:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Classes are not hoisted</h2>
+									<p>You will get an error if you try to use a class before it is declared.</p>
+									<p id="demo"></p>
+									<script>
+									//You cannot use the class yet.
+									//myCar = new Car("Ford")
+									//This would raise an error.
+									class Car {
+									  constructor(brand) {
+										this.carname = brand;
+									  }
+									}
+									//Now you can use the class:
+									let myCar = new Car("Ford")
+									</script>
+									</body>
+									</html>

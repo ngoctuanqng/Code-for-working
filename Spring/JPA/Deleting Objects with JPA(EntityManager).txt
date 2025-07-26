@@ -1,0 +1,14 @@
+Deleting Objects with JPA(EntityManager)--SPRING:
+	Delete a Student:	
+	
+			int id = 1;
+			Student theStudent = entityManager.find(Student.class, id); // retrieve the student													
+			entityManager.remove(theStudent); // delete the student
+												
+	Delete based on a condition:
+	
+			int numRowsDeleted = entityManager.createQuery("DELETE FROM Student WHERE lastName=‘Smith’").executeUpdate();
+	
+	Delete All Students:	
+
+			int numRowsDeleted = entityManager.createQuery("DELETE FROM Student").executeUpdate();

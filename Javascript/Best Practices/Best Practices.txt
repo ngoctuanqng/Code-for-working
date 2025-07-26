@@ -1,0 +1,245 @@
+Best Practices--Các kiến thức nền tảng JAVASCRIPT:
+
+									Avoid global variables, avoid new, avoid ==, avoid eval()
+	Avoid Global Variables:
+									- Minimize the use of global variables. This includes all data types, objects, and functions.
+									- Global variables and functions can be overwritten by other scripts. Use local variables instead, and learn how to use closures.
+	
+	Always Declare Local Variables:
+	
+	Declarations on Top:
+									- It is a good coding practice to put all declarations at the top of each script or function.
+									- This will:
+													Give cleaner code
+													Provide a single place to look for local variables
+													Make it easier to avoid unwanted (implied) global variables
+													Reduce the possibility of unwanted re-declarations
+									
+									// Declare at the beginning
+									let firstName, lastName, price, discount, fullPrice;
+									// Use later
+									firstName = "John";
+									lastName = "Doe";
+									price = 19.90;
+									discount = 0.10;
+									fullPrice = price - discount;
+	Initialize Variables:
+									- It is a good coding practice to initialize variables when you declare them.
+									- Initializing variables provides an idea of the intended use (and intended data type).
+									- This will:
+													Give cleaner code
+													Provide a single place to initialize variables
+													Avoid undefined values
+							
+									// Declare and initiate at the beginning
+									let firstName = "";
+									let lastName = "";
+									let price = 0;
+									let discount = 0;
+									let fullPrice = 0,
+									const myArray = [];
+									const myObject = {};
+	Declare Objects with const:
+									Declaring objects with const will prevent any accidental change of type:
+									
+									let car = {type:"Fiat", model:"500", color:"white"};
+									car = "Fiat";      // Changes object to string
+									
+									const car = {type:"Fiat", model:"500", color:"white"};
+									car = "Fiat";      // Not possible
+	Declare Arrays with const:
+									Declaring arrays with const will prevent any accidential change of type:
+									
+									let cars = ["Saab", "Volvo", "BMW"];
+									cars = 3;    // Changes array to number
+									
+									const cars = ["Saab", "Volvo", "BMW"];
+									cars = 3;    // Not possible
+	Don't Use new Object():
+									Use "" instead of new String()
+									Use 0 instead of new Number()
+									Use false instead of new Boolean()
+									Use {} instead of new Object()
+									Use [] instead of new Array()
+									Use /()/ instead of new RegExp()
+									Use function (){} instead of new Function()
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Literal Constructors</h2>
+									<p id="demo"></p>
+									<script>
+									let x1 = "";
+									let x2 = 0;
+									let x3 = false;
+									const x4 = {};
+									const x5 = [];
+									const x6 = /()/;
+									const x7 = function(){};
+									document.getElementById("demo").innerHTML =
+									"x1: " + typeof x1 + "<br>" + // string
+									"x2: " + typeof x2 + "<br>" + // number
+									"x3: " + typeof x3 + "<br>" + // boolean
+									"x4: " + typeof x4 + "<br>" + // object
+									"x5: " + typeof x5 + "<br>" + // object
+									"x6: " + typeof x6 + "<br>" + // object
+									"x7: " + typeof x7 + "<br>"; // function
+									</script>
+									</body>
+									</html>
+									
+	Beware of Automatic Type Conversions:
+
+									JavaScript is loosely typed. A variable can contain all data types. A variable can change its data type.
+									Beware that numbers can accidentally be converted to strings or NaN (Not a Number). When doing mathematical operations, JavaScript can convert numbers to strings
+									Subtracting a string from a string, does not generate an error but returns NaN (Not a Number)
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Variables</h2>
+									<p>Remove the comment (at the beginning of the lines) to test each case:</p>
+									<p id="demo"></p>
+									<script>
+									let x = 5;
+									//x = 5 + 7;    // x.valueOf() is 12, typeof x is a number
+									//x = 5 + "7";  // x.valueOf() is 57, typeof x is a string
+									//x = "5" + 7;  // x.valueOf() is 57, typeof x is a string
+									//x = 5 - 7;    // x.valueOf() is -2, typeof x is a number
+									//x = 5 - "7";  // x.valueOf() is -2, typeof x is a number
+									//x = "5" - 7;  // x.valueOf() is -2, typeof x is a number
+									//x = 5 - "x";  // x.valueOf() is NaN, typeof x is a number
+									document.getElementById("demo").innerHTML = x.valueOf() + " " + typeof x;
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Variables</h2>
+									<p>Subtracting a string from a string, does not generate an error but returns NaN (Not a Number):</p>
+									<p id="demo"></p>
+									<script>
+									document.getElementById("demo").innerHTML = "Hello" - "Dolly"; // NaN
+									</script>
+									</body>
+									</html> 
+		Use === Comparison:
+									The == comparison operator always converts (to matching types) before comparison. The === operator forces comparison of values and type:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Comparisons</h2>
+									<p>Remove the comment (at the beginning of each line) to test each case:</p>
+									<p id="demo"></p>
+									<script>
+									let x;
+									//x = (0 == "");   // true
+									//x = (1 == "1");  // true
+									//x = (1 == true);   // true
+									//x = (0 === "");  // false
+									//x = (1 === "1");   // false
+									//x = (1 === true);  // false
+									document.getElementById("demo").innerHTML = x;
+									</script>
+									</body>
+									</html>
+		Use Parameter Defaults:
+									- If a function is called with a missing argument, the value of the missing argument is set to undefined.
+									- Undefined values can break your code. It is a good habit to assign default values to arguments.
+									- ECMAScript 2015 allows default parameters in the function definition
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Functions</h2>
+									<p>Setting a default value to a function parameter.</p>
+									<p id="demo"></p>
+									<script>
+									function myFunction(x, y) {
+									  if (y === undefined) {
+										y = 0;
+									  }  
+									  return x * y;
+									}
+									document.getElementById("demo").innerHTML = myFunction(4);
+									</script>
+									</body>
+									</html>
+									
+									function (a=1, b=1) { /*function code*/ }
+		
+		End Your Switches with Defaults:
+		
+									Always end your switch statements with a default. Even if you think there is no need for it.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<p id="demo"></p>
+									<script>
+									let day;
+									switch (new Date().getDay()) {
+									  case 0:
+										day = "Sunday";
+										break;
+									  case 1:
+										day = "Monday";
+										break;
+									  case 2:
+										day = "Tuesday";
+										break;
+									  case 3:
+										day = "Wednesday";
+										break;
+									  case 4:
+										day = "Thursday";
+										break;
+									  case 5:
+										day = "Friday";
+										break;
+									  case  6:
+										day = "Saturday";
+										break;
+									  default:
+										 day = "unknown";
+									}
+									document.getElementById("demo").innerHTML = "Today is " + day;
+									</script>
+									</body>
+									</html>
+		
+		Avoid Number, String, and Boolean as Objects:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript String Objects</h2>
+									<p>Never create strings as objects.</p>
+									<p>Strings and objects cannot be safely compared.</p>
+									<p id="demo"></p>
+									<script>
+									let x = "John";        // x is a string
+									let y = new String("John");  // y is an object
+									document.getElementById("demo").innerHTML = (x === y); // false
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript String Objects</h2>
+									<p>Never create strings as objects.</p>
+									<p>Strings and objects cannot be safely compared.</p>
+									<p id="demo"></p>
+									<script>
+									let x = "John";        // x is a string
+									let y = new String("John");  // y is an object
+									document.getElementById("demo").innerHTML = (x === y); // false
+									</script>
+									</body>
+									</html>

@@ -1,0 +1,100 @@
+Array--JAVASCRIPT:			let numbers = [1, 2, 3, 4, 2, 5, 2];
+	- toString:		
+	- join:					
+							It behaves just like toString(), but in addition you can specify the separator
+							
+							let joinedString = numbers.join(); // Chuyển mảng thành chuỗi, các phần tử được nối bởi dấu phẩy (mặc định) 1,2,3,4,5
+	- forEach:				numbers.forEach((number, index) => {
+								console.log(`Index ${index}: ${number}`); // Index 0: 1, Index 1: 2, Index 2: 3, Index 3: 4, Index 4: 2, Index 5: 5, Index 5: 2
+							}); 								                                             
+	- every:                let allGreaterThanZero = numbers.every(number => number > 0); // true                                                 
+	- some:                 let atLeastOneEven = numbers.some(number => number % 2 === 0); // true. Kiểm tra xem có ít nhất một phần tử trong mảng thỏa mãn một điều kiện                                  
+	- includes:          	let includesThree = numbers.includes(3); // true                                                      
+	- length:				
+							The length property provides an easy way to append a new element to an array
+							
+							let arrayLength = numbers.length; // 7
+							
+							const fruits = ["Banana", "Orange", "Apple", "Mango"];
+							fruits[fruits.length] = "Kiwi"; // Banana, Orange, Apple, Mango, Kiwi
+	- indexOf:				let indexOfTwo = numbers.indexOf(2); // 1
+	lastIndexOf:			let lastIndexOfTwo = numbers.lastIndexOf(2); // 6
+	findIndex:				let indexOfEven = numbers.findIndex(number => number % 2 === 0); // 1
+	- at:					let elementAtTwo = numbers.at(2); // 3
+	- find:					let firstEven = numbers.find(number => number % 2 === 0); // Trả về  giá trị của phần tử đầu tiên thỏa mãn một điều kiện, 2
+	findIndex:				let firstIndexOfEven = numbers.findIndex(number => number % 2 === 0); // Trả về index của phần tử đầu tiên thỏa mãn một điều kiện, 1
+	- reduce:				let sum = numbers.reduce((accumulator, currentValue) => accumulator + currentValue, 0); // 19
+	Dont mutate: 
+		- filter:			let evenNumbers = numbers.filter(number => number % 2 === 0); // [2, 4, 2, 2]
+		- map:				
+							let tripledNumbers = numbers.map(number => number * 3); // [3, 6, 9, 12, 6, 15, 6]
+							const numbers = [1, 2, 3, 4, 5];
+							const doubledNumbers = numbers.map((number) => {
+								return number * 2;
+							});
+							console.log(doubledNumbers); // Output: [2, 4, 6, 8, 10]
+		- concat:			
+							let moreNumbers = [6, 7, 8];
+							let combinedNumbers = numbers.concat(moreNumbers); // [1, 2, 3, 4, 2, 5, 2, 6, 7, 8]
+		- slice:
+							slice() dựa vào index của mảng để thao tác. splice() dựa vào index và số phần tử để thao tác
+		
+							let slicedArray = numbers.slice(2, 5); // Tạo một mảng con từ index 2 đến index 4 (không bao gồm index 5) [3, 4, 2]
+							let slicedArray = numbers.slice(2); // [3, 4, 2, 5, 2]
+							let copiedArray = numbers.slice(); // [1, 2, 3, 4, 2, 5, 2]
+							let slicedArray = numbers.slice(-3, -1); // Lấy một phần của mảng từ index -3 đến index -1 (đếm từ cuối mảng). [5, 2]
+	Mutate:
+		- splice:			
+							The splice() method returns an array with the deleted items
+							Khi đối số thứ 2 là 0, phương thức splice() sẽ không xóa bất kỳ phần tử nào từ mảng, nhưng nó vẫn có thể chèn các phần tử mới vào mảng tại vị trí chỉ định.
+		
+							numbers.splice(2, 3, 6, 7); // Loại bỏ 3 phần tử từ index 2, do đó loại bỏ các số 3, 4, và 2.
+														// Thêm vào các phần tử mới 6 và 7 tại vị trí đã loại bỏ. [1, 2, 6, 7, 5, 2]
+							numbers.splice(2, 0, 6); // Thêm phần tử 6 vào index 2, [1, 2, 6, 3, 4, 2, 5, 2]
+							numbers.splice(2, 0, 6, 3); // Thêm phần tử 6, 3 vào index 2, [1, 2, 6, 3, 3, 4, 2, 5, 2]
+							numbers.splice(1, 3); // Loại bỏ 3 phần tử từ index 1, do đó loại bỏ các số 2, 3, và 4. [1, 2, 5, 2]
+							numbers.splice(2); // Loại bỏ tất cả phần tử từ index 2 đến cuối mảng, nghĩa là loại bỏ từ index có giá trị 3 trở về sau. [3, 4, 2, 5, 2]
+							numbers.splice(1, 2, 10, 11); // Loại bỏ 2 phần tử từ index 1 và thêm 2 phần tử mới. [1, 10, 11, 4, 5, 2]
+							
+							const fruits = ["Banana", "Orange", "Apple", "Mango"];
+							let removed = fruits.splice(2, 2, "Lemon", "Kiwi"); 
+							document.getElementById("demo2").innerHTML = "New Array:<br>" + fruits; // Banana, Orange, Lemon, Kiwi
+							document.getElementById("demo3").innerHTML = "Removed Items:<br> " + removed; // Apple, Mango
+		- pop:				
+							The pop() method returns the value that was "popped out"
+		
+							let lastElement = numbers.pop();
+							console.log("After pop:", numbers, "Removed Element:", lastElement); // After pop: [1, 2, 3, 4, 2, 5] Removed Element: 2
+		- shift:			
+							The shift() method returns the value that was "shifted out"
+		
+							let firstElement = numbers.shift();
+							console.log("After shift:", numbers, "Removed Element:", firstElement); // After shift: [2, 3, 4, 2, 5, 2] Removed Element: 1
+		- push:				
+							The push() method returns the new array length
+							
+							numbers.push(5, 3); // [1, 2, 3, 4, 2, 5, 2, 5, 3]
+		- unshift: 			
+							The unshift() method returns the new array length
+							
+							numbers.unshift(3, 1); // Original Array: [1, 2, 3, 4, 2, 5, 2]
+												   // After unshift: [3, 1, 1, 2, 3, 4, 2, 5, 2]
+		- reverse:			numbers.reverse(); // [2, 5, 2, 4, 3, 2, 1]
+		- sort:				numbers.sort(); // [1, 2, 2, 3, 4, 5, 5]
+		fill:				numbers.fill(0); // After fill: [0, 0, 0, 0, 0, 0, 0]
+		copyWithin:			numbers.copyWithin(0, 3, 5); // copyWithin sao chép một phần của mảng và ghi đè lên chính nó.
+														 // Trong ví dụ này, nó sao chép phần từ index 3 đến index 5 (không bao gồm index 5) ghi đè lên phần từ index 0.
+														 // [4, 2, 5, 4, 2, 5, 2]
+		flat:				let nestedArray = [numbers, [6, 7], [8, [9, 10]]];
+							console.log("Original Nested Array:", nestedArray); // Original Nested Array: [[1, 2, 3, 4, 2, 5, 2], [6, 7], [8, [9, 10]]]
+							let flatArray = nestedArray.flat(); // Flattened Array: [1, 2, 3, 4, 2, 5, 2, 6, 7, 8, [9, 10]]
+							console.log("Flattened Array:", flatArray); // flat được sử dụng để trải phẳng mảng nestedArray, nơi mảng numbers và các mảng lồng nhau
+																		// khác được chuyển thành một mảng một chiều.
+																		// Điều này giúp giảm bậc của mảng và tạo ra một mảng chứa tất cả các phần tử từ mảng lồng nhau.
+		flatMap:			let mappedArray = numbers.flatMap(x => [x, x * 2]); // flatMap(x => [x, x * 2]) ánh xạ mỗi phần tử x của mảng với một mảng mới chứa x và x * 2.
+																				// [1, 2, 2, 4, 3, 6, 4, 8, 2, 4, 5, 10, 2, 4]
+		- Array.isArray:	let isArray = Array.isArray(numbers); // true
+		Array.from:			let newArray = Array.from(numbers); // Array.from(numbers) tạo ra một bản sao mới của mảng numbers.
+																// Kết quả là một mảng mới có cùng các phần tử như mảng gốc. [1, 2, 3, 4, 2, 5, 2]
+		Array.of:			let newArray = Array.of(...numbers); // Array.of(...numbers) sử dụng toán tử spread (...) để truyền các giá trị từ mảng numbers vào phương thức Array.of.
+																 // Kết quả là một mảng mới có cùng các phần tử như mảng gốc.[1, 2, 3, 4, 2, 5, 2]

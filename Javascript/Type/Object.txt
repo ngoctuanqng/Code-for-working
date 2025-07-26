@@ -1,0 +1,14 @@
+Object--JAVASCRIPT:
+
+		let totalRow = {};
+		totalRow["Id"] = res.data.length;
+		totalRow["Project Name"] = "Total";
+		totalRow["Task Count"] = res.data[0]["Total Tasks"];
+		totalRow["Finished Count"] = res.data[0]["Total Finished Tasks"];
+		totalRow["Testing Count"] = res.data[0]["Total Testing Tasks"];
+		totalRow["Remain Count"] = res.data[0]["Total Remain Tasks"];
+		totalRow["Delayed Count"] = res.data[0]["Total Delayed Tasks"];
+		totalRow["Finished (%)"] = ((totalRow["Finished Count"]/totalRow["Task Count"]).toFixed(2)*100) + "%";
+		totalRow["Testing (%)"] = ((totalRow["Testing Count"]/totalRow["Task Count"]).toFixed(2)*100) + "%";
+		totalRow["Remain (%)"] = ((totalRow["Remain Count"]/totalRow["Task Count"]).toFixed(2)*100) + "%";
+		totalRow["Delayed (%)"] = ((totalRow["Delayed Count"]/totalRow["Task Count"]).toFixed(2)*100) + "%";

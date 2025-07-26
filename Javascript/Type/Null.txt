@@ -1,0 +1,13 @@
+Null--JAVASCRIPT:																		
+						var a = null;
+						console.log(a); //null
+
+						typeof null; // 'object';
+						
+						var a = null;
+						a === null; // true
+						
+						let logHi = (str = ‘Hi’) => {
+							console.log(str);
+						}							
+						logHi(null); // null

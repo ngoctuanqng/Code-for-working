@@ -1,0 +1,33 @@
+Saving a Java Object with JPA(EntityManager)--SPRING:
+
+		@Repository
+		public class StudentDAOImpl implements StudentDAO {
+			 private EntityManager entityManager;
+			 @Autowired
+			 public StudentDAOImpl(EntityManager theEntityManager) {
+				 entityManager = theEntityManager;
+			 }
+			@Override
+			public void save(Student theStudent) {
+				 entityManager.persist(theStudent);
+			}
+		}
+		
+		@Override
+		@Transactional
+		public void save(Student theStudent) {
+			entityManager.persist(theStudent);
+		}
+		
+		@SpringBootApplication
+		public class CruddemoApplication {
+			 ...
+			@Bean
+			public CommandLineRunner commandLineRunner(StudentDAO studentDAO) {
+				return runner -> {
+					createStudent(studentDAO);
+		}
+			private void createStudent(StudentDAO studentDAO) {
+				...
+			}
+		}

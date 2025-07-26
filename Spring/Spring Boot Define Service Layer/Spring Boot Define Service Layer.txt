@@ -1,0 +1,11 @@
+Spring Boot Define Service Layer--SPRING:
+
+		@Service
+		public class EmployeeServiceImpl implements EmployeeService {
+			// inject EmployeeDAO
+			…
+			@Override
+			public List<Employee> findAll() {
+				return employeeDAO.findAll();
+			}
+		}

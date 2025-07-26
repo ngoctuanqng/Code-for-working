@@ -1,0 +1,556 @@
+Kafka--Spring:
+
+	ConsumerFactory--Spring kafka:
+	
+		Trong Spring, ConsumerFactory là một interface cung cấp cơ chế để tạo ra các instance của Consumer trong các ứng dụng sử dụng
+		Kafka. Kafka Consumer là một phần quan trọng trong việc đọc các thông điệp từ các topics trong Kafka. ConsumerFactory giúp
+		quản lý việc tạo các consumer và cung cấp cấu hình cần thiết cho chúng.
+		
+		Các thành phần chính liên quan đến ConsumerFactory:
+		
+			ConsumerFactory Interface:
+			
+				Đây là interface định nghĩa một phương thức duy nhất là createConsumer, được sử dụng để tạo một KafkaConsumer.
+				
+				Thông qua ConsumerFactory, bạn có thể tùy chỉnh cách mà KafkaConsumer được tạo ra, bao gồm các cài đặt cấu hình
+				như bootstrap.servers, group.id, key.deserializer, value.deserializer, và nhiều hơn nữa.
+				
+			DefaultKafkaConsumerFactory:
+			
+				Đây là một triển khai mặc định của ConsumerFactory.
+				
+				Bạn có thể sử dụng lớp này để tạo các consumer với cấu hình chuẩn hoặc tùy chỉnh thông qua một Map<String, Object>
+				chứa các properties của Kafka.
+				
+		Cấu hình các thuộc tính của Kafka Consumer:
+		
+			- ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG: Địa chỉ của Kafka broker, thông qua biến bootstrapAddress. Đây là danh
+			sách các broker mà Kafka consumer sẽ kết nối để lấy dữ liệu.
+			
+			- ConsumerConfig.GROUP_ID_CONFIG: Được cấu hình với giá trị của groupId truyền vào. Đây là ID của nhóm consumer, giúp
+			Kafka biết được các consumer nào cùng thuộc về một nhóm và cần
+			chia sẻ công việc với nhau.
+			
+			- ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG và ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG: Cấu hình lớp
+			deserializer để giải mã (deserialize) các khóa và giá trị từ chuỗi byte. Ở đây, StringDeserializer.class được sử
+			dụng để giải mã dữ liệu từ chuỗi byte thành chuỗi (string).
+			
+			- ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG và ConsumerConfig.FETCH_MAX_BYTES_CONFIG: Cấu hình kích thước
+			tối đa mà consumer có thể đọc từ mỗi phân vùng (partition) trong một lần truy vấn (fetch). Ở đây, nó được đặt
+			thành 20 MB (20971520 bytes).
+								
+	ConcurrentKafkaListenerContainerFactory--Spring kafka:
+	
+		ConcurrentKafkaListenerContainerFactory là một lớp trong Spring Kafka, được sử dụng để tạo các container chịu trách nhiệm
+		quản lý vòng đời của các Kafka listener. Nó đặc biệt hữu ích khi bạn cần xử lý các thông điệp từ Kafka một cách song
+		song (concurrent) và hiệu quả trong các ứng dụng Spring.
+		
+		Chức năng của ConcurrentKafkaListenerContainerFactory:
+		
+			Tạo các Listener Containers:
+			
+				ConcurrentKafkaListenerContainerFactory tạo ra các listener containers có khả năng chạy nhiều KafkaListener
+				cùng lúc, cho phép xử lý đồng thời nhiều thông điệp từ Kafka.
+				
+			Cấu hình Concurrency (Độ đồng thời):
+
+				Bạn có thể cấu hình mức độ đồng thời (số lượng thread) để điều khiển số lượng luồng sẽ xử lý các thông điệp Kafka đồng thời.
+				
+				Điều này đặc biệt hữu ích trong các ứng dụng yêu cầu khả năng mở rộng và xử lý khối lượng lớn thông điệp.
+				
+			Tích hợp dễ dàng với Spring:
+			
+				ConcurrentKafkaListenerContainerFactory được tích hợp trực tiếp với cơ chế @KafkaListener trong Spring, cho phép
+				bạn dễ dàng xác định các phương thức sẽ xử lý các thông điệp Kafka.
+			
+	ProducerFactory--Spring kafka:
+	
+		ProducerFactory trong Spring Kafka là một giao diện chịu trách nhiệm tạo các Kafka Producer. Tương tự như ConsumerFactory
+		đối với Kafka Consumer, ProducerFactory cung cấp cơ chế để cấu hình và khởi tạo Kafka Producer với các thuộc tính cụ thể.
+		
+		Vai trò của ProducerFactory:
+		
+			Bạn có thể cấu hình ProducerFactory để tùy chỉnh các thuộc tính liên quan đến cách mà Producer hoạt động, chẳng hạn
+			như địa chỉ Kafka broker, kiểu dữ liệu (serializer) cho khóa và giá trị, timeout, độ an toàn khi gửi dữ
+			liệu (acks), và nhiều thứ khác.
+			
+		Các thuộc tính:
+		
+			ProducerConfig.BOOTSTRAP_SERVERS_CONFIG:
+			
+				Mô tả: Đây là địa chỉ của Kafka broker mà producer sẽ kết nối tới.
+				
+				Ví dụ: "localhost:9092".
+			
+			ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG và ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG:
+				
+				Mô tả: Xác định lớp serializer để chuyển đổi khóa và giá trị từ đối tượng Java sang chuỗi byte trước khi gửi tới Kafka.
+				
+				Ví dụ: StringSerializer.class (để serialize các khóa và giá trị là chuỗi string).
+			
+			ProducerConfig.ACKS_CONFIG:
+				
+				Mô tả: Xác định mức độ an toàn khi gửi dữ liệu. Cấu hình này chỉ định số lượng bản sao (replica) của Kafka
+				broker cần phải xác nhận đã nhận được dữ liệu trước khi producer coi việc gửi là thành công.
+				
+				Giá trị:
+				
+					"all": Tất cả các bản sao đồng bộ phải xác nhận (an toàn nhất).
+					
+					"1": Chỉ cần một bản sao xác nhận.
+					
+					"0": Không cần xác nhận từ broker.
+			
+			ProducerConfig.RETRIES_CONFIG:
+				
+				Mô tả: Số lần tối đa mà producer sẽ thử gửi lại dữ liệu nếu việc gửi ban đầu thất bại.
+				
+				Ví dụ: 10 (Producer sẽ thử gửi lại dữ liệu tối đa 10 lần).
+			
+			ProducerConfig.BATCH_SIZE_CONFIG:
+				
+				Mô tả: Kích thước tối đa của một batch (lô) dữ liệu mà producer sẽ gửi trong một lần. Kafka producer sẽ cố
+				gắng gộp các bản ghi thành các lô trước khi gửi đi.
+				
+				Ví dụ: 16384 (16 KB).
+			
+			ProducerConfig.LINGER_MS_CONFIG:
+				
+				Mô tả: Thời gian tối đa producer sẽ đợi trước khi gửi batch dữ liệu. Nếu thời gian đợi này hết trước khi
+				batch đầy, producer sẽ gửi batch đi ngay cả khi batch chưa đầy.
+				
+				Ví dụ: 1 (Producer sẽ đợi 1 ms để gộp batch trước khi gửi).
+			
+			ProducerConfig.BUFFER_MEMORY_CONFIG:
+				
+				Mô tả: Tổng lượng bộ nhớ mà producer có thể sử dụng để lưu trữ các bản ghi chưa gửi. Khi bộ nhớ này đầy,
+				producer sẽ chờ trước khi chấp nhận thêm các bản ghi mới.
+				
+				Ví dụ: 33554432 (32 MB).
+				
+			ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG
+				
+				Chỉ định lớp serializer được sử dụng để chuyển đổi giá trị (value) thành chuỗi byte trước khi gửi tới Kafka.
+				
+				StringSerializer.class là lớp serializer được chọn, phù hợp khi giá trị là một chuỗi (String).
+				
+			ProducerConfig.MAX_REQUEST_SIZE_CONFIG
+			
+				Xác định kích thước tối đa của một yêu cầu gửi từ Producer tới Kafka, tính bằng byte.
+				
+				20971520 là kích thước tối đa được đặt trong ví dụ này, tương đương với 20 MB. Điều này có nghĩa là
+				Producer có thể gửi một yêu cầu có kích thước lên tới 20 MB.
+				
+	DefaultKafkaProducerFactory--Spring kafka:
+	
+		DefaultKafkaProducerFactory trong Spring Kafka là một lớp triển khai của giao diện ProducerFactory, được sử dụng
+		để tạo các instance của Kafka Producer dựa trên cấu hình mà bạn cung cấp. Nó cung cấp khả năng khởi tạo và quản
+		lý các Kafka Producer với các cấu hình chi tiết như các thuộc tính về broker, serializer, và các thông số hoạt động khác.
+		
+		Chức năng của DefaultKafkaProducerFactory:
+		
+			Tạo Kafka Producer: DefaultKafkaProducerFactory chịu trách nhiệm tạo và cung cấp các Kafka Producer được cấu hình trước.
+			
+			Quản lý tài nguyên: Nó có thể quản lý và tái sử dụng các Kafka Producer để tối ưu hóa tài nguyên.
+			
+			Tùy chỉnh cấu hình: Bạn có thể cung cấp các thuộc tính cấu hình khác nhau để tùy chỉnh cách mà Kafka Producer hoạt động.
+
+	KafkaTemplate--Spring kafka:
+	
+		- KafkaTemplate trong Spring Kafka là một lớp tiện ích được sử dụng để gửi các thông điệp (messages) tới các topic
+		trong Kafka. Nó đóng vai trò tương tự như JdbcTemplate trong Spring JDBC hoặc RestTemplate trong Spring REST,
+		giúp đơn giản hóa quá trình tương tác với Kafka Producer bằng cách ẩn đi các chi tiết phức tạp.
+		
+		- Chức năng của KafkaTemplate:
+		
+			Gửi thông điệp (Send Messages):
+			
+				KafkaTemplate cung cấp nhiều phương thức để gửi thông điệp đồng bộ hoặc bất đồng bộ tới một hoặc nhiều topic trong Kafka.
+				
+			Tự động quản lý Producer:
+			
+				KafkaTemplate quản lý các Kafka Producer dưới lớp, bạn không cần phải tạo hay đóng chúng một cách thủ công.
+				
+			Xử lý kết quả:
+			
+				KafkaTemplate cung cấp các phương thức để xử lý kết quả gửi thông điệp, bao gồm việc nhận Future để
+				theo dõi quá trình gửi thông điệp bất đồng bộ.
+				
+		- Các phương thức quan trọng của KafkaTemplate:
+		
+			send(String topic, String data):
+			
+				Gửi thông điệp tới một topic cụ thể.
+				
+				Trả về một đối tượng ListenableFuture<SendResult<K, V>> cho phép bạn theo dõi trạng thái gửi thông điệp.
+			
+			send(String topic, K key, V data):
+				
+				Gửi thông điệp tới một topic cụ thể với khóa và giá trị.
+				
+				Tương tự như trên, phương thức này cũng trả về một ListenableFuture.
+			
+			sendDefault(String data):
+				
+				Gửi thông điệp sử dụng topic mặc định đã cấu hình trước đó trong KafkaTemplate.
+				
+				Phương thức này hữu ích khi bạn chỉ làm việc với một topic.
+			
+			flush():
+				
+				Đẩy tất cả các thông điệp đã gửi nhưng chưa được xác nhận tới Kafka broker.
+				
+				Hữu ích khi bạn muốn đảm bảo rằng tất cả các thông điệp đã được gửi đi trước khi thực hiện các hành động khác.
+			
+			execute(ProducerCallback<K, V, T> callback):
+				
+				Cho phép thực thi các hoạt động tùy chỉnh với Kafka Producer.
+				
+				Bạn có thể sử dụng phương thức này khi cần thực hiện các thao tác đặc biệt với Producer không được
+				hỗ trợ trực tiếp bởi KafkaTemplate.
+		
+		- Cách sử dụng KafkaTemplate:
+		
+			Để sử dụng KafkaTemplate, trước tiên bạn cần cấu hình ProducerFactory và sau đó tạo một instance của KafkaTemplate
+			
+			Gửi thông điệp sử dụng KafkaTemplate:
+			
+				import org.springframework.beans.factory.annotation.Autowired;
+				import org.springframework.kafka.core.KafkaTemplate;
+				import org.springframework.stereotype.Service;
+				@Service
+				public class KafkaProducerService {
+					private final KafkaTemplate<String, String> kafkaTemplate;
+					@Autowired
+					public KafkaProducerService(KafkaTemplate<String, String> kafkaTemplate) {
+						this.kafkaTemplate = kafkaTemplate;
+					}
+					public void sendMessage(String topic, String message) {
+						kafkaTemplate.send(topic, message);
+					}
+				}
+				
+		- Xử lý kết quả và lỗi:
+		
+			Vì KafkaTemplate sử dụng các phương thức bất đồng bộ (send()), bạn có thể sử dụng ListenableFuture để theo
+			dõi quá trình gửi thông điệp và xử lý kết quả:
+			
+				import org.springframework.kafka.support.SendResult;
+				import org.springframework.util.concurrent.ListenableFuture;
+				import org.springframework.util.concurrent.ListenableFutureCallback;
+				public void sendMessageWithCallback(String topic, String message) {
+					ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, message);
+					future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+						@Override
+						public void onSuccess(SendResult<String, String> result) {
+							System.out.println("Sent message=[" + message + 
+							  "] with offset=[" + result.getRecordMetadata().offset() + "]");
+						}
+						@Override
+						public void onFailure(Throwable ex) {
+							System.out.println("Unable to send message=[" 
+							  + message + "] due to : " + ex.getMessage());
+						}
+					});
+				}
+				
+	KafkaAdmin--Spring kafka:
+	
+		- KafkaAdmin trong Spring là một lớp hỗ trợ quản lý và cấu hình các tài nguyên Kafka, chẳng hạn như tạo, xóa, hoặc
+		thay đổi cấu hình các topic. KafkaAdmin tự động thực thi các thao tác quản lý này khi ứng dụng Spring khởi động, dựa
+		trên các cấu hình mà bạn đã định nghĩa.
+		
+		- Chức năng của KafkaAdmin:
+		
+			Tạo topic: KafkaAdmin cho phép bạn định nghĩa các topic Kafka trong cấu hình Spring, sau đó tự động tạo chúng khi ứng dụng khởi động.
+			
+			Xóa topic: Nó có thể tự động xóa các topic nếu được cấu hình.
+			
+			Thay đổi cấu hình topic: KafkaAdmin hỗ trợ thay đổi cấu hình của các topic đã tồn tại, chẳng hạn như số lượng
+			bản sao (replicas) hoặc số lượng phân vùng (partitions).
+			
+			Tích hợp với Spring: KafkaAdmin tích hợp sâu với Spring, cho phép bạn quản lý các tài nguyên Kafka một cách khai
+			báo thông qua các file cấu hình hoặc annotation.
+
+		- Định cấu hình KafkaAdmin:
+		
+			AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG: Chỉ định địa chỉ của Kafka broker mà KafkaAdmin sẽ kết nối để quản lý các topic.
+				
+	Ví dụ--Spring kafka:
+			
+		KafkaHealthIndicator.java:
+		
+			package com.poscodx.odc.ampro015.config.kafka;
+			import lombok.extern.slf4j.Slf4j;
+			import org.apache.kafka.clients.admin.AdminClient;
+			import org.apache.kafka.clients.admin.ListTopicsOptions;
+			import org.springframework.beans.factory.annotation.Autowired;
+			import org.springframework.boot.actuate.health.Health;
+			import org.springframework.boot.actuate.health.HealthIndicator;
+			import org.springframework.kafka.core.KafkaAdmin;
+			import org.springframework.stereotype.Component;
+			import java.util.concurrent.TimeUnit;
+			@Component("kafka_indicator")
+			@Slf4j
+			public class KafkaHealthIndicator implements HealthIndicator {
+				@Autowired
+				private KafkaAdmin kafkaAdmin;
+				@Override
+				public Health health() {
+					try (AdminClient client = AdminClient.create(kafkaAdmin.getConfig())) {
+						client.listTopics(new ListTopicsOptions().timeoutMs(1000)).listings().get(10, TimeUnit.SECONDS);
+						return Health.up().build();
+					} catch (Exception e) {
+						return Health.down().withException(e).build();
+					}
+				}
+			}
+			
+		KafkaProducerConfig.java:
+		
+			package com.poscodx.odc.ampro015.config.kafka;
+			import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
+			import org.apache.kafka.clients.producer.ProducerConfig;
+			import org.apache.kafka.common.serialization.StringSerializer;
+			import org.springframework.beans.factory.annotation.Value;
+			import org.springframework.context.annotation.Bean;
+			import org.springframework.context.annotation.Configuration;
+			import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+			import org.springframework.kafka.core.KafkaTemplate;
+			import org.springframework.kafka.core.ProducerFactory;
+			import org.springframework.kafka.support.serializer.JsonSerializer;
+			import java.util.HashMap;
+			import java.util.Map;
+			@Configuration
+			public class KafkaProducerConfig {
+				@Value(value = "${spring.kafka.bootstrap-servers}")
+				private String bootstrapAddress;
+				@Bean
+				public ProducerFactory<String, String> producerFactory() {
+					Map<String, Object> configProps = new HashMap<>();
+					configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+					configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+					configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+					configProps.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "20971520");
+					return new DefaultKafkaProducerFactory<>(configProps);
+				}
+				@Bean
+				public KafkaTemplate<String, String> kafkaTemplate() {
+					return new KafkaTemplate<>(producerFactory());
+				}
+				@Bean
+				public ProducerFactory<String, DeepFaceInfoRequest> userFaceProducerFactory() {
+					Map<String, Object> configProps = new HashMap<>();
+					configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+					configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+					configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+					return new DefaultKafkaProducerFactory<>(configProps);
+				}
+				@Bean
+				public KafkaTemplate<String, DeepFaceInfoRequest> userFaceKafkaTemplate() {
+					return new KafkaTemplate<>(userFaceProducerFactory());
+				}
+			}
+			
+		ProductProducer.java:
+		
+			package com.poscodx.odc.ampro015.config.kafka.producers;
+			import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
+			import lombok.NoArgsConstructor;
+			import lombok.extern.slf4j.Slf4j;
+			import org.springframework.beans.factory.annotation.Autowired;
+			import org.springframework.kafka.core.KafkaTemplate;
+			import org.springframework.stereotype.Component;
+			@Slf4j
+			@NoArgsConstructor
+			@Component
+			public class ProductProducer {
+				final String topic = "deepfake";
+				@Autowired
+				private KafkaTemplate<String, DeepFaceInfoRequest> kafkaTemplate;
+				@Autowired
+				private KafkaTemplate<String, String> kafkaTemplate2;
+				public void sendMessage(String message) {
+					kafkaTemplate2.send(topic, message);
+					log.info("Send message String: {}", message);
+				}
+				public void sendMessage(DeepFaceInfoRequest message) {
+					kafkaTemplate.send(topic, message);
+					log.info("Send message UserFaceRequest: {}", message);
+				}
+			}				
+			
+		KafkaConsumerConfig.java:
+		
+			package com.poscodx.odc.ampro015.config.kafka;
+			import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
+			import lombok.extern.slf4j.Slf4j;
+			import org.apache.kafka.clients.consumer.ConsumerConfig;
+			import org.apache.kafka.common.serialization.StringDeserializer;
+			import org.springframework.beans.factory.annotation.Value;
+			import org.springframework.context.annotation.Bean;
+			import org.springframework.context.annotation.Configuration;
+			import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+			import org.springframework.kafka.core.ConsumerFactory;
+			import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+			import org.springframework.kafka.support.serializer.JsonDeserializer;
+			import java.util.HashMap;
+			import java.util.Map;
+			@Slf4j
+			@Configuration
+			public class KafkaConsumerConfig {
+				@Value(value = "${spring.kafka.bootstrap-servers}")
+				private String bootstrapAddress;
+				public ConsumerFactory<String, String> consumerFactory(String groupId) {
+					Map<String, Object> props = new HashMap<>();
+					props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+					props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+					props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+					props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+					props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "20971520");
+					props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "20971520");
+					return new DefaultKafkaConsumerFactory<>(props);
+				}
+				public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(String groupId) {
+					ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+					factory.setConsumerFactory(consumerFactory(groupId));
+					return factory;
+				}
+				@Bean
+				public ConcurrentKafkaListenerContainerFactory<String, String> deepFakeKafkaListenerContainerFactory() {
+					return kafkaListenerContainerFactory("deep-fake");
+				}
+				public ConsumerFactory<String, DeepFaceInfoRequest> consumerFactory2(String groupId) {
+					Map<String, Object> props = new HashMap<>();
+					props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+					props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+					return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(DeepFaceInfoRequest.class));
+				}
+				@Bean
+				public ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> deepFakeeKafkaListenerContainerFactory2() {
+					ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
+					factory.setConsumerFactory(consumerFactory2("deep-fake"));
+					return factory;
+				}
+			}				
+			
+		KafkaTopicConfig.java:
+		
+			package com.poscodx.odc.ampro015.config.kafka;
+			import org.apache.kafka.clients.admin.AdminClientConfig;
+			import org.apache.kafka.clients.admin.NewTopic;
+			import org.springframework.beans.factory.annotation.Value;
+			import org.springframework.context.annotation.Bean;
+			import org.springframework.context.annotation.Configuration;
+			import org.springframework.kafka.core.KafkaAdmin;
+			import java.util.HashMap;
+			import java.util.Map;
+			@Configuration
+			public class KafkaTopicConfig {
+				@Value(value = "${spring.kafka.bootstrap-servers}")
+				private String bootstrapAddress;
+				@Bean
+				public KafkaAdmin kafkaAdmin() {
+					Map<String, Object> configs = new HashMap<>();
+					configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+					return new KafkaAdmin(configs);
+				}
+			}
+			
+		MultiTypeKafkaListener.java:
+		
+			package com.poscodx.odc.ampro015.config.kafka.listeners;
+			import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
+			import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
+			import org.apache.commons.lang3.time.DateUtils;
+			import org.apache.kafka.clients.consumer.ConsumerRecord;
+			import org.springframework.beans.factory.annotation.Autowired;
+			import org.springframework.kafka.annotation.KafkaHandler;
+			import org.springframework.kafka.annotation.KafkaListener;
+			import org.springframework.stereotype.Component;
+			import java.util.Date;
+			import java.util.concurrent.TimeoutException;
+			@Component
+			@KafkaListener(id = "multiGroup1", topics = "amface", groupId = "deep-fake", autoStartup = "false")
+			public class MultiTypeKafkaListener {
+				@Autowired
+				ServiceLifecycle serviceLifecycle;
+				@KafkaHandler
+				public void handleUserFaceRequest(DeepFaceInfoRequest userFaceRequest) throws TimeoutException {
+					try {
+						System.out.println("User face received UserFaceRequest 1 (user-face): " + userFaceRequest);
+					} catch (Exception e) {
+						System.out.println("Handle kafka's message error: " + e.getMessage());
+					}
+				}
+				@KafkaHandler
+				public void handleUserFaceRequest2(String userFaceRequest) throws TimeoutException {
+					try {
+						System.out.println("User face received String 2 (user-face): " + userFaceRequest);
+						DeepFaceInfoRequest receiver = DeepFaceInfoRequest.fromJson(userFaceRequest);
+						System.out.println("User face received String 2 (Oject): " + receiver);
+						serviceLifecycle.requestLevel2WorkingTimeService().createOrUpdateWorkingTime(serviceLifecycle, receiver.getId(), receiver.getAccessTime());
+						serviceLifecycle.requestLevel2Service().sendCheckFaceTimeNotification(receiver, "/topic/check-face-time");
+					} catch (Exception e) {
+						System.out.println("Handle kafka's message error: " + e.getMessage());
+					}
+				}
+				@KafkaHandler
+				public void unknown(ConsumerRecord<String, Object> record) throws TimeoutException {
+					try {
+						System.out.println("User face received Object 2 (user-face): " + record.value());
+					} catch (Exception e) {
+						System.out.println("Handle kafka's message error: " + e.getMessage());
+					}
+				}
+			}
+			
+		ProductApplication.java:
+		
+			package com.poscodx.odc.ampro015;
+			import com.poscodx.odc.ampro015.config.kafka.KafkaHealthIndicator;
+			import com.poscodx.odc.ampro015.service.rest.Pme00ScheduleNotificationResource;
+			import org.springframework.beans.factory.annotation.Autowired;
+			import org.springframework.boot.CommandLineRunner;
+			import org.springframework.boot.SpringApplication;
+			import org.springframework.boot.actuate.health.Health;
+			import org.springframework.boot.actuate.health.Status;
+			import org.springframework.boot.autoconfigure.SpringBootApplication;
+			import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+			import org.springframework.context.ConfigurableApplicationContext;
+			import org.springframework.context.annotation.ComponentScan;
+			import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+			import org.springframework.scheduling.annotation.EnableScheduling;
+			import org.springframework.web.bind.annotation.RestController;
+			import org.springframework.web.bind.annotation.GetMapping;
+			import java.text.DateFormat;
+			import java.text.SimpleDateFormat;
+			import java.util.Date;
+			@SpringBootApplication
+			@ComponentScan(basePackages = { "com.poscodx.odc.ampro015", "com.posco.reuse.compensation.util", })
+			@RestController
+			@EnableDiscoveryClient
+			@EnableScheduling
+			public class ProductApplication implements CommandLineRunner {
+				@Autowired
+				private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+				@Autowired
+				private KafkaHealthIndicator kafkaHealthIndicator;
+				public static void main(String[] args) {
+					ConfigurableApplicationContext context = SpringApplication.run(ProductApplication.class, args);
+					//reschedule active schedule
+					context.getBean(Pme00ScheduleNotificationResource.class).rescheduleTaskWhenRestartProject();
+				}
+				@Override
+				public void run(String... args) throws Exception {
+					// start listener
+					Health result = kafkaHealthIndicator.health();
+					if(result.getStatus().equals(Status.UP)){
+						kafkaListenerEndpointRegistry.getListenerContainer("multiGroup1").start();
+					}
+				}
+				@GetMapping("/health")
+				public String health() {
+					return "ok";
+				}
+			}

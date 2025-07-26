@@ -1,0 +1,69 @@
+String--JAVASCRIPT:		String originalString  = "apple,orange,banana";
+	- length:			
+						const str = 'Hello, world!';
+						const length = str.length; // 13
+	- concat:			
+						let additionalFruits = "grape,kiwi";
+						let concatenatedString = originalString.concat(",", additionalFruits); // concat được sử dụng để nối chuỗi originalString với chuỗi , và chuỗi additionalFruits
+																							   // apple,orange,banana,grape,kiwi
+	- slice:			
+						let slicedString = originalString.slice(6, 11); // slice(6, 11) cắt một phần của chuỗi originalString bắt đầu từ vị trí
+																		// index 6 và kết thúc tại index 11 (không bao gồm)
+																		// orange
+	- split:			
+						let originalString = "apple,orange,banana";
+						let splitArray = originalString.split(","); // Phân tách chuỗi dựa trên dấu phẩy, [ 'apple', 'orange', 'banana' ]
+	- includes:			
+						const str = 'Hello, world!';
+						const includesHello = str.includes('Hello'); // Kết quả: true 
+						const includesWorld = str.includes('World'); // Kết quả: true
+						const includesGoodbye = str.includes('Goodbye'); // Kết quả: false
+	- indexOf:			
+						let indexOfOrange = originalString.indexOf("orange"); // indexOf("orange") trả về vị trí đầu tiên xuất hiện của chuỗi con "orange" trong chuỗi originalString. Chú ý đây là chuỗi
+																			  // 6
+	lastIndexOf:		let lastIndexOfOrange = originalString.lastIndexOf("orange"); // lastIndexOf("orange") trả về vị trí cuối cùng xuất hiện của chuỗi con "orange"
+																					  // trong chuỗi originalString
+																					  // 12
+	- toLowerCase:		let lowercaseString = originalString.toLowerCase(); // apple,orange,banana
+	- toUpperCase:		let uppercaseString = originalString.toUpperCase(); // APPLE,ORANGE,BANANA
+	- trim:				let originalString = "   apple,orange,banana   ";
+						let trimmedString = originalString.trim(); // Loại bỏ khoảng trắng ở đầu và cuối chuỗi, và trả về một chuỗi mới. apple,orange,banana
+	- trimStart:		
+						let trimmedStartString = originalString.trimStart(); // trimStart được áp dụng cho chuỗi originalString
+																			 // loại bỏ khoảng trắng ở đầu chuỗi, và trả về một chuỗi mới
+																			 // apple,orange,banana
+	- trimEnd:			let trimmedEndString = originalString.trimEnd(); // apple,orange,banana
+	- charAt:			let character = originalString.charAt(12); // b
+	- valueOf:			
+						let value = originalString.valueOf(); // valueOf không thay đổi giá trị của chuỗi và chỉ trả về chính chuỗi đó.
+															  // valueOf thường được sử dụng hữu ích trên các đối tượng khác
+															  // như số hoặc Date, để trả về giá trị nguyên thủy của chúng.
+															  // apple,orange,banana
+	- substring:		
+						let substring = originalString.substring(6, 12); // substring(6, 12) trích xuất phần của chuỗi originalString từ vị trí
+																		 // index 6 đến vị trí index 12 (không bao gồm)
+																		 // orange
+	repeat:				let repeatedString = originalString.repeat(3); // repeat(3) tạo ra một chuỗi mới bằng cách lặp lại chuỗi originalString ba lần
+																	   // apple,orange,bananaapple,orange,bananaapple,orange,banana
+
+	- replace:			let replacedString = originalString.replace("orange", "grape"); // apple,grape,banana
+	- search:			
+						let position = originalString.search("orange"); // search chỉ trả về vị trí của lần xuất hiện đầu tiên của chuỗi con. Nếu không tìm thấy, nó sẽ trả về -1.
+																		// 6
+	match:				let matches = originalString.match(/an/g); // [ 'an', 'an', 'an' ]
+	matchAll:			let originalString = "apple,orange,banana";
+						// Tìm tất cả các từ chứa "an" trong chuỗi sử dụng matchAll
+						let matchIterator = originalString.matchAll(/an/g);
+						// Lặp qua iterator và hiển thị kết quả
+						for (let match of matchIterator) {
+						  console.log("Match:", match[0], "at index:", match.index); // Match: an at index: 1 7 14
+						}
+	- endsWith:			let endsWithBanana = originalString.endsWith("banana"); // true
+	- startsWith:		let startsWithApple = originalString.startsWith("apple"); // true
+	padStart:			let paddedString = originalString.padStart(30, '*'); // Thêm ký tự đệm để đạt được chiều dài 30 ký tự
+																			 // ********apple,orange,banana
+	padEnd:				let paddedString = originalString.padEnd(30, '*'); // Thêm ký tự đệm để đạt được chiều dài 30 ký tự
+																		   // apple,orange,banana********
+	- substr:			
+						let substrResult = originalString.substr(6, 6); // Trích xuất phần bắt đầu từ index 6 và có độ dài 6 ký tự
+																		// orange	

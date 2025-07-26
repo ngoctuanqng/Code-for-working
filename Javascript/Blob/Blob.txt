@@ -1,0 +1,64 @@
+Blob--JAVASCRIPT
+
+	- Blob (Binary Large Object) trong JavaScript là một đối tượng đại diện cho dữ liệu thô (binary data). Nó có thể chứa dữ liệu văn bản, hình ảnh, video, hoặc bất kỳ loại dữ liệu nào khác, và
+	được sử dụng rộng rãi trong các ứng dụng web để xử lý tệp và dữ liệu nhị phân.
+	
+	- Cú pháp của new Blob:
+	
+		new Blob(array, options);
+		
+			array
+				
+				Một mảng chứa các phần dữ liệu mà bạn muốn đưa vào Blob.
+				Mỗi phần dữ liệu trong mảng này có thể là một ArrayBuffer, TypedArray, Blob, string, hoặc một đối tượng có thể được chuyển đổi thành Blob.
+				
+			options (tùy chọn)
+			
+				Một đối tượng chứa các tùy chọn để định cấu hình Blob.
+				type: MIME type của Blob, ví dụ text/plain, application/json, image/jpeg, v.v. Điều này giúp xác định loại dữ liệu mà Blob chứa.
+				endings: Có thể là "transparent" hoặc "native". Điều này ảnh hưởng đến cách các ký tự ngắt dòng (\n) trong chuỗi được xử lý khi chuỗi được chuyển thành Blob. Thông thường, bạn không
+				cần thay đổi giá trị mặc định "transparent".
+				
+	- Ví dụ sử dụng Blob:
+	
+		Tạo một Blob từ chuỗi văn bản:
+		
+			const textBlob = new Blob(["Hello, world!"], { type: "text/plain" });
+			console.log(textBlob);
+			
+		Tạo một Blob từ dữ liệu nhị phân (binary data):
+		
+			const byteArray = new Uint8Array([72, 101, 108, 108, 111]); // "Hello" dưới dạng mã ASCII
+			const binaryBlob = new Blob([byteArray], { type: "application/octet-stream" });
+			console.log(binaryBlob);
+			
+		Tạo một Blob từ nhiều phần dữ liệu:
+		
+			const part1 = "Hello, ";
+			const part2 = "world!";
+			const mixedBlob = new Blob([part1, part2], { type: "text/plain" });
+			console.log(mixedBlob);
+			
+	- Sử dụng Blob:
+	
+		Tải xuống một tệp:
+		
+			const blob = new Blob(["Download this text as a file!"], { type: "text/plain" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = "file.txt";
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+			
+		Sử dụng Blob trong FormData để tải lên tệp:
+		
+			const blob = new Blob(["Upload this text as a file!"], { type: "text/plain" });
+			const formData = new FormData();
+			formData.append("file", blob, "file.txt");
+			fetch("/upload", {
+			  method: "POST",
+			  body: formData
+			}).then(response => response.json()).then(result => console.log(result));

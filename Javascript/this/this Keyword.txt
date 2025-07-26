@@ -1,0 +1,206 @@
+this Keyword--Các kiến thức nền tảng JAVASCRIPT:
+
+									In JavaScript, the this keyword refers to an object. Which object depends on how this is being invoked (used or called).
+									The this keyword refers to different objects depending on how it is used:
+											In an object method, this refers to the object.
+											Alone, this refers to the global object.
+											In a function, this refers to the global object.
+											In a function, in strict mode, this is undefined.
+											In an event, this refers to the element that received the event.
+											Methods like call(), apply(), and bind() can refer this to any object.
+											
+	this in a Method:
+					
+									When used in an object method, this refers to the object.
+									In the example on top of this page, this refers to the person object.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>The JavaScript <i>this</i> Keyword</h1>
+									<p>In this example, <b>this</b> refers to the <b>person</b> object.</p>
+									<p>Because <b>fullName</b> is a method of the person object.</p>
+									<p id="demo"></p>
+									<script>
+									// Create an object:
+									const person = {
+									  firstName: "John",
+									  lastName: "Doe",
+									  id: 5566,
+									  fullName : function() {
+										return this.firstName + " " + this.lastName;
+									  }
+									};
+									// Display data from the object:
+									document.getElementById("demo").innerHTML = person.fullName(); // John Doe
+									</script>
+									</body>
+									</html>
+	this Alone:
+									When used alone, this refers to the global object. Because this is running in the global scope.
+									In a browser window the global object is [object Window]:
+
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>The JavaScript <i>this</i> Keyword</h1>
+									<p>In this example, <b>this</b> refers to the window object:</p>
+									<p id="demo"></p>
+									<script>
+									let x = this;
+									document.getElementById("demo").innerHTML = x; // [object Windown]
+									</script>
+									</body>
+									</html>
+									
+		In strict mode, when used alone, this also refers to the global object:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>The JavaScript <i>this</i> Keyword</h1>
+									<p>In this example, <b>this</b> refers to the window object:</p>
+									<p id="demo"></p>
+									<script>
+									"use strict";
+									let x = this;
+									document.getElementById("demo").innerHTML = x; // [object Windown]
+									</script>
+									</body>
+									</html>
+									
+	this in a Function (Default):
+	
+									- In a function, the global object is the default binding for this. In a browser window the global object is [object Window]
+									- Trong JavaScript, từ khóa this thường đại diện cho đối tượng hiện tại mà hàm đang được gọi trên. Tuy nhiên, khi một hàm được gọi mà không có đối tượng nào liên quan, hoặc từ khóa this
+									được sử dụng bên ngoài bất kỳ hàm nào, nó sẽ được gắn kết với đối tượng toàn cục (global object).
+									- Trong môi trường trình duyệt web, đối tượng toàn cục là window object. Vì vậy, khi một hàm không được gọi trên đối tượng cụ thể nào, từ khóa this sẽ được gắn kết với đối tượng window.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>The JavaScript <i>this</i> Keyword</h1>
+									<p>In this example, <b>this</b> refers to the the window object:</p>
+									<p id="demo"></p>
+									<script>
+									document.getElementById("demo").innerHTML = myFunction(); // [object Windown]
+									function myFunction() {
+									  return this;
+									}
+									</script>
+									</body>
+									</html>
+									
+	this in a Function (Strict):
+	
+									- JavaScript strict mode does not allow default binding. So, when used in a function, in strict mode, this is undefined.
+									- Trong chế độ nghiêm ngặt (strict mode) của JavaScript, không cho phép mặc định gắn kết (default binding). Do đó, khi sử dụng từ khóa this trong một hàm ở chế độ nghiêm ngặt, giá trị
+									của this sẽ là undefined.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>The JavaScript <i>this</i> Keyword</h1>
+									<p>In a function, by default, <b>this</b> refers to the global object.</p>
+									<p>Strict mode does not allow default binding, so <b>this</b> is:</p>
+									<p id="demo"></p>
+									<script>
+									"use strict";
+									document.getElementById("demo").innerHTML = myFunction(); // undefined
+									function myFunction() {
+									  return this;
+									}
+									</script>
+									</body>
+									</html>
+									
+	this in Event Handlers:
+	
+									In HTML event handlers, this refers to the HTML element that received the event:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>The JavaScript <i>this</i> Keyword</h1>
+									<button onclick="this.style.display='none'">Click to Remove Me!</button>
+									</body>
+									</html>
+	
+	Object Method Binding:
+	
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>The JavaScript <i>this</i> Keyword</h1>
+									<p>In this example, <b>this</b> refers to the <b>person object</b>.</p>
+									<p id="demo"></p>
+									<script>
+									// Create an object:
+									const person = {
+									  firstName  : "John",
+									  lastName   : "Doe",
+									  id     : 5566,
+									  myFunction : function() {
+										return this;
+									  }
+									};
+									// Display data from the object:
+									document.getElementById("demo").innerHTML = person.myFunction(); [object Object]
+									</script>
+									</body>
+									</html>
+									
+	Explicit Function Binding:
+	
+									The call() and apply() methods are predefined JavaScript methods. They can both be used to call an object method with another object as argument.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>The JavaScript <i>this</i> Keyword</h1>
+									<p>In this example <strong>this</strong> refers to person2, even if it is a method of person1:</p>
+									<p id="demo"></p>
+									<script>
+									const person1 = {
+									  fullName: function() {
+										return this.firstName + " " + this.lastName;
+									  }
+									}
+									const person2 = {
+									  firstName:"John",
+									  lastName: "Doe",
+									}
+									let x = person1.fullName.call(person2); 
+									document.getElementById("demo").innerHTML = x; // John Doe
+									</script>
+									</body>
+									</html>
+									
+	Function Borrowing:
+	
+									With the bind() method, an object can borrow a method from another object.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>JavaScript Function bind()</h1>
+									<p>This example creates 2 objects (person and member).</p>
+									<p>The member object borrows the fullname method from person:</p> 
+									<p id="demo"></p>
+									<script>
+									const person = {
+									  firstName:"John",
+									  lastName: "Doe",
+									  fullName: function() {
+										return this.firstName + " " + this.lastName;
+									  }
+									}
+									const member = {
+									  firstName:"Hege",
+									  lastName: "Nilsen",
+									}
+									let fullName = person.fullName.bind(member);
+									document.getElementById("demo").innerHTML = fullName();
+									</script>
+									</body>
+									</html>

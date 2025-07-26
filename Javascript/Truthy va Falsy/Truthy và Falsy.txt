@@ -1,0 +1,7 @@
+Truthy và Falsy--JAVASCRIPT:
+										Truthy value là những giá trị trong Javascript mà khi ép kiểu về Boolean thì sẽ cho ra giá trị là true. Ngược lại, Falsy value là những giá trị mà khi ép kiểu
+										về Boolean thì cho ra giá trị là false.
+	Truthy Values:
+										Chuỗi khác rỗng, số khác 0 và tất cả các object. // Bao gồm cả [ ] và { } vì mảng rỗng và chuỗi rỗng vẫn là object.
+	Falsy Values:
+										undefined, null, false, 0, -0, 0n, NaN, ''.

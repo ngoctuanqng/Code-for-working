@@ -1,0 +1,163 @@
+Array--Các kiến thức nền tảng JAVASCRIPT:
+							
+							- Trong ngôn ngữ C, khi bạn viết a, nó sẽ được hiểu là một con trỏ tới phần tử đầu tiên của mảng. Nó trỏ tới địa chỉ của a[0] trong bộ nhớ. Bạn có thể sử dụng a để truy cập và thay đổi các
+							phần tử trong mảng.
+							- Trong JavaScript, khi bạn viết a, nó đại diện cho toàn bộ mảng a và sẽ trả về mảng đó.
+							- Trong JavaScript, mảng được xem như một đối tượng (object). Khi bạn truy cập vào biến mảng a, nó không trả về một con trỏ (pointer) đến mảng như trong C. Thay vào đó, nó trả về toàn bộ mảng
+							đó là một đối tượng dữ liệu.
+							- JavaScript xử lý các đối tượng dữ liệu như mảng bằng cách tham chiếu trực tiếp đến đối tượng đó. Khi bạn sử dụng biến a, bạn đang tham chiếu trực tiếp đến mảng đó và có thể truy cập và
+							thay đổi các phần tử trong mảng thông qua biến a.
+							- Việc JavaScript trả về toàn bộ mảng khi truy cập biến a thể hiện cách JavaScript xử lý các đối tượng dữ liệu và quy ước trong ngôn ngữ này. Một số ngôn ngữ khác có cách tiếp cận khác, như C
+							trong trường hợp của bạn, nơi mảng được xử lý dưới dạng con trỏ trỏ đến phần tử đầu tiên của mảng.
+							
+							- In JavaScript, arrays use numbered indexes. In JavaScript, objects use named indexes.
+
+	A Common Error--Javasctipt Array:
+	
+							Create an array with one element:
+							const points = [40];
+							
+							Create an array with 40 undefined elements:
+							const points = new Array(40);
+							
+							Adding elements with high indexes can create undefined "holes" in an array:
+							const fruits = ["Banana", "Orange", "Apple"];
+							fruits[6] = "Lemon";
+							let fLen = fruits.length;
+							let text = "";
+							for (i = 0; i < fLen; i++) {
+							  text += fruits[i] + "<br>";
+							}
+							document.getElementById("demo").innerHTML = text; // Banana, Orange, Apple, undefined, undefined, undefined, Lemon
+	Const Array--Javasctipt Array:
+		Cannot be Reassigned:
+								
+								An array declared with const cannot be reassigned:
+								
+								throw exception
+								<!DOCTYPE html>
+								<html>
+								<body>
+								<h2>JavaScript const</h2>
+								<p>You can NOT reassign a constant array:</p>
+								<p id="demo"></p>
+								<script>
+								try {
+								  const cars = ["Saab", "Volvo", "BMW"];
+								  cars = ["Toyota", "Volvo", "Audi"];
+								}
+								catch (err) {
+								  document.getElementById("demo").innerHTML = err;
+								}
+								</script>
+								</body>
+								</html>
+								
+		Arrays are Not Constants:
+
+								The keyword const is a little misleading.
+								It does NOT define a constant array. It defines a constant reference to an array.
+								Because of this, we can still change the elements of a constant array.
+		
+		Elements Can be Reassigned:
+		
+								You can change the elements of a constant array:
+								
+								<!DOCTYPE html>
+								<html>
+								<body>
+								<h2>JavaScript const</h2>
+								<p>Declaring a constant array does NOT make the elements unchangeable:</p>
+								<p id="demo"></p>
+								<script>							
+								const cars = ["Saab", "Volvo", "BMW"]; // Create an Array
+								cars[0] = "Toyota"; // Change an element								
+								cars.push("Audi"); // Add an element								
+								document.getElementById("demo").innerHTML = cars; // Display the Array
+								</script>
+								</body>
+								</html>
+								
+		Assigned when Declared:
+
+								- JavaScript const variables must be assigned a value when they are declared. Meaning: An array declared with const must be initialized when it is declared.
+								- Using const without initializing the array is a syntax error
+								- Arrays declared with var can be initialized at any time. You can even use the array before it is declared
+								
+								This will not work
+								const cars;
+								cars = ["Saab", "Volvo", "BMW"];
+								
+								<!DOCTYPE html>
+								<html>
+								<body>
+								<h2>JavaScript Hoisting</h2>
+								<p id="demo"></p>
+								<script>
+								cars = ["Saab", "Volvo", "BMW"];
+								var cars;
+								document.getElementById("demo").innerHTML = cars[0];
+								</script>
+								</body>
+								</html>
+								
+		Const Block Scope:
+		
+								An array declared with const has Block Scope. An array declared in a block is not the same as an array declared outside the block
+								An array declared with var does not have block scope
+								
+								<!DOCTYPE html>
+								<html>
+								<body>
+								<h2>Declaring an Array Using const</h2>
+								<p id="demo"></p>
+								<script>
+								const cars = ["Saab", "Volvo", "BMW"];
+								// Here cars[0] is "Saab"
+								{  
+								  const cars = ["Toyota", "Volvo", "BMW"]; 
+								  // Here cars[0] is "Toyota"
+								}
+								// Here cars[0] is "Saab"
+								document.getElementById("demo").innerHTML = cars[0];
+								</script>
+								</body>
+								</html>
+		
+		Redeclaring Arrays:
+			
+								Redeclaring or reassigning an array to const, in the same scope, or in the same block, is not allowed
+								Redeclaring or reassigning an existing const array, in the same scope, or in the same block, is not allowed
+								Redeclaring an array with const, in another scope, or in another block, is allowed
+								Redeclaring an array declared with var is allowed anywhere in a program
+								
+								var cars = ["Volvo", "BMW"];     // Allowed
+								const cars = ["Volvo", "BMW"];   // Not allowed
+								{
+								  var cars = ["Volvo", "BMW"];   // Allowed
+								  const cars = ["Volvo", "BMW"]; // Not allowed
+								}
+								
+								const cars = ["Volvo", "BMW"];   // Allowed
+								const cars = ["Volvo", "BMW"];   // Not allowed
+								var cars = ["Volvo", "BMW"];     // Not allowed
+								cars = ["Volvo", "BMW"];         // Not allowed
+
+								{
+								  const cars = ["Volvo", "BMW"]; // Allowed
+								  const cars = ["Volvo", "BMW"]; // Not allowed
+								  var cars = ["Volvo", "BMW"];   // Not allowed
+								  cars = ["Volvo", "BMW"];       // Not allowed
+								}
+								
+								const cars = ["Volvo", "BMW"];   // Allowed
+								{
+								  const cars = ["Volvo", "BMW"]; // Allowed
+								}
+								{
+								  const cars = ["Volvo", "BMW"]; // Allowed
+								}
+								
+								var cars = ["Volvo", "BMW"];   // Allowed
+								var cars = ["Toyota", "BMW"];  // Allowed
+								cars = ["Volvo", "Saab"];      // Allowed

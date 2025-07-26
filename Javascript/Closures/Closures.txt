@@ -1,0 +1,58 @@
+Closures--Các kiến thức nền tảng JAVASCRIPT:
+
+			- Closure trong JavaScript là một khái niệm quan trọng và mạnh mẽ. Nó là khả năng của một hàm để ghi nhớ và truy cập các biến từ phạm vi ngoại của nó, ngay cả sau khi hàm đã được
+			thực thi.
+			- Một closure được tạo ra khi một hàm bên trong khai báo và truy cập các biến từ phạm vi của hàm bên ngoài của nó. Nói cách khác, closure bao gồm hàm và môi trường xung quanh của nó,
+			bao gồm các biến nằm trong phạm vi của hàm cha, biến đóng (enclosed variables) và biến toàn cục (global variables).
+			- Closure cho phép các biến bên trong hàm bên ngoài vẫn có thể được truy cập và sử dụng bởi hàm bên trong ngay cả khi hàm bên ngoài đã hoàn thành việc thực thi. Nó giúp bảo vệ các biến
+			khỏi việc bị truy cập và thay đổi từ bên ngoài.
+			- Closures được sử dụng rộng rãi trong JavaScript để tạo các biến riêng tư (private variables), tạo các hàm callback, xử lý bất đồng bộ, module pattern và nhiều ứng dụng khác.
+			
+			function counter() {
+			  let count = 0;
+			  function increment() {
+				count++;
+				console.log(count);
+			  }
+			  return increment;
+			}
+			const myCounter = counter();
+			myCounter(); // Kết quả: 1
+			myCounter(); // Kết quả: 2
+
+	
+	Cơ chế giữ giá trị của closure trong JavaScript hoạt động như sau:
+	
+			- Khi một hàm bên trong (như hàm increment trong ví dụ) được tạo ra trong một hàm bên ngoài (như hàm counter), nó tạo ra một closure. Closure bao gồm hàm bên trong và môi trường xung
+			quanh của nó, bao gồm các biến và hàm trong phạm vi của hàm bên ngoài.
+			- Trong closure, các biến và hàm trong phạm vi của hàm bên ngoài vẫn có thể được truy cập và sử dụng bởi hàm bên trong, ngay cả sau khi hàm bên ngoài đã hoàn thành thực thi.
+			- Các biến trong closure được lưu trữ trong một bộ nhớ đặc biệt gọi là environment record (bản ghi môi trường). Mỗi closure có một environment record riêng của nó.
+			- Khi một biến được sử dụng trong hàm bên trong, JavaScript sẽ tìm giá trị của biến trong environment record của closure. Nếu biến không tồn tại trong environment record hiện tại,
+			JavaScript sẽ tiếp tục tìm kiếm trong các environment record khác, theo quy tắc phạm vi (lexical scope) của hàm.
+			- Khi hàm bên trong được gọi, nó có thể thay đổi giá trị của các biến trong environment record của closure. Các thay đổi này sẽ được ghi nhớ và duy trì giữa các lần gọi hàm.
+			- Các closure có tính độc lập và không xung đột với nhau. Mỗi lần gọi hàm bên ngoài tạo ra một closure mới, có một environment record riêng, vì vậy các closure không ảnh hưởng lẫn nhau
+			và giữ được giá trị của biến riêng.
+			
+			Dòng cuối cùng (function () { ... })(); đại diện cho việc thực thi hàm ngay lập tức. Khi chúng ta thêm dấu ngoặc đóng () ở cuối, JavaScript sẽ thực thi hàm được khai báo bên trong dấu
+			ngoặc đóng và trả về kết quả của hàm. Kết quả này được gán cho biến add.
+			Nếu chúng ta không thêm dấu ngoặc đóng (), biến add sẽ chỉ được gán với hàm chưa được thực thi. Điều này có nghĩa là biến add sẽ trỏ tới một hàm, không phải kết quả của việc thực thi
+			hàm đó. Do đó, để có thể sử dụng giá trị trả về của hàm ngay lập tức và gán cho biến add, chúng ta cần thêm dấu ngoặc đóng () để thực thi hàm và gán kết quả vào biến add.
+			<!DOCTYPE html>
+			<html>
+			<body>
+			<h2>JavaScript Closures</h2>
+			<p>Counting with a local variable.</p>
+			<button type="button" onclick="myFunction()">Count!</button>
+			<p id="demo">0</p>
+			<script>
+			const add = (function () {
+			  let counter = 0;
+			  return function () {counter += 1; return counter;}
+			})();
+
+			function myFunction(){
+			  document.getElementById("demo").innerHTML = add();
+			}
+			</script>
+			</body>
+			</html>

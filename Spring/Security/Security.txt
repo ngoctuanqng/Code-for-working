@@ -1,0 +1,2201 @@
+Security--SPRING:
+
+	Spring Boot REST API Security--Security:
+		
+		Bộ lọc Servlet--Security:
+		
+															Bạn có thể đặt bộ lọc lên trước các servlet, tức là bạn có thể viết SecurityFilter và cấu hình nó trong Tomcat (servlet container/ application server) của
+															bạn để lọc mọi request HTTP trước khi nó truy cập vào servlet của bạn.
+															
+			Một SecurityFilter đơn giản:
+			
+															- Đầu tiên, bộ lọc cần extract username/password từ request. Nó có thể thông qua Basic Auth Http Header, hoặc các field trong form, hoặc cookie, v.v.
+															- Sau đó, bộ lọc cần xác thực bằng cách đối chiếu tổ hợp username/password đó với một thứ gì đó , chẳng hạn như database.
+															- Sau khi authenticate thành công, bộ lọc cần kiểm tra user có được phép truy cập requested URI hay không.
+															- Nếu request vẫn tồn tại sau tất cả các lần kiểm tra này, thì bộ lọc có thể cho phép request chuyển đến DispatcherServlet của bạn, tức là @Controllers của bạn.
+															
+			FilterChains:
+			
+								- Xác minh trong thực tế: Trong khi code trên có thể hoạt động khi biên dịch, nó sớm hay muộn cũng dẫn đến một bộ lọc chất đầy hàng tấn code cho các cơ chế
+								authentication và authorization khác nhau.
+								- Trong thế giới thực, bạn sẽ chia bộ lọc này thành nhiều bộ lọc, sau đó bạn _cha_in với nhau.
+								- Ví dụ: một request HTTP sẽ…:
+											Đầu tiên, đi qua LoginMethodFilter…
+											Sau đó, đi qua AuthenticationFilter…
+											Sau đó, chuyển qua AuthorizationFilter…
+											Cuối cùng, chạm vào servlet của bạn.
+								- Với một bộ lọc (chain) như vậy thì về cơ bản, bạn có thể xử lý mọi vấn đề authentication hay authorization có trong ứng dụng của mình mà không cần thay đổi việc
+								triển khai ứng dụng thực tế của bạn (như là @RestControllers / @Controllers của bạn).
+															
+		Authentication với Spring Security--Security:
+		
+								- Khi nói đến authentication và Spring Security, bạn có ba kịch bản sau. Chú ý đang nói đến việc lấy thông tin trong database:
+									
+									Mặc định:
+														Bạn có thể truy cập (hashed) password của user, bởi vì bạn có thông tin chi tiết của mình (username, password) được lưu chẳng hạn trong một 
+														bảng database.
+									Ít phổ biến hơn:	
+														Bạn không thể truy cập password (hashed) của user. Đây là trường hợp nếu user và password của bạn được lưu trữ ở một nơi khác, chẳng hạn như
+														trong một sản phẩm quản lý danh tính của bên thứ ba cung cấp dịch vụ REST cho authentication.
+									Cũng phổ biến:
+														Bạn muốn sử dụng OAuth2 hoặc “Đăng nhập bằng Google / Twitter / v.v.” (OpenID), khả năng kết hợp với JWT. Sau đó, không có điều nào có thể
+														áp dụng thì bạn nên chuyển thẳng đến phần OAuth2.
+														
+								- Lưu ý : Tùy thuộc vào bạn rơi vào kịch bản nào, bạn cần chỉ định các @Beans khác nhau để Spring Security hoạt động, nếu không bạn sẽ nhận được các exception khá
+								khó hiểu (như NullPointerException nếu bạn quên chỉ định PasswordEncoder). Hãy ghi nhớ nó trong tâm trí.
+															
+			UserDetailsService: Có quyền truy cập vào password của user (trường hợp mặc định):
+			
+													- UserDetailsService có một số implement phổ biến:
+													
+														JdbcUserDetailsManager:
+														
+																						Là một implement của UserDetailsService dựa trên JDBC (database). Nó cho phép tải thông tin người dùng từ một cơ sở dữ liệu
+																						quan hệ bằng cách sử dụng JDBC.
+																						
+														InMemoryUserDetailsManager:
+														
+																						Được sử dụng để lưu trữ thông tin người dùng trong bộ nhớ (memory). Thông tin người dùng được cấu hình trực tiếp trong mã nguồn hoặc
+																						qua cấu hình Java hoặc XML.
+																						
+														LdapUserDetailsService:
+														
+																						Sử dụng để tải thông tin người dùng từ một máy chủ LDAP (Lightweight Directory Access Protocol). Nó cho phép tìm kiếm và truy xuất
+																						thông tin người dùng từ một cây thư mục LDAP.
+																						
+														Custom implement:
+														
+																						Bạn có thể tạo ra implement của UserDetailsService tùy chỉnh cho nhu cầu cụ thể của ứng dụng. Điều này có thể bao gồm việc tải thông
+																						tin người dùng từ một dịch vụ web, một cơ sở dữ liệu không phải quan hệ, hoặc bất kỳ nguồn dữ liệu nào khác phù hợp với yêu cầu của ứng
+																						dụng.
+																						
+													- Nếu bạn đang sử dụng Spring Security và có thể truy cập vào password của user, thì:
+													
+														Chỉ định một UserDetailsService. Bạn có thể triển khai UserDetailsService một cách tùy chọn hoặc sử dụng một trong các implement do Spring Security cung cấp như
+														JdbcUserDetailsManager, InMemoryUserDetailsManager hoặc triển khai tùy chỉnh.
+														Chỉ định một PasswordEncoder.
+														
+													- Hãy tưởng tượng bạn có một bảng database nơi bạn lưu trữ user của mình. Nó có một vài cột, nhưng quan trọng nhất là nó có cột username và password, nơi bạn lưu trữ
+													hashed password của user:
+													
+														create table users (id int auto_increment primary key, username varchar(255), password varchar(255));
+														
+													- Trong trường hợp này, Spring Security cần bạn xác định hai bean để thiết lập và chạy authentication:
+													
+														UserDetailsService:
+														
+																				- Một UserDetailsService để load UserDetails qua username của user. Lưu ý rằng method chỉ nhận một tham số: username (không phải password).
+																				- Interface UserDetails có các method để lấy (hashed) password và một method để lấy username.
+																				- UserDetails thậm chí còn có nhiều method hơn, chẳng hạn như account đang hoạt động hay bị chặn, thông tin đăng nhập đã hết hạn hay user
+																				được cấp phép gì - nhưng chúng ta sẽ không đề cập đến ở đây.
+																				- Vì vậy, bạn có thể tự implement các interface này, giống như chúng ta đã làm ở trên, hoặc là sử dụng các interface hiện có mà Spring
+																				Security cung cấp.
+																				
+																				// Ví dụ sử dụng sẵn implement của UserDetailsService
+																				import org.springframework.context.annotation.Bean;
+																				import org.springframework.context.annotation.Configuration;
+																				import org.springframework.security.authentication.AuthenticationManager;
+																				import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+																				import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+																				import org.springframework.security.core.userdetails.UserDetailsService;
+																				import org.springframework.security.core.userdetails.User;
+																				import org.springframework.security.core.userdetails.UserDetails;
+																				import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+																				import org.springframework.security.crypto.password.PasswordEncoder;
+																				import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+																				@Configuration
+																				public class SecurityConfig {
+																					@Bean
+																					public UserDetailsService userDetailsService() {
+																						UserDetails user = User.builder()
+																											   .username("user")
+																											   .password(passwordEncoder().encode("password"))
+																											   .roles("USER")
+																											   .build();
+																						UserDetails admin = User.builder()
+																											    .username("admin")
+																											    .password(passwordEncoder().encode("admin"))
+																											    .roles("ADMIN")
+																											    .build();
+																						return new InMemoryUserDetailsManager(user, admin);
+																					}
+																					@Bean
+																					public PasswordEncoder passwordEncoder() {
+																						return new BCryptPasswordEncoder();
+																					}
+																					@Bean
+																					public DaoAuthenticationProvider authenticationProvider() {
+																						DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+																						authProvider.setUserDetailsService(userDetailsService());
+																						authProvider.setPasswordEncoder(passwordEncoder());
+																						return authProvider;
+																					}
+																				}																					
+																				
+																				// Ví dụ về custom implement của UserDetailsService
+																				@Bean
+																				public UserDetailsService userDetailsService() {
+																					return new MyDatabaseUserDetailsService(); // (1)
+																				}
+																				public class MyDatabaseUserDetailsService implements UserDetailsService {
+																						UserDetails loadUserByUsername(String username) throws UsernameNotFoundException { // (1)
+																						 // 1. Load the user from the users table by username. If not found, throw UsernameNotFoundException.
+																						 // 2. Convert/wrap the user to a UserDetails object and return it.
+																						return someUserDetails;
+																					}
+																				}
+																				public interface UserDetails extends Serializable { // (2)
+																					String getUsername();
+																					String getPassword();
+																					// <3> more methods:
+																					// isAccountNonExpired,isAccountNonLocked,
+																					// isCredentialsNonExpired,isEnabled
+																				}		
+																				
+																Các Implementation
+																sẵn có:
+																
+																						Một lưu ý nhỏ: Bạn luôn có thể tự mình triển khai các interface UserDetailsService và UserDetails.
+																						Tuy nhiên, bạn cũng có thể thay thế bằng các implementations có sẵn của Spring Security mà bạn có thể sử dụng
+																						/configure/extend/override.
+																						
+																						- JdbcUserDetailsManager:
+																							Là một UserDetailsService dựa trên JDBC (database). Bạn có thể cấu hình nó để khớp với cấu trúc bảng/cột user của mình
+																							
+																							import org.springframework.beans.factory.annotation.Autowired;
+																							import org.springframework.context.annotation.Bean;
+																							import org.springframework.context.annotation.Configuration;
+																							import org.springframework.jdbc.datasource.DriverManagerDataSource;
+																							import org.springframework.security.core.userdetails.jdbc.JdbcUserDetailsManager;
+																							import javax.sql.DataSource;
+																							@Configuration
+																							public class SecurityConfig {
+																								@Bean
+																								public DataSource dataSource() { // cấu hình một DataSource để kết nối đến cơ sở dữ liệu MySQL.
+																									DriverManagerDataSource dataSource = new DriverManagerDataSource();
+																									dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+																									dataSource.setUrl("jdbc:mysql://localhost:3306/mydatabase");
+																									dataSource.setUsername("username");
+																									dataSource.setPassword("password");
+																									return dataSource;
+																								}
+																								@Bean
+																								public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) { // tạo một đối tượng JdbcUserDetailsManager, cấu
+																																											  // hình nó để sử dụng DataSource đã được cấu hình
+																																											  // trước đó.
+																									JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager();
+																									userDetailsManager.setDataSource(dataSource);
+																									return userDetailsManager;
+																								}
+																							}
+																							import org.springframework.beans.factory.annotation.Autowired;
+																							import org.springframework.security.core.userdetails.UserDetails;
+																							import org.springframework.security.core.userdetails.UserDetailsService;
+																							import org.springframework.stereotype.Service;
+																							@Service
+																							public class CustomUserDetailsService implements UserDetailsService {
+																								@Autowired
+																								private JdbcUserDetailsManager jdbcUserDetailsManager; // sử dụng JdbcUserDetailsManager để tìm kiếm thông tin người dùng khi họ
+																																					   // đăng nhập
+																								@Override
+																								public UserDetails loadUserByUsername(String username) { // tải chi tiết người dùng dựa trên tên đăng nhập.
+																									return jdbcUserDetailsManager.loadUserByUsername(username);
+																								}
+																							}
+
+																						- InMemoryUserDetailsManager:
+																						
+																							Giữ tất cả các chi tiết user in-memory và rất tốt cho việc test.
+																							
+																							import org.springframework.context.annotation.Bean;
+																							import org.springframework.context.annotation.Configuration;
+																							import org.springframework.security.authentication.AuthenticationManager;
+																							import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+																							import org.springframework.security.core.userdetails.User;
+																							import org.springframework.security.core.userdetails.UserDetails;
+																							import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+																							@Configuration
+																							public class SecurityConfig {
+																								@Bean
+																								public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
+																									UserDetails user = User.withDefaultPasswordEncoder()
+																											.username("user")
+																											.password("password")
+																											.roles("USER")
+																											.build();
+																									UserDetails admin = User.withDefaultPasswordEncoder()
+																											.username("admin")
+																											.password("admin")
+																											.roles("ADMIN")
+																											.build();
+
+																									return new InMemoryUserDetailsManager(user, admin);
+																								}
+																								@Bean
+																								public AuthenticationManager authenticationManager(InMemoryUserDetailsManager inMemoryUserDetailsManager) throws Exception {
+																									return new AuthenticationManagerBuilder(inMemoryUserDetailsManager).build();
+																								}
+																							}
+
+																						- org.springframework.security.core.userdetail.User:
+																							Là một implementation UserDetails mặc định, hợp lý mà bạn có thể sử dụng. Điều đó có nghĩa là có khả năng ánh xạ/sao chép
+																							giữa các entity/ bảng database của bạn và class User này. Ngoài ra, bạn có thể chỉ cần làm cho các entity của mình implement
+																							interface UserDetails.
+																							
+																							import org.springframework.context.annotation.Bean;
+																							import org.springframework.context.annotation.Configuration;
+																							import org.springframework.security.core.userdetails.UserDetails;
+																							import org.springframework.security.core.userdetails.User;
+																							import org.springframework.security.core.userdetails.UserDetailsService;
+																							import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+																							@Configuration
+																							public class SecurityConfig {
+																								@Bean
+																								public UserDetailsService userDetailsService() {
+																									UserDetails user = User.builder() // User.builder() cho phép bạn cung cấp các thuộc tính như username, password và roles để
+																																	  // xác định các chi tiết của người dùng.
+																											.username("user")
+																											.password("password")
+																											.roles("USER")
+																											.build();
+																									UserDetails admin = User.builder()
+																											.username("admin")
+																											.password("admin")
+																											.roles("ADMIN")
+																											.build();
+
+																									return new InMemoryUserDetailsManager(user, admin); // cung cấp chi tiết người dùng được cấu hình trong bộ nhớ.
+																								}
+																							}																						
+																							
+																Quy trình làm việc
+																đầy đủ của UserDetails:
+																
+																HTTP Basic Authentication
+																
+																						Bây giờ, hãy quay trở lại HTTP Basic Authentication của bạn, bạn đang bảo mật ứng dụng của mình bằng Spring Security và Basic
+																						Auth. Đây là những gì sẽ diễn ra khi bạn chỉ định một UserDetailsService và cố gắng login:
+																							Extract tổ hợp username/password từ HTTP Basic Authentication header trong một bộ lọc. Bạn không phải làm bất cứ điều gì cả, nó sẽ
+																							tự diễn ra đằng sau tấm màn che.
+																							Gọi MyDatabaseUserDetailsService của bạn để tải user tương ứng từ database, được bao bọc dưới dạng đối tượng UserDetails, làm lộ
+																							hashed password của user.
+																							Lấy password được extract từ HTTP Basic Auth header, tự động băm nó và so sánh nó với hashed password từ object UserDetails của bạn.
+																							Nếu cả hai khớp, user sẽ được authenticate thành công.
+																							
+														Một PasswordEncoder:
+														
+																						Spring Security không thể đoán một cách kỳ diệu thuật toán băm password ưa thích của bạn. Đó là lý do tại sao bạn cần chỉ định một @Bean
+																						khác, một PasswordEncoder. Giả sử nếu bạn muốn sử dụng chức năng hashed password kiểu BCrypt (mặc định của Spring Security) cho tất cả
+																						các password của mình , bạn sẽ chỉ định @Bean này trong SecurityConfig:
+																							@Bean
+																							public BCryptPasswordEncoder bCryptPasswordEncoder() {
+																								return new BCryptPasswordEncoder();
+																							}
+																							
+																						Điều gì sẽ xảy ra nếu bạn có nhiều thuật toán băm password, vì bạn có một số user cũ có password được lưu trữ bằng MD5 (đừng làm điều
+																						này) và những user mới hơn với Bcrypt hoặc thậm chí là thuật toán thứ ba như SHA-256? Vậy thì bạn sẽ sử dụng bộ mã hóa sau:
+																							@Bean
+																							public PasswordEncoder passwordEncoder() {
+																								return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+																							}
+																							
+																						Bộ mã hóa này hoạt động như thế nào? Nó sẽ xem xét hashed password của UserDetail (đến từ bảng database của bạn chẳng hạn), bây giờ
+																						phải bắt đầu với một <em style="box-sizing:border-box">{prefix}</em>. Prefix (tiền tố) đó, chính là phương pháp hash của bạn!
+																						Spring Security sẽ:
+																							Đọc các password đó và loại bỏ tiền tố ({bcrypt} hoặc {sha256}).
+																							Tùy thuộc vào giá trị tiền tố, hãy sử dụng PasswordEncoder cho chính xác (tức là BCryptEncoder hoặc SHA256Encoder)
+																							Băm password thô với PasswordEncoder đó và so sánh với password đã lưu trữ.
+			AuthenticationProvider: Không có
+			quyền truy cập vào password của
+			user(trường hợp Ít phổ biến hơn):
+			
+													- Bây giờ, hãy tưởng tượng rằng bạn đang sử dụng Atlassian Crowd để quản lý danh tính. Điều đó có nghĩa là tất cả user và password của bạn cho tất cả các ứng dụng được lưu
+													trữ trong Atlassian Crowd và không còn trong bảng database của bạn nữa.
+													- Điều này có hai hàm ý:
+														Bạn không có password user trong ứng dụng của mình nữa, vì bạn không thể yêu cầu Crowd cung cấp cho bạn những password đó.
+														Tuy nhiên, bạn có một API REST mà bạn có thể đăng nhập bằng username và password của mình. (Một POST request đến điểm cuối
+														<em style="box-sizing:border-box">/rest/usermanagement/1/authentication</em> của REST).
+														
+													- Nếu đúng như vậy, bạn không thể sử dụng UserDetailsService nữa, thay vào đó, bạn cần implement và cung cấp AuthenticationProvider @Bean:
+													
+														@Bean
+														public AuthenticationProvider authenticationProvider() {
+															return new AtlassianCrowdAuthenticationProvider();
+														}
+														
+													- Một AuthenticationProvider chủ yếu bao gồm một method và một implementation ngắn gọn có thể trông như thế này:
+													
+														public class AtlassianCrowdAuthenticationProvider implements AuthenticationProvider {
+															Authentication authenticate(Authentication authentication) throws AuthenticationException {// (1)																		
+																String username = authentication.getPrincipal().toString(); // (1)
+																String password = authentication.getCredentials().toString(); // (1)
+																User user = callAtlassianCrowdRestService(username, password); // (2)
+																if (user == null) {                                     // (3)
+																	throw new AuthenticationException("could not login");
+																}
+																return new UserNamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities()); // (4)
+															}
+																// other method ignored
+														}
+													- So với method UserDetails load (), nơi bạn chỉ có quyền truy cập vào username, giờ đây bạn đã có quyền truy cập để authenticate hoàn chỉnh, thường chứa username
+													và password.
+													- Bạn có thể làm bất cứ điều gì bạn muốn để authenticate user, như gọi một REST-service chẳng hạn.
+													- Nếu authenticate không thành công, bạn cần phải throw ra một exception.
+													- Nếu authenticate thành công, bạn cần return một UsernamePasswordAuthenticationToken được khởi tạo đầy đủ. Nó là một implementation của interface Authentication
+													và cần phải đặt trường được authenticate thành true (mà constructor được sử dụng ở trên sẽ tự động đặt).
+													
+					Quy trình làm việc
+					AuthenticationProvider
+					đầy đủ: HTTP Basic
+					Authentication:
+					
+													- Extract tổ hợp username / password từ HTTP Basic Authentication Header trong một bộ lọc. Bạn không phải làm bất cứ điều gì để thực hiện việc đó cả, nó sẽ tự diễn ra đằng
+													sau tấm màn che.
+													- Gọi AuthenticationProvider của bạn (ví dụ: AtlassianCrowdAuthenticationProvider) bằng username và password đó để bạn tự thực hiện authentication (ví dụ: gọi REST).
+													- Không có quá trình hash password hoặc gì đó tương tự đang diễn ra, vì về cơ bản bạn đang ủy quyền cho bên thứ ba thực hiện kiểm tra username / password thực tế.
+													
+		Chú ý--Security:
+		
+			OAuth2--security chú ý:
+													OAuth2 là một giao thức ủy quyền mạnh mẽ được sử dụng rộng rãi cho việc xác thực và ủy quyền trong ứng dụng web và di động. Với OAuth2, người dùng có thể cho phép ứng dụng
+													của bạn truy cập vào tài nguyên của họ mà không cần chia sẻ mật khẩu. Thay vào đó, ứng dụng yêu cầu một mã truy cập (access token) từ máy chủ ủy quyền (authorization
+													server) sau khi người dùng đã xác thực thành công.
+													
+			Đăng nhập bằng Google / Twitter / v.v.
+			(OpenID)--security chú ý:
+			
+													Đăng nhập bằng các dịch vụ lớn như Google, Twitter, Facebook,... cung cấp một cách thuận tiện và an toàn để người dùng xác thực trong ứng dụng của bạn. Thay vì tạo và quản
+													lý tài khoản riêng, người dùng có thể sử dụng tài khoản của họ trên các dịch vụ này để đăng nhập vào ứng dụng của bạn. OpenID là một chuẩn phổ biến cho phương thức này.
+													
+			JSON Web Tokens (JWT)--security chú ý:
+			
+											- JWT là một phương tiện truyền thông được sử dụng để truyền dữ liệu giữa các bên một cách an toàn và kiểm soát tính xác thực. JWT thường được sử dụng trong các cơ chế xác
+											thực stateless như OAuth2. Khi người dùng xác thực thành công, máy chủ sẽ tạo ra một JWT chứa thông tin về quyền truy cập và gửi nó lại cho ứng dụng của bạn. Ứng dụng có
+											thể sử dụng JWT này để xác thực và ủy quyền người dùng trong các yêu cầu tiếp theo mà không cần phải lưu trữ trạng thái xác thực ở phía máy chủ.
+											- Authentication là phần không thể thiếu trong bất kỳ hệ thống nào. Phương pháp authentication đơn giản và hay được sử dụng trong các ứng dụng web đó là user gửi thông tin
+											username và password lên server. Sau khi server chứng thực thành công sẽ tạo ra một chuỗi session_id và lưu vào session hay database ở phía server. Sau đó, gửi session_id
+											này về client và được client lưu trên cookie. Nhưng với các ứng dụng trên mobile và các ứng dụng web SPA (Single Page Application) thì cần có cơ chế authentication tốt hơn
+											khi mà chúng ta phải thiết kế các RESTful api (stateless) thì server không thể đảm nhiệm việc lưu trạng thái phiên làm việc của user. Một trong những phương pháp tốt để
+											giải quyết vấn đề này là sử dụng JSON Web Token (JWT).
+											- Khi một máy chủ nhận được JWT, nó có thể đảm bảo dữ liệu mà nó chứa có thể được tin cậy bởi vì nó đã được xác thực với chữ ký đã được lưu trữ. Không yếu tố trung gian nào
+											có thể sửa đổi JWT sau khi nó được gửi.
+													
+				Bảo mật cao--JWT:
+				
+													JWT hỗ trợ chữ ký số để đảm bảo tính toàn vẹn và xác thực của dữ liệu. Điều này giúp ngăn chặn sửa đổi thông tin và xác định rõ ràng nguồn gốc của dữ liệu.
+													
+				JWT đảm bảo quyền sở hữu dữ
+				liệu nhưng không mã hóa--JWT:
+				
+													- JWT được sử dụng để truyền thông tin giữa các bên một cách an toàn và kiểm soát. Tuy nhiên, điểm quan trọng cần lưu ý là JWT không mã hóa dữ liệu trong nó. Thay vào đó, nó
+													ký và tuần tự hóa dữ liệu dưới dạng JSON. Điều này có nghĩa là bất kỳ ai có được JWT đều có thể giải mã và xem dữ liệu trong nó.
+													- Do tính không mã hóa của dữ liệu trong JWT, nó cần được truyền đi trong môi trường an toàn để đảm bảo bảo mật. HTTPS (HTTP Secure) cung cấp một kênh truyền dữ liệu an
+													toàn bằng cách mã hóa dữ liệu trước khi truyền đi, điều này ngăn chặn bất kỳ kẻ tấn công nào cũng không thể đọc hoặc thay đổi dữ liệu trong quá trình truyền đi. Do đó, việc
+													sử dụng JWT cùng với HTTPS là quan trọng để đảm bảo an toàn cho thông tin trong JWT.
+													
+				Gọn nhẹ (compact)--JWT:
+				
+													JWT có thể được truyền đi thông qua URL, hoặc qua giao thức POST, hay gán vào bên trong phần HTTP Header. Kích thước nhỏ hơn ứng với công việc truyền tải sẽ nhanh hơn. Dưới
+													đây là cách thức truyền token vào trong HTTP Header sử dụng Bearer Schema:
+													
+														Authorization: Bearer <token>
+														
+				Tự đóng gói (self-contained)--JWT:
+				
+													Payload của JWT đã chứa các thông tin cần thiết về user (thay vì phải truy vấn cơ sở dữ liệu nhiều lần).
+													
+				Các thành phần của JSON Web
+				Token (JWT)--JWT:
+				
+										Chi tiết hơn xem tại https://en.wikipedia.org/wiki/JSON_Web_Token#Standard_fields
+										
+										Header:
+										
+													Đây là nơi chứa thông tin mà được dùng để trả lời cho câu hỏi: “Mã JWT được tính toán như thế nào?”
+													Gồm 2 phần: type của token, giá tri là JWT, và phương thức mã hóa (HMAC SHA256 hay RSA).
+													JSON object này sau đó được mã hóa Base64URL.
+													
+													{
+													  "typ": "JWT",  // “typ” (viết tắt của type) là kiểu Token, ở đây chính là JWT.
+													  "alg": "HS256" // “alg” (viết tắt của algorithm) là thuật toán băm tạo ra chữ ký cho Token, ở ví dụ trên HS256 là thuật toán có tên HMAC-SHA256, một thuật
+																	 // toán băm sử dụng khóa bí mật (Secret Key) để tính toán tạo ra chữ ký.
+													}
+													
+										Payload:
+										
+													Đây là nơi chứa những dữ liệu mà chúng ta muốn lưu lại trong JWT.
+													
+													{
+													  "userId": "7j79y-kdjr8n4h-5jd8-5k39-cfk8ghr9wu",
+													  "username": "trungquandev17",
+													  "occupation": "Full stack web developer",
+													  // standard fields
+													  "iss": "Trung Quan, author of blog: https://trungquandev.com", // “iss” viết tắt của Issuer là thông tin người tạo ra Token (không phải user đâu nhé, mà nó
+																													 // chính là tên cái hệ thống backend của các bạn chẳng hạn)
+													  "iat": 1568456819, // “iat” viết tắt của Issued at, là nhãn thời gian lúc mà cái token được tạo.
+													  "exp": 1568460419 // “exp” viết tắt của Expiration time, xác định thời gian hết hạn của Token
+													}
+													
+										SIGNATURE:
+										
+													- Đầu tiên, chúng ta sẽ Encode (chuyển đổi) 2 cái Header và Playload ở trên theo kiểu Base64URL Encoder, và nối 2 chuỗi nhận được lại (cách nhau bởi
+													dấu chấm “.”)rồi gán nó vào một biến là data.
+													- Tiếp theo sẽ Hash (băm) cái data đó bằng “alg”, chính thuật toán tạo chữ ký mà chúng ta đã định nghĩa ở trên Header (HS256 – HMAC-SHA256) kèm với một chuỗi bí
+													mật secret (chuỗi secret này sẽ được đặt tùy vào lập trình viên của mỗi dự án và đảm bảo không được để lộ chuỗi này ra ngoài, có thể đưa vào biến môi trường ENV.)
+													- Sau khi băm xong ở trên thì thực hiện Encode tiếp một lần nữa cái dữ liệu băm đó dưới dạng Base64URL Encode, và chúng ta sẽ thu được chữ ký “Signature”.
+													
+													const headerEncode = base64urlEncode(header); // ví dụ kết quả: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+													const payloadEncode = base64urlEncode(payload); // ví dụ kết quả: eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ
+													const data = headerEncode + "." + payloadEncode;
+													const hashedData = Hash(data, secret);
+													const signature = base64urlEncode(hashedData);  // ví dụ kết quả: xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM
+													// cuối cùng thì mã JWT theo đúng cấu trúc header.payload.signature sẽ trông như sau:
+													const JWT = headerEncode + "." + payloadEncode + "." + signature;
+													// Kết quả: 
+													"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ.xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM"
+																
+				JWT bảo vệ dữ liệu của chúng
+				ta bằng cách nào--JWT:
+				
+													- JWT không bảo vệ dữ liệu của bạn.
+													- Mục đích quan trọng mà các bạn cần phải nắm được là JWT nó không ẩn, không làm mờ, không che giấu dữ liệu gì cả, mà nó được sử dụng để chứng minh rằng dữ liệu được tạo
+													ra bởi một nguồn xác thực.
+													- Các bạn có thể nhìn lại ở các bước xử lý Header, Payload, Signature trên kia, dữ liệu chỉ được Encoded và Hash (Signed) chứ không phải Encrypted.
+													- Lưu ý: mình phải giữ nguyên mấy từ trên bằng tiếng anh bởi vì Encoded và Encrypted dịch ra tiếng việt đều là “Mã hóa” nhưng bản chất ý nghĩa của chúng hoàn toàn
+													khác nhau.
+													
+				Nếu một kẻ tấn công ở giữa
+				(Man-in-the-middle) bắt được gói
+				tin có chứa mã JWT rồi họ decode
+				ra và lấy được thông tin của user
+				thì sao--JWT:
+				
+													Đúng, điều đó là có thể, vậy nên hãy luôn luôn đảm bảo rằng ứng dụng của các bạn chắc chắn phải có giao thức mã hóa đường truyền HTTPS nhé.
+													
+				Server xác thực mã JWT gửi lên
+				từ client ra sao--JWT:
+				
+													- Trong phần 3 trên kia các bạn hãy nhìn lại cho mình đó là khi tạo mã JWT, chúng ta có sử dụng tới một chuỗi bí mật “Secret” trong bước tạo chữ ký (signature).
+													- Chuỗi “Secret” này là unique cho ứng dụng và phải được ưu tiên lưu trữ bảo mật cẩn thận ở phía server.
+													- Khi nhận được mã Token gửi lên từ phía client, Server sẽ lấy phần Signature (chữ ký) bên trong mã token đó, và verify (kiểm tra ) xem chữ ký nhận được có đúng chính
+													xác là được HASH (băm) bởi cùng một thuật toán và chuỗi “Secret” như trên hay không.
+													- Và cuối cùng, rõ ràng, nếu chữ ký của client gửi lên khớp với chữ ký được tạo ra từ máy chủ, thì JWT đó là hợp lệ, ngược lại thì không, và người lập trình API phía
+													Backend như chúng ta sẽ tùy vào từng trường hợp mà response về cho client một cách hợp lý.
+													
+			In-memory--security chú ý:
+			
+													- Thông tin người dùng được lưu trữ trong bộ nhớ RAM của ứng dụng thay vì lưu trữ trong một cơ sở dữ liệu hoặc một nguồn dữ liệu khác. Điều này có nghĩa là dữ liệu
+													người dùng chỉ tồn tại trong thời gian mà ứng dụng đang chạy, và sẽ bị xóa khi ứng dụng được tắt hoặc khởi động lại.
+													- Tuy nhiên, cần lưu ý rằng việc lưu trữ thông tin người dùng trong bộ nhớ có nhược điểm là dữ liệu sẽ bị mất khi ứng dụng bị tắt hoặc khởi động lại, và không phù hợp
+													cho các ứng dụng có nhu cầu lưu trữ thông tin người dùng lâu dài hoặc có lưu lượng truy cập lớn. Trong các trường hợp đó, việc sử dụng một cơ sở dữ liệu hoặc một
+													nguồn dữ liệu khác là lựa chọn phù hợp hơn.
+													- Việc lưu trữ thông tin người dùng trong bộ nhớ có thể là một giải pháp thuận tiện trong các trường hợp sau:
+													
+														Ứng dụng nhỏ và đơn giản:	
+														
+																						Trong các ứng dụng nhỏ và đơn giản, việc lưu trữ thông tin người dùng trong bộ nhớ có thể đủ để đáp ứng nhu cầu của ứng dụng mà không
+																						cần phải sử dụng một cơ sở dữ liệu riêng biệt.
+																						
+														Phát triển và kiểm thử:
+														
+																						Trong quá trình phát triển và kiểm thử ứng dụng, việc sử dụng InMemoryUserDetailsManager có thể là một cách thuận tiện để quản lý thông
+																						tin người dùng mà không cần cấu hình và kết nối đến một cơ sở dữ liệu.
+																						
+														Môi trường thử nghiệm và demo:
+														
+																						Trong một số trường hợp, việc triển khai ứng dụng trong môi trường thử nghiệm hoặc demo có thể sử dụng InMemoryUserDetailsManager để đơn
+																						giản hóa quá trình triển khai và giảm thiểu chi phí vận hành.
+			
+			UserDetailService interface--security chú ý:
+			
+													- UserDetailService là một interface có duy nhất một mẫu phương thức UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+													- Trong ứng dụng Spring Boot, chỉ cần một Component hay Bean nào đó implements interface UserDetailService thì trong quá trình xác thực, phương thức
+													UserDetails loadUserByUsername(String username) throws UsernameNotFoundException; của Component hay Bean đó sẽ được gọi ra khi cần tìm kiếm user theo user name. Bản chất
+													của cơ chế này là Auto Injection, khi quét (component scan) và nạp các Component hay Bean vào Application Context, Spring Boot đã biết được rõ, component nào dùng để tìm
+													kiếm user theo user name thông qua kiểu Interface bạn không cần phải cấu hình gì thêm. Nếu có nhiều hơn một Component implements interface UserDetailService thì sao? Khi
+													đó bạn có thể dùng annotation @Primary hay @Order để ưu tiên component bạn muốn sử dụng.
+													- Khi một yêu cầu đăng nhập (authentication request) đến, Spring Security cần tìm chi tiết của người dùng (tên người dùng, mật khẩu, vai trò, quyền, v.v.) để kiểm tra tính
+													hợp lệ của thông tin đăng nhập. Để thực hiện việc này, Spring Security sử dụng UserDetailsService để tìm kiếm thông tin người dùng từ một nguồn dữ liệu (ví dụ: cơ sở dữ
+													liệu, hệ thống LDAP, dịch vụ web, v.v.).
+													- Interface UserDetailService dùng để tìm kiếm người dùng theo user name. Cần phải có khi bạn muốn quản lý người dùng đăng nhập
+			
+			UserDetails interface--security chú ý:
+			
+													- Lớp x cài đặt interface UserDetails của Spring Security và biểu diễn một đối tượng người dùng trong ứng dụng. Lớp này sẽ lưu thông tin về xác thực (username và password)
+													và thông tin về phân quyền (list authorities) và lần lượt cài đặt các phương thức của interface UserDetails. Trong đó có một số phương thức chúng ta cần để ý đến là
+													getUsername(), getPassword(), và getAuthorities().
+													- UserDetails là một interface cốt lõi của Spring Security. Nó đại diện cho một principal nhưng theo một cách mở rộng và cụ thể hơn. Vậy UserDetails cung cấp cho ta những
+													thông tin gì? UserDetails bao gồm các method sau:
+														- getAuthorities(): trả về danh sách các quyền của người dùng
+														- getPassword(): trả về password đã dùng trong qúa trình xác thực
+														- getUsername(): trả về username đã dùng trong qúa trình xác thực
+														- isAccountNonExpired(): trả về true nếu tài khoản của người dùng chưa hết hạn
+														- isAccountNonLocked(): trả về true nếu người dùng chưa bị khóa
+														- isCredentialsNonExpired(): trả về true nếu chứng thực (mật khẩu) của người dùng chưa hết hạn
+														- isEnabled(): trả về true nếu người dùng đã được kích hoạt
+													- Chúng ta có thể thấy UserDetails mới chỉ cung cấp các phương thức để truy cập các thông tin cơ bản của người dùng. Để mở rộng thêm các thông tin, chúng ta sẽ tạo một lớp
+													CustomUserDetails implements org.springframework.security.userdetails.UserDetails (tên lớp là tùy ý, bạn đặt tên thế nào cũng được).
+													- UserDetails là một giao diện mô tả thông tin chi tiết về một người dùng được sử dụng để thực hiện xác thực và ủy quyền trong ứng dụng web.
+			
+			SecurityContext & SecurityContextHolder--security chú ý:
+			
+								- Là interface cốt lõi của Spring Security, lưu trữ tất cả các chi tiết liên quan đến bảo mật trong ứng dụng. Khi chúng ta kích hoạt Spring Security trong ứng dụng thì
+								SecurityContext cũng sẽ được kích hoạt theo.												
+								- Các phương thức quan trọng của SecurityContextHolder:
+								
+									getContext(): 						
+									
+																				Trả về context hiện tại của bảo mật. Context bao gồm thông tin về người dùng hiện tại và các quyền truy cập.	
+																				
+																				Authentication authentication = SecurityContextHolder.getContext().getAuthentication();																									
+																				Authentication authentication =  .authenticate(
+																											new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
+																				SecurityContextHolder.getContext().setAuthentication(authentication);
+									setContext(SecurityContext context): 																									
+																				Đặt context bảo mật mới. Thường không được sử dụng trực tiếp, mà thay vào đó sử dụng các phương thức trên
+																				SecurityContextHolder.																								
+									clearContext(): 							
+																				Xóa context bảo mật hiện tại khỏi SecurityContextHolder. Thường được gọi khi bạn muốn xóa thông tin xác thực của người dùng
+																				sau khi họ đã thoát ra khỏi ứng dụng hoặc sau một phiên làm việc.																									
+									createEmptyContext(): 						
+																				Tạo một context bảo mật mới mà không có người dùng nào được xác thực																					
+									MODE_THREADLOCAL: 							
+																				Chế độ mặc định của SecurityContextHolder, nơi context bảo mật được lưu trữ trên một biến ThreadLocal. Điều này đảm bảo rằng
+																				mỗi luồng (thread) trong ứng dụng có thể duy trì một context bảo mật riêng biệt.																							
+									MODE_INHERITABLETHREADLOCAL: 				
+																				Chế độ tương tự như MODE_THREADLOCAL, nhưng cho phép các luồng con (sub-threads) kế thừa context bảo mật từ luồng cha
+																				(parent thread).																							
+									MODE_GLOBAL: 								
+																				Chế độ lưu trữ context bảo mật trên một biến static global. Điều này có thể gây ra các vấn đề về đồng bộ hóa trong các môi
+																				trường đa luồng và không được khuyến khích sử dụng.
+																				
+								- Chúng ta sẽ không truy cập trực tiếp vào SecurityContext, thay vào đó sẽ sử dụng lớp SecurityContextHolder. Lớp này lưu trữ security context hiện tại của ứng dụng,
+								bao gồm chi tiết của principal đang tương tác với ứng dụng. Spring Security sẽ dùng một đối tượng Authentication để biểu diễn thông tin này. Đoạn code dưới đây sẽ
+								giúp chúng ta lấy được username của principal đã được xác thực (username ở đây ta nên hiểu là username trong cặp username – password mà người dùng nhập vào khi đăng nhập):
+								
+								Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+								if (principal instanceof UserDetails) {
+									String username = ((UserDetails) principal).getUsername();
+								} else {
+									String username = principal.toString();
+								}
+								
+								import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+								import org.springframework.security.core.Authentication;
+								import org.springframework.security.core.context.SecurityContext;
+								import org.springframework.security.core.context.SecurityContextHolder;
+								public class SecurityContextHolderExample {
+									public static void main(String[] args) {
+										// Tạo một đối tượng Authentication
+										Authentication authentication = new UsernamePasswordAuthenticationToken("user123", "password123");
+										// Tạo một đối tượng SecurityContext và đặt đối tượng Authentication vào đó
+										SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+										securityContext.setAuthentication(authentication);
+										// Đặt SecurityContext vào SecurityContextHolder
+										SecurityContextHolder.setContext(securityContext);
+										// Lấy đối tượng Authentication từ SecurityContextHolder
+										Authentication retrievedAuthentication = SecurityContextHolder.getContext().getAuthentication();
+										System.out.println("Principal: " + retrievedAuthentication.getPrincipal());
+										System.out.println("Credentials: " + retrievedAuthentication.getCredentials());
+										System.out.println("Authorities: " + retrievedAuthentication.getAuthorities());
+										System.out.println("Is authenticated: " + retrievedAuthentication.isAuthenticated());
+										// Xóa đối tượng Authentication khỏi SecurityContextHolder
+										SecurityContextHolder.clearContext();
+										// Kiểm tra xem SecurityContextHolder có rỗng không
+										boolean isContextEmpty = SecurityContextHolder.getContext().getAuthentication() == null;
+										System.out.println("Is SecurityContext empty? " + isContextEmpty);
+									}
+								}
+								
+			HttpSecurity--security chú ý:
+													- Là đối tượng chính của Spring Security, cho phép chúng ta cấu hình mọi thứ cần bảo mật, và nó được xây dựng dưới design pattern giống với Builder Pattern , nên
+													mọi cài đặt có thể viết liên tục thông qua toán tử.
+													- It allows configuring web based security for specific http requests. By default it will be applied to all requests, but can be restricted using
+													#requestMatcher(RequestMatcher) or other similar methods.
+													- HttpSecurity là một lớp cung cấp cơ chế cấu hình bảo mật cho ứng dụng web. Nó là một phần quan trọng của cấu hình Spring Security và cho phép bạn xác định các quy
+													tắc bảo mật dựa trên các yêu cầu HTTP đến ứng dụng của bạn.
+													- Khi một yêu cầu HTTP được gửi đến ứng dụng, nó sẽ được xử lý bởi Spring Security và đi qua một loạt các bộ lọc (filters) bảo mật được cấu hình bởi HttpSecurity. Mỗi
+													bộ lọc sẽ kiểm tra yêu cầu và thực hiện các hành động nhất định, chẳng hạn như xác thực người dùng, ủy quyền, kiểm tra quyền truy cập, và xử lý các tình huống bảo mật khác.
+													- HttpSecurity cho phép bạn chỉ định các quy tắc cụ thể để kiểm soát cách mà yêu cầu HTTP được xử lý.
+				.authorizeRequests():
+													Phương thức này cho phép bạn cấu hình các quy tắc ủy quyền dựa trên các yêu cầu HTTP. Bạn có thể xác định các điều kiện để yêu cầu phải thỏa mãn trước khi được phép truy
+													cập vào các tài nguyên.
+				.formLogin(): 
+													Phương thức này cho phép bạn cấu hình xác thực dựa trên mẫu đăng nhập. Nó sẽ tự động tạo trang đăng nhập cho bạn và xử lý quá trình đăng nhập.
+				.logout(): 
+													Phương thức này cho phép bạn cấu hình xử lý đăng xuất của người dùng.
+				.csrf():
+													Phương thức này cho phép bạn bật hoặc tắt tính năng bảo vệ chống tấn công giả mạo yêu cầu (Cross-Site Request Forgery).
+				.cors(): 
+													Phương thức này cho phép bạn cấu hình hỗ trợ Cross-Origin Resource Sharing (CORS) để cho phép hoặc hạn chế truy cập từ các tên miền khác.
+				.httpBasic():
+													Phương thức này cho phép xác thực dựa trên HTTP Basic Authentication. Nó sẽ tạo một cửa sổ hộp thoại đăng nhập của trình duyệt khi người dùng cố gắng truy cập vào các tài
+													nguyên yêu cầu xác thực.
+				.oauth2Login(): 
+													Phương thức này cấu hình xác thực dựa trên OAuth 2.0. Nó cho phép người dùng đăng nhập bằng cách sử dụng một nhà cung cấp đăng nhập bên thứ ba như Google, Facebook, GitHub,
+													v.v.
+				.rememberMe(): 
+													Phương thức này kích hoạt tính năng "Remember Me" để giữ cho người dùng đăng nhập sau khi hết hạn phiên đăng nhập.
+				.sessionManagement():
+													Phương thức này cho phép bạn cấu hình quản lý phiên (session) trong ứng dụng. Bạn có thể thiết lập thời gian hết hạn phiên, xác định cách xử lý nhiều phiên cùng lúc, v.v.
+				.exceptionHandling():
+													Phương thức này cho phép bạn xác định cách xử lý các ngoại lệ bảo mật trong ứng dụng. Bạn có thể định nghĩa trang đăng nhập tùy chỉnh hoặc xử lý các lỗi bảo mật khác.
+				.headers():
+													Phương thức này cho phép bạn cấu hình các tiêu đề bảo mật cho yêu cầu HTTP như HSTS (HTTP Strict Transport Security), X-Content-Type-Options, X-XSS-Protection, v.v.
+				.authorizeRequests()
+				.antMatchers("/path")
+				.access("hasRole('ROLE_ADMIN') and 
+				hasIpAddress('192.168.1.0/24')"): 
+													Phương thức này cho phép bạn định nghĩa các quy tắc ủy quyền phức tạp bằng cách sử dụng Access Control Expressions (ACEs). Bạn có thể xác định các điều kiện phức
+													tạp để xác định quyền truy cập vào các tài nguyên.	
+													
+													import org.springframework.context.annotation.Configuration;
+													import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+													import org.springframework.security.crypto.password.PasswordEncoder;
+													import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+													@Configuration
+													public class SecurityConfig {
+														@Bean
+														public PasswordEncoder passwordEncoder() {
+															return new BCryptPasswordEncoder();
+														}
+														@Bean
+														public HttpSecurity httpSecurity() throws Exception {
+															HttpSecurity http = new HttpSecurityBuilder<>();
+															http
+																.authorizeRequests()
+																	.antMatchers("/public/**").permitAll() // Cho phép tất cả mọi người truy cập các URL bắt đầu bằng /public/
+																	.antMatchers("/admin/**").hasRole("ADMIN") // Chỉ cho phép người dùng có vai trò ADMIN truy cập các URL bắt đầu bằng /admin/
+																	.antMatchers("/path").access("hasRole('ROLE_ADMIN') and hasIpAddress('192.168.1.0/24')") // Kiểm tra quyền và địa chỉ IP
+																	.anyRequest().authenticated() // Tất cả các request còn lại đều cần xác thực
+																	.and()
+																.formLogin() // Cho phép sử dụng form login
+																	.and()
+																.logout() // Cho phép logout
+																	.and()
+																.csrf().disable() // Vô hiệu hóa CSRF protection
+																	.and()
+																.cors() // Cấu hình CORS (Cross-Origin Resource Sharing)
+																	.and()
+																.httpBasic() // Cho phép sử dụng HTTP Basic Authentication
+																	.and()
+																.oauth2Login() // Cho phép đăng nhập OAuth 2.0
+																	.and()
+																.rememberMe() // Cho phép Remember Me Authentication
+																	.and()
+																.sessionManagement() // Quản lý session
+																	.and()
+																.exceptionHandling() // Xử lý các ngoại lệ liên quan đến bảo mật
+																	.and()
+																.headers() // Cấu hình HTTP headers
+																	.and();
+															return http;
+														}
+													}
+			JdbcUserDetailsManager--security chú ý:
+			
+													- JdbcUserDetailsManager là một implement của interface UserDetailsService trong Spring Security
+													- Là một lớp cung cấp sẵn, được sử dụng để quản lý thông tin người dùng (user details) trong cơ sở dữ liệu bằng cách sử dụng JDBC (Java Database Connectivity). Nó là một
+													cách tiện lợi để lưu trữ và quản lý thông tin người dùng như tên người dùng, mật khẩu, vai trò (roles) và quyền (authorities) trong cơ sở dữ liệu thay vì lưu trữ
+													trong bộ nhớ (in-memory).
+													- Khi bạn cần xác thực và ủy quyền người dùng trong ứng dụng của mình, bạn cần có một cơ chế để lưu trữ thông tin người dùng. Spring Security cung cấp một số lựa chọn
+													để làm điều này, và JdbcUserDetailsManager là một trong số đó.
+													- JdbcUserDetailsManager sử dụng JDBC để tương tác với cơ sở dữ liệu của bạn và có thể thực hiện các chức năng cơ bản như:
+														Tạo người dùng mới và lưu trữ thông tin của họ trong cơ sở dữ liệu.
+														Thay đổi thông tin người dùng như mật khẩu, vai trò, quyền, v.v.
+														Xóa người dùng khỏi cơ sở dữ liệu.
+														Tìm kiếm người dùng theo tên người dùng hoặc ID.
+													- Để sử dụng JdbcUserDetailsManager, bạn cần cấu hình nó trong ứng dụng của mình thông qua các bean Spring. Bạn cần xác định nguồn dữ liệu JDBC (DataSource) để nó có thể
+													kết nối và tương tác với cơ sở dữ liệu.
+													
+													import org.springframework.beans.factory.annotation.Autowired;
+													import org.springframework.context.annotation.Bean;
+													import org.springframework.context.annotation.Configuration;
+													import org.springframework.security.core.userdetails.User;
+													import org.springframework.security.core.userdetails.UserDetails;
+													import org.springframework.security.crypto.password.PasswordEncoder;
+													import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+													import org.springframework.security.provisioning.JdbcUserDetailsManager;
+													import javax.sql.DataSource;
+													@Configuration
+													public class SecurityConfig {
+														@Autowired
+														private DataSource dataSource;
+														@Bean
+														public PasswordEncoder passwordEncoder() {
+															return new BCryptPasswordEncoder();
+														}
+														@Bean
+														public JdbcUserDetailsManager jdbcUserDetailsManager() {
+															JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
+															jdbcUserDetailsManager.setDataSource(dataSource);
+															return jdbcUserDetailsManager;
+														}
+														@Bean
+														public void loadUsers(JdbcUserDetailsManager jdbcUserDetailsManager, PasswordEncoder passwordEncoder) {
+															// Thêm người dùng mới vào cơ sở dữ liệu
+															UserDetails user = User.withUsername("user")
+																	.password(passwordEncoder.encode("password"))
+																	.roles("USER")
+																	.build();
+															UserDetails admin = User.withUsername("admin")
+																	.password(passwordEncoder.encode("admin"))
+																	.roles("ADMIN")
+																	.build();
+															if (!jdbcUserDetailsManager.userExists("user")) {
+																jdbcUserDetailsManager.createUser(user);
+															}
+															if (!jdbcUserDetailsManager.userExists("admin")) {
+																jdbcUserDetailsManager.createUser(admin);
+															}
+														}
+													}
+			SecurityFilterChain--security chú ý:
+													- Là một interface chịu trách nhiệm xác định các bộ lọc (filters) mà Spring Security sử dụng để xử lý các yêu cầu HTTP vào ứng dụng. Mỗi SecurityFilterChain đại
+													diện cho một tập hợp các bộ lọc được áp dụng theo một cách cụ thể cho các yêu cầu cụ thể. Khi một yêu cầu HTTP đến, Spring Security sẽ kiểm tra các
+													SecurityFilterChain để xác định xem bộ lọc nào cần được áp dụng cho yêu cầu này.
+													- Một ứng dụng Spring Security có thể có nhiều SecurityFilterChain để hỗ trợ các luồng xử lý bảo mật khác nhau cho các URL hoặc nhóm URL cụ thể. Điều này giúp bạn xác định
+													mức độ bảo mật khác nhau cho các phần của ứng dụng của bạn.
+													
+													import org.springframework.context.annotation.Bean;
+													import org.springframework.context.annotation.Configuration;
+													import org.springframework.security.authentication.AuthenticationManager;
+													import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+													import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+													import org.springframework.security.crypto.password.PasswordEncoder;
+													import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+													import org.springframework.security.provisioning.JdbcUserDetailsManager;
+													import org.springframework.security.web.SecurityFilterChain;
+													import javax.sql.DataSource;
+													@Configuration
+													@EnableWebSecurity
+													public class SecurityConfig {
+														@Bean
+														public PasswordEncoder passwordEncoder() {
+															return new BCryptPasswordEncoder();
+														}
+														@Bean
+														public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
+															JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
+															jdbcUserDetailsManager.setDataSource(dataSource);
+															return jdbcUserDetailsManager;
+														}
+														@Bean
+														public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+															http
+																.authorizeRequests()
+																	.antMatchers("/public/**").permitAll()
+																	.antMatchers("/admin/**").hasRole("ADMIN")
+																	.anyRequest().authenticated()
+																	.and()
+																.formLogin()
+																	.and()
+																.logout()
+																	.and()
+																.csrf().disable();
+															return http.build();
+														}
+														@Bean
+														public AuthenticationManager authenticationManagerBean() throws Exception {
+															return super.authenticationManagerBean();
+														}
+													}
+
+			DataSource--security chú ý:
+													Trong Spring Framework, DataSource là một interface (giao diện) được sử dụng để cấu hình và quản lý kết nối đến cơ sở dữ liệu. Nó cung cấp một cách trừu tượng để tạo và
+													giải phóng các kết nối đến cơ sở dữ liệu, đồng thời cho phép ứng dụng truy cập vào các tính năng của cơ sở dữ liệu một cách tiện lợi.
+														Lấy một kết nối đến cơ sở dữ liệu (Connection): Ứng dụng có thể yêu cầu DataSource trả về một kết nối đang mở đến cơ sở dữ liệu để thực hiện các truy vấn.
+														Giải phóng kết nối (Connection Release): 		Sau khi ứng dụng hoàn thành công việc với kết nối, nó có thể giải phóng nó để tái sử dụng bởi các yêu cầu kết nối
+																										sau này.
+													
+													import javax.sql.DataSource;
+													import org.springframework.context.annotation.Bean;
+													import org.springframework.context.annotation.Configuration;
+													import org.springframework.jdbc.datasource.DriverManagerDataSource;
+													@Configuration
+													public class DataSourceConfig {
+														@Bean
+														public DataSource dataSource() {
+															DriverManagerDataSource dataSource = new DriverManagerDataSource();
+															dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+															dataSource.setUrl("jdbc:mysql://localhost:3306/mydatabase");
+															dataSource.setUsername("username");
+															dataSource.setPassword("password");
+															return dataSource;
+														}
+													}		
+			authorizeHttpRequests--security chú ý:
+			
+													Là một phần của cấu hình bảo mật (security configuration) cho ứng dụng web. Nó được sử dụng để xác định cách xác thực (authentication) và phân quyền (authorization) được
+													thực hiện trên các yêu cầu HTTP vào ứng dụng.
+													Phương thức authorizeHttpRequests cho phép bạn xác định các quy tắc (rules) để quyết định ai và khi nào được truy cập vào các tài nguyên, URL hoặc chức năng cụ thể của ứng
+													dụng dựa trên vai trò (roles) của người dùng và các điều kiện khác.
+													
+													@Bean
+													public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+														 http.authorizeHttpRequests(configurer ->
+																 configurer
+																	 .requestMatchers(HttpMethod.GET, "/api/employees").hasRole("EMPLOYEE")
+																	 .requestMatchers(HttpMethod.GET, "/api/employees/**").hasRole("EMPLOYEE")
+																	 .requestMatchers(HttpMethod.POST, "/api/employees").hasRole("MANAGER")
+																	 .requestMatchers(HttpMethod.PUT, "/api/employees").hasRole("MANAGER")
+																	 .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasRole("ADMIN"));																 
+														http.httpBasic(); // use HTTP Basic authentication																 
+														http.csrf().disable(); // disable Cross Site Request Forgery (CSRF)
+														return http.build();
+													}														
+			HTTP Basic Authentication--security chú ý:
+			
+													HTTP Basic Authentication là một phương thức xác thực trong giao thức HTTP được sử dụng để bảo vệ các tài nguyên trên web bằng cách yêu cầu người dùng cung cấp tên người
+													dùng (username) và mật khẩu (password). Phương thức này là một trong những phương thức xác thực cơ bản và dễ dàng triển khai.
+														Khi truy cập vào một tài nguyên yêu cầu xác thực, máy chủ sẽ trả về một mã trạng thái HTTP 401 Unauthorized.
+														Trình duyệt hoặc ứng dụng khách sẽ hiển thị một hộp thoại yêu cầu người dùng nhập tên người dùng và mật khẩu.
+														Người dùng cung cấp thông tin xác thực và gửi lại yêu cầu đến máy chủ.
+														Máy chủ sẽ kiểm tra thông tin đăng nhập được cung cấp. Nếu thông tin xác thực chính xác, máy chủ sẽ phản hồi với mã trạng thái HTTP 200 OK và cung cấp truy cập vào tài
+														nguyên yêu cầu. Ngược lại, nếu thông tin xác thực không chính xác, máy chủ sẽ trả về mã trạng thái HTTP 401 Unauthorized.
+			
+			HTTP Basic Authentication header--security chú ý:
+			
+													HTTP Basic Authentication header là một dạng header của yêu cầu HTTP được sử dụng để chứa thông tin đăng nhập của người dùng khi sử dụng phương thức xác thực HTTP Basic
+													Authentication. Header này chứa tên người dùng và mật khẩu được mã hóa và gửi đến máy chủ để xác thực.
+													Cấu trúc của HTTP Basic Authentication header như sau:
+														Authorization: Basic <credentials>
+																	Authorization: là tên của header, chỉ định rằng yêu cầu HTTP này được xác thực bằng phương thức HTTP Basic Authentication.
+																	Basic: là loại phương thức xác thực, trong trường hợp này là HTTP Basic Authentication.
+																	<credentials>: là chuỗi thông tin xác thực của người dùng, bao gồm tên người dùng và mật khẩu, được mã hóa theo thuật toán Base64.
+													Ví dụ: 	
+																	Authorization: Basic YWxhZGRpbjpvcGVuc2VzYW1l
+																				Authorization là tên của header.
+																				Basic là loại xác thực, cho biết rằng đây là phương thức Basic Authentication.
+																				YWxhZGRpbjpvcGVuc2VzYW1l là tên người dùng (username) và mật khẩu (password) của người dùng, được mã hóa dưới dạng Base64.
+			
+			DaoAuthenticationProvider--security chú ý:
+					
+													- DaoAuthenticationProvider là một lớp trong Spring Security được sử dụng để cung cấp việc xác thực người dùng bằng cách sử dụng một implement của UserDetailsService
+													để lấy thông tin người dùng từ một nguồn dữ liệu, sau đó so sánh mật khẩu đã nhập với mật khẩu lưu trữ để xác định xem người dùng có được phép truy cập hay không.
+													- Đối với mỗi yêu cầu xác thực, DaoAuthenticationProvider sẽ sử dụng UserDetailsService được chỉ định để tìm kiếm thông tin người dùng dựa trên tên người dùng (username).
+													Sau đó, nó sẽ so sánh mật khẩu đã nhập với mật khẩu lưu trữ của người dùng được trả về từ UserDetailsService. Nếu mật khẩu khớp, người dùng được xác thực thành công.
+													
+													Chúng ta tạo bean UserDetailsService và PasswordEncoder để cung cấp thông tin người dùng và mã hóa mật khẩu.
+													Chúng ta cũng tạo một DaoAuthenticationProvider và cấu hình nó để sử dụng UserDetailsService và PasswordEncoder đã tạo.
+													SecurityFilterChain được sử dụng để cấu hình bảo mật cho ứng dụng. Ở đây, chúng ta cấu hình phần tử HttpSecurity để cho phép truy cập vào các url có tiền tố là "/public" mà
+													không cần xác thực, còn lại tất cả các yêu cầu khác phải được xác thực. Chúng ta cũng cấu hình form login và logout.
+													
+													import org.springframework.context.annotation.Bean;
+													import org.springframework.context.annotation.Configuration;
+													import org.springframework.security.authentication.AuthenticationManager;
+													import org.springframework.security.authentication.AuthenticationProvider;
+													import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+													import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+													import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+													import org.springframework.security.config.annotation.web.configuration.SecurityConfigurerAdapter;
+													import org.springframework.security.config.annotation.web.configuration.SecurityFilterChain;
+													import org.springframework.security.core.userdetails.UserDetailsService;
+													import org.springframework.security.crypto.password.PasswordEncoder;
+													import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+													@Configuration
+													@EnableWebSecurity
+													public class SecurityConfig {
+														@Bean
+														public UserDetailsService userDetailsService() {														
+															return new CustomUserDetailsService(); // Trả về implement của UserDetailsService (có thể triển khai bằng cách sử dụng JDBC, LDAP, hoặc các cách khác)
+														}
+														@Bean
+														public PasswordEncoder passwordEncoder() {														
+															return new BCryptPasswordEncoder(); // Sử dụng BCryptPasswordEncoder cho mã hóa mật khẩu
+														}
+														@Bean
+														public AuthenticationProvider authenticationProvider() {														
+															DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(); // Tạo một DaoAuthenticationProvider và cấu hình nó
+															authProvider.setUserDetailsService(userDetailsService());
+															authProvider.setPasswordEncoder(passwordEncoder());
+															return authProvider;
+														}
+														@Bean
+														public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {															
+															http // Cấu hình bảo mật cho ứng dụng
+																.authorizeRequests()
+																	.antMatchers("/public/**").permitAll()
+																	.anyRequest().authenticated()
+																	.and()
+																.formLogin()
+																	.loginPage("/login")
+																	.permitAll()
+																	.and()
+																.logout()
+																	.permitAll();
+															return http.build();
+														}
+													}
+			Bcrypt--security chú ý:
+													- Chú ý mật khẩu dạng thường đến backend chuyển thành bcrypt, nên khi hacker có mật khẩu dạng bcrypt cũng không làm gì, vì nó sẽ lại mã hóa mật khẩu đó sẽ tạo ra mật
+													khẩu khác
+													- Về cơ bản, cách mà bcrypt thực hiện so sánh hai mật khẩu mã hóa là một bí mật thương mại được giữ bởi nhà phát triển thư viện và không được tiết lộ công khai. Điều này
+													giữ cho phương thức so sánh được an toàn và không thể dễ dàng bị tấn công.
+													- Nếu mật khẩu được gửi dưới dạng bcrypt, việc bắt được mật khẩu này không có nghĩa là hacker có thể biết chính xác mật khẩu của bạn là gì. Bcrypt là một thuật toán mã hóa
+													mật khẩu mạnh mẽ và an toàn, được thiết kế để ngăn chặn việc xác định mật khẩu gốc từ mật khẩu đã được mã hóa.
+													- Thuật toán bcrypt sử dụng hàm hash mạnh mẽ và sử dụng salt (muối) để tăng cường bảo mật. Khi một mật khẩu được mã hóa bằng bcrypt, kết quả mã hóa sẽ không thể được quay
+													ngược trở lại mật khẩu gốc một cách dễ dàng. Điều này đảm bảo rằng ngay cả khi mật khẩu bị bắt được, hacker sẽ gặp khó khăn trong việc xác định mật khẩu gốc.
+													- Tuy nhiên, việc sử dụng bcrypt chỉ giúp bảo vệ mật khẩu của bạn nếu bạn đã chọn một mật khẩu mạnh và độ dài đủ lớn. Mật khẩu yếu vẫn có thể bị crack bằng các kỹ thuật
+													tấn công từ điển hoặc tấn công brute force. Để tăng cường bảo mật, luôn nên sử dụng mật khẩu mạnh và hạn chế sử dụng cùng một mật khẩu cho nhiều tài khoản khác nhau.
+													- Nếu một hacker bắt được một mật khẩu được mã hóa bằng bcrypt, họ không thể sử dụng trực tiếp mật khẩu đó để đăng nhập vào các hệ thống khác. Lý do là bcrypt sử dụng một
+													kỹ thuật gọi là salt (muối) khi mã hóa mật khẩu. Salt là một chuỗi ngẫu nhiên được thêm vào trước khi thực hiện quá trình mã hóa, làm cho mỗi mật khẩu được mã hóa trở nên
+													duy nhất, ngay cả khi hai mật khẩu có giá trị giống nhau.
+													- Khi hacker bắt được một mật khẩu được mã hóa bằng bcrypt, họ chỉ có thể thực hiện các cuộc tấn công tương tự để cố gắng tìm ra mật khẩu gốc. Điều này thường là một quá
+													trình tốn kém và tốn thời gian, đặc biệt nếu mật khẩu của bạn là một mật khẩu mạnh.
+													- Tuy nhiên, nếu hacker có thể giải mã mật khẩu bcrypt thành mật khẩu gốc, họ có thể sử dụng mật khẩu đó để thử đăng nhập vào các hệ thống khác nếu bạn tái sử dụng mật khẩu
+													đó. Đây là lý do tại sao quan trọng phải sử dụng một mật khẩu duy nhất và mạnh mẽ cho mỗi tài khoản của bạn.
+
+													import org.springframework.security.crypto.password.PasswordEncoder;
+													import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+													public class BcryptExample {
+														public static void main(String[] args) {
+															// Khởi tạo PasswordEncoder
+															PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+															// Mật khẩu gốc
+															String rawPassword = "myPassword123";
+															// Mã hóa mật khẩu
+															String encodedPassword = passwordEncoder.encode(rawPassword);
+															System.out.println("Mật khẩu đã mã hóa: " + encodedPassword);
+															// Kiểm tra mật khẩu
+															boolean matches = passwordEncoder.matches(rawPassword, encodedPassword);
+															System.out.println("Mật khẩu đúng: " + matches);
+														}
+													}
+		Authentication--security chú ý:
+											
+							- Trong Spring Security, Authentication là một interface đại diện cho thông tin xác thực của một người dùng. Interface này cung cấp các phương thức để truy xuất thông tin
+							liên quan đến quá trình xác thực của người dùng, bao gồm tên người dùng (principal), mật khẩu, các quyền (authorities), và các thông tin bổ sung.
+								getPrincipal(): 							Trả về thông tin người dùng được xác thực (principal), thường là tên đăng nhập hoặc đối tượng đại diện cho người dùng.
+								getCredentials():							Trả về thông tin xác thực của người dùng, thường là mật khẩu hoặc thông tin xác thực khác.
+								getAuthorities(): 							Trả về danh sách các quyền (authorities) của người dùng sau khi xác thực.
+								getDetails(): 								Trả về các thông tin chi tiết về quá trình xác thực. Thông thường, đây là các đối tượng tùy chỉnh được cung cấp bởi ứng dụng.
+								getName(): 									Trả về tên người dùng, tương đương với getPrincipal().toString().
+								isAuthenticated(): 							Kiểm tra xem người dùng đã được xác thực hay chưa.
+								setAuthenticated(boolean authenticated): 	Đánh dấu người dùng là đã được xác thực hoặc chưa được xác thực.
+								
+								import org.springframework.security.core.Authentication;
+								import org.springframework.security.core.context.SecurityContextHolder;
+								public class AuthenticationExample {
+									public static void main(String[] args) {															
+										Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); // Tạo một đối tượng Authentication
+										// Lấy thông tin người dùng được xác thực
+										Object principal = authentication.getPrincipal();
+										System.out.println("Principal: " + principal);
+										// Lấy thông tin xác thực
+										Object credentials = authentication.getCredentials();
+										System.out.println("Credentials: " + credentials);
+										// Lấy danh sách quyền của người dùng
+										System.out.println("Authorities: " + authentication.getAuthorities());
+										// Kiểm tra xem người dùng đã được xác thực hay chưa
+										boolean isAuthenticated = authentication.isAuthenticated();
+										System.out.println("Is authenticated: " + isAuthenticated);
+									}
+								}
+												
+		Jwts--security chú ý:											
+							
+							- Jwts là một lớp tĩnh trong thư viện JWT của Java, thường được sử dụng để tạo ra và xác thực JSON Web Tokens (JWTs). Thư viện này cung cấp các phương thức tiện ích để
+							tạo, phân tích và xác thực các chuỗi JWT.
+							- Trong Spring Security, Jwts thường được sử dụng để tạo ra JWTs trong quá trình xác thực và tạo ra token cho người dùng đã đăng nhập.
+							
+							- Dưới đây là một số phương thức phổ biến của lớp Jwts:
+									
+									builder(): Phương thức này trả về một builder mới để bắt đầu quá trình tạo JWT.
+									parser(): Trả về một parser để phân tích chuỗi JWT.
+									compact() : Hoàn thành quá trình tạo JWT và trả về chuỗi JWT đã ký.
+									setSubject(String subject): Đặt chủ thể (subject) của JWT.
+									setIssuer(String issuer): Đặt người phát hành (issuer) của JWT.
+									setAudience(String audience): Đặt đối tượng mà JWT được tạo cho (audience).
+									setIssuedAt(Date issuedAt): Đặt thời gian phát hành (issued at) của JWT.
+									setExpiration(Date expiration): Đặt thời gian hết hạn của JWT.
+									setId(String id): Đặt ID của JWT.
+									signWith(SignatureAlgorithm alg, Key key): Ký JWT bằng một thuật toán ký và một khóa.
+									serializeToJson(JsonSerializationHelper jsonSerializationHelper): Chuyển đổi JWT thành đối tượng JSON.
+									deserializeFromJson(JsonNode json, DeserializationContext deserializationContext): Chuyển đổi đối tượng JSON thành JWT.
+									
+									import io.jsonwebtoken.Jwts;
+									import io.jsonwebtoken.SignatureAlgorithm;
+									import java.util.Date;
+									public class JwtExample {
+										public static void main(String[] args) {																
+											String secretKey = "mySecretKey"; // Khóa bí mật được sử dụng để ký JWT															
+											long expirationMs = 3600000; // Thời gian hết hạn của JWT (60 phút)
+											// Tạo JWT
+											String jwt = Jwts.builder()
+													.setSubject("user123") // Chủ thể của JWT
+													.setIssuedAt(new Date()) // Thời gian phát hành
+													.setExpiration(new Date(System.currentTimeMillis() + expirationMs)) // Thời gian hết hạn
+													.signWith(SignatureAlgorithm.HS256, secretKey) // Ký JWT với thuật toán HS256 và khóa bí mật
+													.compact();
+
+											// In ra JWT đã tạo
+											System.out.println("Generated JWT: " + jwt);
+										}
+									}
+									
+									Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
+									Jwts.parserBuilder()
+										Mô tả: Đây là phương thức tĩnh của lớp Jwts, bắt đầu việc xây dựng một JwtParser thông qua một JwtParserBuilder.
+										Chức năng: JwtParserBuilder cung cấp các phương thức để cấu hình các tùy chọn phân tích JWT.
+									setSigningKey(key())
+										Mô tả: Phương thức này thiết lập khóa ký (signing key) mà JwtParser sẽ sử dụng để xác thực JWT.
+										Chức năng: key() là phương thức giả định của bạn (không được định nghĩa trong đoạn code). Phương thức này trả về khóa bí mật (secret key) được sử dụng để
+										ký JWT. Khóa này phải giống với khóa được sử dụng khi JWT được tạo ra. Bạn cần đảm bảo rằng khóa này là một byte array hoặc một đối tượng Key (như
+										SecretKey hoặc PublicKey nếu bạn sử dụng thuật toán không đối xứng).
+										Chú ý: Nếu key() trả về một chuỗi, bạn có thể cần chuyển nó thành byte array như key().getBytes() tùy thuộc vào cách bạn cấu hình JwtParser.
+									build()
+										Mô tả: Phương thức này hoàn tất quá trình xây dựng và trả về một đối tượng JwtParser đã được cấu hình.
+										Chức năng: build() tạo ra một JwtParser mà bạn có thể sử dụng để phân tích và xác thực JWT.
+									parse(authToken)
+										Mô tả: Phương thức parse của JwtParser nhận vào một JWT dưới dạng chuỗi (authToken) và cố gắng phân tích và xác thực nó.
+										Chức năng: Nếu token hợp lệ và được ký bằng khóa đúng, parse sẽ trả về một đối tượng Jwt (hoặc Claims nếu bạn dùng parseClaimsJws). Nếu token không hợp lệ hoặc
+										không thể xác thực được (do khóa sai hoặc token đã bị sửa đổi), nó sẽ ném ra một ngoại lệ như JwtException.
+																
+		AuthenticationManager--security chú ý:
+
+			- Trong Spring Security, AuthenticationManager là một thành phần cốt lõi chịu trách nhiệm xử lý xác thực (authentication). Nó có nhiệm vụ kiểm tra thông tin xác thực (credentials)
+			do người dùng cung cấp (thông qua form đăng nhập, HTTP Basic, hoặc bất kỳ cơ chế nào khác) và quyết định xem người dùng có được phép truy cập vào hệ thống hay không.
+			- Vai trò của AuthenticationManager:
+				
+				AuthenticationManager được sử dụng để xác minh danh tính người dùng. Nó nhận vào một đối tượng Authentication chứa thông tin đăng nhập của người dùng (ví dụ: tên đăng nhập và
+				mật khẩu), sau đó kiểm tra thông tin này bằng cách sử dụng các bộ xử lý xác thực (authentication providers).
+				
+				Nếu thông tin xác thực là hợp lệ, AuthenticationManager sẽ trả về một đối tượng Authentication đã được xác thực (authentication token). Nếu không, nó sẽ ném ra một ngoại
+				lệ, thường là AuthenticationException.
+
+			- Sử dụng AuthenticationManager:
+			
+				Bạn thường không tạo thủ công AuthenticationManager, thay vào đó, Spring Security cung cấp một cách tự động để cấu hình nó trong quá trình thiết lập bảo mật.
+				
+				import org.springframework.context.annotation.Bean;
+				import org.springframework.security.authentication.AuthenticationManager;
+				import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+				@Configuration
+				public class SecurityConfig {
+					@Bean
+					public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+						return authenticationConfiguration.getAuthenticationManager();
+					}
+				}
+				Trong ví dụ trên, AuthenticationConfiguration là một thành phần của Spring Security giúp lấy AuthenticationManager từ cấu hình bảo mật hiện tại.
+				
+			- Quá trình xác thực với AuthenticationManager:
+			
+				Khi AuthenticationManager nhận một yêu cầu xác thực, nó sẽ lần lượt chuyển thông tin này đến các AuthenticationProvider mà nó quản lý. Mỗi AuthenticationProvider sẽ cố gắng xác thực
+				yêu cầu. Nếu không có AuthenticationProvider nào thành công, quá trình xác thực sẽ thất bại.
+				
+				Ví dụ về quá trình xác thực:
+				
+					Người dùng gửi thông tin đăng nhập (username và password).
+					AuthenticationManager nhận thông tin này và gọi đến các AuthenticationProvider.
+					Nếu một AuthenticationProvider có thể xác thực, nó trả về một đối tượng Authentication đã xác thực, nếu không, nó ném ra ngoại lệ BadCredentialsException hoặc các ngoại lệ khác.
+
+			- Các thành phần liên quan đến AuthenticationManager:
+			
+				Authentication: Đối tượng chứa thông tin đăng nhập người dùng, có thể là tên đăng nhập, mật khẩu, mã OTP, token, v.v.
+				
+				AuthenticationProvider: Là thành phần thực hiện logic xác thực. Một AuthenticationManager có thể sử dụng nhiều AuthenticationProvider khác nhau để xác thực người dùng.
+				
+				UserDetailsService: Cung cấp thông tin người dùng cho AuthenticationProvider để so sánh và kiểm tra thông tin xác thực.
+				
+			- Cấu hình tuỳ chỉnh AuthenticationManager:
+			
+				Bạn có thể cấu hình các AuthenticationProvider cho AuthenticationManager bằng cách thêm các provider vào cấu hình bảo mật.
+				
+				import org.springframework.context.annotation.Bean;
+				import org.springframework.context.annotation.Configuration;
+				import org.springframework.security.authentication.AuthenticationManager;
+				import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+				import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+				import org.springframework.security.crypto.password.PasswordEncoder;
+				import org.springframework.security.provisioning.UserDetailsManager;
+				@Configuration
+				public class SecurityConfig {
+					private final UserDetailsManager userDetailsManager;
+					private final PasswordEncoder passwordEncoder;
+					public SecurityConfig(UserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
+						this.userDetailsManager = userDetailsManager;
+						this.passwordEncoder = passwordEncoder;
+					}
+					@Bean
+					public AuthenticationManager authenticationManager(AuthenticationManagerBuilder auth) throws Exception {
+						DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+						authProvider.setUserDetailsService(userDetailsManager);
+						authProvider.setPasswordEncoder(passwordEncoder);
+						return auth.authenticationProvider(authProvider).build();
+					}
+				}
+				Trong ví dụ trên, chúng ta cấu hình một DaoAuthenticationProvider với UserDetailsService và PasswordEncoder, sau đó thêm nó vào AuthenticationManager.
+				
+				private final AuthenticationManager authenticationManager;
+				Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
+				authenticate() là phương thức của AuthenticationManager, được sử dụng để xác thực thông tin người dùng.
+				Phương thức này nhận một đối tượng Authentication (ở đây là UsernamePasswordAuthenticationToken) và tiến hành kiểm tra xem thông tin đăng nhập có hợp lệ không.
+				Nếu thông tin hợp lệ, nó trả về đối tượng Authentication đã được xác thực.
+				Nếu thông tin không hợp lệ, phương thức sẽ ném ra một ngoại lệ xác thực, chẳng hạn như BadCredentialsException.
+
+		FilterChain--security chú ý:
+		
+			- Trong Spring Framework, FilterChain là một phần của cơ chế lọc (filtering) của Servlet API, được sử dụng để xử lý các yêu cầu HTTP trước khi chúng đến với các servlet hoặc các
+			thành phần xử lý khác trong ứng dụng web của bạn. Spring cung cấp các công cụ và tiện ích để dễ dàng tích hợp và làm việc với FilterChain.
+			- Filter: Là một đối tượng có nhiệm vụ thực hiện các tác vụ trước khi yêu cầu HTTP được chuyển tiếp đến servlet hoặc sau khi servlet xử lý xong yêu cầu.
+			- FilterChain: Là một đối tượng giúp truyền yêu cầu HTTP qua chuỗi các filter để xử lý. FilterChain có phương thức doFilter() để chuyển tiếp yêu cầu đến filter tiếp theo trong chuỗi.
+			- Đăng ký Filter: Bạn cần phải đăng ký filter trong ứng dụng của mình để Spring biết filter nào cần sử dụng và khi nào sử dụng.
+			- Thứ tự Filter: Thứ tự đăng ký filter trong cấu hình có thể ảnh hưởng đến cách yêu cầu HTTP được xử lý.
+			- Cách hoạt động của FilterChain:
+			
+				Khi một yêu cầu HTTP đến: Nó được gửi đến các filter trong ứng dụng theo thứ tự đã được định nghĩa.
+				Mỗi filter có thể thực hiện các thao tác như kiểm tra quyền truy cập, ghi log, thay đổi yêu cầu/đáp ứng, v.v.
+				Sau khi filter xử lý xong: Yêu cầu được chuyển tiếp đến filter tiếp theo thông qua phương thức doFilter() của FilterChain.
+				Cuối cùng: Yêu cầu sẽ đến servlet để xử lý chính, hoặc nếu filter đã chấm dứt quá trình xử lý thì có thể gửi phản hồi ngay lập tức.
+				
+			- Cấu hình Filter trong Spring:
+			
+				Bạn có thể cấu hình Filter trong Spring bằng cách sử dụng các lớp Java Configuration hoặc XML Configuration.
+				
+					Tạo lớp Filter:
+				
+						import javax.servlet.Filter;
+						import javax.servlet.FilterChain;
+						import javax.servlet.FilterConfig;
+						import javax.servlet.ServletException;
+						import javax.servlet.ServletRequest;
+						import javax.servlet.ServletResponse;
+						import java.io.IOException;
+						public class MyCustomFilter implements Filter {
+							@Override
+							public void init(FilterConfig filterConfig) throws ServletException {
+								// Initialization code
+							}
+							@Override
+							public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+									throws IOException, ServletException {
+								// Pre-processing code
+								System.out.println("Before processing request");
+								// Continue to next filter or servlet
+								chain.doFilter(request, response);
+								// Post-processing code
+								System.out.println("After processing request");
+							}
+							@Override
+							public void destroy() {
+								// Cleanup code
+							}
+						}
+						
+					Đăng ký Filter trong cấu hình Spring:
+					
+						import org.springframework.boot.web.servlet.FilterRegistrationBean;
+						import org.springframework.context.annotation.Bean;
+						import org.springframework.context.annotation.Configuration;
+						@Configuration
+						public class FilterConfig {
+							@Bean
+							public FilterRegistrationBean<MyCustomFilter> loggingFilter() {
+								FilterRegistrationBean<MyCustomFilter> registrationBean = new FilterRegistrationBean<>();
+								registrationBean.setFilter(new MyCustomFilter());
+								registrationBean.addUrlPatterns("/api/*"); // Apply filter to specific URL patterns
+								return registrationBean;
+							}
+						}
+
+		
+		Phân quyền tập trung hay phân
+		quyền bằng annotation--Security:
+													
+													Tập trung cấu hình phần quyền trong phương thức protected void configure(HttpSecurity http) throws Exception sử dụng antMatchers hay mvcMatchers cho từng đường dẫn:
+														
+														http.authorizeRequests()
+															.antMatchers("/admin").hasAuthority("ADMIN")
+															.antMatchers("/free").hasAnyAuthority("ADMIN", "USER", "AUTHOR", "EDITOR")
+															.antMatchers("/author").hasAnyAuthority("AUTHOR")
+															.antMatchers("/user").hasAnyAuthority("USER")
+															.antMatchers("/editor").hasAnyAuthority("EDITOR")
+													
+													Dùng annotation để phân quyền tại từng phương thức hoặc controller:
+															
+															@GetMapping("/admin")
+															@PreAuthorize("hasAuthority('ADMIN')")
+															public String showAdmin() {
+																return "admin";
+															}
+
+															@PreAuthorize("hasAuthority('USER')")
+															@GetMapping("/user")
+															public String showUserPage() {
+																return "user";
+															}
+													Thật tuyệt là chúng ta có thể kết hợp cả 2 phương pháp này. Những logic cấu hình authentication và những yêu cầu bảo mật chung như cần yêu cầu đăng nhập với request đến
+													đường dẫn /api tôi luôn để trong hàm protected void configure(HttpSecurity http) throws Exception. Tôi chỉ dùng annotation phân quyền khi quy định đó dành riêng cho phương
+													thức đó mà không áp dụng được cho phương thức khác.
+		Expression-Based Access Control--Security:
+													
+													hasRole(role): Kiểm tra xem người dùng hiện tại có vai trò cụ thể không.
+													hasAnyRole(role1, role2, ...): Kiểm tra xem người dùng hiện tại có ít nhất một trong các vai trò cụ thể không.
+													hasAuthority(authority): Kiểm tra xem người dùng hiện tại có quyền cụ thể không.
+													hasAnyAuthority(authority1, authority2, ...): Kiểm tra xem người dùng hiện tại có ít nhất một trong các quyền cụ thể không.
+													principal: Đại diện cho người dùng hiện tại.
+													authentication: Đại diện cho thông tin xác thực hiện tại, bao gồm người dùng và quyền truy cập của họ.
+													permitAll: Cho phép tất cả các yêu cầu được truy cập mà không cần xác thực.
+													denyAll: Từ chối tất cả các yêu cầu.
+													anonymous: Kiểm tra xem người dùng có phải là người dùng ẩn danh không.
+													rememberMe: Kiểm tra xem người dùng có đang xác thực bằng cơ chế ghi nhớ không.
+													isAuthenticated(): Kiểm tra xem người dùng đã được xác thực hay chưa.
+													isFullyAuthenticated(): Kiểm tra xem người dùng đã được xác thực một cách đầy đủ hay không (không phải là xác thực bằng ghi nhớ).
+													hasIpAddress(ipAddressExpression): Kiểm tra xem địa chỉ IP của yêu cầu có khớp với biểu thức IP đã chỉ định không.
+													hasPermission(target, permission): Kiểm tra xem người dùng có quyền cụ thể đối với một mục tiêu cụ thể không.
+													
+		Phân quyền ở cấp độ Controller--Security:
+													@RestController
+													@RequestMapping("/v2/api")
+													@PreAuthorize("isAuthenticated()")
+													public class APIControllerV2 {
+													 ...
+													}
+		Phần quyền ở cấp độ phương thức--Security:
+			@PreAuthorize:
+													Kiểm tra trước khi chạy phương thức
+													
+													Yêu cầu đăng nhập isAuthenticated()
+													Giá trị biến đường dẫn {username} bằng với tên đăng nhập hiện thời #username == authentication.principal.username. Chú ý authentication.principal là một biến mặc định mà
+													Spring Security cung cấp để lấy thông tin về người dùng đang đăng nhập
+													
+													@GetMapping("/user/{username}") // Yêu cầu đăng nhập isAuthenticated()
+													@PreAuthorize("isAuthenticated() and #username == authentication.principal.username")
+													public String getMyRoles(@PathVariable("username") String username) {
+															SecurityContext securityContext = SecurityContextHolder.getContext();
+															return securityContext.getAuthentication().getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+													}
+													@GetMapping("/admin")
+													@PreAuthorize("hasAuthority('ADMIN')")
+													public String showAdmin() {
+														return "admin";
+													}
+													
+			@PostAuthorize:
+													Nếu như @PreAuthorize kiểm tra quyền trước khi method thực thi thì có những tình huống quyết định cho phép truy cập tiếp hay không chỉ sau khi phương thức được thực thi. Ví
+													dụ GET /post/{id} sẽ trả về bài viết. Tôi muốn rằng chỉ tác giả của chính bài viết đó mới có thể được xem để sửa. Spring Boot đã có user.id đang đăng nhập, nhưng để biết
+													tác giả của bài viết thì cần phải lấy bài viết đó từ CSDL ra đã. @PostAuthorize
+													
+													@PreAuthorize("isAuthenticated()") //Phải đảm bảo là user login để có principal.id
+													@PostAuthorize("returnObject.user.id == authentication.principal.id")  //chỉ trả bài viết nếu user.id == id của login user
+													@GetMapping("/post/{id}")
+													public Post showEditPostForm(@PathVariable("id") long id) {
+														Optional<Post> oPost = postRepo.findById(id);
+														if (oPost.isPresent()) {
+															return oPost.get();
+														} else {
+															throw new RuntimeException("Cannot find post with id " + id);
+														}
+													}
+													
+			@PostFilter:
+													Để lọc dữ liệu trước khi trả về, có 2 cách: để lập trình viên tự viết code trong phương thức hoặc cấu hình bằng annotation @PostFilter.
+													Trong ví dụ này, phương thức getPostsOfAnUser() sẽ trả về một danh sách tất cả bài viết. Tôi muốn lọc ra chỉ trả về những bài viết do chính user đang login
+													authentication.principal viết mà thôi.
+													
+													@PreAuthorize("isAuthenticated()")
+													@PostFilter("filterObject.user.id == authentication.principal.id")
+													@GetMapping("/post")
+													public List<Post> getPostsOfAnUser() {
+														return postRepo.findAll();
+													}
+													
+			@PreFilter:
+													@Prefilter lại cho phép lọc dữ liệu truyền vào phương thức trước khi thực thi.
+		pom.xml--Security:										
+															<dependency>
+																<groupId>org.springframework.boot</groupId>
+																<artifactId>spring-boot-starter-security</artifactId>
+															</dependency>
+													
+																	spring.security.user.name=scott
+																	spring.security.user.password=test123
+		Custom Tables--Security:											
+																	
+																	@Bean
+																	public UserDetailsManager userDetailsManager(DataSource dataSource) {
+																		JdbcUserDetailsManager theUserDetailsManager = new JdbcUserDetailsManager(dataSource);																						 
+																		theUserDetailsManager.setUsersByUsernameQuery("select user_id, pw, active from members where user_id=?");
+																		theUserDetailsManager.setAuthoritiesByUsernameQuery("select user_id, role from roles where user_id=?");																						 
+																		return theUserDetailsManager;
+																	}
+																	
+		Basic Configuration--Security:	
+																	
+																	@Configuration
+																	public class DemoSecurityConfig {
+																		@Bean
+																		public InMemoryUserDetailsManager userDetailsManager() {
+																			UserDetails john = User.builder()
+																								   .username("john")
+																								   .password("{noop}test123")
+																								   .roles("EMPLOYEE")
+																								   .build();
+																			UserDetails mary = User.builder()
+																								   .username("mary")
+																								   .password("{noop}test123")
+																								   .roles("EMPLOYEE", "MANAGER")
+																								   .build();
+																		UserDetails susan = User.builder()
+																				...
+																			return new InMemoryUserDetailsManager(john, mary, susan);
+																		}
+																	}
+																	
+		Restrict URLs based on Roles--Security:
+																	@Bean
+																	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+																		 http.authorizeHttpRequests(configurer ->
+																				 configurer
+																					 .requestMatchers(HttpMethod.GET, "/api/employees").hasRole("EMPLOYEE")
+																					 .requestMatchers(HttpMethod.GET, "/api/employees/**").hasRole("EMPLOYEE")
+																					 .requestMatchers(HttpMethod.POST, "/api/employees").hasRole("MANAGER")
+																					 .requestMatchers(HttpMethod.PUT, "/api/employees").hasRole("MANAGER")
+																					 .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasRole("ADMIN"));																 
+																		http.httpBasic(); // use HTTP Basic authentication																 
+																		http.csrf().disable(); // disable Cross Site Request Forgery (CSRF)
+																		return http.build();
+																	}
+		JDBC Authentication - Plain Text--Security:			
+																	
+																	<dependency>
+																		<groupId>com.mysql</groupId>
+																		<artifactId>mysql-connector-j</artifactId>
+																		<scope>runtime</scope>
+																	</dependency>
+																	
+																	spring.datasource.url=jdbc:mysql://localhost:3306/employee_directory
+																	spring.datasource.username=springstudent
+																	spring.datasource.password=springstudent
+		
+																	@Configuration
+																	public class DemoSecurityConfig {
+																		 @Bean
+																		 public UserDetailsManager userDetailsManager(DataSource dataSource) {
+																			 return new JdbcUserDetailsManager(dataSource);
+																		 }
+																		 …
+																	}
+																	
+		UsernamePasswordAuthenticationToken--Security:
+		
+								- UsernamePasswordAuthenticationToken là một loại đối tượng được sử dụng để đại diện cho thông tin xác thực của người dùng dựa trên tên người dùng và mật
+								khẩu. Đối tượng này được sử dụng khi người dùng cung cấp thông tin đăng nhập, chẳng hạn khi họ nhập tên người dùng và mật khẩu vào một form đăng nhập.
+								- UsernamePasswordAuthenticationToken kế thừa từ lớp AbstractAuthenticationToken, và nó chứa thông tin về tên người dùng và mật khẩu mà người dùng cung cấp
+								khi đăng nhập. Thông thường, sau khi người dùng cung cấp thông tin đăng nhập, UsernamePasswordAuthenticationToken sẽ được tạo ra và chuyển đến
+								AuthenticationManager để xác thực.
+								- Sau khi xác thực thành công, UsernamePasswordAuthenticationToken có thể được chuyển đến SecurityContextHolder để lưu trữ thông tin về người dùng đã đăng
+								nhập, giúp Spring Security tiếp tục quản lý phiên làm việc và kiểm soát truy cập của người dùng trong ứng dụng.
+								- Các dạng constructor của UsernamePasswordAuthenticationToken:
+								
+									Constructor cơ bản (dùng cho xác thực chưa hoàn tất): Constructor này được sử dụng khi tạo một token cho quá trình xác thực (ví dụ: trước khi người dùng đăng nhập).
+										
+										public UsernamePasswordAuthenticationToken(Object principal, Object credentials)
+										
+											principal: Thông thường là tên đăng nhập hoặc đối tượng người dùng (có thể là String, UserDetails, v.v.).
+											credentials: Mật khẩu hoặc thông tin xác thực khác (có thể là String).
+											
+										UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("username", "password");
+										
+									Constructor có thêm quyền (dùng sau khi xác thực hoàn tất): Constructor này được sử dụng khi xác thực đã hoàn tất và bạn muốn cung cấp thông tin xác thực
+									cùng với các quyền của người dùng.
+									
+										public UsernamePasswordAuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities)
+										
+											principal: Đối tượng đại diện cho người dùng (có thể là String, UserDetails, v.v.).
+											credentials: Mật khẩu hoặc thông tin xác thực.
+											authorities: Danh sách các quyền của người dùng (danh sách các đối tượng triển khai GrantedAuthority).
+											
+										Collection<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+										UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+										
+									Constructor cho đối tượng được xác thực và không cần mật khẩu (credentials null): Khi dùng constructor này và giá trị credentials là null, nó thường biểu thị rằng quá
+									trình xác thực đã hoàn tất, và mật khẩu không còn cần thiết (ví dụ: khi khôi phục người dùng từ token JWT).
+									
+										public UsernamePasswordAuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities)
+
+										UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+										
+								- UsernamePasswordAuthenticationToken có các constructor cho hai trường hợp chính:
+								
+									Trước khi xác thực: Chỉ có tên đăng nhập (principal) và mật khẩu (credentials).
+									Sau khi xác thực: Có thêm quyền (authorities), và thường không cần mật khẩu nữa (credentials null).
+									
+								- setDetails() là một phương thức của lớp AbstractAuthenticationToken, mà UsernamePasswordAuthenticationToken kế thừa. Phương thức này được sử dụng để thiết lập các chi
+								tiết bổ sung về yêu cầu xác thực (authentication details) trong đối tượng xác thực (authentication object).
+								
+									public void setDetails(Object details)
+									
+										details: Đây là một đối tượng có thể chứa thông tin chi tiết liên quan đến yêu cầu hiện tại. Đối tượng này thường là một thể hiện của WebAuthenticationDetails,
+										chứa các thông tin như địa chỉ IP của người dùng và chi tiết về phiên làm việc (session).
+										
+									Ví dụ:
+									
+										authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));										
+										new WebAuthenticationDetailsSource().buildDetails(request): Tạo ra một đối tượng WebAuthenticationDetails, chứa các thông tin chi tiết từ yêu cầu HTTP như
+										địa chỉ IP, thông tin phiên (session), v.v.
+									
+								import org.springframework.security.authentication.AuthenticationManager;
+								import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+								import org.springframework.security.core.Authentication;
+								import org.springframework.security.core.context.SecurityContextHolder;
+								import org.springframework.security.core.userdetails.UserDetails;
+								import org.springframework.stereotype.Controller;
+								import org.springframework.web.bind.annotation.PostMapping;
+								import org.springframework.web.bind.annotation.RequestBody;
+								import org.springframework.web.bind.annotation.ResponseBody;
+								@Controller
+								public class LoginController {
+									// authenticationManager được tiêm vào controller thông qua dependency injection. Đây là một bean được Spring Security cung cấp mặc định.
+									private final AuthenticationManager authenticationManager;
+									public LoginController(AuthenticationManager authenticationManager) {
+										this.authenticationManager = authenticationManager;
+									}
+									@PostMapping("/login")
+									@ResponseBody
+									public String login(@RequestBody LoginRequest loginRequest) {
+										// Tạo một đối tượng UsernamePasswordAuthenticationToken từ dữ liệu đăng nhập
+										UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+												loginRequest.getUsername(), loginRequest.getPassword());																			
+										Authentication authentication = authenticationManager.authenticate(authenticationToken); // Xác thực thông tin đăng nhập																		
+										SecurityContextHolder.getContext().setAuthentication(authentication); // Lưu thông tin về người dùng đã đăng nhập vào SecurityContextHolder
+										return "Đăng nhập thành công!";
+									}
+								}
+								 
+								protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+									String jwt = parseJwt(request);
+									if(serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwt).isEmpty()){//check token in blacklist
+									  if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+										String id = jwtUtils.getUserIdFromJwtToken(jwt);
+										UserDetails userDetails = employeeDetailsService.loadUserById(id);
+										UsernamePasswordAuthenticationToken authentication =
+												new UsernamePasswordAuthenticationToken(
+														userDetails,
+														null,
+														userDetails.getAuthorities());
+										authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request)); // setDetails: Gắn các chi tiết của yêu cầu HTTP (chẳng hạn như địa chỉ IP hoặc thông tin
+																															   // bổ sung) vào đối tượng xác thực.
+										SecurityContextHolder.getContext().setAuthentication(authentication);
+									  }
+									}
+									filterChain.doFilter(request, response);
+								}
+								private String parseJwt(HttpServletRequest request) {
+									String headerAuth = request.getHeader("Authorization");
+									if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+									  return headerAuth.substring(7);
+									}
+									return null;
+								}									
+		
+	Login--Security:
+								@PostMapping("/signin")
+								public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+									Authentication authentication = authenticationManager.authenticate(
+																							new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
+									SecurityContextHolder.getContext().setAuthentication(authentication);
+									String jwt = jwtUtils.generateJwtToken(authentication);
+									EmployeeDetailsImpl userDetails = (EmployeeDetailsImpl) authentication.getPrincipal();
+									LoginUserInfo userInfo = LoginUserInfo.builder()
+																		  .id(userDetails.getId())
+																		  .username(userDetails.getUsername())
+																		  .email(userDetails.getEmail())
+																		  .listRole(userDetails.getRole())
+																		  .avatar(userDetails.getAvatar())
+																		  .build();
+									return ResponseEntity.ok(new JwtResponse(jwt, userInfo, userDetails.getPermissionMap()));
+								}
+								
+								public String generateJwtToken(Authentication authentication) {
+									EmployeeDetailsImpl userPrincipal = (EmployeeDetailsImpl) authentication.getPrincipal();
+									return Jwts.builder()
+											   .setSubject((userPrincipal.getId()))
+											   .setIssuedAt(new Date())
+											   .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+											   .signWith(key(), SignatureAlgorithm.HS256)
+											   .compact();
+								}
+								
+	Logout--Security:
+	
+								@PostMapping("/logout")
+								public ResponseEntity<?> logout(HttpServletRequest request) {
+									String jwtToken = parseJwt(request);
+									System.out.println("jwt token: " + jwtToken);
+									if (jwtToken == null || jwtToken.isEmpty()) {
+										return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Not logged in yet!");
+									} else {
+										if (serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwtToken).isEmpty()) {
+											//Save logout access token to blacklist
+											LogoutAccessToken token = LogoutAccessToken.builder()
+													.token(jwtToken)
+													.status(1) //blacklist token
+													.build();
+											serviceLifecycle.requestLogoutAccessTokenService().register(token);
+										}
+										return ResponseEntity.ok().body("Logout successfully!");
+									}
+								}
+								
+								private String parseJwt(HttpServletRequest request) {
+									String headerAuth = request.getHeader("Authorization");
+									if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+										return headerAuth.substring(7);
+									}
+									return null;
+								}
+																	
+	Forgot Password--Security:
+																	
+								@PostMapping("/forgot-password")
+								public ResponseEntity<?> ForgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+									M00Employee employee = serviceLifecycle.requestM00EmployeeService().getEmployeeByEmail(forgotPasswordRequest.getEmail());
+									if(employee == null){
+										ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
+										forgotPasswordResponse.setError(true);
+										forgotPasswordResponse.setMessage("Email is not exists on system. Please check again!");
+										return ResponseEntity.ok(forgotPasswordResponse);
+									}else{
+										UUID uuid = UUID. randomUUID();
+										Pme00PasswordToken pme00PasswordToken = getPme00PasswordToken(employee, uuid);
+										String resetHtmlTemplate = LoadTemplate();
+										Utils.MAIL_SMTP_SERVER = mailConfig.getSmtpHostServer();
+										Utils.MAIL_SMTP_SERVER_PORT = mailConfig.getSmtpHostServerPort();
+										Utils.MAIL_SMTP_EMAIL_ID = mailConfig.getEmailId();
+										Utils.MAIL_SMTP_EMAIL_ID_ALIAS = mailConfig.getEmailName();
+										Utils.MAIL_SMTP_EMAIL_USERNAME = mailConfig.getUserName();
+										Utils.MAIL_SMTP_EMAIL_PASSWORD = mailConfig.getPassword();
+										Utils.MAIL_FRONT_END_URL = mailConfig.getFrontEndUrl();
+										Map<String, String> map = new HashMap<String, String>();
+										map.put("url", mailConfig.getFrontEndUrl());
+										map.put("token",uuid.toString());
+										for (Map.Entry<String, String> entry : map.entrySet()) {
+											resetHtmlTemplate = resetHtmlTemplate.replace("${" + entry.getKey() + "}", entry.getValue());
+										}
+										if(serviceLifecycle.requestLevel2Service().sendMail(employee.getMail(),mailConfig.getSubject(),resetHtmlTemplate)){
+											serviceLifecycle.requestPasswordService().register(pme00PasswordToken);
+											ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
+											forgotPasswordResponse.setError(false);
+											forgotPasswordResponse.setMessage("Please check email to process next step");
+											return ResponseEntity.ok(forgotPasswordResponse);
+										}else {
+											ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
+											forgotPasswordResponse.setError(true);
+											forgotPasswordResponse.setMessage("Have Error when send email. Please contact with administrator");
+											return ResponseEntity.ok(forgotPasswordResponse);
+										}
+									}
+								}																	
+								public class ForgotPasswordResponse extends  MessageResponse {
+								  private boolean error;
+								}																	
+								public class MessageResponse {
+								  private String message;
+								}
+								
+								@NotNull
+								private static Pme00PasswordToken getPme00PasswordToken(M00Employee employee, UUID uuid) {
+									Pme00PasswordToken pme00PasswordToken=new Pme00PasswordToken();
+									pme00PasswordToken.setEmpId(employee.getEmpId());
+									pme00PasswordToken.setToken(uuid.toString());
+									pme00PasswordToken.setCreateAt(new Date());
+									pme00PasswordToken.setCreateBy("0");
+									pme00PasswordToken.setUpdateAt(new Date());
+									pme00PasswordToken.setUpdateBy("0");
+									long currentTimeInMillis = System.currentTimeMillis();
+									Calendar calendar = Calendar.getInstance();
+									calendar.setTimeInMillis(currentTimeInMillis);
+									calendar.add(Calendar.HOUR, Utils.MAX_EXPIRE_TOKEN);
+									pme00PasswordToken.setExpire(calendar.getTimeInMillis());
+									return pme00PasswordToken;
+								}
+								
+								private String LoadTemplate() {
+									try {
+										return new String(Files.readAllBytes(ResourceUtils.getFile("classpath:password-reset.html").toPath()));
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									return "";
+								}
+																	
+	Reset Password--Security:
+																	
+								@CrossOrigin
+								@GetMapping("/reset-password/{token}")
+								public ResponseEntity<?> ResetPasswordGetToken(@PathVariable("token") String token) {
+									//String s = LoadTemplate();
+
+									ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
+									Pme00PasswordToken pme00PasswordToken = serviceLifecycle.requestPasswordService().FindPasswordTokenByToken(token);
+									if(pme00PasswordToken==null){
+										resetPasswordResponse.setError(true);
+										resetPasswordResponse.setMessage("Token is not exists on system. Please check again!");
+										return ResponseEntity.ok(resetPasswordResponse);
+									}else {
+										if(pme00PasswordToken.IsExpired()){
+											resetPasswordResponse.setError(true);
+											resetPasswordResponse.setMessage("Token is expired!");
+										}else{
+											resetPasswordResponse.setError(false);
+											resetPasswordResponse.setMessage("");
+											resetPasswordResponse.setEmpId(pme00PasswordToken.getEmpId());
+										}
+										return ResponseEntity.ok(resetPasswordResponse);
+									}
+								}
+								@PostMapping("/reset-password/{token}")
+								public ResponseEntity<?> ResetPassword(@Valid @PathVariable("token") String token,
+																	   @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+									ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
+									Pme00PasswordToken pme00PasswordToken = serviceLifecycle.requestPasswordService().FindPasswordTokenByToken(token);
+
+									M00Employee m00Employee = serviceLifecycle.requestM00EmployeeService().find(pme00PasswordToken.getEmpId());
+									if (m00Employee == null) {
+										resetPasswordResponse.setError(true);
+										resetPasswordResponse.setMessage("Token is not exists on system. Please check again!");
+										return ResponseEntity.ok(resetPasswordResponse);
+									} else {
+										if (pme00PasswordToken.IsExpired()) {
+											resetPasswordResponse.setError(true);
+											resetPasswordResponse.setMessage("Token is expired!");
+										} else {
+											if(!resetPasswordRequest.getPassword().equals(resetPasswordRequest.getConfirmPassword())){
+												resetPasswordResponse.setError(true);
+												resetPasswordResponse.setMessage("Password is not match!");
+											}else {
+												String passwordToMd5Hex = DigestUtils
+														.md5Hex(resetPasswordRequest.getPassword());
+												m00Employee.setPassword(passwordToMd5Hex);
+												M00Employee updateM00Employee = serviceLifecycle.requestM00EmployeeService().modify(m00Employee);
+
+												resetPasswordResponse.setError(false);
+												resetPasswordResponse.setMessage("Password is changed! You can login again, now!");
+											}
+										}
+										return ResponseEntity.ok(resetPasswordResponse);
+									}
+
+								}
+								
+								public class ResetPasswordResponse extends  MessageResponse {
+								  private int passwordTokenId;
+								  private boolean error;
+								  private String EmpId;
+								}
+								
+	Another--Security:
+								package com.poscodx.odc.ampro015.config.jwt;
+								import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
+								import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
+								import org.springframework.beans.factory.annotation.Autowired;
+								import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+								import org.springframework.security.core.context.SecurityContextHolder;
+								import org.springframework.security.core.userdetails.UserDetails;
+								import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+								import org.springframework.stereotype.Component;
+								import org.springframework.util.StringUtils;
+								import org.springframework.web.filter.OncePerRequestFilter;
+								import javax.servlet.FilterChain;
+								import javax.servlet.ServletException;
+								import javax.servlet.http.HttpServletRequest;
+								import javax.servlet.http.HttpServletResponse;
+								import java.io.IOException;
+								@Component
+								public class AuthTokenFilter extends OncePerRequestFilter {
+								  @Autowired
+								  private JwtUtils jwtUtils;
+								  @Autowired
+								  private ServiceLifecycle serviceLifecycle;
+								  @Autowired
+								  private EmployeeDetailsServiceImpl employeeDetailsService;
+								  @Override
+								  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+									String jwt = parseJwt(request);
+									if(serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwt).isEmpty()){//check token in blacklist
+									  if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+										String id = jwtUtils.getUserIdFromJwtToken(jwt);
+										UserDetails userDetails = employeeDetailsService.loadUserById(id);
+										UsernamePasswordAuthenticationToken authentication =
+												new UsernamePasswordAuthenticationToken(
+														userDetails,
+														null,
+														userDetails.getAuthorities());
+										authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+										SecurityContextHolder.getContext().setAuthentication(authentication);
+									  }
+									}
+									filterChain.doFilter(request, response);
+								  }
+								  private String parseJwt(HttpServletRequest request) {
+									String headerAuth = request.getHeader("Authorization");
+									if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+									  return headerAuth.substring(7);
+									}
+									return null;
+								  }
+								}
+								
+								package com.poscodx.odc.ampro015.config.jwt;
+								import com.poscodx.odc.ampro015.config.services.EmployeeDetailsImpl;
+								import io.jsonwebtoken.*;
+								import io.jsonwebtoken.io.Decoders;
+								import io.jsonwebtoken.security.Keys;
+								import org.springframework.beans.factory.annotation.Value;
+								import org.springframework.security.core.Authentication;
+								import org.springframework.stereotype.Component;
+								import java.security.Key;
+								import java.util.Date;
+								@Component
+								public class JwtUtils {
+								  @Value("${bezkoder.app.jwtSecret}")
+								  private String jwtSecret;
+								  @Value("${bezkoder.app.jwtExpirationMs}")
+								  private int jwtExpirationMs;
+								  public String generateJwtToken(Authentication authentication) {
+									EmployeeDetailsImpl userPrincipal = (EmployeeDetailsImpl) authentication.getPrincipal();
+									return Jwts.builder()
+										.setSubject((userPrincipal.getId()))
+										.setIssuedAt(new Date())
+										.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+										.signWith(key(), SignatureAlgorithm.HS256)
+										.compact();
+								  }																	 
+								  private Key key() {
+									return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+								  }
+								  public String getUserNameFromJwtToken(String token) {
+									return Jwts.parserBuilder().setSigningKey(key()).build()
+											   .parseClaimsJws(token).getBody().getSubject();
+								  }
+								  public String getUserIdFromJwtToken(String token) {
+									return Jwts.parserBuilder().setSigningKey(key()).build()
+											.parseClaimsJws(token).getBody().getSubject();
+								  }
+								  public boolean validateJwtToken(String authToken) {
+									try {
+									  Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
+									  return true;
+									} catch (MalformedJwtException e) {
+									  System.out.println("Invalid JWT token: {}" + e.getMessage());
+									} catch (ExpiredJwtException e) {
+									  System.out.println("JWT token is expired: {}" + e.getMessage());
+									} catch (UnsupportedJwtException e) {
+									  System.out.println("JWT token is unsupported: {}" + e.getMessage());
+									} catch (IllegalArgumentException e) {
+									  System.out.println("JWT claims string is empty: {}" +  e.getMessage());
+									}
+									return false;
+								  }
+								}
+								
+								package com.poscodx.odc.ampro015.config.provider;
+								import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
+								import lombok.RequiredArgsConstructor;
+								import org.springframework.security.authentication.AuthenticationProvider;
+								import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+								import org.springframework.security.core.Authentication;
+								import org.springframework.security.core.AuthenticationException;
+								import org.springframework.security.core.userdetails.UserDetails;
+								import org.springframework.security.core.userdetails.UsernameNotFoundException;
+								import org.springframework.security.crypto.password.PasswordEncoder;
+								import org.springframework.stereotype.Component;
+								@Component
+								@RequiredArgsConstructor
+								public class CustomAuthenticationProvider implements AuthenticationProvider {
+									private final EmployeeDetailsServiceImpl employeeDetailsService;
+									private final PasswordEncoder encoder;
+									@Override
+									public Authentication authenticate(Authentication authentication)
+											throws AuthenticationException {
+										String id = authentication.getPrincipal().toString();
+										String password = authentication.getCredentials().toString();
+										UserDetails currentUser = employeeDetailsService.loadUserById(id);
+										if (currentUser == null) {
+											throw new UsernameNotFoundException("User not found");
+										}
+										// Example: validating credentials
+										if (!encoder.matches(password, currentUser.getPassword())) {
+											throw new UsernameNotFoundException("Invalid credentials");
+										}
+										// Create a fully authenticated Authentication object
+										return new UsernamePasswordAuthenticationToken(currentUser, password, currentUser.getAuthorities());
+									}
+									@Override
+									public boolean supports(Class<?> authentication) {
+										return authentication.equals(UsernamePasswordAuthenticationToken.class);
+									}
+								}
+								
+								package com.poscodx.odc.ampro015.config.services;
+								import com.fasterxml.jackson.annotation.JsonIgnore;
+								import com.poscdx.odc.ampro015.domain.entity.M00Employee;
+								import lombok.Data;
+								import org.springframework.security.core.GrantedAuthority;
+								import org.springframework.security.core.authority.SimpleGrantedAuthority;
+								import org.springframework.security.core.userdetails.UserDetails;
+								import java.util.*;
+								@Data
+								public class EmployeeDetailsImpl implements UserDetails {
+									private static final long serialVersionUID = 1L;
+									private String id;
+									private String username;
+									private String avatar;
+									private String email;
+									private List<String> role;
+									private Map <String, List<String>> permissionMap;
+								  @JsonIgnore
+								  private String password;
+								  private Collection<? extends GrantedAuthority> authorities;
+									public EmployeeDetailsImpl(String id, String username, String email, String avatar, String password, List<String> role,
+															   Collection<? extends GrantedAuthority> authorities, Map <String, List<String>> permissionMap) {
+										this.id = id;
+										this.username = username;
+										this.email = email;
+										this.avatar = avatar;
+										this.password = password;
+										this.role = role;
+										this.authorities = authorities;
+										this.permissionMap = permissionMap;
+									}
+									public static EmployeeDetailsImpl build(M00Employee user, List<String> listRoles, List<Map<String, String>> listPermission) {
+										Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+										Map <String, List<String>> permissionMap = new HashMap<>();
+										List<String> permissionList;
+										for (Map<String, String> map : listPermission) {
+											Set<String> set = map.keySet();
+											for (String key : set) {
+												authorities.add(new SimpleGrantedAuthority(map.get(key)));
+												permissionList = permissionMap.get(key) == null ? new ArrayList<>() : permissionMap.get(key);
+												if (!permissionList.contains(map.get(key))) permissionList.add(map.get(key));
+												permissionMap.put(key, permissionList);
+											}
+										}
+										return new EmployeeDetailsImpl(
+												user.getEmpId(),
+												user.getName(),
+												user.getMail(),
+												user.getAvatar(),
+												user.getPassword(),
+												listRoles,
+												authorities,
+												permissionMap);
+									}
+									@Override
+									public Collection<? extends GrantedAuthority> getAuthorities() {
+										return authorities;
+									}
+									@Override
+									public String getPassword() {
+										return password;
+									}
+									@Override
+									public String getUsername() {
+										return username;
+									}
+									@Override
+									public boolean isAccountNonExpired() {
+										return true;
+									}
+									@Override
+									public boolean isAccountNonLocked() {
+										return true;
+									}
+									@Override
+									public boolean isCredentialsNonExpired() {
+										return true;
+									}
+									@Override
+									public boolean isEnabled() {
+										return true;
+									}
+									@Override
+									public boolean equals(Object o) {
+										if (this == o)
+											return true;
+										if (o == null || getClass() != o.getClass())
+											return false;
+										EmployeeDetailsImpl user = (EmployeeDetailsImpl) o;
+										return Objects.equals(id, user.id);
+									}
+								}
+								
+								package com.poscodx.odc.ampro015.config.services;
+								import com.netflix.discovery.converters.Auto;
+								import com.poscdx.odc.ampro015.domain.entity.M00Employee;
+								import com.poscdx.odc.ampro015.domain.entity.Pme00RoleUser;
+								import com.poscdx.odc.ampro015.domain.entity.Pme00Setting;
+								import com.poscdx.odc.ampro015.domain.entity.SettingMedia;
+								import com.poscdx.odc.ampro015.domain.spec.Pme00SettingService;
+								import com.poscdx.odc.ampro015.domain.utils.Utils;
+								import com.poscodx.odc.ampro015.store.Pme00RoleUserJpaStore;
+								import com.poscodx.odc.ampro015.store.jpo.M00EmployeeJpo;
+								import com.poscodx.odc.ampro015.store.jpo.Pme00PerRoleJpo;
+								import com.poscodx.odc.ampro015.store.jpo.Pme00PermissionJpo;
+								import com.poscodx.odc.ampro015.store.jpo.Pme00SettingJpo;
+								import com.poscodx.odc.ampro015.store.repository.*;
+								import org.springframework.beans.factory.annotation.Autowired;
+								import org.springframework.security.core.userdetails.UserDetails;
+								import org.springframework.security.core.userdetails.UserDetailsService;
+								import org.springframework.security.core.userdetails.UsernameNotFoundException;
+								import org.springframework.stereotype.Service;
+								import org.springframework.transaction.annotation.Transactional;
+								import java.util.*;
+								import java.util.stream.Collectors;
+								@Service
+								public class EmployeeDetailsServiceImpl implements UserDetailsService {
+									@Autowired
+									M00EmployeeRepository employeeRepository;
+									@Autowired
+									Pme00RoleRepository roleRepository;
+									@Autowired
+									Pme00PerRoleRepository perRoleRepository;
+									@Autowired
+									Pme00PermissionRepository permissionRepository;
+									@Autowired
+									Pme00RoleUserJpaStore pme00RoleUserJpaStore;
+									@Autowired
+									Pme00SettingService pme00SettingService;
+									@Override
+									@Transactional
+									public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+										M00EmployeeJpo user = employeeRepository.findByName(username)
+												.orElseThrow(() -> new UsernameNotFoundException("User Not Found with UserName: " + username));
+										M00Employee employee = user.toDomain();
+										SettingMedia settingMedia = pme00SettingService.getMediaSetting();
+										if (settingMedia != null) {
+											employee.setAvatar(Utils.setFilePath(settingMedia, employee.getAvatar(), Utils.UPLOAD_SERVICE_EMPLOYEE));
+										}
+										//List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findRoleUserByEmpId(user.getEmpId());
+										List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findByEmployeeId(user.getEmpId());
+										List<String> listRoles = new ArrayList<>();
+										for (Pme00RoleUser roleUser : roles) {
+											roleRepository.findById(roleUser.getRoleId()).ifPresent(pme00RoleJpo -> listRoles.add(pme00RoleJpo.getName()));
+										}
+										String roleName = "ROLE_STAFF";
+										if (!roles.isEmpty()) {
+											// roleName = role.get().getName().name();
+											//roleName = role.get().getName();
+										}
+										return EmployeeDetailsImpl.build(employee, null, null);
+									}
+									@Transactional
+									public UserDetails loadUserById(String id) throws RuntimeException {
+										M00EmployeeJpo user = employeeRepository.findById(id)
+												.orElseThrow(() -> new UsernameNotFoundException("User Not Found with Id: " + id));
+										M00Employee employee = user.toDomain();
+										SettingMedia settingMedia = pme00SettingService.getMediaSetting();
+										if (settingMedia != null) {
+											employee.setAvatar(Utils.setFilePath(settingMedia, employee.getAvatar(), Utils.UPLOAD_SERVICE_EMPLOYEE));
+										}
+										//List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findRoleUserByEmpId(user.getEmpId());
+										List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findByEmployeeId(user.getEmpId());
+										List<String> listRoles = new ArrayList<>();
+										for (Pme00RoleUser roleUser : roles) {
+											roleRepository.findById(roleUser.getRoleId()).ifPresent(pme00RoleJpo -> listRoles.add(pme00RoleJpo.getName()));
+										}
+										// Optional<Pme00RoleJpo> role = roleRepository.findByName(user.getRole());
+										if (!roles.isEmpty()) {
+											List<Map<String, String>> listPermission = new ArrayList<>();
+											for (Pme00RoleUser roleUser : roles) {
+												List<Integer> perIds = perRoleRepository.findByRoleId(roleUser.getRoleId()).stream()
+														.map(Pme00PerRoleJpo::getPermissionId).collect(Collectors.toList());
+												perIds.forEach(permissionId -> {
+													Optional<Pme00PermissionJpo> permission = permissionRepository.findById(permissionId);
+													if (permission.isPresent()) {
+														//perName.add(permission.get().getName());
+														Map<String, String> per = new HashMap<>();
+														per.put(permission.get().getGroup(), permission.get().getName());
+														listPermission.add(per);
+													}
+												});
+											}
+											return EmployeeDetailsImpl.build(employee, listRoles, listPermission);
+										}
+										return new EmployeeDetailsImpl(user.getEmpId(), user.getName(), user.getMail(), user.getAvatar(), user.getPassword(), listRoles, null, null);
+									}
+								}
+								
+								package com.poscodx.odc.ampro015.config;
+								import com.poscodx.odc.ampro015.config.exceptionhandler.AuthEntryPoint;
+								import com.poscodx.odc.ampro015.config.jwt.AuthTokenFilter;
+								import com.poscodx.odc.ampro015.config.provider.CustomAuthenticationProvider;
+								import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
+								import java.security.MessageDigest;
+								import java.security.NoSuchAlgorithmException;
+								import org.apache.commons.codec.digest.Md5Crypt;
+								import org.springframework.beans.factory.annotation.Autowired;
+								import org.springframework.context.annotation.Bean;
+								import org.springframework.context.annotation.Configuration;
+								import org.springframework.http.HttpMethod;
+								import org.springframework.security.authentication.AuthenticationManager;
+								import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+								import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+								import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+								import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+								import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+								import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+								import org.springframework.security.config.http.SessionCreationPolicy;
+								import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+								import org.springframework.security.crypto.password.PasswordEncoder;
+								import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+								import org.springframework.context.annotation.Bean;
+								import org.springframework.context.annotation.Configuration;
+								import org.springframework.security.crypto.password.PasswordEncoder;
+								import java.security.MessageDigest;
+								import java.security.NoSuchAlgorithmException;
+								import java.math.BigInteger;
+								@Configuration
+								@EnableWebSecurity
+								@EnableGlobalMethodSecurity(prePostEnabled = true)
+								public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+									@Autowired
+									private AuthTokenFilter authTokenFilter;
+									@Autowired
+									private EmployeeDetailsServiceImpl employeeDetailsService;
+									@Autowired
+									private AuthEntryPoint unauthorizedHandler;
+									@Autowired
+									private CustomAuthenticationProvider authenticationProvider;
+									// Details omitted for brevity
+									@Bean
+									public PasswordEncoder passwordEncoder() {
+										return new PasswordEncoder() {
+											@Override
+											public String encode(CharSequence rawPassword) {
+												try {
+													MessageDigest md = MessageDigest.getInstance("MD5");
+													byte[] messageDigest = md.digest(rawPassword.toString().getBytes());
+													BigInteger number = new BigInteger(1, messageDigest);
+													String hashtext = number.toString(16);
+													while (hashtext.length() < 32) {
+														hashtext = "0" + hashtext;
+													}
+													return hashtext;
+												} catch (NoSuchAlgorithmException e) {
+													throw new RuntimeException(e);
+												}
+											}
+											@Override
+											public boolean matches(CharSequence rawPassword, String encodedPassword) {
+												return encode(rawPassword).equals(encodedPassword);
+											}
+										};
+									}
+									@Bean
+									public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+										return authConfig.getAuthenticationManager();
+									}
+									@Override
+									protected void configure(AuthenticationManagerBuilder auth)
+											throws Exception {
+										auth.authenticationProvider(authenticationProvider)
+												.userDetailsService(employeeDetailsService)
+												.passwordEncoder(passwordEncoder());
+									}
+									@Override
+									protected void configure(HttpSecurity http) throws Exception {
+										// Enable CORS and disable CSRF
+										http = http.cors().and().csrf().disable();
+										// Set session management to stateless
+										http = http
+												.sessionManagement()
+												.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+												.and();
+										// Set unauthorized requests exception handler
+										http = http
+												.exceptionHandling()
+												.authenticationEntryPoint(
+														unauthorizedHandler
+												)
+												.and();
+										// Set permissions on endpoints
+										http.authorizeRequests()
+												// Our public endpoints
+												.antMatchers(HttpMethod.POST, "/author/signup").permitAll()
+												.antMatchers(HttpMethod.POST, "/author/signin").permitAll()
+												.antMatchers(HttpMethod.POST, "/author/logout").permitAll()
+												.anyRequest().permitAll();
+										// Add JWT token filter
+										http.addFilterBefore(
+												authTokenFilter,
+												UsernamePasswordAuthenticationFilter.class
+										);
+									}
+								}
+																	
+								package com.poscodx.odc.ampro015.config.exceptionhandler;
+								import com.fasterxml.jackson.databind.ObjectMapper;
+								import org.springframework.http.MediaType;
+								import org.springframework.security.core.AuthenticationException;
+								import org.springframework.security.web.AuthenticationEntryPoint;
+								import org.springframework.stereotype.Component;
+								import javax.servlet.ServletException;
+								import javax.servlet.http.HttpServletRequest;
+								import javax.servlet.http.HttpServletResponse;
+								import java.io.IOException;
+								import java.util.LinkedHashMap;
+								import java.util.Map;
+								@Component
+								public class AuthEntryPoint implements AuthenticationEntryPoint {
+								//  private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
+								  @Override
+								  public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+									response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+									response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+									final Map<String, Object> body = new LinkedHashMap<>();;
+									body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+									body.put("error", "Unauthorized");
+									body.put("message", authException.getMessage());
+									body.put("path", request.getServletPath());
+									final ObjectMapper mapper = new ObjectMapper();
+									mapper.writeValue(response.getOutputStream(), body);
+								  }
+								}
+								
+	Spring Security 5 – OAuth2 Login--Security:
+																	
+														- Spring Security 5 introduces a new OAuth2LoginConfigurer class that we can use for configuring an external Authorization Server.
+														- Spring Security cung cấp tích hợp với OAuth, một giao thức ủy quyền phổ biến, cho phép ứng dụng của bạn xác thực và ủy quyền với dịch vụ của bên thứ ba.
+														- OAuth là một giao thức ủy quyền mở được sử dụng để cho phép một ứng dụng (hoặc dịch vụ) yêu cầu quyền truy cập vào tài nguyên từ một người dùng mà không cần
+														biết mật khẩu của người dùng. Thay vào đó, OAuth cung cấp một cách tiếp cận an toàn và phân quyền để cho phép người dùng chia sẻ tài nguyên của họ với các
+														ứng dụng khác mà không cần tiết lộ mật khẩu của mình.
+																	
+	JWT (JSON Web Tokens)--Security:
+																	Cơ chế xác thực dựa trên việc sử dụng token được mã hóa dưới dạng JSON, cho phép truyền thông tin xác thực giữa các bên một cách an toàn.
+	HTTP Basic Authentication--Security:
+																	Cách tiếp cận cơ bản nhất, trong đó thông tin đăng nhập được gửi dưới dạng mã thông báo cơ bản (base64-encoded) trong header của HTTP request.
+	LDAP Authentication--Security:
+																	Xác thực người dùng thông qua một máy chủ LDAP (Lightweight Directory Access Protocol), thường được sử dụng trong các môi trường doanh nghiệp.
+	Custom Authentication Providers--Security:
+																	Spring Security cho phép bạn triển khai các cơ chế xác thực tùy chỉnh, bằng cách triển khai các interface như UserDetailsService, AuthenticationProvider,...
+	HTTP Form-based Authentication--Security:
+																	Xác thực thông qua một form đăng nhập trên giao diện người dùng, trong đó thông tin đăng nhập được gửi dưới dạng POST request.
+	HTTP Digest Authentication--Security:
+																	Một phương thức xác thực tương tự HTTP Basic, nhưng thông tin đăng nhập được gửi dưới dạng mã thông báo tiêu chuẩn (digest) để tăng cường bảo mật.
+	OpenID Connect--Security:
+																	Một phương thức xác thực và ủy quyền dựa trên OAuth 2.0, thêm một số tính năng xác thực mở rộng và cải tiến.
+	Spring Security cũng cung cấp một số tính năng và cách
+	tiếp cận khác nhằm hỗ trợ bảo mật cho ứng dụng web Java,
+	bao gồm--Security:														
+				Method-Level Security:
+																	Spring Security cho phép bạn áp dụng các quy định bảo mật tới các phương thức trong ứng dụng của mình. Bằng cách sử dụng các annotations như @PreAuthorize,
+																	@PostAuthorize, và @Secured, bạn có thể xác định quyền truy cập cho từng phương thức cụ thể.
+				CSRF Protection:
+																	Cross-Site Request Forgery (CSRF) là một lỗ hổng bảo mật phổ biến trong các ứng dụng web. Spring Security cung cấp tính năng bảo vệ chống lại CSRF bằng cách
+																	sử dụng token CSRF và kiểm tra token này trước khi xử lý bất kỳ yêu cầu POST nào.
+				CORS (Cross-Origin Resource Sharing):
+																	Spring Security cung cấp cơ chế để quản lý và cấu hình CORS trong ứng dụng web của bạn, cho phép hoặc từ chối yêu cầu từ các nguồn khác nhau.																		
+				Session Management:
+																	Spring Security hỗ trợ quản lý phiên (session) người dùng trong ứng dụng web của bạn. Bạn có thể cấu hình các chiến lược session management như thời gian
+																	hết hạn phiên, cách thức lưu trữ phiên, và xử lý các trạng thái phiên không hợp lệ.
+				Integration with External Systems:
+																	Spring Security tích hợp tốt với các dịch vụ bảo mật và nhận dạng bên ngoài như OAuth 2.0, LDAP, OpenID Connect, và SAML.																		
+				Remember-Me Authentication:
+																	Tính năng này cho phép người dùng đăng nhập một lần và duy trì phiên đăng nhập cho một khoảng thời gian dài, thậm chí sau khi họ đóng trình duyệt và mở lại.
+				Access Control Lists (ACLs):
+																	ACLs cho phép bạn xác định các quyền truy cập cụ thể tới các đối tượng (ví dụ: tài liệu, bài viết, sản phẩm) trong ứng dụng của mình.

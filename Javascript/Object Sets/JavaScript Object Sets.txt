@@ -1,0 +1,154 @@
+JavaScript Object Sets--JAVASCRIPT:
+
+												- A JavaScript Set is a collection of unique values.
+												- Each value can only occur once in a Set.
+												- A Set can hold any value of any data type.
+												
+	How to Create a Set--JAVASCRIPT Object Sets:
+	
+												Passing an Array to new Set()
+												Create a new Set and use add() to add values
+												Create a new Set and use add() to add variables
+												
+	The new Set() Method--JAVASCRIPT Object Sets:
+	
+		Pass an Array to the new Set() constructor:
+
+												<script>
+												// Create a Set
+												const letters = new Set(["a","b","c"]);
+												// Display set.size
+												document.getElementById("demo").innerHTML = letters.size; // 3
+												</script>
+												
+		Create a Set and add literal values:
+		
+												<script>
+												// Create a Set
+												const letters = new Set();
+												// Add Values to the Set
+												letters.add("a");
+												letters.add("b");
+												letters.add("c");
+												// Display set.size
+												document.getElementById("demo").innerHTML = letters.size; // 3
+												</script>
+												
+		Create a Set and add variables:
+		
+												<script>
+												// Create a Set
+												const letters = new Set();
+												// Create Variables
+												const a = "a";
+												const b = "b";
+												const c = "c";
+												// Add the Variables to the Set
+												letters.add(a);
+												letters.add(b);
+												letters.add(c);
+												// Display set.size
+												document.getElementById("demo").innerHTML = letters.size; // 3
+												</script>
+												
+	The add() Method--JAVASCRIPT Object Sets:
+												If you add equal elements, only the first will be saved
+												
+												<script>
+												// Create a new Set
+												const letters = new Set(["a","b","c"]);
+												// Add a new Element
+												letters.add("d");
+												letters.add("e");
+												// Display set.size
+												document.getElementById("demo").innerHTML = letters.size; // 5
+												</script>
+												
+												<script>
+												// Create a Set
+												const letters = new Set();
+												// Add values to the Set
+												letters.add("a");
+												letters.add("b");
+												letters.add("c");
+												letters.add("c");
+												letters.add("c");
+												letters.add("c");
+												letters.add("c");
+												letters.add("c");
+												// Display set.size
+												document.getElementById("demo").innerHTML = letters.size; // 3
+												</script>
+												
+	The values() Method--JAVASCRIPT Object Sets:
+	
+												- The values() method returns an Iterator object containing all the values in a Set
+												- Now you can use the Iterator object to access the elements
+												
+												<script>
+												// Create a Set
+												const letters = new Set(["a","b","c"]);
+												// Display set.size
+												document.getElementById("demo").innerHTML = letters.values(); // [object Set Iterator]
+												</script>
+												
+												<script>
+												// Create a Set
+												const letters = new Set(["a","b","c"]);
+												// List all Elements
+												let text = "";
+												for (const x of letters.values()) {
+												  text += x + "<br>";
+												}
+												document.getElementById("demo").innerHTML = text; // a b c
+												</script>
+												
+	The keys() Method--JAVASCRIPT Object Sets:
+	
+												- A Set has no keys.
+												- keys() returns the same as values().
+												- This makes Sets compatible with Maps.
+												
+												<script>
+												// Create a Set
+												const letters = new Set(["a","b","c"]);
+												// Display set.size
+												document.getElementById("demo").innerHTML = letters.keys(); // [object Set Iterator]
+												</script>
+												
+	The entries() Method--JAVASCRIPT Object Sets:
+	
+												- A Set has no keys.
+												- entries() returns [value,value] pairs instead of [key,value] pairs.
+												- This makes Sets compatible with Maps
+												
+												<script>
+												// Create a Set
+												const letters = new Set(["a","b","c"]);
+												// List all entries
+												const iterator = letters.entries();
+												let text = "";
+												for (const entry of iterator) {
+												  text += entry + "<br>";
+												}
+												document.getElementById("demo").innerHTML = text; // a,a b,b c,c
+												</script>
+												
+	Sets are Objects--JAVASCRIPT Object Sets:
+	
+												- For a Set, typeof returns object
+												- For a Set, instanceof Set returns true
+												
+												<script>
+												// Create a new Set
+												const letters = new Set(["a","b","c"]);
+												// Display typeof
+												document.getElementById("demo").innerHTML = typeof letters; // object
+												</script>
+												
+												<script>
+												// Create a new Set
+												const letters = new Set(["a","b","c"]);
+												// Display typeof
+												document.getElementById("demo").innerHTML = letters instanceof Set; // true
+												</script>

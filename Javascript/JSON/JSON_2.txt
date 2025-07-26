@@ -1,0 +1,345 @@
+JSON--Các kiến thức nền tảng JAVASCRIPT:
+
+			- When storing data, the data has to be a certain format, and regardless of where you choose to store it, text is always one of the legal formats.
+			- JSON makes it possible to store JavaScript objects as text.
+			- A common use of JSON is to exchange data to/from a web server. When receiving data from a web server, the data is always a string. Parse the data with JSON.parse(), and the data 
+			becomes a JavaScript object.
+
+	JSON.parse():
+									
+									JavaScript has a built in function for converting JSON strings into JavaScript objects
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Creating an Object from a JSON String</h2>
+									<p id="demo"></p>
+									<script>
+									const txt = '{"name":"John", "age":30, "city":"New York"}'
+									const obj = JSON.parse(txt);
+									document.getElementById("demo").innerHTML = obj.name + ", " + obj.age;
+									</script>
+									</body>
+									</html>
+									
+		When using the JSON.parse() on a JSON derived from an array, the method will return a JavaScript array, instead of a JavaScript object:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Parsing a JSON Array.</h2>
+									<p>Data written as an JSON array will be parsed into a JavaScript array.</p>
+									<p id="demo"></p>
+									<script>
+									const text = '[ "Ford", "BMW", "Audi", "Fiat" ]';
+									const myArr = JSON.parse(text);
+									document.getElementById("demo").innerHTML = myArr[0];
+									</script>
+									</body>
+									</html>
+									
+		Exceptions:
+			
+			Parsing Dates:
+			
+									Date objects are not allowed in JSON.
+									If you need to include a date, write it as a string.
+									You can convert it back into a date object later:											
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Convert a string into a date object.</h2>
+									<p id="demo"></p>
+									<script>
+									const text = '{"name":"John", "birth":"1986-12-14", "city":"New York"}';
+									const obj = JSON.parse(text);
+									obj.birth = new Date(obj.birth);
+									document.getElementById("demo").innerHTML = obj.name + ", " + obj.birth; 
+									</script>
+									</body>
+									</html>
+									
+									Or, you can use the second parameter, of the JSON.parse() function, called reviver.
+									The reviver parameter is a function that checks each property, before returning the value.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Convert a string into a date object.</h2>
+									<p id="demo"></p>
+									<script>
+									const text = '{"name":"John", "birth":"1986-12-14", "city":"New York"}';
+									const obj = JSON.parse(text, function (key, value) {
+									  if (key == "birth") {
+										return new Date(value);
+									  } else {
+										return value;
+									  }
+									});
+									document.getElementById("demo").innerHTML = obj.name + ", " + obj.birth; 
+									</script>
+									</body>
+									</html>
+			
+			Parsing Functions:
+			
+									Functions are not allowed in JSON.
+									If you need to include a function, write it as a string.
+									You should avoid using functions in JSON, the functions will lose their scope, and you would have to use eval() to convert them back into functions.
+									You can convert it back into a function later:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Convert a string into a function.</h2>
+									<p id="demo"></p>
+									<script>
+									const text = '{"name":"John", "age":"function() {return 30;}", "city":"New York"}';
+									const obj = JSON.parse(text);
+									obj.age = eval("(" + obj.age + ")");
+									document.getElementById("demo").innerHTML = obj.name + ", " + obj.age(); 
+									</script>
+									</body>
+									</html>
+	JSON.stringify():
+	
+									JavaScript also has a built in function for converting an object into a JSON string
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Create a JSON string from a JavaScript object.</h2>
+									<p id="demo"></p>
+									<script>
+									const obj = {name: "John", age: 30, city: "New York"};
+									const myJSON = JSON.stringify(obj);
+									document.getElementById("demo").innerHTML = myJSON; // {name: "John", age: 30, city: "New York"}
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Create a JSON string from a JavaScript array.</h2>
+									<p id="demo"></p>
+									<script>
+									const arr = ["John", "Peter", "Sally", "Jane"];
+									const myJSON = JSON.stringify(arr);
+									document.getElementById("demo").innerHTML = myJSON;
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Store and retrieve data from local storage.</h2>
+									<p id="demo"></p>
+									<script>
+									// Storing data:
+									const myObj = { name: "John", age: 31, city: "New York" };
+									const myJSON = JSON.stringify(myObj);
+									localStorage.setItem("testJSON", myJSON);
+									// Retrieving data:
+									let text = localStorage.getItem("testJSON");
+									let obj = JSON.parse(text);
+									document.getElementById("demo").innerHTML = obj.name;
+									</script>
+									</body>
+									</html>
+		
+		Exceptions:
+		
+			Stringify Dates:
+			
+									In JSON, date objects are not allowed. The JSON.stringify() function will convert any dates into strings.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JSON.stringify() converts date objects into strings.</h2>
+									<p id="demo"></p>
+									<script>
+									const obj = {name: "John", today: new Date(), city: "New York"};
+									const myJSON = JSON.stringify(obj);
+									document.getElementById("demo").innerHTML = myJSON; // {name: "John", today: new Date(), city: "New York"}
+									</script>
+									</body>
+									</html>
+									
+			Stringify Functions:
+			
+									In JSON, functions are not allowed as object values.
+									If you send functions using JSON, the functions will lose their scope, and the receiver would have to use eval() to convert them back into functions.
+									The JSON.stringify() function will remove any functions from a JavaScript object, both the key and the value:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JSON.stringify() will remove any functions from an object.</h2>
+									<p id="demo"></p>
+									<script>
+									const obj = {name: "John", age: function () {return 30;}, city: "New York"};
+									const myJSON = JSON.stringify(obj);
+									document.getElementById("demo").innerHTML = myJSON;
+									</script>
+									</body>
+									</html>
+									
+									This can be omitted if you convert your functions into strings before running the JSON.stringify() function.
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JSON.stringify() will remove any functions from an object.</h2>
+									<p>Convert functions into strings to keep them in the JSON object.</p>
+									<p id="demo"></p>
+									<script>
+									const obj = {name: "John", age: function () {return 30;}, city: "New York"};
+									obj.age = obj.age.toString();
+									const myJSON = JSON.stringify(obj);
+									document.getElementById("demo").innerHTML = myJSON;
+									</script>
+									</body>
+									</html>
+									
+	JSON Array Literals:
+	
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1>Access an Array by Index</h1>
+									<p id="demo"></p>
+									<script>
+									const myJSON = '["Ford", "BMW", "Fiat"]';
+									const myArray = JSON.parse(myJSON);
+									document.getElementById("demo").innerHTML = myArray[0]; // Ford
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Access Array Values</h2>
+									<p id="demo"></p>
+									<script>
+									const myJSON = '{"name":"John", "age":30, "cars":["Ford", "BMW", "Fiat"]}';
+									const myObj = JSON.parse(myJSON);
+									document.getElementById("demo").innerHTML = myObj.cars[0]; // Ford
+									</script>
+									</body>
+									</html>
+	
+	JSON Data Types:
+	
+		Valid Data Types:
+
+			In JSON, values must be one of the following data types:
+
+									a string
+									a number
+									an object (JSON object)
+									an array
+									a boolean
+									null
+									
+			JSON values cannot be one of the following data types:
+			
+									a function
+									a date
+									undefined
+									
+		JSON Strings:
+		
+									Strings in JSON must be written in double quotes.
+									
+									{"name":"John"}
+									
+		JSON Numbers:
+		
+									Numbers in JSON must be an integer or a floating point.
+									
+									{"age":30}
+									
+		JSON Objects:
+		
+									{
+									"employee":{"name":"John", "age":30, "city":"New York"}
+									}
+									
+		JSON Arrays:
+		
+									{
+									"employees":["John", "Anna", "Peter"]
+									}
+									
+		JSON Booleans:
+		
+									{"sale":true}
+									
+		JSON null:
+
+									{"middlename":null}
+	JSON HTML:
+	
+									JSON can very easily be translated into JavaScript. JavaScript can be used to make HTML in your web pages.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>Make a table based on JSON data.</h2>
+									<p id="demo"></p>
+									<script>
+									const dbParam = JSON.stringify({table:"customers",limit:20});
+									const xmlhttp = new XMLHttpRequest();
+									xmlhttp.onload = function() {
+									  const myObj = JSON.parse(this.responseText);
+									  let text = "<table border='1'>"
+									  for (let x in myObj) {
+										text += "<tr><td>" + myObj[x].name + "</td></tr>";
+									  }
+									  text += "</table>"    
+									  document.getElementById("demo").innerHTML = text;
+									}
+									xmlhttp.open("POST", "json_demo_html_table.php");
+									xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+									xmlhttp.send("x=" + dbParam);
+									</script>
+									</body>
+									</html>
+	
+	JSON Syntax:
+			
+		JSON Syntax Rules:
+
+									Data is in name/value pairs
+									Data is separated by commas
+									Curly braces hold objects
+									Square brackets hold arrays
+									In JSON, keys must be strings, written with double quotes
+									
+	JSON vs XML:
+									Both JSON and XML can be used to receive data from a web server.
+									
+		JSON Example:
+		
+									{"employees":[
+									  { "firstName":"John", "lastName":"Doe" },
+									  { "firstName":"Anna", "lastName":"Smith" },
+									  { "firstName":"Peter", "lastName":"Jones" }
+									]}
+									
+		XML Example:
+		
+									<employees>
+									  <employee>
+										<firstName>John</firstName> <lastName>Doe</lastName>
+									  </employee>
+									  <employee>
+										<firstName>Anna</firstName> <lastName>Smith</lastName>
+									  </employee>
+									  <employee>
+										<firstName>Peter</firstName> <lastName>Jones</lastName>
+									  </employee>
+									</employees>

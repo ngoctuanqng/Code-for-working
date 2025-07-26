@@ -1,0 +1,60 @@
+Fetch API--Các kiến thức nền tảng JAVASCRIPT:
+
+									Trong JavaScript, "fetch" là một hàm được sử dụng để gửi yêu cầu HTTP và lấy dữ liệu từ các nguồn tài nguyên mạng như API, tệp tin
+									hoặc trang web. Nó giúp tương tác với các máy chủ từ xa và lấy thông tin cần thiết từ chúng.
+									
+	Cú pháp sử dụng "fetch" như sau:
+	
+									fetch(url [, options])
+									  .then(response => {
+										// Xử lý phản hồi
+									  })
+									  .catch(error => {
+										// Xử lý lỗi
+									  });
+	Ví dụ:
+	
+									fetch('https://api.example.com/data')
+									  .then(response => response.json())
+									  .then(data => {
+										// Xử lý dữ liệu nhận được từ API
+										console.log(data);
+									  })
+									  .catch(error => {
+										// Xử lý lỗi nếu có
+										console.error(error);
+									  });
+
+
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<p id="demo">Fetch a file to change this text.</p>
+									<script>
+									let file = "fetch_info.txt"
+									fetch (file)
+									.then(x => x.text())
+									.then(y => document.getElementById("demo").innerHTML = y);
+									</script>
+									</body>
+									</html>
+									
+									Hàm getText(file) được định nghĩa với từ khóa "async". Nó nhận một đối số là tên của tệp tin cần được lấy nội dung.
+									Sử dụng "await" để đợi cho kết quả của hàm "fetch(file)" trả về. Hàm "fetch()" được sử dụng để gửi yêu cầu HTTP đến tệp tin
+									được chỉ định và trả về một Promise đại diện cho phản hồi từ máy chủ.
+									Khi Promise được giải quyết, nội dung của phản hồi được lấy bằng cách sử dụng phương thức "text()" trên đối tượng phản hồi.
+									Cuối cùng, nội dung của phần tử có id "demo" được thay đổi thành nội dung của tệp tin đã được lấy.
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<p id="demo">Fetch a file to change this text.</p>
+									<script>
+									getText("fetch_info.txt");
+									async function getText(file) {
+									  let myObject = await fetch(file);
+									  let myText = await myObject.text();
+									  document.getElementById("demo").innerHTML = myText;
+									}
+									</script>
+									</body>
+									</html>

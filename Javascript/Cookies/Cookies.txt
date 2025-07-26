@@ -1,0 +1,86 @@
+Cookies--Các kiến thức nền tảng JAVASCRIPT:
+
+	What are Cookies:
+	
+					- Cookies are data, stored in small text files, on your computer.
+					- When a web server has sent a web page to a browser, the connection is shut down, and the server forgets everything about the user.
+					- Cookies were invented to solve the problem "how to remember information about the user"
+					- Cookies are saved in name-value pairs like:		username = John Doe
+					- When a browser requests a web page from a server, cookies belonging to the page are added to the request. This way the server gets the necessary data to "remember" information about
+					users.
+
+	Create a Cookie with JavaScript:
+	
+					With JavaScript, a cookie can be created like this:
+					document.cookie = "username=John Doe";
+					
+					You can also add an expiry date (in UTC time). By default, the cookie is deleted when the browser is closed:
+					document.cookie = "username=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC";
+					
+					With a path parameter, you can tell the browser what path the cookie belongs to. By default, the cookie belongs to the current page.
+					document.cookie = "username=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
+	
+	Read a Cookie with JavaScript:
+	
+					let x = document.cookie; // document.cookie will return all cookies in one string much like: cookie1=value; cookie2=value; cookie3=value;
+									
+	Change a Cookie with JavaScript:
+
+					With JavaScript, you can change a cookie the same way as you create it:
+					
+					document.cookie = "username=John Smith; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/"; // The old cookie is overwritten.
+									
+	Delete a Cookie with JavaScript:
+	
+					You don't have to specify a cookie value when you delete a cookie. Just set the expires parameter to a past date.
+					You should define the cookie path to ensure that you delete the right cookie. Some browsers will not let you delete a cookie if you don't specify the path.
+					
+					document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+									
+	The Cookie String:
+		
+					- The document.cookie property looks like a normal text string. But it is not.
+					- Even if you write a whole cookie string to document.cookie, when you read it out again, you can only see the name-value pair of it.
+					- If you set a new cookie, older cookies are not overwritten. The new cookie is added to document.cookie
+					- If you want to find the value of one specified cookie, you must write a JavaScript function that searches for the cookie value in the cookie string.
+	Example:
+	
+		A Function to Set a Cookie:
+		
+					function setCookie(cname, cvalue, exdays) {
+					  const d = new Date();
+					  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+					  let expires = "expires="+ d.toUTCString();
+					  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+					}
+									
+		A Function to Get a Cookie:
+		
+					function getCookie(cname) {
+					  let name = cname + "=";
+					  let decodedCookie = decodeURIComponent(document.cookie);
+					  let ca = decodedCookie.split(';');
+					  for(let i = 0; i <ca.length; i++) {
+						let c = ca[i];
+						while (c.charAt(0) == ' ') {
+						  c = c.substring(1);
+						}
+						if (c.indexOf(name) == 0) {
+						  return c.substring(name.length, c.length);
+						}
+					  }
+					return
+									 
+		A Function to Check a Cookie:
+		
+					function checkCookie() {
+					  let username = getCookie("username");
+					  if (username != "") {
+					   alert("Welcome again " + username);
+					  } else {
+						username = prompt("Please enter your name:", "");
+						if (username != "" && username != null) {
+						  setCookie("username", username, 365);
+						}
+					  }
+					}

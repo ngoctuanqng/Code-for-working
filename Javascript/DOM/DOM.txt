@@ -1,0 +1,1417 @@
+DOM--Các kiến thức nền tảng JAVASCRIPT:
+
+									- The HTML DOM can be accessed with JavaScript (and with other programming languages).
+									- In the DOM, all HTML elements are defined as objects.
+
+	JavaScript - HTML DOM Methods--JAVASCRIPT DOM:
+	
+									- HTML DOM methods are actions you can perform (on HTML Elements).
+									- HTML DOM properties are values (of HTML Elements) that you can set or change.
+									
+	JavaScript HTML DOM Elements--JAVASCRIPT DOM:
+	
+		Finding HTML Elements:
+		
+									Often, with JavaScript, you want to manipulate HTML elements. To do so, you have to find the elements first. There are several ways to do this:
+									
+									Finding HTML elements by id
+									Finding HTML elements by tag name
+									Finding HTML elements by class name
+									Finding HTML elements by CSS selectors
+									Finding HTML elements by HTML object collections
+									
+		Finding HTML Element by Id - getElementById:
+		
+									If the element is found, the method will return the element as an object (in element). If the element is not found, element will contain null.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p id="intro">Finding HTML Elements by Id</p>
+									<p>This example demonstrates the <b>getElementsById</b> method.</p>
+									<p id="demo"></p>
+									<script>
+									const element = document.getElementById("intro");
+									document.getElementById("demo").innerHTML = 
+									"The text from the intro paragraph is: " + element.innerHTML;
+									</script>
+									</body>
+									</html>
+									
+		Finding HTML Elements by Tag Name - getElementsByTagName:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Finding HTML Elements by Tag Name.</p>
+									<p>This example demonstrates the <b>getElementsByTagName</b> method.</p>
+									<p id="demo"></p>
+									<script>
+									const element = document.getElementsByTagName("p");
+									document.getElementById("demo").innerHTML = 'The text in first paragraph (index 0) is: ' + element[0].innerHTML;
+									</script>											
+									</body>
+									</html>
+									
+		Finding HTML Elements by Class Name - getElementsByClassName:
+		
+									If you want to find all HTML elements with the same class name, use getElementsByClassName().
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Finding HTML Elements by Class Name.</p>
+									<p class="intro">Hello World!</p>
+									<p class="intro">This example demonstrates the <b>getElementsByClassName</b> method.</p>
+									<p id="demo"></p>
+									<script>
+									const x = document.getElementsByClassName("intro");
+									document.getElementById("demo").innerHTML = 
+									'The first paragraph (index 0) with class="intro" is: ' + x[1].innerHTML;
+									</script>
+									</body>
+									</html>
+									
+		Finding HTML Elements by CSS Selectors - querySelectorAll:
+		
+									If you want to find all HTML elements that match a specified CSS selector (id, class names, types, attributes, values of attributes, etc), use the querySelectorAll() method.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Finding HTML Elements by Query Selector</p>
+									<p class="intro">Hello World!.</p>
+									<p class="intro">This example demonstrates the <b>querySelectorAll</b> method.</p>
+									<p id="demo"></p>
+									<script>
+									const x = document.querySelectorAll("p.intro");
+									document.getElementById("demo").innerHTML = 
+									'The first paragraph (index 0) with class="intro" is: ' + x[0].innerHTML;
+									</script>
+									</body>
+									</html>
+									
+		Finding HTML Elements by HTML Object Collections:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Finding HTML Elements Using <b>document.forms</b>.</p>
+									<form id="frm1" action="/action_page.php">
+									  First name: <input type="text" name="fname" value="Donald"><br>
+									  Last name: <input type="text" name="lname" value="Duck"><br><br>
+									  <input type="submit" value="Submit">
+									</form> 
+									<p>These are the values of each element in the form:</p>
+									<p id="demo"></p>
+									<script>
+									const x = document.forms["frm1"];
+									let text = "";
+									for (let i = 0; i < x.length ;i++) {
+									  text += x.elements[i].value + "<br>";
+									}
+									document.getElementById("demo").innerHTML = text;
+									</script>
+									</body>
+									</html>
+
+	JavaScript HTML DOM - Changing CSS--JAVASCRIPT DOM:
+	
+									The HTML DOM allows JavaScript to change the style of HTML elements.
+									
+		Changing HTML Style:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Changing the HTML style:</p>
+									<p id="p1">Hello World!</p>
+									<p id="p2">Hello World!</p>
+									<script>
+									document.getElementById("p2").style.color = "blue";
+									document.getElementById("p2").style.fontFamily = "Arial";
+									document.getElementById("p2").style.fontSize = "larger";
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1 id="id1">My Heading 1</h1>
+									<button type="button" 
+									onclick="document.getElementById('id1').style.color = 'red'">
+									Click Me!</button>
+									</body>
+									</html>
+	
+	JavaScript HTML DOM - Changing HTML--JAVASCRIPT DOM:
+	
+									The HTML DOM allows JavaScript to change the content of HTML elements.
+									
+		Changing HTML Content:
+
+									The easiest way to modify the content of an HTML element is by using the innerHTML property.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript can Change HTML</h2>
+									<p id="p1">Hello World!</p>
+									<script>
+									document.getElementById("p1").innerHTML = "New text!";
+									</script>
+									<p>The paragraph above was changed by a script.</p>
+									</body>
+									</html>
+	
+		Changing the Value of an Attribute:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<img id="image" src="smiley.gif" width="160" height="120">
+									<script>
+									document.getElementById("image").src = "landscape.jpg";
+									</script>
+									<p>The original image was smiley.gif, but the script changed it to landscape.jpg</p>
+									</body>
+									</html>
+									
+		Dynamic HTML content:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<p id="demo"></p>
+									<script>
+									document.getElementById("demo").innerHTML = "Date : " + Date();
+									</script>
+									</body>
+									</html>
+									
+	JavaScript HTML DOM Collections--JAVASCRIPT DOM:
+	
+		The HTMLCollection Object:
+		
+									- The getElementsByTagName() method returns an HTMLCollection object.
+									- An HTMLCollection object is an array-like list (collection) of HTML elements.
+									- An HTMLCollection is NOT an array! An HTMLCollection may look like an array, but it is not.
+									- You can loop through the list and refer to the elements with a number (just like an array). However, you cannot use array methods like valueOf(), pop(), push(), or join() on
+									an HTMLCollection.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Hello World!</p>
+									<p>Hello Norway!</p>
+									<p id="demo"></p>
+									<script>
+									const myCollection = document.getElementsByTagName("p");
+									document.getElementById("demo").innerHTML = "The innerHTML of the second paragraph is: " + myCollection[1].innerHTML; // Hello Norway!
+									</script>
+									</body>
+									</html>
+									
+		HTML HTMLCollection Length:
+		
+									The length property defines the number of elements in an HTMLCollection:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Hello World!</p>
+									<p>Hello Norway!</p>
+									<p id="demo"></p>
+									<script>
+									const myCollection = document.getElementsByTagName("p");
+									document.getElementById("demo").innerHTML = "This document contains " + myCollection.length + " paragraphs."; // 3
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Hello World!</p>
+									<p>Hello Norway!</p>
+									<p>Click the button to change the color of all p elements.</p>
+									<button onclick="myFunction()">Try it</button>
+									<script>
+									function myFunction() {
+									  const myCollection = document.getElementsByTagName("p");
+									  for (let i = 0; i < myCollection.length; i++) {
+										myCollection[i].style.color = "red";
+									  }
+									}
+									</script>
+									</body>
+									</html>
+									
+	JavaScript HTML DOM Elements (Nodes)--JAVASCRIPT DOM:
+	
+		Creating New HTML Elements (Nodes):
+		
+									To add a new element to the HTML DOM, you must create the element (element node) first, and then append it to an existing element.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Add a new HTML Element.</p>
+									<div id="div1">
+										<p id="p1">This is a paragraph.</p>
+										<p id="p2">This is another paragraph.</p>
+									</div>
+									<script>
+									const para = document.createElement("p");
+									const node = document.createTextNode("This is new.");
+									para.appendChild(node);
+									const element = document.getElementById("div1");
+									element.appendChild(para);
+									</script>
+									</body>
+									</html>
+									// Result:
+									// Add a new HTML Element.
+									// This is a paragraph.
+									// This is another paragraph.
+									// This is new.
+									
+		Creating new HTML Elements - appendChild():
+		
+									The appendChild() method appended the new element as the last child of the parent.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Add a new HTML Element.</p>
+									<div id="div1">
+										<p id="p1">This is a paragraph.</p>
+										<p id="p2">This is another paragraph.</p>
+									</div>
+									<script>
+									const para = document.createElement("p");
+									const node = document.createTextNode("This is new.");
+									para.appendChild(node);
+									const element = document.getElementById("div1");
+									const child = document.getElementById("p2");
+									element.insertBefore(para,child);
+									</script>
+									</body>
+									</html>
+									// Result:
+									//Add a new HTML Element.
+									// This is a paragraph.
+									// This is new.
+									// This is another paragraph.
+									
+		Removing Existing HTML Elements - remove():
+		
+									To remove an HTML element, use the remove() method:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<h3>Remove an HTML Element.</h3>
+									<div>
+										<p id="p1">This is a paragraph.</p>
+										<p id="p2">This is another paragraph.</p>
+									</div>
+									<button onclick="myFunction()">Remove Element</button>
+									<script>
+									function myFunction() {
+									document.getElementById("p1").remove();
+									}
+									</script>
+									</body>
+									</html>
+									// Result:
+									// This is another paragraph.
+									
+		Removing a Child Node - removeChild(child):
+		
+									For browsers that does not support the remove() method, you have to find the parent node to remove an element:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<p>Remove Child Element</p>
+									<div id="div1">
+										<p id="p1">This is a paragraph.</p>
+										<p id="p2">This is another paragraph.</p>
+									</div>
+									<script>
+									const parent = document.getElementById("div1");
+									const child = document.getElementById("p1");
+									parent.removeChild(child);
+									</script>
+									</body>
+									</html>
+									// Result:
+									// Remove Child Element
+									// This is another paragraph.
+									
+		Replacing HTML Elements - replaceChild(para,child):
+		
+									To replace an element to the HTML DOM, use the replaceChild() method:
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML DOM</h2>
+									<h3>Replace an HTML Element.</h3>
+									<div id="div1">
+									  <p id="p1">This is a paragraph.</p>
+									  <p id="p2">This is a paragraph.</p>
+									</div>
+									<script>
+									const parent = document.getElementById("div1");
+									const child = document.getElementById("p1");
+									const para = document.createElement("p");
+									const node = document.createTextNode("This is new.");
+									para.appendChild(node);
+									parent.replaceChild(para,child);
+									</script>
+									</body>
+									</html>
+									// Result:
+									// Replace an HTML Element.									
+									// This is new.
+									// This is a paragraph.
+																				
+	JavaScript HTML DOM EventListener--JAVASCRIPT DOM:
+	
+		Syntax:
+		
+									The third parameter is a boolean value specifying whether to use event bubbling or event capturing. This parameter is optional.
+									
+									element.addEventListener(event, function, useCapture);
+									
+		Add an Event Handler to an Element:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript addEventListener()</h2>
+									<p>This example uses the addEventListener() method to attach a click event to a button.</p>
+									<button id="myBtn">Try it</button>
+									<script>
+									document.getElementById("myBtn").addEventListener("click", function() {
+									  alert("Hello World!");
+									});
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript addEventListener()</h2>
+									<p>This example uses the addEventListener() method to execute a function when a user clicks on a button.</p>
+									<button id="myBtn">Try it</button>
+									<script>
+									document.getElementById("myBtn").addEventListener("click", myFunction);
+									function myFunction() {
+									  alert ("Hello World!");
+									}
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript addEventListener()</h2>
+									<p>This example uses the addEventListener() method to add two click events to the same button.</p>
+									<button id="myBtn">Try it</button>
+									<script>
+									var x = document.getElementById("myBtn");
+									x.addEventListener("click", myFunction);
+									x.addEventListener("click", someOtherFunction);
+									function myFunction() {
+									  alert ("Hello World!");
+									}
+									function someOtherFunction() {
+									  alert ("This function was also executed!");
+									}
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript addEventListener()</h2>
+									<p>This example uses the addEventListener() method to add many events on the same button.</p>
+									<button id="myBtn">Try it</button>
+									<p id="demo"></p>
+									<script>
+									var x = document.getElementById("myBtn");
+									x.addEventListener("mouseover", myFunction);
+									x.addEventListener("click", mySecondFunction);
+									x.addEventListener("mouseout", myThirdFunction);
+									function myFunction() {
+									  document.getElementById("demo").innerHTML += "Moused over!<br>";
+									}
+									function mySecondFunction() {
+									  document.getElementById("demo").innerHTML += "Clicked!<br>";
+									}
+									function myThirdFunction() {
+									  document.getElementById("demo").innerHTML += "Moused out!<br>";
+									}
+									</script>
+									</body>
+									</html>
+									
+	Add an Event Handler to the window Object--JAVASCRIPT DOM:
+	
+									The addEventListener() method allows you to add event listeners on any HTML DOM object such as HTML elements, the HTML document, the window object, or other objects that support
+									events, like the xmlHttpRequest object.
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript addEventListener()</h2>
+									<p>This example uses the addEventListener() method on the window object.</p>
+									<p>Try resizing this browser window to trigger the "resize" event handler.</p>
+									<p id="demo"></p>
+									<script>
+									window.addEventListener("resize", function(){
+									  document.getElementById("demo").innerHTML = Math.random();
+									});
+									</script>
+									</body>
+									</html>
+									
+	Event Bubbling or Event Capturing?--JAVASCRIPT DOM
+	
+									- There are two ways of event propagation in the HTML DOM, bubbling and capturing.
+									- Event propagation is a way of defining the element order when an event occurs. If you have a <p> element inside a <div> element, and the user clicks on the <p> element, which
+									element's "click" event should be handled first?
+									- In bubbling the inner most element's event is handled first and then the outer: the <p> element's click event is handled first, then the <div> element's click event.
+									- In capturing the outer most element's event is handled first and then the inner: the <div> element's click event will be handled first, then the <p> element's click event.
+									- The default value is false, which will use the bubbling propagation, when the value is set to true, the event uses the capturing propagation.
+									- With the addEventListener() method you can specify the propagation type by using the "useCapture" parameter:
+									
+									addEventListener(event, function, useCapture);
+									
+		Event Bubbling:
+									Event Bubbling là quá trình khi một sự kiện xảy ra trên một phần tử con, sự kiện đó sẽ được truyền xuống các phần tử cha của nó cho đến phần tử gốc. Nghĩa là sự kiện sẽ lan truyền từ
+									phần tử con lên đến các phần tử cha trong cấu trúc cây HTML.
+									
+									<div id="parent">
+									  <div id="child">Click me</div>
+									</div>
+									<script>
+									document.getElementById("parent").addEventListener("click", function() {
+									  console.log("Parent clicked");
+									});
+									document.getElementById("child").addEventListener("click", function() {
+									  console.log("Child clicked");
+									});
+									</script>
+									// Result:
+									// Child clicked
+									// Parent clicked
+
+		Event Capturing:
+
+									Event Capturing, còn được gọi là "trình bắt sự kiện từ trên xuống", là quá trình khi một sự kiện xảy ra trên một phần tử con, sự kiện sẽ được bắt trước đó trên các phần tử cha của nó
+									từ phần tử gốc xuống phần tử con. Nghĩa là sự kiện sẽ lan truyền từ phần tử cha xuống đến phần tử con trong cấu trúc cây HTML.
+									
+									<div id="parent">
+									  <div id="child">Click me</div>
+									</div>
+									<script>
+									document.getElementById("parent").addEventListener("click", function() {
+									  console.log("Parent clicked");
+									}, true);
+									document.getElementById("child").addEventListener("click", function() {
+									  console.log("Child clicked");
+									}, true);
+									</script>
+									/ Result:
+									// Parent clicked											
+									// Child clicked
+
+	JavaScript HTML DOM Events--JAVASCRIPT DOM:
+
+	Input Events--JAVASCRIPT DOM:
+
+			onblur - When a user leaves an input field:
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  var x = document.getElementById("fname");
+									  x.value = x.value.toUpperCase();
+									}
+									</script>
+									</head>
+									<body>
+									Enter your name: <input type="text" id="fname" onblur="myFunction()">
+									<p>When you leave the input field, a function is triggered which transforms the input text to upper case.</p>
+									</body>
+									</html>
+									
+			onchange - When a user changes the content of an input field:
+			
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTML Events</h2>
+									Enter your name: <input type="text" id="fname" onchange="upperCase()">
+									<p>When you leave the input field, a function is triggered which transforms the input text to upper case.</p>
+									<script>
+									function upperCase() {
+									  const x = document.getElementById("fname");
+									  x.value = x.value.toUpperCase();
+									}
+									</script>
+									</body>
+									</html>
+
+			onchange - When a user selects a dropdown value:
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function preferedBrowser() {
+									  prefer = document.forms[0].browsers.value;
+									  alert("You prefer browsing internet with " + prefer);
+									}
+									</script>
+									</head>
+									<body>
+									<form>
+									Choose which browser you prefer:
+									  <select id="browsers" onchange="preferedBrowser()">
+										<option value="Chrome">Chrome</option>
+										<option value="Internet Explorer">Internet Explorer</option>
+										<option value="Firefox">Firefox</option>
+									  </select>
+									</form>
+									</body>
+									</html>
+									
+			onfocus - When an input field gets focus
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction(x) {
+									  x.style.background = "yellow";
+									}
+									</script>
+									</head>
+									<body>
+									Enter your name: <input type="text" onfocus="myFunction(this)">
+									<p>When the input field gets focus, a function is triggered which changes the background-color.</p>
+									</body>
+									</html>
+
+			onselect - When input text is selected
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  document.getElementById("demo").innerHTML = "You selected some text";
+									}
+									</script>
+									</head>
+									<body>
+									Some text: <input type="text" value="Hello world!" onselect="myFunction()">
+									<p id="demo"></p>
+									</body>
+									</html>
+			
+			onsubmit - When a user clicks the submit button
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function confirmInput() {
+									  fname = document.forms[0].fname.value;
+									  alert("Hello " + fname + "! You will now be redirected to www.w3Schools.com");
+									}
+									</script>
+									</head>
+									<body>
+									<form onsubmit="confirmInput()" action="https://www.w3schools.com/">
+									  Enter your name: <input id="fname" type="text" size="20">
+									  <input type="submit">
+									</form>
+									</body>
+									</html>
+									
+			onreset - When a user clicks the reset button
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function message() {
+									  alert("This alert box was triggered by the onreset event handler");
+									}
+									</script>
+									</head>
+									<body>
+									<form onreset="message()">
+									  Enter your name: <input type="text" size="20">
+									  <input type="reset">
+									</form>
+									</body>
+									</html>
+
+			onkeydown - When a user is pressing/holding down a key
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  alert("You pressed a key inside the input field");
+									}
+									</script>
+									</head>
+									<body>
+									<p>A function is triggered when the user is pressing a key in the input field.</p>
+									<input type="text" onkeydown="myFunction()">
+									</body>
+									</html>
+									
+			onkeypress - When a user is pressing/holding down a key
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  alert("You pressed a key inside the input field");
+									}
+									</script>
+									</head>
+									<body>
+									<p>A function is triggered when the user is pressing a key in the input field.</p>
+									<input type="text" onkeypress="myFunction()">
+									</body>
+									</html>
+
+			onkeyup - When the user releases a key
+			
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  var x = document.getElementById("fname");
+									  x.value = x.value.toUpperCase();
+									}
+									</script>
+									</head>
+									<body>
+									<p>A function is triggered when the user releases a key in the input field. The function transforms the character to upper case.</p>
+									Enter your name: <input type="text" id="fname" onkeyup="myFunction()">
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function writeMessage() {
+									  document.forms[0].mySecondInput.value = document.forms[0].myInput.value;
+									}
+									</script>
+									</head>
+									<body>
+									<p>The onkeyup event occurs when the a keyboard key is on its way UP.</p>
+									<form>
+									  Enter your name:
+									  <input type="text" name="myInput" onkeyup="writeMessage()" size="20">
+									  <input type="text" name="mySecondInput" size="20">
+									</form>
+									</body>
+									</html>
+
+		onkeydown vs onkeyup - Both
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function color(color) {
+									  document.forms[0].myInput.style.background = color;
+									}
+									</script>
+									</head>
+									<body>
+									<form>
+									Write a message:<br>
+									<input 
+									type="text" 
+									onkeydown="color('yellow')"
+									onkeyup="color('white')"
+									name="myInput">
+									</form>
+									</body>
+									</html>
+	Mouse Events--JAVASCRIPT DOM:
+	
+		onmouseover/onmouseout - When the mouse passes over an element
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1 onmouseover="style.color='red'" onmouseout="style.color='black'">Mouse over this text</h1>
+									</body>
+									</html>
+		
+		onmousedown/onmouseup - When pressing/releasing a mouse button
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction(elmnt, clr) {
+									  elmnt.style.color = clr;
+									}
+									</script>
+									</head>
+									<body>
+									<p onmousedown="myFunction(this,'red')" onmouseup="myFunction(this,'green')">
+									Click the text to change the color. A function, with parameters, is triggered when the mouse button is pressed down, and again, with other parameters, when the mouse button is released.
+									</p>
+									</body>
+									</html>
+
+		onmousedown - When mouse is clicked: Alert which element<!DOCTYPE html>
+		
+									<html>
+									<head>
+									<script>
+									function whichElement(e) {
+									  var targ;
+									  if (!e) {
+										var e = window.event;
+									  }
+									  if (e.target) {
+										targ=e.target;
+									  } else if (e.srcElement) {
+										targ=e.srcElement;
+									  }
+									  var tname;
+									  tname = targ.tagName;
+									  alert("You clicked on a " + tname + " element.");
+									}
+									</script>
+									</head>
+									<body onmousedown="whichElement(event)">
+									<p>Click somewhere in the document. An alert box will alert the name of the element you clicked on.</p>
+									<h3>This is a heading</h3>
+									<img border="0" src="smiley.gif" alt="Smiley" width="32" height="32">
+									<p>This is a paragraph.</p>
+									</body>
+									</html>
+
+		onmousedown - When mouse is clicked: Alert which button
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function WhichButton(event) {
+									  alert("You pressed button: " + event.button)
+									}
+									</script>
+									</head>
+									<body>
+									<div onmousedown="WhichButton(event);">Click this text (with one of your mouse-buttons)
+									<p>
+									0 Specifies the left mouse-button<br>
+									1 Specifies the middle mouse-button<br>
+									2 Specifies the right mouse-button</p>
+									<p><strong>Note:</strong> Internet Explorer 8, and earlier, returns another result:<br>
+									1 Specifies the left mouse-button<br>
+									4 Specifies the middle mouse-button<br>
+									2 Specifies the right mouse-button</p>
+									</div>
+									</body>
+									</html>
+
+		onmousemove/onmouseout - When moving the mouse pointer over/out of an image
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction(e) {
+									  x = e.clientX;
+									  y = e.clientY;
+									  coor = "Coordinates: (" + x + "," + y + ")";
+									  document.getElementById("demo").innerHTML = coor
+									}
+									function clearCoor() {
+									  document.getElementById("demo").innerHTML = "";
+									}
+									</script>
+									</head>
+									<body style="margin:0px;">
+									<div id="coordiv" style="width:199px;height:99px;border:1px solid" onmousemove="myFunction(event)" onmouseout="clearCoor()"></div>
+									<p>Mouse over the rectangle above, and get the coordinates of your mouse pointer.</p>
+									<p id="demo"></p>
+									</body>
+									</html>
+									
+		onmouseover/onmouseout - When moving the mouse over/out of an image
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function bigImg(x) {
+									  x.style.height = "64px";
+									  x.style.width = "64px";
+									}
+									function normalImg(x) {
+									  x.style.height = "32px";
+									  x.style.width = "32px";
+									}
+									</script>
+									</head>
+									<body>
+									<img onmouseover="bigImg(this)" onmouseout="normalImg(this)" border="0" src="smiley.gif" alt="Smiley" width="32" height="32">
+									<p>The function bigImg() is triggered when the user moves the mouse pointer over the image.</p>
+									<p>The function normalImg() is triggered when the mouse pointer is moved out of the image.</p>
+									</body>
+									</html>
+
+		onmouseover an image map
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function writeText(txt) {
+									  document.getElementById("desc").innerHTML = txt;
+									}
+									</script>
+									</head>
+									<body>
+									<img src ="planets.gif" width ="145" height ="126" alt="Planets" usemap="#planetmap" />
+									<map name="planetmap">
+									<area shape ="rect" coords ="0,0,82,126"
+									onmouseover="writeText('The Sun and the gas giant planets like Jupiter are by far the largest objects in our Solar System.')"
+									href ="sun.htm" target ="_blank" alt="Sun" />
+									<area shape ="circle" coords ="90,58,3"
+									onmouseover="writeText('The planet Mercury is very difficult to study from the Earth because it is always so close to the Sun.')"
+									href ="mercur.htm" target ="_blank" alt="Mercury" />
+									<area shape ="circle" coords ="124,58,8"
+									onmouseover="writeText('Until the 1960s, Venus was often considered a twin sister to the Earth because Venus is the nearest planet to us, and because the two planets seem to share many characteristics.')"
+									href ="venus.htm" target ="_blank" alt="Venus" />
+									</map> 
+									<p id="desc">Mouse over the sun and the planets and see the different descriptions.</p>
+									</body>
+									</html>
+
+	Click Events--JAVASCRIPT DOM:
+	
+		Acting to the onclick event:
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function displayDate() {
+									  document.getElementById("demo").innerHTML = Date();
+									}
+									</script>
+									</head>
+									<body>
+									<h2>My First JavaScript</h2>
+									<p id="demo">This is a paragraph.</p>
+									<button type="button" onclick="displayDate()">Display Date</button>
+									</body>
+									</html> 
+
+		onclick - When button is clicked<!DOCTYPE html>
+		
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  document.getElementById("demo").innerHTML = "Hello World";
+									}
+									</script>
+									</head>
+									<body>
+									<p>Click the button to trigger a function.</p>
+									<button onclick="myFunction()">Click me</button>
+									<p id="demo"></p>
+									</body>
+									</html>
+									
+		ondblclick - When a text is double-clicked
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  document.getElementById("demo").innerHTML = "Hello World";
+									}
+									</script>
+									</head>
+									<body>
+									<p ondblclick="myFunction()">Doubleclick this paragraph to trigger a function.</p>
+									<p id="demo"></p>
+									</body>
+									</html>
+									
+	Load Events--JAVASCRIPT DOM:
+	
+		onload - When the page has been loaded:
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  alert("Page is loaded");
+									}
+									</script>
+									</head>
+									<body onload="myFunction()">
+									<h2>Hello World!</h2>
+									</body>
+									</html>
+		
+		onload - When an image has been loaded
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function loadImage() {
+									  alert("Image is loaded");
+									}
+									</script>
+									</head>
+									<body>
+									<img src="w3javascript.gif" onload="loadImage()" width="100" height="132">
+									</body>
+									</html>
+		
+		onerror - When an error occurs when loading an image
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function imgError() {
+									  alert('The image could not be loaded.');
+									}
+									</script>
+									</head>
+									<body>
+									<img src="image.gif" onerror="imgError()">
+									<p>A function is triggered if an error occurs when loading the image. The function shows an alert box with a text.
+									In this example we refer to an image that does not exist, therefore the onerror event occurs.</p>
+									</body>
+									</html>
+									
+		onunload - When the browser closes the document
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  alert("Thank you for visiting W3Schools!");
+									}
+									</script>
+									</head>
+									<body onunload="myFunction()">
+									<h2>Welcome to my Home Page</h2>
+									<p>Close this window or press F5 to reload the page.</p>
+									</body>
+									</html>
+									
+		onresize - When the browser window is resized
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function myFunction() {
+									  var w = window.outerWidth;
+									  var h = window.outerHeight;
+									  var txt = "Window size: width=" + w + ", height=" + h;
+									  document.getElementById("demo").innerHTML = txt;
+									}
+									</script>
+									</head>
+									<body onresize="myFunction()">
+									<p>Try to resize the browser window.</p>
+									<p id="demo"> </p>
+									<p>Note: this example will not work properly in IE8 and earlier. IE8 and earlier do not support the outerWidth/outerHeight propery of the window object.</p>
+									</body>
+									</html>
+
+	JavaScript HTML DOM Navigation--JAVASCRIPT DOM:
+	
+									With the HTML DOM, you can navigate the node tree using node relationships.
+
+		DOM Nodes:
+		
+									According to the W3C HTML DOM standard, everything in an HTML document is a node:
+									The entire document is a document node
+									Every HTML element is an element node
+									The text inside HTML elements are text nodes
+									Every HTML attribute is an attribute node (deprecated)
+									All comments are comment nodes
+									
+									In a node tree, the top node is called the root (or root node)
+									Every node has exactly one parent, except the root (which has no parent)
+									A node can have a number of children
+									Siblings (brothers or sisters) are nodes with the same parent
+
+									<html>
+									  <head>
+										<title>DOM Tutorial</title>
+									  </head>
+									  <body>
+										<h1>DOM Lesson one</h1>
+										<p>Hello world!</p>
+									  </body>
+									</html>
+									// <html> is the root node
+									// <html> has no parents
+									// <html> is the parent of <head> and <body>
+									// <head> is the first child of <html>
+									// <body> is the last child of <html>
+									
+		Navigating Between Nodes:
+		
+									parentNode
+									childNodes[nodenumber]
+									firstChild
+									lastChild
+									nextSibling
+									previousSibling
+									
+		Child Nodes and Node Values:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1 id="id01">My First Page</h1>
+									<p id="id02"></p>
+									<script>
+									document.getElementById("id02").innerHTML = document.getElementById("id01").innerHTML; // My First Page
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1 id="id01">My First Page</h1>
+									<p id="id02"></p>
+									<script>
+									document.getElementById("id02").innerHTML = document.getElementById("id01").firstChild.nodeValue; // My First Page
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1 id="id01">My First Page</h1>
+									<p id="id02"></p>
+									<script>
+									document.getElementById("id02").innerHTML = document.getElementById("id01").childNodes[0].nodeValue; // My First Page
+									</script>
+									</body>
+									</html>
+									
+		DOM Root Nodes:
+		
+									There are two special properties that allow access to the full document:
+											document.body - The body of the document
+											document.documentElement - The full document
+											
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTMLDOM</h2>
+									<p>Displaying document.body</p>
+									<p id="demo"></p>
+									<script>
+									document.getElementById("demo").innerHTML = document.body.innerHTML; // JavaScript HTMLDOM. Displaying document.body
+									</script>
+									</body>
+									</html>
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript HTMLDOM</h2>
+									<p>Displaying document.documentElement</p>
+									<p id="demo"></p>
+									<script>
+									document.getElementById("demo").innerHTML = document.documentElement.innerHTML; // JavaScript HTMLDOM. Displaying document.documentElement
+									</script>
+									</body>
+									</html>
+									
+		The nodeName Property:
+		
+									The nodeName property specifies the name of a node.
+									
+									nodeName is read-only
+									nodeName of an element node is the same as the tag name
+									nodeName of an attribute node is the attribute name
+									nodeName of a text node is always #text
+									nodeName of the document node is always #document
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h1 id="id01">My First Page</h1>
+									<p id="id02"></p>
+									<script>
+									document.getElementById("id02").innerHTML = document.getElementById("id01").nodeName;
+									</script>
+									</body>
+									</html>
+									
+		The nodeValue Property:
+		
+									nodeValue for element nodes is null
+									nodeValue for text nodes is the text itself
+									nodeValue for attribute nodes is the attribute value
+
+	The Difference Between an HTMLCollection and a NodeList--JAVASCRIPT DOM:
+	
+			- A NodeList and an HTMLcollection is very much the same thing.
+			- Both are array-like collections (lists) of nodes (elements) extracted from a document. The nodes can be accessed by index numbers. The index starts at 0.
+			- Both have a length property that returns the number of elements in the list (collection).
+			- An HTMLCollection is a collection of document elements.
+			- A NodeList is a collection of document nodes (element nodes, attribute nodes, and text nodes).
+			- HTMLCollection items can be accessed by their name, id, or index number.
+			- NodeList items can only be accessed by their index number.
+			- An HTMLCollection is always a live collection. Example: If you add a <li> element to a list in the DOM, the list in the HTMLCollection will also change.
+			- A NodeList is most often a static collection. Example: If you add a <li> element to a list in the DOM, the list in NodeList will not change.
+			- The getElementsByClassName() and getElementsByTagName() methods return a live HTMLCollection.
+			- The querySelectorAll() method returns a static NodeList.
+			- The childNodes property returns a live NodeList.
+			
+			- A NodeList may look like an array, but it is not.
+			- You can loop through a NodeList and refer to its nodes by index.
+			- But, you cannot use Array methods like push(), pop(), or join() on a NodeList.
+
+	JavaScript HTML DOM Node Lists--JAVASCRIPT DOM:
+	
+		The HTML DOM NodeList Object
+			
+			- A NodeList object is a list (collection) of nodes extracted from a document.
+			- A NodeList object is almost the same as an HTMLCollection object.
+			- Some (older) browsers return a NodeList object instead of an HTMLCollection for methods like getElementsByClassName().
+			- All browsers return a NodeList object for the property childNodes. 
+			- Most browsers return a NodeList object for the method querySelectorAll().
+
+			The following code selects all <p> nodes in a document:
+				
+				<!DOCTYPE html>
+				<html>
+				<body>
+				<h2>JavaScript HTML DOM</h2>
+				<p>Hello World!</p>
+				<p>Hello Norway!</p>
+				<p id="demo"></p>
+				<script>
+				const myNodelist = document.querySelectorAll("p");
+				document.getElementById("demo").innerHTML = "The innerHTML of the second paragraph is: " + myNodelist[1].innerHTML;
+				</script>
+				</body>
+				</html>
+					
+			Note: The index starts at 0.
+		
+		HTML DOM Node List Length
+					
+					The length property defines the number of nodes in a node list:
+					
+						<!DOCTYPE html>
+						<html>
+						<body>
+						<h2>JavaScript HTML DOM</h2>
+						<p>Hellow World!</p>
+						<p>Hellow Norway!</p>
+						<p id="demo"></p>
+						<script>
+						const myNodelist = document.querySelectorAll("p");
+						document.getElementById("demo").innerHTML = "This document contains " + myNodelist.length + " paragraphs.";
+						</script>
+						</body>
+						</html>
+		
+		The length property is useful when you want to loop through the nodes in a node list:
+						
+						<!DOCTYPE html>
+						<html>
+						<body>
+						<h2>JavaScript HTML DOM</h2>
+						<p>Hello World!</p>
+						<p>Hello Norway!</p>
+						<p>Click the button to change the color of all p elements.</p>
+						<button onclick="myFunction()">Try it</button>
+						<script>
+						function myFunction() {
+						  const myNodelist = document.querySelectorAll("p");
+						  for (let i = 0; i < myNodelist.length; i++) {
+							myNodelist[i].style.color = "red";
+						  }
+						}
+						</script>
+						</body>
+						</html>
+						
+		The Difference Between an HTMLCollection and a NodeList
+			
+			- A NodeList and an HTMLcollection is very much the same thing.
+			- Both are array-like collections (lists) of nodes (elements) extracted from a document. The nodes can be accessed by index numbers. The index starts at 0.
+			- Both have a length property that returns the number of elements in the list (collection).
+			- An HTMLCollection is a collection of document elements.
+			- A NodeList is a collection of document nodes (element nodes, attribute nodes, and text nodes).
+			- HTMLCollection items can be accessed by their name, id, or index number.
+			- NodeList items can only be accessed by their index number.
+			- An HTMLCollection is always a live collection. Example: If you add a <li> element to a list in the DOM, the list in the HTMLCollection will also change.
+			- A NodeList is most often a static collection. Example: If you add a <li> element to a list in the DOM, the list in NodeList will not change.
+			- The getElementsByClassName() and getElementsByTagName() methods return a live HTMLCollection.
+			- The querySelectorAll() method returns a static NodeList.
+			- The childNodes property returns a live NodeList.
+		
+		Not an Array!
+		
+			- A NodeList may look like an array, but it is not.
+			- You can loop through a NodeList and refer to its nodes by index.
+			- But, you cannot use Array methods like push(), pop(), or join() on a NodeList.
+	
+	Others--JAVASCRIPT DOM:
+
+		What is the keycode of the key pressed?
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function whichButton(event) {
+									  document.getElementById("demo").innerHTML = event.keyCode;
+									}
+									</script>
+									</head>
+									<body onkeyup="whichButton(event)">
+									<p><b>Note:</b> Make sure the right frame has focus when trying this example!</p>
+									<p>Click on this page, and press a key on your keyboard.</p>
+									<p id="demo"></p>
+									</body>
+									</html>
+									
+		What are the coordinates of the cursor?
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function show_coords(event) {
+									  document.getElementById("demo").innerHTML = "X= " + event.clientX + "<br>Y= " + event.clientY;
+									}
+									</script>
+									</head>
+									<body>
+									<p onmousedown="show_coords(event)">
+									Click this paragraph to display the x and y coordinates of the mouse pointer.</p>
+									<p id="demo"></p>
+									</body>
+									</html>
+									
+		What are the coordinates of the cursor, relative to the screen?
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function coordinates(event) {
+									  document.getElementById("demo").innerHTML = "X = " + event.screenX + "<br>Y = " + event.screenY;
+									}
+									</script>
+									</head>
+									<body>
+									<p onmousedown="coordinates(event)">
+									Click this paragraph, to display the x and y coordinates of the cursor, relative to the screen.
+									</p>
+									<p id="demo"></p>
+									</body>
+									</html>
+
+		Was the shift key pressed?
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function isKeyPressed(event) {
+									  var text = "The shift key was NOT pressed!";
+									  if (event.shiftKey == 1) {
+										text = "The shift key was pressed!";
+									  }
+									  document.getElementById("demo").innerHTML = text;
+									}
+									</script>
+									</head>
+									<body onmousedown="isKeyPressed(event)">
+									<p>Click on this paragraph. An alert box will tell you if you pressed the shift key or not.</p>
+									<p id="demo"></p>
+									</body>
+									</html>
+									
+		Which event type occurred?
+		
+									<!DOCTYPE html>
+									<html>
+									<head>
+									<script>
+									function getEventType(event) { 
+									  document.getElementById("demo").innerHTML = event.type;
+									}
+									</script>
+									</head>
+									<body>
+									<p onmousedown="getEventType(event)">
+									Click on this paragraph. A message will tell what type of event was triggered.</p>
+									<p id="demo"></p>
+									</body>
+									</html>

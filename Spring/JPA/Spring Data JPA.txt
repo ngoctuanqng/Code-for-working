@@ -1,0 +1,19 @@
+Spring Boot REST: Spring Data JPA--SPRING:
+
+		public interface EmployeeRepository extends JpaRepository<Employee, Integer> { // Entity: Employee. Primary key: Integer
+			// that's it ... no need to write any code LOL!
+		}
+		
+		@Service
+		public class EmployeeServiceImpl implements EmployeeService {
+			private EmployeeRepository employeeRepository;
+			@Autowired
+			public EmployeeServiceImpl(EmployeeRepository theEmployeeRepository) {
+				employeeRepository = theEmployeeRepository;
+			}
+			@Override
+			public List<Employee> findAll() {
+				return employeeRepository.findAll();
+			}
+			…
+		}

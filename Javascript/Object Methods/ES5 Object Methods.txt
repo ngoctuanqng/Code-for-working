@@ -1,0 +1,156 @@
+ES5 Object Methods--Các kiến thức nền tảng JAVASCRIPT:
+
+		
+		Managing Objects:										
+									Object.create() // Create object with an existing object as prototype									
+									Object.defineProperty(object, property, descriptor) // Adding or changing an object property										
+									Object.defineProperties(object, descriptors) // Adding or changing object properties										
+									Object.getOwnPropertyDescriptor(object, property) // Accessing Properties										
+									Object.getOwnPropertyNames(object) // Returns all properties as an array										
+									Object.getPrototypeOf(object) // Accessing the prototype										
+									Object.keys(object) // Returns enumerable properties as an array
+		Protecting Objects:
+									
+									Object.preventExtensions(object) // Prevents adding properties to an object											
+									Object.isExtensible(object) // Returns true if properties can be added to an object											
+									Object.seal(object) // Prevents changes of object properties (not values)											
+									Object.isSealed(object) // Returns true if object is sealed											
+									Object.freeze(object) // Prevents any changes to an object											
+									Object.isFrozen(object) // Returns true if object is frozen
+		
+		Changing a Property Value:
+
+									Object.defineProperty(object, property, {value : value})
+									
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Object.defineProperty()</h2>
+									<p>This example changes a property value.</p>
+									<p id="demo"></p>
+									<script>
+									// Create an object:
+									const person = {
+									  firstName: "John",
+									  lastName: "Doe",
+									  language: "EN" 
+									};
+									// Change a property
+									Object.defineProperty(person, "language", {value:"NO"})
+									document.getElementById("demo").innerHTML = person.language; // NO
+									</script>
+									</body>
+									</html>
+									
+		Changing Meta Data:
+		
+			ES5 allows the following property meta data to be changed:
+			
+									writable : true      // Property value can be changed
+									enumerable : true    // Property can be enumerated
+									configurable : true  // Property can be reconfigured
+									writable : false     // Property value can not be changed
+									enumerable : false   // Property can be not enumerated
+									configurable : false // Property can be not reconfigured
+									
+			ES5 allows getters and setters to be changed:	
+			
+									get: function() { return language } // Defining a getter									
+									set: function(value) { language = value } // Defining a setter
+									
+			This example makes language read-only:
+			
+									Object.defineProperty(person, "language", {writable:false});
+									
+			This example makes language not enumerable:
+			
+									Object.defineProperty(person, "language", {enumerable:false});
+									
+		Listing All Properties:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Object.getOwnPropertyNames()</h2>
+									<p>This example list the properties of an object.</p>
+									<p id="demo"></p>
+									<script>
+									// Create an object:
+									const person = {
+									  firstName: "John",
+									  lastName: "Doe",
+									  language: "EN"
+									}
+									// Change Property
+									Object.defineProperty(person, "language", {enumerable:false});
+									// Display Properties
+									document.getElementById("demo").innerHTML = Object.getOwnPropertyNames(person); // firstName,lastName,language
+									</script>
+									</body>
+									</html>
+									
+		Listing Enumerable Properties:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Object.keys()</h2>
+									<p>This example list the enumerable properties of an object.</p>
+									<p id="demo"></p>
+									<script>
+									// Create an object:
+									const person = {
+									  firstName: "John",
+									  lastName: "Doe",
+									  language: "EN"
+									}
+									// Change Property
+									Object.defineProperty(person, "language", {enumerable:false});
+									// Display Properties
+									document.getElementById("demo").innerHTML = Object.keys(person); // firstName,lastName
+									</script>
+									</body>
+									</html>
+									
+		Adding a Property:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Object.defineProperty()</h2>
+									<p>This example adds a new property to an object.</p>
+									<p id="demo"></p>
+									<script>
+									// Create an object:
+									const person = {
+									  firstName: "John",
+									  lastName: "Doe",
+									  language: "EN"
+									};
+									// Add a property
+									Object.defineProperty(person, "year", {value:"2008"})
+									document.getElementById("demo").innerHTML = person.year; // 2008
+									</script>
+									</body>
+									</html>
+									
+		Adding Getters and Setters:
+		
+									<!DOCTYPE html>
+									<html>
+									<body>
+									<h2>JavaScript Object.defineProperty()</h2>
+									<p>This example uses the defineProperty() method to add a getter and a setter.</p>
+									<p id="demo"></p>
+									<script>
+									// Create an object:
+									const person = {firstName:"John", lastName:"Doe"};
+									// Define a getter
+									Object.defineProperty(person, "fullName", {
+									  get: function () {return this.firstName + " " + this.lastName;}
+									});
+									// Display full name
+									document.getElementById("demo").innerHTML = person.fullName;
+									</script>
+									</body>
+									</html>

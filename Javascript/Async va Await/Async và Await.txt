@@ -1,0 +1,46 @@
+Async và Await--JAVASCRIPT:
+
+	- Trong JavaScript, async và await là các từ khóa được sử dụng để làm việc với các hoạt động bất đồng bộ (asynchronous) một cách dễ dàng và trực quan hơn. Chúng được giới thiệu
+	trong ECMAScript 2017 (ES8) và giúp cải thiện cú pháp khi làm việc với Promises.
+	- Từ khóa async được sử dụng để khai báo một hàm bất đồng bộ.
+	- Một hàm được khai báo với async sẽ tự động trả về một Promise. Nếu hàm trả về một giá trị không phải Promise, giá trị đó sẽ được bọc trong một Promise đã hoàn thành (resolved).
+	- await chỉ có thể được sử dụng bên trong các hàm được khai báo với async.
+	- Cách thức hoạt động:
+		Khi await được sử dụng, JavaScript sẽ tạm dừng thực thi hàm cho đến khi Promise hoàn thành.
+		Nếu Promise hoàn thành (resolved), await sẽ trả về giá trị của Promise.
+		Nếu Promise bị từ chối (rejected), await sẽ ném ra lỗi (throw an error), và bạn có thể bắt lỗi này bằng cách sử dụng try...catch.
+	- Các hàm async và await vẫn dựa trên Promises, do đó, hiểu biết cơ bản về Promises là cần thiết.
+	
+	async function myFunction() {
+		return "Hello, World!";
+	}
+	// Tương đương với:
+	function myFunction() {
+		return Promise.resolve("Hello, World!");
+	}
+	myFunction().then(console.log); // "Hello, World!"
+	
+	async function fetchData() {
+		let response = await fetch('https://api.example.com/data');
+		let data = await response.json();
+		return data;
+	}
+	fetchData().then(data => console.log(data));
+	
+	async function fetchData() {
+		try {
+			let response = await fetch('https://api.example.com/data');
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			let data = await response.json();
+			return data;
+		} catch (error) {
+			console.error('There has been a problem with your fetch operation:', error);
+		}
+	}
+	fetchData().then(data => {
+		if (data) {
+			console.log(data);
+		}
+	});

@@ -1,0 +1,9 @@
+Spring Boot REST Path Variables--SPRING:	
+												
+		@GetMapping("/students/{studentId}") // define endpoint for "/students/{studentId}" - return student at index
+		public Student getStudent(@PathVariable int studentId) {
+			List<Student> theStudents = new ArrayList<>();
+			// populate theStudents
+			…
+			return theStudents.get(studentId);
+		}
