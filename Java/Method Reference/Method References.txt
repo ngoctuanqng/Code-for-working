@@ -1,0 +1,224 @@
+Method References là gì?
+	Chúng ta có thể sử dụng Method References để thay thế cho các Lambda Expression khi Lamba gọi
+	một phương thức nào đó đã được định nghĩa sẵn.
+	
+	Chú ý: khi sử dụng toán tử dấu 2 chấm (::) để tham chiếu phương thức. Lúc này phương thức trừu
+	tượng của functional interface phải có số lượng và kiểu dữ liệu của các tham số PHẢI giống với
+	phương thức của lớp được tham chiếu.
+	
+	Java cung cấp một tính năng mới gọi là Method References (phương thức tham chiếu) trong Java 8.
+	
+	Method References là một tính năng khá hay và liên quan đến việc sử dụng Lambda Expression. Nó
+	cung cấp các cú pháp (syntax) hữu ích để truy cập trực tiếp tới các constructor hoặc method đã
+	tồn tại của các lớp hoặc đối tượng trong Java mà không cần thực thi chúng. Nó làm cho việc viết
+	code của chúng ta trở nên đơn giản hơn rất nhiều và nhìn chúng đẹp hơn.
+	
+	Method References là cú pháp viết tắt của biểu thức Lambda để gọi phương thức. Ví dụ, nếu biểu thức Lamda được viết như sau:
+		str -> System.out.println(str)
+		
+	Chúng ta có thể viết lại theo cách của Method references như sau:
+		System.out::println
+		
+	Java 8 cho phép truyền một tham chiếu của một method hoặc constructor thông qua việc sử dụng từ khóa ::
+	
+	Chúng ta không thể truyền tham số cho các Method References, phải sử dụng đi kèm với Functional Interfaces.
+	
+	Nó giống như biểu thức lambda. Chỉ khác nhau ở chỗ đó là toán tử :: tham chiếu đến phương thức bởi tên của phương thức.
+Các loại Method References
+	Tham chiếu đến một static method – Class::staticMethod
+	Tham chiếu đến một instance method của một đối tượng cụ thể – object::instanceMethod
+	Tham chiếu đến một instance method của một đối tượng tùy ý của một kiểu cụ thể – Class::instanceMethod
+	Tham chiếu đến một constuctor – Class::new
+Tham chiếu đến một static method
+	Cú pháp:
+		Class::staticMethod
+	Ví dụ:
+		package com.gpcoder.method_reference;
+ 
+@FunctionalInterface
+interface ExecuteFunction {
+    public int execute(int a, int b);
+}
+ 
+class MathUtils {
+    public static int sum(int a, int b) {
+        return a + b;
+    }
+ 
+    public static int minus(int a, int b) {
+        return a - b;
+    }
+}
+ 
+public class DemoMethodReference1 {
+    public static void main(String[] args) {
+        int a = 10;
+        int b = 7;
+ 
+        int sum = doAction(a, b, MathUtils::sum);
+        System.out.println(a + " + " + b + " = " + sum); // 10 + 7 = 17
+ 
+        int minus = doAction(a, b, MathUtils::minus);
+        System.out.println(a + " - " + b + " = " + minus); // 10 - 7 = 3
+    }
+ 
+    public static int doAction(int a, int b, ExecuteFunction func) { // truyền tham chiếu hàm vào vị trí functional interface
+        return func.execute(a, b);
+    }
+}
+		Thông qua ví dụ trên, bạn có thể thấy cách thức sử dụng từ khóa :: để truyền vào tham chiếu của một method. Nếu
+		bạn gọi một method, mà trong method đó có một tham số là Functional Interface, bạn có thể truyền vào một tham
+		chiếu method có cấu trúc giống với cấu trúc method định nghĩa trong Functional interface.
+		
+Tham chiếu đến một instance method của một đối tượng cụ thể
+	Cú pháp:
+		object::instanceMethod
+	Ví dụ:
+		package com.gpcoder.method_reference;
+ 
+@FunctionalInterface
+interface ExecuteFunction2 {
+    public int execute(int a, int b);
+}
+ 
+class MathUtils2 {
+    public int sum(int a, int b) {
+        return a + b;
+    }
+ 
+    public int minus(int a, int b) {
+        return a - b;
+    }
+}
+ 
+public class DemoMethodReference2 {
+    public static void main(String[] args) {
+        int a = 10;
+        int b = 7;
+ 
+        MathUtils2 obj = new MathUtils2();
+        int sum = doAction(a, b, obj::sum);
+        System.out.println(a + " + " + b + " = " + sum); // 10 + 7 = 17
+ 
+        int minus = doAction(a, b, obj::minus);
+        System.out.println(a + " - " + b + " = " + minus); // 10 - 7 = 3
+    }
+ 
+    public static int doAction(int a, int b, ExecuteFunction2 func) {
+        return func.execute(a, b);
+    }
+}
+		Như bạn thấy cách sử dụng hoàn toàn tương tự như tham chiếu đến một static method.
+Tham chiếu đến một instance method của một đối tượng tùy ý của một kiểu cụ thể
+	Cú pháp:
+		Class::instanceMethod
+	Ví dụ:
+		package com.gpcoder.method_reference;
+ 
+import java.util.Arrays;
+ 
+public class DemoMethodReference3 {
+    public static void main(String[] args) {
+        String[] stringArray = { "Java", "C++", "PHP", "C#", "Javascript" };
+ 
+        Arrays.sort(stringArray, String::compareToIgnoreCase);
+        for (String str : stringArray) {
+            System.out.println(str);
+        }
+    }
+}
+Tham chiếu đến một constuctor
+	Cú pháp:
+		Class::new
+	Ví dụ:
+		package com.gpcoder.method_reference;
+ 
+@FunctionalInterface
+interface SayHello {
+    void display(String say);
+}
+ 
+class Hello implements SayHello {
+    public Hello(String say) {
+        System.out.print(say);
+    }
+ 
+    @Override
+    public void display(String say) {
+        System.out.println(say);
+    }
+}
+ 
+public class DemoMethodReference4 {
+ 
+    public static void main(String[] args) {
+        SayHello ref = Hello::new;
+        ref.display("Welcome to gpcoder.com");
+    }
+ 
+}
+Ví dụ toán tử dấu 2 chấm (::) trong Java
+	Tạo một FunctionalInterface chỉ có một phương thức trừu tượng accept().
+		package vn.viettuts.lambda;
+ 
+@FunctionalInterface
+public interface MyFunction {
+    int accept(int a, int b);
+}
+	Tạo lớp MyUtils có 2 phương thức add() và minus().
+		package vn.viettuts.lambda;
+ 
+public class MyUtils {
+    public static int add(int a, int b) {
+        return a + b;
+    }
+ 
+    public static int minus(int a, int b) {
+        return a - b;
+    }
+}
+	Tạo lớp App có 2 phương thức action() và main() để chạy ứng dụng. Hàm action() xử lý giá trị của tham số a
+	và b, lúc này chúng ta chưa biết hàm accept(a,b) trả về giá trị gì vì nó chỉ là một hàm trừu tượng chưa có
+	thân hàm. Chúng ta sẽ cung cấp thân hàm cho phương thức MyFunction.accept() trong hàm main().
+		package vn.viettuts.lambda;
+ 
+public class App {
+    /**
+     * Xử lý giá trị của tham số a và b.
+     * Lúc này chúng ta chưa biết hàm accept(a,b) trả về giá trị gì, 
+     * vì nó chỉ là một hàm trừu tượng chưa có thân hàm.
+     * Chúng ta sẽ cung cấp thân hàm cho phương thức MyFunction.accept() 
+     * trong hàm main().
+     */
+    public int action(int a, int b, MyFunction func) {
+        return func.accept(a, b);
+    }
+ 
+    public static void main(String[] args) {
+        App app = new App();
+        // tạo đối tượng nặc danh addFunc và cung cấp thân hàm cho hàm accept()
+        // bây giờ hàm accept() sẽ có thân hàm giống như hàm MyUtils.add().
+        // nghĩa là hệ thống copy hàm MyUtils.add() như một bản cài đặt 
+        // cho hàm accept()
+        MyFunction addFunc = MyUtils::add;
+        int c1 = app.action(10, 2, addFunc);
+        System.out.println("Tổng 2 số: " + c1);
+         
+        MyFunction minusFunc = MyUtils::minus;
+        int c2 = app.action(10, 2, minusFunc);
+        System.out.println("Hiệu 2 số: " + c2);
+         
+        MyFunction maxFunc = Math::max;
+        int c3 = app.action(10, 2, maxFunc);
+        System.out.println("MAX: " + c3);
+         
+        MyFunction minFunc = Math::min;
+        int c4 = app.action(10, 2, minFunc);
+        System.out.println("MIN: " + c4);
+    }
+}
+		Kết quả:
+			Tổng 2 số: 12
+Hiệu 2 số: 8
+MAX: 10
+MIN: 2
