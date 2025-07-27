@@ -1,0 +1,221 @@
+GROUP BY Statement và Aggregate Functions--MySQL:
+
+	- Group by là nhóm các giá trị bằng nhau trong 1 cột về 1 row duy nhất
+	- Hàm tổng hợp trong mệnh đề có group by sẽ tính theo nhóm group by, trong mệnh đề không có group by sẽ tính với tất cả row. Nếu trong group by mà select không theo hàm tổng hợp
+	hoặc không phải cột được group by sẽ gây ra lỗi, trừ trường hợp nếu nó chỉ có 1 kết quả duy nhất theo cột group by thì mới không gây ra lỗi
+	- Nếu đã có group by thì bất kì select nào cũng phải thuộc group by hoặc aggregate function.
+	- Trong SQL, khi bạn sử dụng các hàm tổng hợp (aggregate functions) như SUM(), COUNT(), AVG(), MAX(), MIN(), nhưng không có câu lệnh GROUP BY, thì hàm tổng hợp sẽ áp dụng trên
+	toàn bộ tập kết quả của truy vấn, không phân nhóm dữ liệu. Kết quả trả về sẽ là một giá trị duy nhất đại diện cho tất cả các hàng trong tập dữ liệu.
+	- Nếu bạn muốn tính toán tổng hợp trên toàn bộ bảng hoặc một phần của bảng mà không cần phân nhóm, bạn có thể sử dụng các hàm tổng hợp mà không cần câu lệnh GROUP BY. Trong
+	trường hợp này, hàm tổng hợp sẽ được áp dụng cho toàn bộ tập hợp kết quả.
+	- Chỉ các cột GROUP BY có thể được dùng bao gồm trong mệnh đề SELECT. Để dùng các cột khác trong SELECT, dùng hàm tổng hợp.
+	- Bất kỳ một cột hay biểu thức trong danh sách của SELECT không phải là hàm nhóm dữ liệu thì phải có mệnh đề GROUP BY (nếu không có thì trong 1 group by của 1 cột sẽ có nhiều
+	giá trị của một cột SELECT khác mà không có group by, lúc đó tạo nên nhiều row với các giá trị khác nhau phá vỡ nguyên tắc group by)
+	- Trong hệ quản trị cơ sở dữ liệu, các hàm tổng hợp là một hàm trong đó các giá trị của nhiều hàng được gom nhóm lại với nhau để làm đầu vào cho các tiêu chí nhất định để tạo
+	thành một giá trị duy nhất có ý nghĩa quan trọng hơn.
+	- The GROUP BY statement is often used with aggregate functions (COUNT(), MAX(), MIN(), SUM(), AVG()) to group the result-set by one or more columns.																
+	- Không thể sử dụng mệnh đề WHERE để giới hạn bớt các nhóm; Sử dụng mệnh đề HAVING để lọc bớt các nhóm; Không được phép sử dụng các hàm nhóm dữ liệu trong mệnh đề WHERE.
+	- Đứng sau mệnh đề WHERE nếu có và trước HAVING.
+	- Có thể bao gồm một hoặc nhiều cột để tạo thành một hoặc nhiều nhóm dựa trên cột đó.
+	- Những cột nào select mới theo nguyên tắc, còn những cột mà không select thì sẽ không bị ảnh hưởng
+	- Hàm tổng hợp sẽ được tính toán theo vùng của từng nhóm group by
+	- Đôi khi có thể select 1 cột bình thường khi cột đó không phải là hàm tổng hợp hay là group by trong câu sql có group by nếu cột đó có giá trị riêng biệt đối với mỗi phần của cột group by
+	- Where không check theo group by mà chỉ là lọc dữ liệu trước khi group by, để lọc dữ liệu sau khi group by ta dùng having
+	- Mệnh đề group by cũng phải thỏa điều kiện chứa cột group by hoặc là hàm tổng hợp với 1 cột thường
+											
+	Syntax:
+											
+											SELECT column_name(s)
+											FROM table_name
+											WHERE condition
+											GROUP BY column_name(s)
+											ORDER BY column_name(s);
+	
+	Example:
+											
+											SELECT 
+												product_id,
+												product_name,
+												SUM(sale_amount) AS total_sales
+											FROM sales
+											GROUP BY product_id, product_name
+											HAVING SUM(sale_amount) > 1000;
+	
+											select code30.CD_TP_ID, count(code20.FK_CD_TP_ID)
+											from tb_m00_codes030 code30 
+											join tb_m00_codes020 code20
+												on code30.CD_TP_ID = code20.CD_TP_ID
+											group by code30.CD_TP_ID
+											
+											--Sai:
+											SELECT DEPARTMENT_ID, AVG(SALARY)
+											FROM EMPLOYEES
+											 
+											--Đúng:
+											SELECT DEPARTMENT_ID, AVG(SALARY)
+											FROM EMPLOYEES
+											GROUP BY DEPARTMENT_ID
+											
+											SELECT DEPARTMENT_ID, SUM(SALARY)
+											FROM EMPLOYEES
+											WHERE DEPARTMENT_ID IN(10, 20, 30)
+											GROUP BY DEPARTMENT_ID
+											HAVING SUM(SALARY) > 10000
+											ORDER BY DEPARTMENT_ID
+		
+		Ví dụ với Aggregate function:
+		
+											+------------+----------+-------------+-------+
+											|IDChuyenmuc |  Muccon  |Chuyenmuclon | Sobai |
+											+------------+----------+-------------+-------+
+											|    1       |SQL Server|Lap trinh    | 101   |
+											|    2       |Facebook  |Mang xa hoi  | 152   |
+											|    3       |Python    |Lap trinh    | 101   |
+											|    4       |JavaScript|Lap trinh    | 122   |
+											|    5       |Chrome    |Web          | 94    |
+											|    6       |Instagram |Mang xa hoi  | 165   |
+											+------------+----------+-------------+-------+								
+			
+			Dùng hàm SUM:
+
+											SELECT Chuyenmuclon, SUM(Sobai) AS "Tong"
+											FROM [Quantrimang.com]
+											GROUP BY Chuyenmuclon;
+											
+											+--------------+------+
+											| Chuyenmuclon | Tong |
+											+--------------+------+
+											|Lap trinh     | 324  |
+											|Mang xa hoi   | 317  |
+											|Web           | 94   |
+											+--------------+------+
+											
+			Dùng hàm COUNT:
+										
+											SELECT COUNT(Chuyenmuclon), Chuyenmuclon
+											FROM [Quantrimang.com]
+											WHERE Chuyenmuclon = 'Lap trinh'
+											GROUP BY Chuyenmuclon;
+											
+											+------+--------------+
+											|      | Chuyenmuclon |
+											+------+--------------+
+											|  3   |  Lap trinh   |
+											+------+--------------+
+											
+			Dùng hàm MIN:
+			
+											SELECT Chuyenmuclon, MIN(Sobai) AS 'So luong it nhat'
+											FROM [Quantrimang.com]
+											GROUP BY Chuyenmuclon;
+
+											+--------------+------------------+
+											| Chuyenmuclon | So luong it nhat |
+											+--------------+------------------+
+											|Lap trinh     | 101              |
+											|Mang xa hoi   | 152              |
+											|Web           | 94               |
+											+--------------+------------------+	
+
+			Dùng hàm MAX:
+
+											SELECT Chuyenmuclon, MAX(Sobai) AS 'So bai cao nhat'
+											FROM [Quantrimang.com]
+											GROUP BY Chuyenmuclon;
+
+											+--------------+------------------+
+											| Chuyenmuclon | So bai cao nhat  |
+											+--------------+------------------+
+											|Lap trinh     | 122              |
+											|Mang xa hoi   | 165              |
+											|Web           | 94               |
+											+--------------+------------------+	
+
+			Dùng với mệnh đề HAVING:
+
+											SELECT r.name, COUNT(*) AS albums
+											FROM albums l, artists r
+											WHERE artist_id=r.id
+											GROUP BY artist_id
+											HAVING albums > 1;
+											
+											+------------+--------+
+											| name       | albums |
+											+------------+--------+
+											| Pink Floyd | 2      |
+											| Adele      | 2      |
+											+------------+--------+			
+
+			Các ví dụ khác:
+			
+				Ví dụ 1:
+
+											Tính toán miễn là cột còn lại có trong hàm tổng hợp là vẫn thỏa điều kiện
+											
+											SELECT Request_at as Day,
+												   ROUND(COUNT(IF(Status != 'completed', TRUE, NULL)) / COUNT(*), 2) AS 'Cancellation Rate'
+											FROM Trips // Chú ý việc code sẽ đi từ đây thay vì bắt đầu từ select, select luôn là cuối cùng
+											WHERE (Request_at BETWEEN '2013-10-01' AND '2013-10-03')
+												  AND Client_id NOT IN (SELECT Users_Id FROM Users WHERE Banned = 'Yes')
+											GROUP BY Request_at;
+											
+											select t.Request_at Day, 
+												   round(sum(case when t.Status like 'cancelled_%' then 1 else 0 end)/count(*),2) Rate
+											from Trips t 
+											inner join Users u 
+											on t.Client_Id = u.Users_Id and u.Banned='No'
+											where t.Request_at between '2013-10-01' and '2013-10-03'
+											group by t.Request_at
+											
+											SELECT T.request_at AS Day,
+												ROUND(SUM(CASE
+														WHEN T.status = 'cancelled_by_driver' OR T.status = 'cancelled_by_client' THEN 1
+														ELSE 0
+													END) / SUM(1), 2) AS 'Cancellation Rate' // SUM(1) sẽ tính tổng của giá trị 1 cho mỗi hàng trong tập kết quả của truy vấn, tương tự như COUNT(*).
+											FROM Trips AS T, Users AS U1, Users AS U2
+											WHERE   (T.driver_id =  U1.users_id AND U1.role = 'driver' AND U1.banned = 'No')
+													AND (T.client_id =  U2.users_id AND U2.role = 'client' AND U2.banned = 'No')
+													AND T.request_at BETWEEN '2013-10-01' AND '2013-10-03'
+											GROUP BY T.request_at
+											ORDER BY T.request_at
+											
+											select distinct product_id, 10 as price
+											from Products
+											group by product_id
+											having (min(change_date) > "2019-08-16")
+											union
+											select p2.product_id, new_price
+											from Products p2
+											where (p2.product_id, p2.change_date) in
+											(
+												select product_id, max(change_date) as recent_date
+												from Products
+												where change_date <= "2019-08-16"
+												group by product_id
+											)
+											
+											select requester_id as id,
+												(select count(*) from RequestAccepted  where (requester_id = id or accepter_id = id)) as num
+											from RequestAccepted
+											group by requester_id
+											union 
+											select accepter_id as id,
+												(select count(*) from RequestAccepted  where (requester_id = id or accepter_id = id)) as num
+											from RequestAccepted
+											group by accepter_id
+											order by num desc limit 1;
+											
+											// group by sau chỉ cho phần select trong (), select đầu không theo group by nên sẽ tính cho tất cả row
+											SELECT ROUND(COUNT(t2.player_id)/COUNT(t1.player_id),2) AS fraction
+											FROM
+											(SELECT player_id, MIN(event_date) AS first_login FROM Activity GROUP BY player_id) t1
+											LEFT JOIN Activity t2
+											ON t1.player_id = t2.player_id AND t1.first_login = t2.event_date - 1
+											
+											// mỗi id sẽ có mỗi name riêng nên không cần hàm tổng hợp cho cột name
+											Select m.name
+											from employee as e
+											inner join employee as m
+											on e.managerId=m.id
+											group by e.managerId 
+											having count(e.id)>=5

@@ -1,0 +1,54 @@
+Store--Redux Toolkit:
+	
+	- Các bạn hình dung Redux Store như 1 nơi lưu global state mà tất cả các Component trong phạm vi của Store đều
+	có thể truy xuất để lấy dữ liệu hoặc cập nhật dữ liệu. Giao diện của các nent đó cũng sẽ được tự động cập nhật khi state thay đổi.
+	- Trong Redux, trạng thái state của application được quản lý bởi một đối tượng gọi là store.
+	- Với các dự án lớn thì trong Store có thể chia ra nhiều Slice (nhóm các state theo chức năng)
+	- Khai báo phạm vi sử dụng Store, dùng cho toàn bộ website nên sẽ khai báo ở file index.js
+	- Store là nơi Redux dùng để lưu toàn bộ state của ứng dụng. Nó giống như một cái nhà kho vậy, khi một component có nhu cầu sử dụng
+	state nào đấy chỉ cần vào trong store để lấy ra.
+	
+	import React from "react";
+	import ReactDOM from "react-dom";
+	import { Provider } from "react-redux";
+	import { store } from "./store/index";
+	import App from "./App";									
+	ReactDOM.render(
+	  <Provider store={store}>
+		<App /> // Bọc App component vào trong Store Provider để App và toàn bộ Component con đều có thể truy xuất đến Store
+	  </Provider>,
+	  document.getElementById("root")
+	);
+	
+	// store/index.js
+	import { configureStore } from "@reduxjs/toolkit";
+	import userReducer from "./userSlice";
+	export const store = configureStore({
+	  reducer: {
+		user: userReducer  // Khai báo 1 slice tên là user với giá trị là userReducer được export ở file userSlice
+		// Có thể khai báo nhiều slice khác tương tự
+	  }
+	});
+	
+	// store/userSlice.js
+	import { createSlice } from "@reduxjs/toolkit";										
+	const initialState = { // Khởi tạo state cho slice, có thể kèm giá trị mặc định ban đầu
+	  username: "Guest"  // State username với giá trị mặc định là "Guest"
+	  // Có thể khai báo nhiều state khác nữa
+	};										
+	export const userSlice = createSlice({ // Cấu hình slice
+	  name: "user",  // Tên của slice, mỗi slice đặt 1 tên khác nhau để phân biệt
+	  initialState,
+	  // Reducers chứa các hàm xử lý cập nhật state
+	  reducers: {
+		updateUsername: () => {},
+	  }
+	});										
+	export const { updateUsername } = userSlice.actions; // Export action ra để sử dụng cho tiện.
+														 // Action là 1 hàm trả về object dạng {type, payload}, chạy thử console.log(updateUsername()) để xem chi tiết
+	
+	
+	export const selectUsername = state => state.user.username; // Hàm giúp lấy ra state mong muốn.
+																// Hàm này có 1 tham số là root state là toàn bộ state trong store, chạy thử console.log(state) trong nội dung hàm để
+																// xem chi tiết										
+	export default userSlice.reducer; // Export reducer để nhúng vào Store

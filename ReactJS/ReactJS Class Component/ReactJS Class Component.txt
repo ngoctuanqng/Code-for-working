@@ -1,0 +1,509 @@
+ReactJS Class Component--REACTJS:
+
+			- Before React 16.8, Class components were the only way to track state and lifecycle on a React component. Function components were considered "state-less".
+			- Components are independent and reusable bits of code. They serve the same purpose as JavaScript functions, but work in isolation and return HTML via a render() function.
+			- Components come in two types, Class components and Function components
+			- The component has to include the extends React.Component statement, this statement creates an inheritance to React.Component, and gives your component access to
+			React.Component's functions.
+			- The component also requires a render() method, this method returns HTML.
+			
+			import React from 'react';
+			import ReactDOM from 'react-dom/client';
+			class Car extends React.Component {
+			  render() {
+				return <h2>Hi, I am a Car!</h2>;
+			  }
+			}
+			ReactDOM.render(<Car />, document.getElementById('root'));
+										
+	Làm Thế Nào React Hook Có Thể Thay Thế Class Component--ReactJS Class Component:
+	
+				- Sử dụng useEffect để thay thế
+				- Nếu chúng ta sử dụng useEffect như một hàm thông thường, không truyền bất kỳ tham số hay mảng dependencies nào, thì mặc định các lệnh trong hàm sẽ được thực hiện mỗi khi
+				component được re-render.
+										
+		Mounting:
+		
+					Đây là quá trình component được khởi tạo và render lần đầu tiên, nó có phương thức chính là componentDidMount. Sau khi 
+					component xuất hiện ở DOM, những câu lệnh bên trong componentDidMount sẽ được thực hiện, nhưng chỉ một lần duy
+					nhất. Để làm được như vậy với useEffect, ta cần truyền một mảng dependencies rỗng vào.
+					
+					import React, { useState, useEffect } from 'react';
+					function Example() {
+					  const [count, setCount] = useState(0);
+					  useEffect(() => {
+						console.log('I run only on the first render: mount.');
+					  }, []);
+					  return (
+						<div>
+						  <p>You clicked {count} times</p>
+						  <button onClick={() => setCount(count + 1)}>Click me</button>
+						</div>
+					  );
+					};
+										
+		Updating:
+		
+										- Nó có phương thức chính là componentDidUpdate
+										- Trong trường hợp ta muốn thay đổi dữ liệu khi re-render, song chỉ giới hạn trong một vài phần
+										tử trong component đó thì ta chỉ cần truyền vào một mảng dependencies các phần tử đấy,
+										như thế này :
+										
+											import React, { useState, useEffect } from 'react';
+											function Example() {
+											  const [count, setCount] = useState(0);
+											  const [countSub, setCountSub] = useState(0);
+											  useEffect(() => {
+												console.log(`You clicked ${count} times`);
+											  }, [count]);
+											  return (
+												<div>
+												  <p>You clicked {count} times</p>
+												  <button onClick={() => setCount(count + 1)}>Click me</button>
+												  <p>You clicked {countSub} times</p>
+												  <button onClick={() => setCountSub(countSub + 1)}>Click your</button>
+												</div>
+											  );
+											};		
+
+		Unmounting:
+
+										- Như vậy ta đã hiểu về cách useEffect thay thế componentDidMount() và componentDidUpdate() vậy còn
+										componentWillUnMount() thì sao. Đât là lúc mà ta sử dụng đầy đủ cú pháp useEffect với hàm return mà nãy
+										giờ vẫn chưa nhắc tới.
+										- Như vậy là mỗi khi component sắp bị unmount nó sẽ báo console giống như componentWillUnMount().
+										
+										import React, { useState, useEffect } from 'react';
+										function Example() {
+										  const [count, setCount] = useState(0);
+										  useEffect(() => {
+											console.log(`You clicked ${count} times`);
+											return(() => console.log('cleanup'))
+										  }, [count]);
+										  return (
+											<div>
+											  <p>You clicked {count} times</p>
+											  <button onClick={() => setCount(count + 1)}>Click me</button>
+											</div>
+										  );
+										};
+	
+	Component Constructor--ReactJS Class Component:
+	
+										- If there is a constructor() function in your component, this function will be called when the component gets initiated.
+										- The constructor function is where you initiate the component's properties.
+										- In React, component properties should be kept in an object called state.
+										- The constructor function is also where you honor the inheritance of the parent component by including the
+										super() statement, which executes the parent component's constructor function, and your component has access to
+										all the functions of the parent component (React.Component).
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Car extends React.Component {
+										  constructor() {
+											super();
+											this.state = {color: "red"};
+										  }
+										  render() {
+											return <h2>I am a {this.state.color} Car!</h2>;
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Car />);
+										
+	Props--ReactJS Class Component:
+	
+										- Another way of handling component properties is by using props.
+										- Props are like function arguments, and you send them into the component as attributes.
+										- If your component has a constructor function, the props should always be passed to the constructor
+										and also to the React.Component via the super() method.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Car extends React.Component {
+										  render() {
+											return <h2>I am a {this.props.color} Car!</h2>;
+										  }
+										}
+										ReactDOM.render(<Car color="red"/>, document.getElementById('root'));
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Car extends React.Component {
+										  constructor(props) {
+											super(props);
+										  }
+										  render() {
+											return <h2>I am a {this.props.model}!</h2>;
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Car model="Mustang"/>);
+										
+	React Class Component State--ReactJS Class Component:
+	
+										- React Class components have a built-in state object.
+										- To change a value in the state object, use the this.setState() method.
+										- The state object is where you store property values that belongs to the component.
+										- The state object is initialized in the constructor
+										- Refer to the state object anywhere in the component by using the this.state.propertyname syntax
+										- When a value in the state object changes, the component will re-render, meaning that the output
+										will change according to the new value(s).
+										- Always use the setState() method to change the state object, it will ensure that the component
+										knows its been updated and calls the render() method (and all the other lifecycle methods).
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Car extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {
+											  brand: "Ford",
+											  model: "Mustang",
+											  color: "red",
+											  year: 1964
+											};
+										  }
+										  changeColor = () => {
+											this.setState({color: "blue"});
+										  }
+										  render() {
+											return (
+											  <div>
+												<h1>My {this.state.brand}</h1>
+												<p>
+												  It is a {this.state.color}
+												  {this.state.model}
+												  from {this.state.year}.
+												</p>
+												<button
+												  type="button"
+												  onClick={this.changeColor}
+												>Change color</button>
+											  </div>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Car />);
+										
+	Lifecycle of Components--ReactJS Class Component:
+	
+		Mounting:
+
+										- Mounting means putting elements into the DOM.
+										- The render() method is required and will always be called, the others are optional and will
+										be called if you define them.
+										
+			constructor:
+			
+										- The constructor() method is called before anything else, when the component is initiated, and it
+										is the natural place to set up the initial state and other initial values.
+										- The constructor() method is called with the props, as arguments, and you should always start by calling
+										the super(props) before anything else, this will initiate the parent's constructor method and
+										allows the component to inherit methods from its parent (React.Component).
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Header extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {favoritecolor: "red"};
+										  }
+										  render() {
+											return (
+											  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header />);
+										
+			getDerivedStateFromProps:
+			
+										- The getDerivedStateFromProps() method is called right before rendering the element(s) in the DOM.
+										- This is the natural place to set the state object based on the initial props.
+										- It takes state as an argument, and returns an object with changes to the state.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Header extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {favoritecolor: "red"};
+										  }
+										  static getDerivedStateFromProps(props, state) {
+											return {favoritecolor: props.favcol };
+										  }
+										  render() {
+											return (
+											  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header favcol="yellow"/>);
+										
+			render:
+			
+										- The render() method is required, and is the method that actually outputs the HTML to the DOM.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';=
+										class Header extends React.Component {
+										  render() {
+											return (
+											  <h1>This is the content of the Header component</h1>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header />);
+										
+			componentDidMount:
+			
+										- The componentDidMount() method is called after the component is rendered.
+										- This is where you run statements that requires that the component is already placed in the DOM.
+										- Được gọi sau khi component đã được mount (hoặc render) lần đầu tiên trong cây DOM. Điều này có
+										nghĩa là componentDidMount sẽ chạy sau khi component được hiển thị lần đầu tiên trên trình
+										duyệt. componentDidMount chỉ được gọi một lần duy nhất, sau lần render đầu tiên.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Header extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {favoritecolor: "red"};
+										  }
+										  componentDidMount() {
+											setTimeout(() => {
+											  this.setState({favoritecolor: "yellow"})
+											}, 1000)
+										  }
+										  render() {
+											return (
+											  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header />);
+										
+		Updating:
+		
+										- The next phase in the lifecycle is when a component is updated.
+										- A component is updated whenever there is a change in the component's state or props.
+										- The render() method is required and will always be called, the others are optional and
+										will be called if you define them.
+										
+			getDerivedStateFromProps:
+			
+										- Also at updates the getDerivedStateFromProps method is called. This is the first method
+										that is called when a component gets updated.
+										- This is still the natural place to set the state object based on the initial props.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Header extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {favoritecolor: "red"};
+										  }
+										  static getDerivedStateFromProps(props, state) {
+											return {favoritecolor: props.favcol };
+										  }
+										  changeColor = () => {
+											this.setState({favoritecolor: "blue"});
+										  }
+										  render() {
+											return (
+											  <div>
+											  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+											  <button type="button" onClick={this.changeColor}>Change color</button>
+											  </div>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header favcol="yellow" />);
+										/*
+										This example has a button that changes the favorite color to blue,
+										but since the getDerivedStateFromProps() method is called,
+										the favorite color is still rendered as yellow
+										(because the method updates the state
+										with the color from the favcol attribute).
+										*/
+										
+			shouldComponentUpdate:
+			
+										- In the shouldComponentUpdate() method you can return a Boolean value that specifies whether
+										React should continue with the rendering or not.
+										- The default value is true.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Header extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {favoritecolor: "red"};
+										  }
+										  shouldComponentUpdate() {
+											return false;
+										  }
+										  changeColor = () => {
+											this.setState({favoritecolor: "blue"});
+										  }
+										  render() {
+											return (
+											  <div>
+											  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+											  <button type="button" onClick={this.changeColor}>Change color</button>
+											  </div>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header />);
+										
+			render:
+			
+										- The render() method is of course called when a component gets updated, it has to re-render the HTML
+										to the DOM, with the new changes.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Header extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {favoritecolor: "red"};
+										  }
+										  changeColor = () => {
+											this.setState({favoritecolor: "blue"});
+										  }
+										  render() {
+											return (
+											  <div>
+											  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+											  <button type="button" onClick={this.changeColor}>Change color</button>
+											  </div>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header />);
+										
+			getSnapshotBeforeUpdate:
+			
+										- In the getSnapshotBeforeUpdate() method you have access to the props and state before the
+										update, meaning that even after the update, you can check what the values were before the update.
+										- If the getSnapshotBeforeUpdate() method is present, you should also include the componentDidUpdate() method,
+										otherwise you will get an error.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Header extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {favoritecolor: "red"};
+										  }
+										  componentDidMount() {
+											setTimeout(() => {
+											  this.setState({favoritecolor: "yellow"})
+											}, 1000)
+										  }
+										  getSnapshotBeforeUpdate(prevProps, prevState) {
+											document.getElementById("div1").innerHTML =
+											"Before the update, the favorite was " + prevState.favoritecolor;
+										  }
+										  componentDidUpdate() {
+											document.getElementById("div2").innerHTML =
+											"The updated favorite is " + this.state.favoritecolor;
+										  }
+										  render() {
+											return (
+											  <div>
+											  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+											  <div id="div1"></div>
+											  <div id="div2"></div>
+											  </div>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header />);
+										
+			componentDidUpdate:
+			
+										The componentDidUpdate method is called after the component is updated in the DOM.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Header extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {favoritecolor: "red"};
+										  }
+										  componentDidMount() {
+											setTimeout(() => {
+											  this.setState({favoritecolor: "yellow"})
+											}, 1000)
+										  }
+										  componentDidUpdate() {
+											document.getElementById("mydiv").innerHTML =
+											"The updated favorite is " + this.state.favoritecolor;
+										  }
+										  render() {
+											return (
+											  <div>
+											  <h1>My Favorite Color is {this.state.favoritecolor}</h1>
+											  <div id="mydiv"></div>
+											  </div>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Header />);
+										
+		Unmounting:
+		
+										The next phase in the lifecycle is when a component is removed from the DOM, or unmounting as React likes to call it.
+										
+			componentWillUnmount:
+			
+										The componentWillUnmount method is called when the component is about to be removed from the DOM.
+										
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										class Container extends React.Component {
+										  constructor(props) {
+											super(props);
+											this.state = {show: true};
+										  }
+										  delHeader = () => {
+											this.setState({show: false});
+										  }
+										  render() {
+											let myheader;
+											if (this.state.show) {
+											  myheader = <Child />;
+											};
+											return (
+											  <div>
+											  {myheader}
+											  <button type="button" onClick={this.delHeader}>Delete Header</button>
+											  </div>
+											);
+										  }
+										}
+										class Child extends React.Component {
+										  componentWillUnmount() {
+											alert("The component named Header is about to be unmounted.");
+										  }
+										  render() {
+											return (
+											  <h1>Hello World!</h1>
+											);
+										  }
+										}
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(<Container />);

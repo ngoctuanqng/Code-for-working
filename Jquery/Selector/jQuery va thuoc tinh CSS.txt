@@ -1,0 +1,86 @@
+jQuery và thuộc tính CSS--Jquery
+
+	jQuery và thuộc tính CSS
+	
+		Trong jQuery có phương thức .css() được dùng để lấy giá trị hoặc thiết lập giá trị cho một
+		thuộc tính CSS vào phần tử. (color, background-color, width ...)
+		
+		Lấy thuộc tính CSS của phần tử
+			
+			.css("attr");
+			
+		Ví dụ
+		
+			<style>
+				#vidu1 {
+					background-color: green;
+					color: white;
+					padding: 30px;
+					cursor: pointer;
+				}
+			</style>
+			<p id="vidu1">Ví dụ về CSS (click here)</p>
+			<script>
+				$('#vidu1').click(function () {
+					alert($(this).css("background-color"));
+					$(this).css("background-color", "#FF5722");
+
+				});
+			</script>
+
+	Thiết lập nhiều thuộc tính css()
+		Các thuộc tính cần thiết lập cho phần tử có thể gộp lại vào một JSON (JavaScript Object
+		Notation), mỗi thuộc tính biểu diễn bằng một cặp "property":"value", các cặp cách nhau bởi
+		dấu phẩy và toàn bộ bao bọc trong {}
+			
+			.css({"property1":"value1", "property2":"value2" ...});
+		
+		<style>
+			#vidu2 {
+				background-color: green;
+				color: white;
+				padding: 30px;
+				cursor: pointer;
+			}
+		</style>
+		<p id="vidu2">Ví dụ về CSS nhiều thuộc tính (click here)</p>
+		<script>
+			$('#vidu2').click(function () {
+				$(this).css({
+					"background-color" :"#FF5722",
+					"font-size": "200%",
+					"color": "whitesmoke"
+					});
+
+			});
+		</script>
+
+	Kích thước phần tử với jQuery
+	
+		Có các hàm lấy kích thước và thiết lập kích thước cho phần tử: width(), height(),
+		innerWidth(), innerHeight(), outerWidth(), outerHeight()
+
+		<style>
+			#vidu3 {
+				width: 300px;
+				height: 100px;
+				padding: 10px;
+				margin: 20px;
+				border: 3px solid blue;
+				background-color: red;
+				color: white;
+			}
+		</style>
+		<div id="vidu3"></div>
+		<script>
+			$(function() {
+				var txt = "";
+				txt += "width: " + $("#vidu3").width() + " ";
+				txt += "height: " + $("#vidu3").height() + "<br/>";
+				txt += "innerWidth: " + $("#vidu3").innerWidth() + " ";
+				txt += "innerHeight: " + $("#vidu3").innerHeight() + "<br/>";
+				txt += "outerWidth: " + $("#vidu3").outerWidth() + " ";
+				txt += "outerHeight: " + $("#vidu3").outerHeight();
+				$("#vidu3").html(txt);
+			});
+		</script>		

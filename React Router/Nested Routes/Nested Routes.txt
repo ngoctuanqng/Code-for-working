@@ -1,0 +1,87 @@
+Nested Routes--React Router:
+
+		- Các tuyến lồng nhau cho phép Tuyến mẹ hoạt động như một trình bao bọc và kiểm soát việc hiển thị một Tuyến con.
+		- Một ví dụ thực tế về giao diện người dùng này có thể trông tương tự như tuyến đường messages / của Twitter. Khi
+		bạn truy cập / messages, bạn sẽ thấy tất cả các cuộc Chat trước đó
+		của mình ở bên trái màn hình. Sau đó, khi bạn truy cập / messages /: id, bạn vẫn thấy tất cả các messages của mình,
+		nhưng bạn cũng thấy lịch sử Chat của mình cho: id.
+		
+		// App.js
+		function App() {
+		  return (
+			<Routes>
+			  <Route path="/" element={<Home />} />
+			  <Route path="/messages" element={<Messages />} />
+			  <Route path="/settings" element={<Settings />} />
+			</Routes>
+		  );
+		}
+		
+		- Bây giờ, nếu chúng ta muốn Messages kiểm soát việc hiển thị các Tuyến con, thì điều gì ngăn chúng ta chỉ hiển thị một
+		thành phần Định tuyến khác bên trong Messages? Một cái gì đó như
+		thế này.
+		- Bây giờ khi người dùng điều hướng đến / messages, React Router sẽ hiển thị thành phần Messages. Từ đó, Messages hiển thị
+		tất cả các cuộc Chat của chúng tôi thông qua thành phần Chat và sau đó hiển thị các Routes khác có Route ánh xạ / Messages /: id tới thành phần Chat.
+		- Lưu ý rằng chúng ta không phải bao gồm đường dẫn đầy đủ / messages /: id trong Route lồng nhau. Điều này là do Routes
+		là thông minh và bằng cách bỏ đi đầu /, nó giả định rằng chúng ta muốn đường dẫn này có liên quan đến vị trí của cha , /messages
+		
+		function Messages() {
+		  return (
+			<Container>
+			  <Conversations />
+
+			  <Routes>
+				<Route path=":id" element={<Chat />} />
+			  </Routes>
+			</Container>
+		  );
+		}
+		
+		- Điều gì sẽ xảy ra nếu chúng ta chỉ cập nhật đường dẫn của mình thành / messages / *?
+		- Chúng tôi rất vui, điều đó sẽ hoạt động. Bằng cách thêm / * vào cuối đường dẫn / messages, về cơ bản chúng ta
+		đang nói với React Router rằng Messages có thành phần Routes lồng nhau và đường dẫn mẹ của chúng ta phải khớp
+		với / messages cũng như bất kỳ vị trí nào khác khớp với / messages / * họa tiết. Chính xác những gì chúng tôi muốn.
+		
+		// App.js
+		function App() {
+		  return (
+			<Routes>
+			  <Route path="/" element={<Home />} />
+			  <Route path="/messages/*" element={<Messages />} />
+			  <Route path="/settings" element={<Settings />} />
+			</Routes>
+		  );
+		}
+		
+		- Bởi vì đây là một sở thích phổ biến, React Router cũng hỗ trợ cách này để tạo các tuyến đường lồng nhau. Đây
+		là những gì nó trông như thế nào.
+		- Bạn đã khai báo lồng Route con dưới dạng con của Route cha. Giống như trước đây, Route con bây giờ là tương đối
+		với cha, vì vậy bạn không cần phải bao gồm đường dẫn cha (/ messages).
+		
+		function App() {
+		  return (
+			<Routes>
+			  <Route path="/" element={<Home />} />
+			  <Route path="/messages" element={<Messages />}>
+				<Route path=":id" element={<Chats />} />
+			  </Route>
+			  <Route path="/settings" element={<Settings />} />
+			</Routes>
+		  );
+		}
+						
+		- Bây giờ, điều cuối cùng bạn cần làm là cho React Router biết vị trí trong Tuyến cha (massages) sẽ hiển thị Tuyến con (Chats).
+		- Để làm điều này, bạn sử dụng thành phần Outlet của React Router
+		- Nếu vị trí của ứng dụng khớp với đường dẫn của Tuyến đường lồng nhau, thành phần Outlet này sẽ hiển thị
+		phần tử của Tuyến đường. Vì vậy, dựa trên Routes của chúng ta ở trên, nếu chúng ta đang ở / messages, thành phần Outlet
+		sẽ hiển thị null, nhưng nếu chúng ta ở / messages / 1, nó sẽ hiển thị thành phần <Chats />.
+		
+		import { Outlet } from "react-router-dom";
+		function Messages() {
+		  return (
+			<Container>
+			  <Conversations />
+			  <Outlet />
+			</Container>
+		  );
+		}

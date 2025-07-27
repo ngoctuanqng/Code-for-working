@@ -1,0 +1,22 @@
+Working With Dates--MySQL:
+											The most difficult part when working with dates is to be sure that the format of the date
+											you are trying to insert, matches the format of the date column in the database.
+											
+											As long as your data contains only the date portion, your queries will work as
+											expected. However, if a time portion is involved, it gets more complicated.
+	DATE - Format YYYY-MM-DD:										
+												SELECT *
+												FROM Orders
+												WHERE OrderDate = '2008-11-11';
+	DATETIME - Format: YYYY-MM-DD HH:MI:SS:												
+												SELECT *
+												FROM Orders
+												WHERE OrderDateTime = '2008-11-11 12:30:45';
+	TIMESTAMP - Format: YYYY-MM-DD HH:MI:SS:											
+												SELECT *
+												FROM Orders
+												WHERE OrderTimestamp = '2008-11-11 12:30:45';
+	YEAR - Format YYYY or YY:											
+												SELECT *
+												FROM Orders
+												WHERE YEAR(OrderYear) = 2008;

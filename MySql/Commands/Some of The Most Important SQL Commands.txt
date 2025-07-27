@@ -1,0 +1,158 @@
+Some of The Most Important SQL Commands--MYSQL:
+		
+		SELECT - extracts data from a database
+															
+			SELECT ... FROM ... WHERE ...
+			
+		UPDATE Statement--MySQL:
+								The UPDATE statement is used to modify the existing records in a table.
+								Be careful when updating records. If you omit the WHERE clause, ALL records will be updated!
+			Syntax:
+								UPDATE table_name
+								SET column1 = value1, column2 = value2, ...
+								WHERE condition;
+			Example:
+								UPDATE Customers
+								SET ContactName = 'Alfred Schmidt', City = 'Frankfurt'
+								WHERE CustomerID = 1;
+		
+								UPDATE Customers
+								SET PostalCode = 00000
+								WHERE Country = 'Mexico';
+		
+		DELETE Statement--MySQL:
+								The DELETE statement is used to delete existing records in a table.
+			Syntax:
+								DELETE FROM table_name WHERE condition;
+			Example:
+								DELETE FROM Customers WHERE CustomerName='Alfreds Futterkiste';
+								
+								DELETE FROM Customers;
+		
+		INSERT INTO - inserts new data into a database
+		
+			INSERT INTO ...  VALUES ...
+			
+		CREATE DATABASE - creates a new database
+		
+			CREATE DATABASE ...
+		
+		ALTER DATABASE - modifies a database
+
+			ALTER DATABASE ...
+			MODIFY ... (
+				...
+			);
+		
+		CREATE TABLE Statement--MySQL:
+													The CREATE TABLE statement is used to create a new table in a database.
+			Syntax:
+													CREATE TABLE table_name (
+														column1 datatype,
+														column2 datatype,
+														column3 datatype,
+													   ....
+													);
+			Example:
+													CREATE TABLE Persons (
+														PersonID int,
+														LastName varchar(255),
+														FirstName varchar(255),
+														Address varchar(255),
+														City varchar(255)
+													);
+			Create Table Using Another Table:
+				Syntax:
+													CREATE TABLE new_table_name AS
+													SELECT column1, column2,...
+													FROM existing_table_name
+													WHERE ....;
+				Example:
+													CREATE TABLE TestTable AS
+													SELECT customername, contactname
+													FROM customers;
+		
+		ALTER TABLE - modifies a table
+		
+			ALTER TABLE ...
+			ADD COLUMN ...
+		
+		DROP TABLE Statement--MySQL:	
+		
+									The DROP TABLE statement is used to drop an existing table in a database.
+			Syntax:
+									DROP TABLE table_name;
+									Note: Be careful before dropping a table. Deleting a table will result in loss of complete information stored in the table!
+			Example:
+									DROP TABLE Shippers;
+									
+		TRUNCATE TABLE--MySQL:
+									The TRUNCATE TABLE statement is used to delete the data inside a table, but not the table itself.
+			Syntax:
+									TRUNCATE TABLE table_name;
+			Example:
+									TRUNCATE TABLE employees;									
+			
+		CREATE INDEX Statement--MySQL::
+													The CREATE INDEX statement is used to create indexes in tables.
+													
+													Indexes are used to retrieve data from the database more quickly than otherwise. The users
+													cannot see the indexes, they are just used to speed up searches/queries.
+			CREATE INDEX:
+				Syntax:								
+													CREATE INDEX index_name
+													ON table_name (column1, column2, ...);
+				Example:									
+													CREATE INDEX idx_lastname
+													ON Persons (LastName);
+													
+													CREATE INDEX idx_pname
+													ON Persons (LastName, FirstName);
+			CREATE UNIQUE INDEX Syntax:
+				Syntax:								
+													CREATE UNIQUE INDEX index_name
+													ON table_name (column1, column2, ...);
+				Example:
+													CREATE UNIQUE INDEX unique_name_index
+													ON employees (first_name, last_name);
+			DROP INDEX Statement:
+													ALTER TABLE table_name
+													DROP INDEX index_name;
+													
+		DROP DATABASE Statement--MySQL:
+		
+									The DROP DATABASE statement is used to drop an existing SQL database.
+			Syntax:
+									DROP DATABASE databasename;
+									Tip: Make sure you have admin privilege before dropping any database. Once a database is dropped, you
+									can check it in the list of databases with the following SQL
+									
+									command: SHOW DATABASES;
+			Example:
+									DROP DATABASE testDB;													
+		
+			
+		Defining Foreign Key--MYSQL:
+		
+			CREATE TABLE `instructor` (
+			…
+				CONSTRAINT `FK_DETAIL` FOREIGN KEY (`instructor_detail_id`) REFERENCES `instructor_detail` (`id`)
+			);
+			
+		ALTER TABLE--MySQL:
+		
+			The ALTER TABLE statement is used to add, delete, or modify columns in an existing table.
+			The ALTER TABLE statement is also used to add and drop various constraints on an existing table.
+													
+			ALTER TABLE - ADD Column:
+													ALTER TABLE Customers
+													ADD Email varchar(255);
+			ALTER TABLE - DROP COLUMN:
+													ALTER TABLE Customers
+													DROP COLUMN Email;
+			ALTER TABLE - MODIFY COLUMN:
+													ALTER TABLE Persons
+													MODIFY COLUMN DateOfBirth year;
+			ALTER TABLE - DROP COLUMN:
+													ALTER TABLE Persons
+													DROP COLUMN DateOfBirth;		

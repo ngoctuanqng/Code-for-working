@@ -1,0 +1,104 @@
+- Redux là một thư viện quản lý trạng thái (state management) tương thích với các ứng dụng web, phổ biến
+trong việc phát triển ứng dụng front-end sử dụng JavaScript và ReactJS.
+- Đây là một công cụ hữu ích giúp bạn xây dựng các ứng dụng có tính nhất quán, hoạt động linh hoạt trên
+nhiều môi trường (client, server và native), và dễ dàng kiểm thử. Sáng tạo từ ngôn ngữ Elm và kiến trúc
+Flux của Facebook, Redux thường được kết hợp sử dụng cùng với React.
+- Redux có nhiệm vụ quản lý trạng thái phức tạp trong ứng dụng web, giúp tách biệt logic và giao diện người
+dùng. Với tiếp cận dễ hiểu và theo dõi, Redux giúp bạn theo dõi và cập nhật trạng thái một cách hiệu quả,
+đồng thời đảm bảo tính nhất quán cho dữ liệu trong ứng dụng, từ đó dễ dàng debug khi gặp lỗi.
+- Redux Toolkit là thư viện được phát triển bởi ReduxJS, giúp viết mã Redux nhanh chóng, toàn diện và tuân
+thủ chuẩn mực. Nó giải quyết vấn đề phức tạp của Redux và cung cấp API tiện ích để viết mã ngắn gọn, dễ
+đọc hơn và tuân theo các mẫu thiết kế tốt nhất.
+- Một số lập trình viên cảm thấy Redux hơi dài dòng và khó sử dụng. Tạo một store hoàn chỉnh đòi hỏi nhiều
+bước và tạo nhiều tệp lặp đi lặp lại. Redux Toolkit được ra đời, nhằm tối giản hoá cách setup và sử dụng, giúp
+lập trình viên có thể tập trung hơn vào việc xử lý logic thay vì mất quá nhiều thời gian ban đầu để set-up.	
+
+Reducer trên Redux là gì?--Redux Toolkit
+
+		Là các hàm xử lý các hành động cụ thể và thay đổi state của ứng dụng. Reducer nhận vào giá trị của state
+		hiện tại và hành động bạn muốn thực hiện, rồi trả ra state mới dựa trên hành động đó.
+										
+Action trên Redux là gì?--Redux Toolkit
+
+		Là hành động mà bạn muốn thực hiện với state đó. Ví dụ đơn giản nhất là việc thay đổi giá trị của state.
+
+Tại sao lập trình viên nên dùng Redux?--Redux Toolkit
+
+		- Khi ứng dụng web Frontend của chúng ta ngày càng lớn, có thêm nhiều component hơn, đồng nghĩa với
+		việc sẽ sinh ra nhiều state. Có những state chúng ta sử dụng trong phạm vi component hiện tại, nhưng sẽ
+		có những state ta sẽ sử dụng ở nhiều component khác nhau, và các component mà ta sử dụng nằm rải rác trong source code của chúng ta.
+		- Việc truyền state thông qua props theo cách truyền thống từ cha xuống con sẽ không còn hiệu quả nếu như
+		2 component cần sử dụng chung 1 state nằm quá xa nhau.
+										
+										
+Hướng dẫn truy cập state userDetail trên Redux--Redux Toolkit:
+
+	Call API ở những nơi cần sử dụng:
+
+		- Cách đầu tiên là làm tương tự như ở file Header.jsx, đấy là component nào cần sử dụng userDetail thì ta call
+		api ở component đấy. Đây là cách nhanh và đơn giản nhất nhưng nó lại có vài vấn đề. Đó là nó làm api bị call nhiều lần.
+		- Bạn thử tưởng tượng Header nằm trong trang Admin, khi 2 component này được render, nó sẽ call đến api kia một lần,
+		và mỗi khi 1 trong 2 component này re-render, nó sẽ lại call tiếp.
+		- Việc này ảnh hưởng rất lớn đến performance của website, khiến website của chúng ta chậm đi đáng kể. Nên đây không
+		phải là cách chúng ta nên làm đúng không?
+										
+	Lưu dữ liệu call từ api xuống localStorage:
+	
+		- Cách thứ hai có thể nghĩ đến là lưu dữ liệu call từ api xuống localStorage, component nào cần dùng thì gọi
+		ra để sử dụng là xong.
+		- Cách này sẽ giải quyết được vấn đề của cách đầu tiên, là api sẽ không bị gọi đi gọi lại nhiều lần không cần
+		thiết, nhưng nó lại sinh ra 2 vấn đề:
+				Một là làm website của chúng ta chậm lại vì việc format dữ liệu từ localStorage, ta phải sử dụng đến hàm
+				stringify và parse để xử lý dữ liệu khi lưu xuống và lấy ra từ localStorage.
+				Hai là dữ liệu từ localStorage sẽ không tự đồng bộ ở tất cả component khi giá trị của state đó bị thay đổi.
+												
+	Từ những vấn đề trên mà state management như Redux ra đời, Redux đã khắc phục được toàn bộ nhược điểm bên trên,
+	giúp quản lý state hiệu quả hơn rất nhiều.
+	
+	Redux hoạt động như thế nào?
+	
+		- Redux sẽ đưa tất cả các state vào một kho lưu trữ chung gọi là Store, khi component nào đó muốn sử dụng state
+		có trong Store thì sẽ gọi vào Store thông qua Reducer. Và để thực
+		hiện hành động đối với các state này thì chúng ta sẽ tạo ra các Action.
+
+Lưu ý khi sử dụng Redux--Redux Toolkit:										
+		- Giá trị lưu trong Redux về bản chất vẫn là state nên nó thừa hưởng mọi tính chất của state, chỉ khác ở chỗ nó là
+		global state (state toàn cục) nên khi giá trị lưu trong Redux thay đổi thì tất cả component đang sử dụng giá trị đó cũng sẽ thay đổi theo.
+		- Chuẩn hoá dữ liệu (Normalized State) trước khi lưu chúng vào Redux để đảm bảo hiệu suất của ứng dụng đạt ở mức cao.
+		- Nên thực hiện việc xử lý logic ở các hàm bên ngoài, hạn chế xử lý logic phức tạp bên trong Redux, Redux chỉ nên sử dụng để lưu dữ liệu cuối cùng sau khi đã qua xử lý.
+										
+Nên sử dụng Redux trong trường hợp nào?--Redux Toolkit
+
+		- Vì việc sử dụng Redux không đúng cách có thể làm ứng dụng của bạn chậm đi đáng kể, ảnh hưởng đến performance. Với những
+		ứng dụng web nhỏ bạn có thể sử dụng state nội bộ hoặc các state management gọn nhẹ hơn như ContextAPI, Recoil,...
+		- Quản lý nhiều state phức tạp: Khi ứng dụng web của bạn cần quản lý nhiều state phức tạp và chúng cần tương tác với nhau,
+		việc sử dụng Redux sẽ giúp bạn quản lý các state dễ dàng hơn
+		- State cần chia sẻ global: Khi nhiều component cần sử dụng chung 1 state, việc sử dụng Redux sẽ giúp các component truy
+		cập dễ dàng hơn so với việc sử dụng props
+		- Lưu lại lịch sử của state và actions: Redux cho phép bạn theo dõi lịch sử của các state và actions, điều này rất hữu ích
+		cho việc debug về sau. Redux còn có extension trên Chrome tên là Redux DevTools, giúp chúng ta có thể dễ dàng theo
+		dõi lịch sử thay đổi của state và actions ngay trên trình duyệt.
+		
+		
+Phân chia ứng dụng thành nhiều component--ReactJS Class Component:
+										ReactJS khuyến khích việc phân chia ứng dụng thành nhiều component nhỏ thay vì viết tất
+										cả mã nguồn trong một file lớn.
+	Tính Tái Sử Dụng (Reusability):
+										Bằng cách phân chia ứng dụng thành các component nhỏ, bạn có thể tái sử dụng chúng trong
+										nhiều phần của ứng dụng hoặc trong các ứng dụng khác mà không cần phải viết
+										lại mã nguồn. Điều này giúp giảm thời gian phát triển và bảo trì mã nguồn.
+	Tính Tích Cực (Modularity):
+										Phân chia ứng dụng thành các component nhỏ giúp làm cho mã nguồn trở nên dễ đọc và dễ
+										hiểu hơn. Mỗi component chịu trách nhiệm cho một phần nhất định của giao diện
+										người dùng, làm cho việc theo dõi và hiểu cấu trúc của ứng dụng dễ dàng hơn.
+	Tính Linh Hoạt (Flexibility):
+										Sử dụng các component cho phép bạn tạo ra các thành phần có thể tái sử dụng và có thể tái
+										sử dụng mã nguồn dễ dàng. Điều này làm cho việc thay đổi hoặc mở rộng các
+										phần của ứng dụng trở nên dễ dàng hơn mà không cần phải ảnh hưởng đến các phần khác.
+	Quản lý Trạng Thái (State Management):
+										ReactJS sử dụng mô hình stateful components và stateless components để quản lý trạng thái của
+										ứng dụng. Việc phân chia ứng dụng thành các component nhỏ giúp quản lý
+										trạng thái trở nên dễ dàng hơn và giảm thiểu các vấn đề liên quan đến quản lý trạng thái.
+	Hiệu Năng (Performance):
+										Phân chia ứng dụng thành các component nhỏ có thể giúp cải thiện hiệu năng của ứng dụng bằng cách
+										giảm thiểu số lượng các phần tử DOM cần được cập nhật khi trạng thái của ứng dụng thay đổi.

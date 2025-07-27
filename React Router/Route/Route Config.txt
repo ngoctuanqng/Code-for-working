@@ -1,0 +1,54 @@
+Route Config--React Router:
+
+		- React Router v6 đi kèm với useRoutes Hook giúp việc sắp xếp các tuyến của bạn thành một cấu hình tuyến trung
+		tâm không chỉ khả thi mà còn đơn giản với API lớp đầu tiên.
+		- Bây giờ với useRoutes, thay vì khai báo các tuyến đường của bạn bằng cách sử dụng các phần tử React (JSX), bạn có
+		thể thực hiện việc đó bằng cách sử dụng các đối tượng JavaScript.
+		- useRoutes nhận một mảng các đối tượng JavaScript đại diện cho các tuyến đường trong ứng dụng của bạn. Tương tự
+		như API phần tử React với mỗi tuyến có một đường dẫn, phần tử và
+		thuộc tính con tùy chọn.
+		- Điều khiến useRoutes trở nên thú vị hơn là cách React Router sử dụng nó trong nội bộ. Trên thực tế, khi bạn
+		sử dụng API phần tử React để tạo các tuyến đường của mình, nó thực sự chỉ là một trình bao bọc xung quanh useRoutes.
+		
+		Thông thường, nếu bạn muốn ánh xạ các đường dẫn đó đến các thành phần React khác nhau, bạn sẽ hiển thị một cái gì đó như thế này.
+		return (
+		  <Routes>
+			<Route path="/" element={<Home />} />
+			<Route path="/invoices" element={<Invoices />}>
+			  <Route path=":id" element={<Invoice />} />
+			  <Route path="pending" element={<Pending />} />
+			  <Route path="complete" element={<Complete />} />
+			</Route>
+			<Route path="/users/*" element={<Users />} />
+		  </Routes>
+		);
+		
+		import { useRoutes } from "react-router-dom";
+		const routes = useRoutes([
+		  { path: "/", element: <Home /> },
+		  {
+			path: "/invoices",
+			element: <Invoices />,
+			children: [
+			  { path: ":id", element: <Invoice /> },
+			  { path: "/pending", element: <Pending /> },
+			  { path: "/complete", element: <Complete /> },
+			],
+		  },
+		  {
+			path: "/users",
+			element: <Users />,
+			children: [
+			  { path: ":id", element: <Profile /> },
+			  { path: "/settings", element: <Settings /> },
+			],
+		  },
+		]);
+		export default function App() {
+		  return (
+			<div>
+			  <Navbar />
+			  {routes}
+			</div>
+		  );
+		}

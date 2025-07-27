@@ -1,0 +1,208 @@
+Khái niệm về Apache Kafka--Kafka:
+
+	- Để rõ hơn về lợi ích của kafka, hãy tưởng tượng một hệ thống thương mại điện tử có nhiều máy chủ
+	thực hiện các công việc khác nhau, tất cả các máy chủ này đều muốn giao tiếp với database server, vì vậy
+	chúng ta sẽ có nhiều data pipeline kết nối các server khác đến database server này
+	- Nhưng trong thực tế, hệ thống thương mại điện tử sẽ còn phải kết nối đến một vài server khác nữa
+	- Data pipeline đang trở nên phức tạp theo sự gia tăng của số lượng hệ thống. Để giải quyết vấn đề
+	này thì kafka ra đời. Kafka tách rời các data pipeline giữa các hệ thống để làm cho việc communicate giữa các hệ thống
+	trở nên đơn giản hơn và dễ quản lý hơn.
+
+	Kafka là gì?--Khái niệm về Apache Kafka:
+		- Real-time data có giá trị đặc biệt quan trọng đối với các doanh nghiệp. Các doanh nghiệp sử dụng real-time data để cải thiện
+		dịch vụ khách hàng, quản lý sản phẩm và tối ưu hóa vận hành. Ngoài ra, real-time data còn để giúp theo dõi và duy trì cơ sở
+		hạ tầng CNTT. Nhận biết được những lợi ích trên, nhu cầu thu thập real-time data ngày càng tăng cao ở khắp các doanh nghiệp toàn thế giới.
+		- Chính vì thế, những công cụ có khả năng thu thập và lưu trữ dữ liệu thời gian thực ngày càng trở nên
+		được “săn đón”, Kafka chính là một trong những công cụ đó.
+		- Apache Kafka là một nền tảng phát trực tuyến sự kiện phân tán mã nguồn mở. Apache Kafka được xây dựng nhằm
+		mục đích xử lý dữ liệu streaming real-time (theo thời gian thực). Nói một cách đơn giản - Apache
+		Kafka được phát triển để lưu trữ các streams of records (luồng ghi dữ liệu).
+		- Ngày nay, hàng tỷ nguồn dữ liệu liên tục tạo ra các luồng data record, bao gồm các luồng sự kiện. Một sự
+		kiện là một bản ghi kỹ thuật số về một hành động đã xảy ra và thời gian nó xảy ra. Thông thường, một sự kiện
+		là một hành động thúc đẩy một hành động khác như một phần của quy trình. Một khách hàng đặt hàng, chọn chỗ
+		ngồi trên chuyến bay, hoặc gửi đơn đăng ký đều là những ví dụ về các sự kiện. Một sự kiện không nhất thiết
+		phải liên quan đến một người — ví dụ: báo cáo của máy điều nhiệt được kết nối về nhiệt độ tại một thời điểm
+		nhất định cũng là một sự kiện.
+		- Các luồng này tạo cơ hội cho các ứng dụng phản hồi dữ liệu hoặc sự kiện trong thời gian thực. Nền tảng stream
+		dữ liệu cho phép các nhà phát triển xây dựng các ứng dụng liên tục sử dụng và xử lý các luồng này ở
+		tốc độ cực cao, với mức độ trung thực và chính xác cao dựa trên thứ tự xuất hiện chính xác của chúng.
+		- LinkedIn đã phát triển Kafka vào năm 2011 như một message broker thông lượng cao để sử dụng cho chính nó, sau đó
+		Kafka có nguồn mở và được donate cho Software Foundation. Kafka sử dụng ngôn ngữ chính là Java
+		hoặc Scala.
+		- Ngày nay, Kafka đã phát triển thành nền tảng stream dữ liệu phân tán được sử dụng rộng rãi nhất, có khả năng nhập
+		và xử lý hàng nghìn tỷ bản ghi mỗi ngày mà không có bất kỳ độ trễ hiệu suất có thể nhận thấy
+		nào theo quy mô khối lượng. Các tổ chức trong danh sách Fortune 500 như Target, Microsoft, AirBnB và Netflix dựa vào
+		Kafka để cung cấp trải nghiệm theo thời gian thực, theo hướng dữ liệu cho khách hàng của họ.
+	
+	Kafka được sử dụng để làm gì?--Khái niệm về Apache Kafka:
+	
+		Kafka là kho dữ liệu phân tán được sử dụng để xử lý dữ liệu theo thời gian thực. Nếu là nền tảng streaming trực tuyến
+		thì sẽ cần xử lý dữ liệu một cách liên tục theo thứ tự tăng dần. Dưới đây là 3 chức năng
+		chính của Kafka:
+		
+			Publish và subscribe các stream of record
+			Lưu trữ các stream of record theo thứ tự
+			Hỗ trợ xử lý stream of record theo thời gian thực
+			
+	Ưu, nhược điểm nổi bật của Kafka--Khái niệm về Apache Kafka:
+	
+		- Ưu điểm của Kafka
+		
+			Open-source
+			High-throughput: Có khả năng xử lý một lượng lớn thông tin một cách liên tục, gần như không có thời gian chờ
+			High-frequency: Có thể xử lý cùng lúc nhiều message và nhiều thể loại topic
+			Scalability: Dễ dàng mở rộng khi có nhu cầu
+			Tự động lưu trữ message, dễ dàng kiểm tra lại
+			Cộng đồng người dùng đông đảo, được hỗ trợ nhanh chóng khi cần
+		
+		- Nhược điểm của Kafka
+		
+			Chưa có bộ công cụ giám sát hoàn chỉnh: Có nhiều tool khác nhau nhưng mỗi tool chỉ đáp ứng một tính năng quản lý
+			nhất định, chẳng hạn như: Kafka tool (offset manager) GUI tool - quản lý topic và consumer, Lense - hỗ trợ query
+			message, Akhq - toolbox quản lý Kafka và view data bên trong Kafka
+			Không chọn được topic theo wildcard: Người dùng sẽ cần phải sử dụng chính xác tên topic để xử lý message
+			Giảm hiệu suất: Kích thước message tăng khiến cho consumer và producer phải compress và decompress message, từ đó
+			làm bộ nhớ bị chậm đi, ảnh hưởng đến throughput và hiệu suất.
+			Xử lý chậm: Đôi khi số lượng queues trong Kafka cluster tăng đột biến khiến Kafka xử lý chậm hơn.
+			
+	Lý do nên sử dụng Kafka--Khái niệm về Apache Kafka:
+	
+		- Kafka được đóng gói hoàn chỉnh, hiệu năng cao, dễ dàng mở rộng mà không làm gián đoạn hệ thống. Nếu bạn đang xây dựng
+		phần mềm hoặc website hiển thị thông tin theo thời gian thực, thì đây chính là một lựa chọn lý
+		tưởng. Bên cạnh đó, Kafka cũng có khả năng nhập và lưu trữ dữ liệu trong quá trình phát trực tiếp; hoặc sử dụng như một
+		phần mềm message broker để các ứng dụng/nền tảng giao tiếp với nhau.
+		
+		- Một số lợi ích nổi bật của Kafka bao gồm:
+			Khả năng mở rộng cao: Mô hình phân vùng nhật ký của Kafka cho phép dữ liệu có thể được phân phối trên nhiều máy chủ
+			và mở rộng máy chủ khi có nhu cầu.
+			Tốc độ nhanh chóng: Việc xử lý thông qua tách các luồng dữ liệu giúp cho tốc độ trở nên nhanh hơn.
+			Khả năng chịu lỗi và độ bền: Do các gói dữ liệu được sao chép và phân phối trên nhiều máy chủ khác nhau, nên khi có
+			sự cố thì dữ liệu sẽ ít gặp lỗi và an toàn hơn.
+	
+	Cơ chế hoạt động của Kafka--Khái niệm về Apache Kafka:
+	
+		Apache Kafka hoạt động giống như một message queue (hàng đợi message) pub-sub truyền thống (chẳng hạn như RabbitMQ) ở chỗ
+		nó cho phép bạn publish và subscribe các luồng message. Tuy nhiên Apache Kafka khác
+		với message queue truyền thống ở 3 điểm chính:
+			
+			Kafka hoạt động như một hệ thống phân tán hiện đại chạy dưới dạng một cụm và có thể mở rộng quy mô để xử lý bất kỳ
+			số lượng ứng dụng nào.
+			Kafka được thiết kế để phục vụ như một hệ thống lưu trữ và có thể lưu trữ dữ liệu trong thời gian cần thiết; hầu hết
+			các message queue sẽ xóa message ngay sau khi consumer xác nhận đã nhận.
+			Kafka xử lý stream processing, tính toán các luồng dẫn xuất và các dataset một cách linh hoạt, thay vì chỉ chuyển các
+			dãy thông báo.
+	
+	Quy trình làm việc của Pub-Sub Messaging--Khái niệm về Apache Kafka:
+	
+		Sau đây là quy trình từng bước của Pub-Sub Messaging:
+		
+			- Các producer gửi message đến một topic theo định kỳ.
+			- Kafka broker lưu trữ tất cả các message trong các partition được định cấu hình cho topic cụ thể đó. Nó đảm bảo các
+			message được chia đều giữa các partition. Nếu producer gửi hai message và có hai
+			partition, Kafka sẽ lưu trữ một message trong partition đầu tiên và message thứ hai trong partition thứ hai.
+			- Consumer sẽ subscribe một topic cụ thể.
+			- Sau khi consumer đã subscribe một topic, Kafka sẽ cung cấp offset hiện tại của topic cho consumer và cũng lưu offset
+			trong nhóm Zookeeper.
+			- Consumer sẽ yêu cầu Kafka trong một khoảng thời gian đều đặn (ví dụ 100 Ms) cho các message mới.
+			- Khi Kafka nhận được message từ producer, nó sẽ chuyển tiếp những message này đến consumer.
+			- Consumer sẽ nhận được message và xử lý nó.
+			- Sau khi message được xử lý, consumer sẽ gửi xác nhận đến Kafka broker.
+			- Khi Kafka nhận được xác nhận, nó sẽ thay đổi offset thành giá trị mới và cập nhật nó trong Zookeeper. Vì các offset
+			được duy trì trong Zookeeper nên consumer có thể đọc message tiếp theo một cách chính
+			xác ngay cả khi máy chủ gặp sự cố.
+			- Luồng trên sẽ lặp lại cho đến khi consumer dừng yêu cầu.
+			- Consumer có tùy chọn tua lại/bỏ qua offset mong muốn của một topic bất kỳ lúc nào và đọc tất cả các message tiếp theo.
+	
+	Một số khái niệm cơ bản trong Kafka--Khái niệm về Apache Kafka:
+	
+		Producer:
+		
+			Producer là những application produce data và gửi data tới Kafka Server. Data này sẽ là những message có định dạng, được
+			gửi dưới dạng mảng byte tới Kafka server. Ví dụ như các bạn có một tập tin .txt chứa
+			text bên trong, chúng ta có thể dùng Producer để đọc từng dòng trong tập tin này rồi gửi tới Kafka server.
+		
+		Consumer:
+			
+			- Kafka sử dụng consumer để subscribe vào topic, các consumer được định danh bằng các group name. Nhiều consumer có thể
+			cùng đọc một topic. Sau khi nhận được data, Consumer có thể thêm code để xử lý data theo
+			nhu cầu của mình.
+			- Consumer là những ai có thể subscribe vào một hoặc nhiều topic cụ thể và nhận message thuộc topic đó từ hệ thống.
+		
+		Cluster:
+			
+			- Kafka cluster là một set các server, mỗi một set này được gọi là 1 broker.
+			- Nhiều broker cùng làm việc với nhau, tránh single point failure (để toàn bộ broker trên cùng một server sau đó sever
+			đó có vấn đề thì sẽ gặp ảnh hưởng toàn bộ).
+		
+		Broker:
+			
+			Broker là Kafka server, là cầu nối giữa Message Publisher và Message Consumer, giúp chúng có thể trao đổi message với nhau.
+		
+		Topic:
+			
+			- Dữ liệu truyền trong Kafka theo topic, khi cần truyền dữ liệu cho các ứng dụng khác nhau thì sẽ tạo ra các topic khác nhau.
+			- Tên đại diện của một kênh cho phép các hệ thống nói chuyện với nhau. Bạn cũng có thể hiểu Topic là tổng hợp của một dãy
+			event tương tự với nhau, gần như một bảng SQL vậy.
+		
+		Partitions:
+			
+			- Kafka là một distributed messaging system và chúng ta có thể setup Kafka server với cluster. Trong trường hợp một topic
+			nhận quá nhiều message tại cùng một thời điểm, chúng ta có thể chia topic này thành những partitions được share giữa các
+			Kafka server với nhau trong một cluster được handle các message này.
+			- Một partition sẽ small và independent với các partitions khác. Số lượng partition cho mỗi topic thì tuỳ theo nhu cầu
+			của ứng dụng mà chúng ta có thể quyết định.
+			- Message đưa ra sẽ được Kafka chỉ định hoặc chủ động chỉ định partition để biết message đó “đi đâu về đâu”. Một topic
+			có thể có một hoặc nhiều partition.
+		
+		Consumer Group:
+			
+			Consumer group là một group các Consumer consume message từ Kafka server. Mỗi một Consumer Group sẽ share với nhau việc handle message.
+		
+		ZOOKEEPER:
+			
+			Dùng để quản lý và bố trí các broker.
+		
+		Connector:
+			
+			Kết nối Kafka với các hệ thống cơ sở dữ liệu khác.
+		
+		Event Distributed System:
+			
+			Nền tảng phân phối message rộng rãi, ngắt hệ thống ra nhiều server, nhiều cluster khác nhau.
+		
+		Event:
+			
+			Một sự kiện, hành động được diễn ra.
+		
+		Stream:
+			
+			Chuyển hóa luồng topic đầu vào thành topic đầu ra.
+			
+	Tìm hiểu về ứng dụng của Kafka--Khái niệm về Apache Kafka:
+	
+		- Nhờ khả năng xử lý hiệu quả và lưu trữ dữ liệu lớn theo thời gian thực, Kafka được các doanh nghiệp thuộc nhiều lĩnh vực
+		khác nhau tin tưởng để sử dụng cho hệ thống của họ.
+		- Đóng vai trò như message broker
+			Người dùng có thể sử dụng Kafka để thay thế cho các Message broker, ví dụ như ActiveMQ hoặc RabbitMQ.
+		- Quản lý hoạt động website
+			Đây là cách thức truyền thống để sử dụng Kafka, được dùng để xây dựng website và đăng tải nội dung theo thời gian
+			thực. Các dữ liệu như lượt xem trang, hoạt động tìm kiếm… đều được tạo thành các topic. Việc
+			quản lý hoạt động này giúp bạn phân tích hành vi của người dùng trên trang tốt hơn, từ đó thu hút được nhiều người đọc hơn.
+		- Đo lường
+			Kafka cũng có thể được dùng để xây dựng dữ liệu giám sát các hoạt động. Điều này đồng nghĩa với việc tập hợp số liệu
+			thống kê từ nhiều nguồn phân tán trên trang để tạo ra một nguồn dữ liệu tổng hợp.
+		- Tạo log
+			Kafka hỗ trợ tổng hợp log hoặc nhật ký hoạt động, tóm tắt các chi tiết và cung cấp bản ghi cụ thể về dữ liệu sự kiện
+			nhằm phục vụ cho việc xử lý trong tương lai.
+		- Stream processing
+			Steam processing là cách sử dụng phổ biến hiện nay của Kafka, hệ thống được phát triển để xử lý dữ liệu theo thời
+			gian thực. Mỗi khi dữ liệu mới được thêm vào topic, thì sẽ được ghi vào hệ thống ngay lập tức
+			và truyền đến bên nhận dữ liệu. Hơn nữa, thư viện Kafka Streams được tích hợp từ phiên bản 0.10.0.0 có tính năng
+			xử lý stream nhẹ nhưng rất mạnh mẽ.
+	
+	Kết luận--Khái niệm về Apache Kafka:
+	
+		Trong quá trình phát triển website, ứng dụng rất dễ xảy ra trường hợp lượng message cần xử lý tăng lên quá nhiều dẫn đến
+		các data pipeline trở nên vô cùng phức tạp, khiến việc quản lý và vận hành rất khó
+		khăn. Kafka với năng lực phân phối tuyệt vời là giải pháp hoàn hảo để xử lý cho bài toán này. Tuy nhiên, để triển khai 1
+		hệ thống như vậy sẽ cần rất nhiều thời gian, nguồn lực, tài nguyên và chi phí.

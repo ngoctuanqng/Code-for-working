@@ -1,0 +1,27 @@
+Nguyên tắc--MYSQL:
+
+		- Select là lựa chọn theo giá trị của các cột trong 1 row									
+		- Bảng chứa khóa ngoại được gọi là bảng sở hữu (Owner, Child), bảng được bảng sở hữu liên kết đến gọi là bảng
+		tham chiếu (reference table hoặc parent table), field trong bảng tham chiếu để liên kết được gọi là đối
+		tượng tham chiếu (reference object)
+		- Trong cơ sở dữ liệu, một entity thường tương đương với một bảng trong cơ sở dữ liệu. Mỗi hàng trong
+		bảng đó đại diện cho một thực thể cụ thể, và các cột trong hàng đó chứa thông tin về các thuộc tính
+		của thực thể đó.
+
+		Cập nhật bảng cha trước: 
+		
+								Trong hầu hết các trường hợp, bạn nên cập nhật dữ liệu trong bảng cha trước, trước khi
+								cập nhật bất kỳ dữ liệu nào trong bảng con. Điều này giúp đảm bảo rằng dữ liệu mới trong
+								bảng cha sẽ có sẵn khi cập nhật dữ liệu trong bảng con.
+		Xóa bảng con trước: 
+		
+								Để đảm bảo tính toàn vẹn referential, bạn cần xóa dữ liệu từ bảng con trước rồi mới xóa dữ
+								liệu từ bảng cha. Nếu bạn xóa dữ liệu từ bảng cha trước, có thể gây ra việc vi phạm ràng
+								buộc referential integrity vì bảng con vẫn có thể chứa các bản ghi liên kết với bảng cha.
+								
+		Sử dụng các ràng buộc (constraints) và các hành động thực thi (trigger): 
+		
+								Bạn có thể sử dụng các ràng buộc (constraints) như ON DELETE CASCADE hoặc ON
+						        UPDATE CASCADE để tự động cập nhật hoặc xóa các hàng trong bảng con khi các hàng tương ứng
+								trong bảng cha được cập nhật hoặc xóa. Các trigger cũng có thể được sử dụng để thực hiện các
+								hành động tùy chỉnh khi dữ liệu được cập nhật.

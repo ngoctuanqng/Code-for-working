@@ -1,0 +1,306 @@
+Window Functions--MySQL:
+												
+		- Mysql hỗ trợ window functions, tức là đối với mỗi hàng từ câu truy vấn, thực hiện phép tính bằng cách sử dụng các hàng liên quan đến hàng đó. Hầu hết các Aggregate Function
+		(COUNT, SUM, MAX, MIN, . . .) cũng có thể sử dụng như các Window Functions khi kết hợp với OVER().
+		- Chú ý PARTITION BY tạo thành 1 phạm vi mới, nghĩa là khi mới vào phạm vi sẽ bắt đầu lại, khi ra khỏi phạm vi sẽ kết thúc cho phạm vi đó
+		- Khi bạn sử dụng window function với mệnh đề OVER() mà không có PARTITION BY, window function đó sẽ được áp dụng trên toàn bộ tập kết quả của truy vấn, tương tự như cách mà
+		một hàm tổng hợp hoạt động trên toàn bộ dữ liệu khi không có GROUP BY.
+		- Vẫn đầy đủ các row chứ không gom row theo group như group by
+	
+	Phân tích thành phần Window Functions--Window Functions MySQL:
+	
+						- Một Window Function được định nghĩa khi có mệnh đề OVER() đi kèm sau lệnh gọi hàm.
+												
+	OVER([partition_clause] [order_clause] [frame_clause])--Window Functions MySQL:
+	
+						- Chú ý: khi đã sử dụng frame_clause thì bắt buộc phải sử dụng order_clause nếu không MYSQL sẽ không biết vị trị thứ tự các row để tạo ra Frame
+						
+						partiiton_clause: 	
+						
+											Đối với Aggregate Functions khi muốn nhóm các row liên quan lại với nhau thì chúng ta sử dụng GROUP BY, thì ở Window Functions cũng có, đó chính là
+											PARTITION BY , partition sẽ nhóm các rows liên quan đến row hiện tại thành 1 cửa sổ làm việc(window) để thực hiện tính toán. Như ví dụ ở Query3 mình có sử
+											dụng [partition by category].
+											
+						order_clause: 		cũng giống như ORDER BY bình thường, sắp xếp các rows trong cửa sổ làm việc
+						frame_clause: 		sử dụng trong trường hợp bạn muốn giới hạn các rows trong partition --> Window Frame
+						
+						OVER (
+							PARTITION BY category 
+							ORDER BY id 
+							ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+						)
+						
+						SELECT
+							student_id,
+							test_id,
+							score,
+							AVG(score) OVER(PARTITION BY student_id) AS average_score,
+							AVG(score) OVER() AS class_average
+						FROM
+							scores;
+						
+						select *, sum(quantity_warehouse) over(partition by category) as total_warehouse
+						from products
+												
+		Trường hợp OVER empty:
+		
+						- OVER( ) --> toàn bộ dữ liệu của bảng được coi là 1 khối - window
+												
+	Mệnh đề partition--Window Functions MySQL:
+	
+						- Mệnh đề này dùng để lọc bảng dựa trên các thuộc tính thành các vùng. Windown funtion được hoạt động trong từng vùng, khi vượt qua ranh giới của vùng đó, nó sẽ được khởi
+						tạo lại.
+						- Dưới đây là cú pháp của mệnh đề:
+									PARTITION BY <expression>[{,<expression>...}]
+									Trong cú pháp này, chúng ta có thể truyền 1 hay nhiều biểu thức ngăn cách nhau bởi dấu phẩy.
+	
+	Mệnh đề order by--Window Functions MySQL:
+	
+						Mệnh đề này dùng để sắp xếp các hàng trong một vùng với cú pháp:
+									ORDER BY <expression> [ASC|DESC], [{,<expression>...}]
+									Chúng ta có thể sắp xếp nhiều trường theo các thứ tự khác nhau. Mệnh đề có thể định nghĩa với một hay nhiều điều kiện ngăn cách nhau bởi dấu phẩy.
+	
+	ROW_NUMBER()--Window Functions MySQL:
+	
+						- Tên hàm đã nói lên tất cả, đánh số thứ tự các bản ghi theo thứ tự order với từng partition. Ví dụ: đánh số thứ tự học sinh theo từng lớp chẳng hạn.
+						- Đánh số thứ tự học sinh theo class_id, nghĩa là trong 1 class_id sẽ bắt đầu từ 1, sang class_id khác lại bắt đầu từ 1
+						
+						SELECT row_number() over(PARTITION BY s.class_id ORDER BY s.name) AS STT,
+							   c.name AS class_name,
+							   s.*
+						FROM students AS s
+						JOIN classes AS c ON s.class_id = c.id
+	
+	RANK()--Window Functions MySQL:
+	
+						Xếp rank, vâng. Thật sự là trong quá trình làm việc, mình rất hay ĐƯỢC Khách hàng yêu cầu lấy data để điều tra, tracking, xếp rank trao thưởng, bla bla. . . Xếp rank ở đây
+						không đơn giản là chỉ order nó ra là xong đâu, còn phải lấy vị trí xếp rank rồi xếp rank theo tiêu chí gì gì nữa cơ.
+						
+						// lấy vị trí ranking
+						Select *, rank() over(order by score_AVG DESC) as ranking from students
+						
+						// xếp rank theo lớp
+						SELECT c.name,
+							   s.*,
+							   rank() over(PARTITION BY s.class_id ORDER BY s.score_AVG DESC) AS ranking
+						FROM students AS s
+						JOIN classes AS c ON s.class_id = c.id
+	
+	dense_rank()--Window Functions MySQL:
+	
+												Nó tương tự như hàm Rank() nhưng thứ tự xếp rank sẽ theo thứ tự lần lượt chứ không có nhảy cóc từ 1 -> 3
+												
+												SELECT c.name,
+													   s.*,
+													   dense_rank() over(PARTITION BY s.class_id  ORDER BY s.score_AVG DESC) AS ranking
+												FROM students AS s
+												JOIN classes AS c ON s.class_id = c.id
+												
+	LAG() và LEAD()--Window Functions MySQL:
+	
+												- 2 hàm này khá hữu ích cho việc tracking sự phát triển, doanh thu của một công ty theo tháng, hay tiến độ học tập của học sinh qua từng năm theo từng môn học.
+												- Bằng cách so sánh row hiện tại với các row trước - LAG() hay các row sau - LEAD().
+												- LAG(heighs, 2, -1) được sử dụng để tính toán giá trị của cột heighs ở hàng trước đó (cách đó là 2 hàng) trong mỗi nhóm được phân vùng bởi cột name, sắp xếp theo
+												cột years tăng dần. Nếu không có giá trị trước đó (ví dụ, nếu hàng hiện tại là hàng đầu tiên trong phân vùng), thì giá trị mặc định sẽ là -1.
+												- Chú ý select lần lượt theo cùng 1 row chung
+		
+												SELECT *,
+													   LAG(heighs) OVER(PARTITION BY name ORDER BY years ASC) AS LAG_heigh,
+													   (heighs - LAG(heighs) OVER(PARTITION BY name ORDER BY years ASC)) AS LAG_DIFF,
+													   LEAD(heighs) OVER(PARTITION BY name ORDER BY years ASC) AS LEAD_heigh,
+													   LAG(heighs, 2, -1) OVER(PARTITION BY name ORDER BY years ASC) AS LAG_heigh2
+												FROM heigh_infos
+		LAG(expr [, N[, default]]):
+												Hàm trả về giá trị của n hàng trước kể từ row hiện tại, nếu không tồn tại hàng đó thì trả về giá trị default. Trường hợp để trống N & default thì mặc định N = 1 và
+												default = NULL.
+		LEAD(expr [, N[, default]]):
+												Tương tự như hàm LAG nhưng là trả về giá trị của hàng sau tính từ row hiện tại.
+	
+	FIRST_VALUE() & LAST_VALUE() & NTH_VALUE()--Window Functions MySQL:
+	
+												2 hàm trước (LAG - LEAD) thì trả về giá trị của n hàng trước/sau kể từ row hiện tại
+												3 hàm này thì trả về vị trí đầu, cuối hoặc bất kì của partition - window dựa vào thứ tự ORDER BY
+			Syntax:
+												FIRST_VALUE(expr)
+												LAST_VALUE(expr)
+												NTH_VALUE(exp, n)
+			Example:
+												SELECT *,
+													   FIRST_VALUE(heighs) OVER(
+															PARTITION BY name
+															ORDER BY heighs ASC 
+															ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS min_heigh,
+													   LAST_VALUE(heighs) OVER(
+															PARTITION BY name
+															ORDER BY heighs ASC 
+															ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS max_heigh,
+													   NTH_VALUE(heighs, 3) OVER(
+															PARTITION BY name
+															ORDER BY heighs ASC 
+															ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS random_heigh
+												FROM heigh_infos
+												
+	Example--Window Functions MySQL:
+	
+												// Không có vùng partition by nên sẽ không khởi tạo lại giá trị
+												| order_date | amount |
+												|------------|--------|
+												| 2024-01-01 | 100    |
+												| 2024-02-01 | 200    |
+												| 2024-03-01 | 150    |
+												| 2024-04-01 | 300    |	
+												SELECT 
+													order_date,
+													amount,
+													SUM(amount) OVER (ORDER BY order_date) AS cumulative_sum
+												FROM 
+													sales;														
+												| order_date | amount | cumulative_sum |
+												|------------|--------|---------------|
+												| 2024-01-01 | 100    | 100           |
+												| 2024-02-01 | 200    | 300           |
+												| 2024-03-01 | 150    | 450           |
+												| 2024-04-01 | 300    | 750           |
+												
+												// Khi ra khỏi vùng partition by thì sẽ khởi tạo lại giá trị
+												| order_date | customer_id | amount |
+												|------------|-------------|--------|
+												| 2024-01-01 | 1           | 100    |
+												| 2024-02-01 | 2           | 200    |
+												| 2024-03-01 | 1           | 150    |
+												| 2024-04-01 | 3           | 300    |
+												| 2024-05-01 | 2           | 50     |
+												SELECT 
+													order_date,
+													customer_id,
+													amount,
+													SUM(amount) OVER (PARTITION BY customer_id ORDER BY order_date) AS cumulative_sum_by_customer
+												FROM 
+													orders;
+												| order_date | customer_id | amount | cumulative_sum_by_customer |
+												|------------|-------------|--------|---------------------------|
+												| 2024-01-01 | 1           | 100    | 100                       |
+												| 2024-03-01 | 1           | 150    | 250                       |
+												| 2024-02-01 | 2           | 200    | 200                       |
+												| 2024-05-01 | 2           | 50     | 250                       |
+												| 2024-04-01 | 3           | 300    | 300                       |
+
+		Ví dụ khác:
+		
+			Ví dụ 1:
+
+												SaleID	Salesperson	SaleAmount	SaleDate
+												1		Alice		300			2023-01-01
+												2		Bob			150			2023-01-02
+												3		Alice		200			2023-01-03
+												4		Charlie		250			2023-01-04
+												5		Bob			300			2023-01-05
+												6		Alice		100			2023-01-06
+												7		Charlie		350			2023-01-07
+												8		Alice		450			2023-01-08
+												9		Bob			200			2023-01-09
+												10		Charlie		400			2023-01-10
+												11		Alice		150			2023-01-11
+												12		Bob			250			2023-01-12
+												13		Charlie		300			2023-01-13
+												14		Alice		350			2023-01-14
+												15		Bob			100			2023-01-15
+												
+												SELECT 
+												  SaleID, 
+												  Salesperson, 
+												  SaleAmount, 
+												  SaleDate, 
+												  SUM(SaleAmount) OVER (ORDER BY SaleDate) AS RunningTotal
+												FROM Sales;
+												SaleID	SaleDate	Salesperson	SaleAmount	RunningTotal
+												1		2023-01-01	Alice		300			300
+												2		2023-01-02	Bob			150			450
+												3		2023-01-03	Alice		200			650
+												4		2023-01-04	Charlie		250			900
+												5		2023-01-05	Bob			300			1200
+												
+												SELECT 
+												  SaleID, 
+												  Salesperson, 
+												  SaleAmount, 
+												  SaleDate, 
+												  SUM(SaleAmount) OVER (PARTITION BY Salesperson ORDER BY SaleDate) AS CumulativeSalePerPerson
+												FROM Sales;
+												SaleID	SaleDate	Salesperson	SaleAmount	CumulativeSalePerPerson
+												1		2023-01-01	Alice		300			300
+												2		2023-01-02	Bob			150			150
+												3		2023-01-03	Alice		200			500
+												4		2023-01-04	Charlie		250			250
+												5		2023-01-05	Bob			300			450
+												
+												SELECT 
+												  SaleID, 
+												  Salesperson, 
+												  SaleAmount, 
+												  SaleDate, 
+												  RANK() OVER (ORDER BY SaleAmount DESC) AS SaleRank
+												FROM Sales;
+												SaleID	Salesperson	SaleAmount	SaleDate	MovingAverage
+												1		Alice		300			2023-01-01	300.0
+												2		Bob			150			2023-01-02	225.0
+												3		Alice		200			2023-01-03	216.67
+												4		Charlie		250			2023-01-04	200.0
+												5		Bob			300			2023-01-05	250.0
+												6		Alice		100			2023-01-06	216.67
+												7		Charlie		350			2023-01-07	250.0
+												8		Alice		450			2023-01-08	300.0
+												9		Bob			200			2023-01-09	333.33
+												10		Charlie		400			2023-01-10	350.0
+												11		Alice		150			2023-01-11	250.0
+												12		Bob			250			2023-01-12	266.67
+												13		Charlie		300			2023-01-13	233.33
+												14		Alice		350			2023-01-14	300.0
+												15		Bob			100			2023-01-15	250.0
+												
+												SELECT SaleID, SaleDate, Salesperson, SaleAmount, 
+													   AVG(SaleAmount) OVER (
+																	ORDER BY SaleDate 
+																	ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+																			) AS MovingAverage
+												FROM Sales;
+												SaleID	Salesperson	SaleAmount	SaleDate	MovingAverage
+												1		Alice		300			2023-01-01	300.0
+												2		Bob			150			2023-01-02	225.0
+												3		Alice		200			2023-01-03	216.67
+												4		Charlie		250			2023-01-04	200.0
+												5		Bob			300			2023-01-05	250.0
+												6		Alice		100			2023-01-06	216.67
+												7		Charlie		350			2023-01-07	250.0
+												8		Alice		450			2023-01-08	300.0
+												9		Bob			200			2023-01-09	333.33
+												10		Charlie		400			2023-01-10	350.0
+												11		Alice		150			2023-01-11	250.0
+												12		Bob			250			2023-01-12	266.67
+												13		Charlie		300			2023-01-13	233.33
+												14		Alice		350			2023-01-14	300.0
+												15		Bob			100			2023-01-15	250.0
+												
+			Ví dụ 2:
+
+												
+												SaleID	Salesperson	Amount
+												1		John		300
+												2		Jane		200
+												3		John		150
+												4		Jane		200
+												5		Mary		400
+												
+												SELECT 
+													Salesperson, 
+													Amount, 
+													RANK() OVER (ORDER BY Amount DESC) AS RankAmount,
+													DENSE_RANK() OVER (ORDER BY Amount DESC) AS DenseRankAmount
+												FROM 
+													Sales;
+												Salesperson	Amount	RankAmount	DenseRankAmount
+												Mary		400		1			1
+												John		300		2			2
+												Jane		200		3			3
+												Jane		200		3			3
+												John		150		5			4

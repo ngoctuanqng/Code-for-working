@@ -1,0 +1,38 @@
+- Mobx là 1 thư viện Javascript dùng để quản lý state của ứng dụng. Mobx có thể sử dụng được với Javascript thuần
+và với cả các modern framework như Angular, Vue hay React
+- MobX rất đơn giản, có thể mở rộng (scalable) và là một giải pháp để quản lý trạng thái (state management). MobX
+là một thư viện độc lập, nhưng hầu hết mọi người sử dụng nó với React
+											
+Các khái niệm chính--MobX:
+
+	- Mobx là mutable, có nghĩa là chúng ta sẽ thay đổi hoàn toàn trực tiếp, thay vì immutable như Redux. Code của Mobx cực ngắn và dễ hiểu.
+	- Các event từ UI sẽ gọi đến những actions (@action) trong store của Mobx.
+	- Các actions này sẽ thay đổi trực tiếp (mutate) các observable state (@observable) trong store.
+	- Những observable state sau khi thay đổi sẽ được truyền đến các cập nhật lại (@computed) những computed
+	value (những giá trị được tính toàn và trả về bởi method getter).
+	- Cuối cùng, các side-effect (như render component) sẽ được trigger để render component với state mới.				
+										
+Ý tưởng cốt lõi (The core idea)--MobX:
+
+	- Trạng thái (State) là trái tim của mỗi ứng dụng và ở đây không có con đường nào tạo ra nhiều lỗi, không thể quản lý
+	ứng dụng nhanh hơn việc tạo ra một trạng thái không nhất quán (inconsistent state) hoặc một state không đồng bộ
+	với các biến cục bộ xung quanh. Do đó có nhiều giải pháp quản lý state bằng cách cố gắng hạn chế các cách mà bạn
+	có thể sửa đổi state, ví dụ như làm state bất biến (state immutable). Nhưng các cách này lại phát sinh vấn đề
+	mới, dữ liệu cần được chuẩn hóa, tính toàn vẹn tham chiếu có thể không còn được đảm bảo và nó không thể sử dụng
+	các khái niệm mạnh mẽ như prototype.
+	- MobX có thể làm state management trở nên đơn giản bởi giải quyết vấn đề cốt lõi: không thể tạo ra trạng thái không
+	nhất quán. Để làm được điều này thật đơn giản: đảm bảo mọi thứ có thể được dẫn xuất từ trạng thái ứng dụng một cách tự động.
+										
+MobX xử lý ứng dụng của bạn như sau--MobX:
+
+	- Đầu tiên, ở đây là Application State. Nhóm các Objects, array, primitives, tham chiếu tới các model của ứng dụng. Những
+	giá trị này được coi như những "ô dữ liệu" (data cell) của ứng dụng.
+	- Kế tiếp là Phái sinh (Derivations). Đơn giản nhất, các giá trị được tính toán tự động từ application state. Những phái
+	sinh (được sinh ra từ cùng một nguyên mẫu). Các bạn có thể hiểu là MobX lưu giữ giá trị gốc, và giá trị mình lấy ra
+	hiển thị là giá trị sao chép từ giá trị gốc đó.
+	- Phản ứng ( Reactions) cũng tương tự như phái sinh. Điểm khác nhau của những hàm này là chúng không tạo ra giá trị. Thay
+	vào đó, chúng có thể tự động thực thi vài tác vụ. Thường là liên quan tới I/O. Chúng đảm bảo DOM luôn được cập nhật hoặc thực
+	hiện các request đúng thời điểm.
+	- Cuối cùng là hành động (Actions). Hành động là cách duy nhất để thay đổi state. MobX muốn đảm bảo tất cả sự thay đổi của
+	ứng dụng được gây ra bởi hành động được tự động xử lý bởi Derivations và Reactions. Bất đồng bộ và không có vấn đề gì. Ví dụ
+	xây dựng một lớp lưu giữ ghi chú đơn giản. Để rõ ràng hơn về khái niệm cơ bản của MobX ta bắt đầu với một lớp lưu giữ ghi chú cơ bản.

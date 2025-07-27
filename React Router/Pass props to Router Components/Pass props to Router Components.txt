@@ -1,0 +1,5 @@
+Pass props to Router Components--React Router:
+
+		Với React Router v6, vì bạn chịu trách nhiệm tạo phần tử, nên bạn chỉ cần chuyển một phần tử hỗ trợ cho thành phần như bình thường.
+		
+		<Route path="/dashboard" element={<Dashboard authed={true} />} />

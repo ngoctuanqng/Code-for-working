@@ -1,0 +1,59 @@
+Hiệu ứng động với animate() trong jQuery--Jquery
+
+	Phương thức animate() giúp bạn tạo ra các hiệu ứng động bằng cách thay đổi các thuộc tính của
+	phần tử từ giá trị ban đầu đến giá trị mong muốn. Các thuộc tính muốn biến đổi và giá trị của
+	nó viết theo cặp theo nguyên tắc JSON rồi truyền vào tham số thứ nhất của phương thức. Tham số
+	thứ hai của phương thức là khoảng thời gian (mili giây) diễn ra hiệu ứng. Củ pháp của cơ bản như sau:
+		
+		.animate({property1: value1, property2: value2, ... }, speed);
+	
+	Có thể thêm tham số thứ 3 chức năng easing 'swing' 'linear', tham số thứ 4 là một hàm callback, được
+	gọi sau khi hiệu ứng động hoàn thành.
+	
+	Ví dụ sau, hiệu ứng diễn ra trong 2s bằng cách thay đổi chiều rộng, cao của phần tử.
+		
+		<div id="example1"></div>
+		<button id="button1">Hiệu ứng animate()</button>
+		<script>
+			$("#button1").click(function () {
+				$("#example1").css({"width": "10px",
+					"height": "10px",
+					"background":"orangered"});
+				$("#example1").animate(
+					{"width": "100%", "height": "100px"}, 2000);
+			});
+		</script>
+		
+		Check trường hợp tại https://xuanthulab.net/hieu-ung-dong-voi-animate-trong-jquery.html
+	
+	Bạn cũng có thể thiết lập hiệu ứng thay đổi từ giá trị hiện tại tới giá trị cộng thêm bằng cách dùng += hoặc -=
+	
+	Dừng lập tức hiệu ứng động
+		
+		Hiệu ứng đang chạy với .animate() có thể bắt dừng ngay lập tức bằng phương thức .stop()
+			
+			<div id="example2"><strong>****</strong></div>
+			<button id="button2">Chạy animate()</button>
+			<button id="button3">Dừng animate()</button>
+			<script>
+				function animate_examp() {
+					var mr = $("#example2").css("margin-left");
+					if (mr == '0px')
+						$("#example2").animate({"margin-left": "320px"}, 2000, "linear", function () {
+							animate_examp();
+						});
+					else
+						$("#example2").animate({"margin-left": "0px"}, 2000, "linear", function () {
+							animate_examp();
+						});
+				  }
+				$("#button2").click(function () {
+					animate_examp();
+					$(this).hide();
+				});
+				$("#button3").click(function () {
+
+					$("#example2").stop();
+					$("#button2").show();
+				});
+			</script>

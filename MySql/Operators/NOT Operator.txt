@@ -1,0 +1,14 @@
+NOT Operator--MySQL:
+	Syntax:
+											SELECT column1, column2, ...
+											FROM table_name
+											WHERE NOT condition;
+	Example:
+											SELECT 
+												employee_id,
+												first_name,
+												last_name
+											FROM 
+												employees
+											WHERE 
+												NOT job_title = 'Manager';

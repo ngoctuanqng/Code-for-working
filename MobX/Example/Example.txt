@@ -1,0 +1,90 @@
+Ví dụ 1:
+
+				Trong ví dụ này, @observable được sử dụng để theo dõi trạng thái của thuộc tính todos trong TodoStore, trong khi
+				@observer được sử dụng để theo dõi và tự động render lại component TodoList mỗi khi giá trị của todos thay đổi.
+
+				import { observable } from "mobx";
+				import { observer } from "mobx-react";
+				class TodoStore {
+				  @observable todos = [];
+
+				  addTodo = (todo) => {
+					this.todos.push(todo);
+				  };
+				}
+				const todoStore = new TodoStore();
+				@observer
+				class TodoList extends React.Component {
+				  render() {
+					return (
+					  <div>
+						{todoStore.todos.map((todo, index) => (
+						  <div key={index}>{todo}</div>
+						))}
+					  </div>
+					);
+				  }
+				}
+
+Ví dụ 2:
+
+				Trong ví dụ này, todoStore được đánh dấu là observable, cho phép theo dõi và cập nhật các thay đổi trong todos. Hai
+				components TodoList và TodoForm đều được đánh dấu là observer, giúp tự động render lại mỗi khi todos thay đổi. TodoForm
+				cho phép người dùng thêm mới các todo vào todoStore bằng cách sử dụng phương thức addTodo từ todoStore.
+
+				import React from 'react';
+				import { observable } from 'mobx';
+				import { observer } from 'mobx-react';
+				// Tạo một đối tượng observable
+				const todoStore = observable({
+				  todos: [],
+				  addTodo: function (todo) {
+					this.todos.push(todo);
+				  },
+				});
+				// Tạo một component React và sử dụng decorator @observer
+				@observer
+				class TodoList extends React.Component {
+				  render() {
+					return (
+					  <div>
+						<h2>Todo List</h2>
+						<ul>
+						  {todoStore.todos.map((todo, index) => (
+							<li key={index}>{todo}</li>
+						  ))}
+						</ul>
+					  </div>
+					);
+				  }
+				}
+				// Component để thêm các todo mới
+				@observer
+				class TodoForm extends React.Component {
+				  handleSubmit = (e) => {
+					e.preventDefault();
+					const todo = e.target.elements.todo.value;
+					todoStore.addTodo(todo);
+					e.target.elements.todo.value = '';
+				  };
+				  render() {
+					return (
+					  <form onSubmit={this.handleSubmit}>
+						<input type="text" name="todo" />
+						<button type="submit">Add Todo</button>
+					  </form>
+					);
+				  }
+				}
+				// Sử dụng TodoList và TodoForm trong một component cha
+				class App extends React.Component {
+				  render() {
+					return (
+					  <div>
+						<TodoList />
+						<TodoForm />
+					  </div>
+					);
+				  }
+				}
+				export default App;

@@ -1,0 +1,136 @@
+JOIN Keyword--MySQL:
+
+				- Với join thì phần khác sẽ là 1, phần trùng là cấp nhân
+				- JOIN là phép kết nối dữ liệu từ nhiều bảng lại với nhau, nối 2 bảng, 3 bảng.. với nhau. Khi bạn cần truy vấn các cột dữ liệu từ nhiều bảng khác nhau để trả về trong cùng một
+				tập kết quả , bạn cần dùng JOIN. 2 bảng kết nối được với nhau khi có 1 trường chung giữa 2 bảng này.
+				- Khi bạn sử dụng mệnh đề JOIN, bạn thường xuyên kết hợp dữ liệu từ các bảng dựa trên giá trị của các khóa ngoại và khóa chính
+				- Sử dụng các câu lệnh JOIN trong SQL là cần thiết khi bạn cần truy vấn dữ liệu từ nhiều bảng cùng một lúc và kết hợp dữ liệu từ các bảng đó dựa trên các điều kiện.
+				- Khi sử dụng 2 bảng trong mệnh đề FROM, SQL sẽ thực hiện một CROSS JOIN theo mặc định. Điều này có nghĩa là nó sẽ tạo ra một kết quả là tích Descartes của hai bảng, tức là nó
+				sẽ kết hợp mọi hàng từ bảng này với mọi hàng từ bảng kia.
+				- Trong các trường hợp phức tạp, bạn có thể cần kết hợp dữ liệu từ nhiều bảng và áp dụng các điều kiện phức tạp để trả về kết quả mong muốn.
+				- JOIN bản chất là lọc ra các hàng theo như giá trị của các cột điều kiện
+				- Nhìn chung, các bảng có liên quan với nhau qua các ràng buộc foreign key.
+				- Một trong nhưng lợi ích chính của SQL là khả năng kết hợp dữ liệu từ hai hay nhiều bảng lại với nhau. Việc kết hợp các bảng lại như vậy gọi là JOIN, SQL sẽ tạo ra một bảng
+				tạm thời chứa dữ liệu kết quả từ JOIN.
+				- Trước khi tìm hiểu cú pháp mệnh đề join, trong một số trường hợp có thể lấy dữ liệu kết hợp của các bảng chỉ bằng cách đơn giản là dùng mệnh đề where
+
+	Sử dụng WHERE::
+	
+											- Khi bạn muốn lọc dữ liệu dựa trên một điều kiện cụ thể.
+											- Khi không cần kết hợp dữ liệu từ nhiều bảng, chỉ cần áp dụng điều kiện lọc cho một bảng cụ thể.
+											- Khi bạn muốn thực hiện các phép so sánh đơn giản như bằng, lớn hơn, nhỏ hơn, khác nhau, vv.
+	
+	Sử dụng JOIN:
+	
+											- Khi bạn cần kết hợp dữ liệu từ hai hoặc nhiều bảng dựa trên một điều kiện liên kết.
+											- Khi có mối quan hệ giữa các bảng và bạn muốn lấy thông tin từ cả hai bảng.
+											- Khi cần thực hiện kết hợp theo nhiều điều kiện phức tạp hơn.
+											- Chú ý 1 điều là JOIN hỗ trợ nhiều loại nối khác (left join, right join, inner join...) nhau nếu như chúng ta cần nối phức tạp, trong khi where thì không
+	
+	CROSS JOIN:								
+											The CROSS JOIN keyword returns all records from both tables (table1 and table2).
+		Syntax:
+											SELECT column_name(s)
+											FROM table1
+											CROSS JOIN table2;
+		Example:
+											SELECT 
+												e.first_name,
+												e.last_name,
+												d.department_name
+											FROM 
+												employees e
+											CROSS JOIN 
+												departments d;
+												
+											SELECT 
+												employees.employee_id,
+												employees.first_name,
+												employees.last_name,
+												departments.department_name,
+												roles.role_name
+											FROM 
+												employees
+											CROSS JOIN 
+												departments
+											CROSS JOIN 
+												roles;
+	INNER JOIN:
+											The INNER JOIN keyword selects records that have matching values in both tables.
+		Syntax:
+											SELECT column_name(s)
+											FROM table1
+											INNER JOIN table2
+											ON table1.column_name = table2.column_name;
+		Example:
+											SELECT 
+												orders.order_id,
+												orders.order_date,
+												customers.first_name,
+												customers.last_name
+											FROM 
+												orders
+											INNER JOIN 
+												customers ON orders.customer_id = customers.customer_id;
+												
+											SELECT 
+												orders.order_id,
+												customers.first_name AS customer_first_name,
+												customers.last_name AS customer_last_name,
+												products.product_name
+											FROM 
+												orders
+											INNER JOIN 
+												customers ON orders.customer_id = customers.customer_id
+											INNER JOIN 
+												products ON orders.product_id = products.product_id;
+	LEFT JOIN:
+											The LEFT JOIN keyword returns all records from the left table (table1), and the matching records (if any) from the right table (table2).
+		Syntax:
+											SELECT column_name(s)
+											FROM table1
+											LEFT JOIN table2
+											ON table1.column_name = table2.column_name;
+		Example:
+											SELECT 
+												employees.employee_id,
+												employees.first_name,
+												employees.last_name,
+												departments.department_name
+											FROM 
+												employees
+											LEFT JOIN 
+												departments ON employees.department_id = departments.department_id;
+	RIGHT JOIN:
+											The RIGHT JOIN keyword returns all records from the right table (table2), and the matching records (if any) from the left table (table1).
+		Syntax:
+											SELECT column_name(s)
+											FROM table1
+											RIGHT JOIN table2
+											ON table1.column_name = table2.column_name;
+		Example:
+											SELECT 
+												orders.order_id, 
+												customers.first_name, 
+												customers.last_name, 
+												orders.order_date
+											FROM 
+												orders
+											RIGHT JOIN 
+												customers ON orders.customer_id = customers.customer_id;
+	Self Join:
+											A self join is a regular join, but the table is joined with itself.
+		Syntax:
+											SELECT column_name(s)
+											FROM table1 T1, table1 T2
+											WHERE condition;
+		Example:
+											SELECT 
+												e.employee_id,
+												e.employee_name AS employee_name,
+												m.employee_name AS manager_name
+											FROM 
+												employees T1,
+												employees T2
+											WHERE 
+												T1.manager_id = T2.employee_id;

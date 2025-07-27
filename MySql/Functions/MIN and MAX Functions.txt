@@ -1,0 +1,19 @@
+MIN() and MAX() Functions--MySQL:
+							The MIN() function returns the smallest value of the selected column.
+							The MAX() function returns the largest value of the selected column.
+	MIN():
+			Syntax:
+							SELECT MIN(column_name)
+							FROM table_name
+							WHERE condition;
+			Example:
+							SELECT MIN(salary) AS min_salary
+							FROM employees;
+	MAX():
+			Syntax:
+							SELECT MAX(column_name)
+							FROM table_name
+							WHERE condition;
+			Example:
+							SELECT MAX(salary) AS max_salary
+							FROM employees;

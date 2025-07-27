@@ -1,0 +1,51 @@
+TextField--MUI:
+		<div class="container-field">
+			<TextField className="txtPM" label="Project Manager"
+				id="pmSearch"
+				value={searchPMName}
+				readOnly
+				disabled
+				size="small"
+				style={{ width: 200 }}
+				margin="dense"
+				sx={{									
+					"& .MuiOutlinedInput-root": {
+						backgroundColor: "white",
+						height: "37px",
+					},
+				}}
+				InputProps={{
+					endAdornment: (
+						<IconButton
+							color="default"
+							size="small"
+							sx={{ visibility: searchPMName ? "visible" : "hidden" }}
+							onClick={() => {
+								setSearchPM("");
+								setSearchPMName("");
+							}}
+						>
+							<Clear fontSize="small" />
+						</IconButton>
+					),
+				}}
+			/>
+			<Button className="btnPM" variant="contained" size='medium' sx={{
+				marginRight: 2, marginTop: 1,
+			}}
+				onClick={() => setIsChoosePmOpen(true)}
+			>
+				Choose
+			</Button>
+		</div>						
+		
+		<TextField label="Start date"
+		  id="startDate"
+		  value={startDate}
+		  defaultValue={now}
+		  type="date"
+		  datatype="dd-MM-yyyy"
+		  size="small"
+		  format="dd-MM-yyyy"
+		  onChange={(e) => setStartDate(e.target.value)}
+		/>		

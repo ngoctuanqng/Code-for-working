@@ -1,0 +1,519 @@
+Constraint--MySQL:
+
+	CHECK Constraint--Contraint MySQL:
+	
+											- The CHECK constraint is used to limit the value range that can be placed in a column.
+											- If you define a CHECK constraint on a column it will allow only certain values for this column.
+											- If you define a CHECK constraint on a table it can limit the values in certain columns based on values in other columns in the row.
+		
+		CHECK on CREATE TABLE:
+												CREATE TABLE Persons (
+													ID int NOT NULL,
+													LastName varchar(255) NOT NULL,
+													FirstName varchar(255),
+													Age int,
+													CHECK (Age>=18)
+												);
+												
+												CREATE TABLE Persons (
+													ID int NOT NULL,
+													LastName varchar(255) NOT NULL,
+													FirstName varchar(255),
+													Age int,
+													City varchar(255),
+													CONSTRAINT CHK_Person CHECK (Age>=18 AND City='Sandnes')
+												);
+		
+		CHECK on ALTER TABLE:
+		
+												ALTER TABLE Persons
+												ADD CHECK (Age>=18);
+												
+												ALTER TABLE Persons
+												ADD CONSTRAINT CHK_PersonAge CHECK (Age>=18 AND City='Sandnes');
+		
+		DROP a CHECK Constraint:
+		
+												ALTER TABLE Persons
+												DROP CHECK CHK_PersonAge;
+	
+	DEFAULT Constraint--Contraint MySQL:
+	
+												- The DEFAULT constraint is used to set a default value for a column.
+												- The default value will be added to all new records, if no other value is specified.
+		
+		DEFAULT on CREATE TABLE:
+		
+												CREATE TABLE Persons (
+													ID int NOT NULL,
+													LastName varchar(255) NOT NULL,
+													FirstName varchar(255),
+													Age int,
+													City varchar(255) DEFAULT 'Sandnes'
+												);
+			
+												CREATE TABLE Orders (
+													ID int NOT NULL,
+													OrderNumber int NOT NULL,
+													OrderDate date DEFAULT CURRENT_DATE()
+												);
+		
+		DEFAULT on ALTER TABLE:
+		
+												ALTER TABLE Persons
+												ALTER City SET DEFAULT 'Sandnes';
+		
+		DROP a DEFAULT Constraint:
+		
+												ALTER TABLE Persons
+												ALTER City DROP DEFAULT;
+	
+	NOT NULL Constraint--Contraint MySQL:
+	
+												- By default, a column can hold NULL values.
+												- The NOT NULL constraint enforces a column to NOT accept NULL values.
+												- This enforces a field to always contain a value, which means that you cannot insert a new record, or update a record without adding a value to this field.
+		
+		NOT NULL on CREATE TABLE:
+		
+												CREATE TABLE Persons (
+													ID int NOT NULL,
+													LastName varchar(255) NOT NULL,
+													FirstName varchar(255) NOT NULL,
+													Age int
+												);
+		
+		NOT NULL on ALTER TABLE:
+		
+												ALTER TABLE Persons
+												MODIFY Age int NOT NULL;
+	
+	PRIMARY KEY Constraint--Contraint MySQL:
+	
+												- The PRIMARY KEY constraint uniquely identifies each record in a table.
+												- Primary keys must contain UNIQUE values, and cannot contain NULL values.
+												- A table can have only ONE primary key; and in the table, this primary key can consist of single or multiple columns (fields).
+												- Nếu chúng ta thiết lập ràng buộc PRIMARY KEY cho một cột thì dữ liệu trên các hàng của cột đó tuyệt đối không được trùng nhau.
+												- Nếu chúng ta thiết lập ràng buộc PRIMARY KEY cho một tập hợp các cột thì dữ liệu trên các hàng của một tập hợp các cột đó tuyệt đối không được trùng nhau.
+												- Khóa chính có nhiệm vụ lưu trữ giá trị duy nhất hay còn gọi là cơ sở dữ liệu SQL duy nhất. Đây chính là yếu tố được lưu thông xuyên suốt giữa các table.
+		
+		PRIMARY KEY on CREATE TABLE:
+		
+												CREATE TABLE Persons (
+													ID int NOT NULL,
+													LastName varchar(255) NOT NULL,
+													FirstName varchar(255),
+													Age int,
+													PRIMARY KEY (ID)
+												);
+	
+												CREATE TABLE Persons (
+													ID int NOT NULL,
+													LastName varchar(255) NOT NULL,
+													FirstName varchar(255),
+													Age int,
+													CONSTRAINT PK_Person PRIMARY KEY (ID,LastName)
+												);
+		
+		PRIMARY KEY on ALTER TABLE:
+		
+												ALTER TABLE Persons
+												ADD PRIMARY KEY (ID);
+												
+												ALTER TABLE Persons
+												ADD CONSTRAINT PK_Person PRIMARY KEY (ID,LastName);
+		
+		DROP a PRIMARY KEY Constraint:
+		
+												ALTER TABLE Persons
+												DROP PRIMARY KEY;
+		
+		Vô hiệu hóa khóa chính:
+		
+												ALTER INDEX ten_rang_buoc ON ten_bang
+												DISABLE;
+		
+		Kích hoạt khóa chính:
+		
+												ALTER INDEX ten_rang_buoc ON ten_bang
+												REBUILD;
+	
+	FOREIGN KEY Constraint--Contraint MySQL:
+
+										- Ràng buộc khóa ngoại là một điều kiện áp dụng cho một hoặc nhiều cột trong một bảng cơ sở dữ liệu, định rõ quan hệ giữa bảng đó và một bảng khác (bảng cha và bảng con). Nói
+										cách khác, nếu trong bảng cha có một giá trị khóa chính (primary key) nào đó, thì trong bảng con sẽ có một hoặc nhiều giá trị trong các cột liên kết phải tương ứng với giá
+										trị đó.
+										- Nó định nghĩa một mối quan hệ giữa bảng cha (primary key) và bảng con (foreign key) để đảm bảo rằng dữ liệu trong bảng con phụ thuộc vào dữ liệu trong bảng cha.											
+										- Một hàng trong bảng con (bảng tham chiếu) phải chứa các giá trị tồn tại trong bảng cha.											
+										- The table with the foreign key is called the child table, and the table with the primary key is called the referenced or parent table.
+										- Khi bạn thực hiện các hành động như chèn (insert), cập nhật (update) hoặc xóa (delete) dữ liệu trong bảng, hệ thống sẽ kiểm tra xem các hành động này có làm mất tính
+										toàn vẹn của ràng buộc khóa ngoại hay không. Nếu một hành động làm mất điều kiện ràng buộc này, hệ thống sẽ phát sinh lỗi vi phạm ràng buộc khóa ngoại.
+										- The FOREIGN KEY constraint is used to prevent actions that would destroy links between tables.
+										- A FOREIGN KEY is a field (or collection of fields) in one table, that refers to the PRIMARY KEY in another table.
+										- Khóa ngoại được sử dụng để đảm bảo tính toàn vẹn và liên kết dữ liệu giữa các bảng.
+										- Khi chúng ta tạo ra một bảng, thì chỉ lấy được thông tin của duy nhất bảng đó.Tuy nhiên một số trường hợp cần liên kết giữa các bảng lại với nhau để lấy thông tin của 2 hoặc
+										nhiều bảng.Lúc này chúng ta sử dụng khóa ngoại để nối bảng, lấy những thông tin cần thiết giữa các bảng.
+										
+										- Giá trị của khóa ngoại chỉ có thể tồn tại với giá trị tồn tại trong bảng cha hoặc là null
+												
+		Vi phạm ràng buộc khóa ngoại--FOREIGN KEY Constraint:
+		
+			Nguyên tắc chung:
+			
+												- Giá trị của cột trong bảng cha mà khóa ngoại trong bảng con tham chiếu đến phải có trước và giá trị này là quan trọng nhất
+												- Cập nhật giá trị của foreign key trong bảng con là null hoặc là giá trị bằng với giá trị trong bảng cha thì không gây ra lỗi
+		
+			Chèn dữ liệu không hợp lệ:
+
+												Khi bạn thêm một bản ghi mới vào bảng con và giá trị của các cột liên kết không có trong bảng cha, ràng buộc khóa ngoại sẽ bị vi phạm.
+												
+			Cập nhật giá trị không hợp lệ:
+			
+										- Trong hầu hết các trường hợp, bạn nên cập nhật dữ liệu từ bảng cha trước, sau đó mới cập nhật dữ liệu từ bảng con. Điều này giúp tránh việc cập nhật dữ liệu từ bảng con mà có
+										thể dẫn đến việc mất dữ liệu liên quan trong bảng cha.
+										- Sau khi đã cập nhật dữ liệu từ bảng cha, bạn có thể tiếp tục cập nhật dữ liệu từ bảng con mà không gặp phải các vấn đề về ràng buộc khóa ngoại.												
+										- Nếu bạn cập nhật giá trị trong cột liên kết của bảng cha mà giá trị này đang được sử dụng bởi một hoặc nhiều bản ghi trong bảng con, và sau đó giá trị mới không tồn tại
+										trong bảng cha, ràng buộc khóa ngoại sẽ bị vi phạm. Điều quan trọng ở đây là giá trị mới mà bạn đang cập nhật không còn tồn tại trong bảng cha sau khi cập nhật được thực hiện.
+										- Giả sử chúng ta có hai bảng: "Students" (học sinh) và "Grades" (điểm số). Bảng "Grades" có một cột "student_id" liên kết với cột "id" trong bảng "Students" thông qua một
+										ràng buộc khóa ngoại. Nếu bạn cập nhật giá trị trong cột "id" của bảng "Students" mà giá trị mới không còn tồn tại trong bảng "Students", ràng buộc khóa ngoại sẽ bị vi phạm.
+										Ví dụ, nếu bạn cố gắng cập nhật "id" của một học sinh trong bảng "Students" thành một giá trị mới, nhưng giá trị mới đó không tồn tại trong bảng "Students", thì việc này
+										sẽ làm vi phạm ràng buộc khóa ngoại nếu bảng "Grades" đang sử dụng giá trị cũ của "id" đó.												
+												
+			Xóa giá trị chính trong bảng cha:
+			
+										- Khi bạn cố gắng xóa một giá trị khóa chính từ bảng cha mà có các bản ghi trong bảng con đang tham chiếu đến nó, việc này sẽ vi phạm ràng buộc khóa ngoại.
+										- Trong hầu hết các trường hợp, nếu có thể, bạn nên xóa dữ liệu từ bảng con trước. Điều này giúp tránh việc xóa dữ liệu từ bảng cha mà có thể dẫn đến mất mát dữ liệu quan trọng
+										trong bảng con (xóa như vậy để khóa dữ liệu trong bảng này sẽ không gây ảnh hưởng đến bảng khác).
+										- Điều quan trọng là phải hiểu rõ cấu trúc cơ sở dữ liệu của bạn và các mối quan hệ giữa các bảng, cũng như các ràng buộc và hành vi được cấu hình cho các quan hệ
+										khóa ngoại. Trong một số trường hợp, việc xóa dữ liệu từ bảng cha trước có thể là lựa chọn phù hợp, đặc biệt nếu bạn đã cấu hình ràng buộc khóa ngoại với ON DELETE CASCADE và
+										không có dữ liệu quan trọng trong bảng con.
+
+		Tác dụng của khóa ngoại trong dữ liệu--FOREIGN KEY Constraint:
+		
+			Đảm bảo tính toàn vẹn dữ liệu:
+																		Khóa ngoại đảm bảo tính toàn vẹn dữ liệu bằng cách đảm bảo rằng mối quan hệ giữa các bảng được duy trì. Nó ngăn chặn việc chèn hoặc cập nhật dữ liệu
+																		không hợp lệ trong bảng con, bảo vệ sự nhất quán của cơ sở dữ liệu.
+			Quản lý mối quan hệ giữa các bảng:		
+																		Khóa ngoại giúp quản lý mối quan hệ giữa các bảng trong cơ sở dữ liệu. Nó cho phép bạn liên kết dữ liệu từ các bảng khác nhau dựa trên cột khóa ngoại,
+																		giúp truy vấn và thu thập thông tin từ nhiều bảng dễ dàng.
+			Hành vi xóa và cập nhật kiểm tra:		
+																		Thông qua tùy chọn ON DELETE và ON UPDATE, bạn có thể xác định hành vi khi xóa hoặc cập nhật bản ghi trong bảng cha. Điều này giúp bạn quản lý cách dữ
+																		liệu trong bảng con phản ánh thay đổi trong bảng cha. Ví dụ, bạn có thể xóa tất cả các bản ghi con khi xóa một bản ghi cha (CASCADE) hoặc đặt các cột
+																		khóa ngoại trong bảng con thành NULL khi xóa bản ghi cha (SET NULL).
+			Ngăn chặn dữ liệu không hợp lệ:		
+																		Khóa ngoại ngăn chặn dữ liệu không hợp lệ được chèn vào bảng con. Điều này đảm bảo rằng chỉ dữ liệu hợp lệ và thỏa mãn ràng buộc sẽ được thêm vào bảng
+																		con, giúp bảo vệ tính toàn vẹn dữ liệu.
+			Duyệt qua và thực hiện các thao tác dữ liệu liên quan:
+																		Mối quan hệ khóa ngoại giúp bạn dễ dàng duyệt qua và thực hiện các thao tác dữ liệu liên quan. Ví dụ, bạn có thể lấy tất cả các đơn đặt hàng của một
+																		khách hàng cụ thể, tính tổng giá trị đơn đặt hàng của họ hoặc tìm tất cả các đơn đặt hàng liên quan đến một sản phẩm cụ thể.
+																		
+		FOREIGN KEY on CREATE TABLE--FOREIGN KEY Constraint:
+		
+												CREATE TABLE Orders (
+													OrderID int NOT NULL,
+													OrderNumber int NOT NULL,
+													PersonID int,
+													PRIMARY KEY (OrderID),
+													FOREIGN KEY (PersonID) REFERENCES Persons(PersonID) // Mỗi giá trị trong cột "PersonID" của bảng "Orders" phải tồn tại trong cột "PersonID" của bảng "Persons".
+												);
+												
+		FOREIGN KEY on ALTER TABLE--FOREIGN KEY Constraint:
+		
+												ALTER TABLE Orders
+												ADD FOREIGN KEY (PersonID) REFERENCES Persons(PersonID);
+												
+												ALTER TABLE Orders
+												ADD CONSTRAINT FK_PersonOrder
+												FOREIGN KEY (PersonID) REFERENCES Persons(PersonID);
+												
+		DROP a FOREIGN KEY Constraint--FOREIGN KEY Constraint:
+		
+												ALTER TABLE Orders
+												DROP FOREIGN KEY FK_PersonOrder;
+												
+		Tạo khóa ngoại trường hợp tham chiếu chính nó--FOREIGN KEY Constraint:
+		
+																CREATE TABLE Employee(
+																	id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+																	fullname VARCHAR(50) NOT NULL,
+																	email VARCHAR (50) NOT NULL,
+																	leader_id INT (11) NOT NULL,
+																	CONSTRAINT pk_self FOREIGN KEY (leader_id) REFERENCES Employee(id) 
+																);
+																
+		Tùy chọn ON DELETE khi thiết lập khóa ngoại--FOREIGN KEY Constraint:
+		
+												Lựa chọn hành động xảy ra trên các row của bảng con khi row trong bảng cha bị xóa đi
+		
+			DELETE NO ACTION:
+
+									- NO ACTION là tùy chọn mặc định cho hành động DELETE trong ràng buộc khóa ngoại trong MySQL. Khi NO ACTION được sử dụng, hệ thống sẽ không thực hiện bất kỳ hành động nào mà có
+									thể gây ra vi phạm ràng buộc khóa ngoại khi có thay đổi trong hàng cha. Tuy nhiên, hệ thống cũng sẽ không báo lỗi nếu xảy ra vi phạm.
+									- Khi sử dụng DELETE NO ACTION, không có thứ tự xóa cụ thể đặc biệt được áp đặt. Thay vào đó, hệ thống sẽ không thực hiện bất kỳ hành động xóa nào trên dữ liệu khi có một
+									hoặc nhiều dòng trong bảng cha (parent table, bảng chứa primary key, không chứa foreign key) được xóa.				
+									- Specifies that the row in the parent table can be deleted if no other row depends on it. If a dependent row exists in the relationship, the DELETE fails. The check for
+									dependent rows is performed at the end of the statement.
+									
+									CREATE TABLE OrderDetails (
+										DetailID INT PRIMARY KEY,
+										OrderID INT,
+										ProductName VARCHAR(50),
+										Quantity INT,
+										FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE NO ACTION
+									);
+												
+			DELETE RESTRICT:
+
+									- Khi RESTRICT được sử dụng với hành động DELETE, nếu có một hoặc nhiều hàng con tham chiếu đến hàng cha mà sẽ bị xóa (chú ý là đang nói xóa dữ liệu ở bảng cha), hệ thống sẽ từ
+									chối hành động xóa và báo lỗi.
+									- RESTRICT yêu cầu không được phép thực hiện hành động xóa nếu nó có thể gây ra vi phạm ràng buộc khóa ngoại.
+									- Trong hầu hết các trường hợp, RESTRICT và NO ACTION sẽ có hành vi tương tự khi xảy ra hành động DELETE. Tuy nhiên, RESTRICT là một lựa chọn rõ ràng hơn nếu bạn muốn hệ thống
+									báo lỗi ngay lập tức khi có thay đổi dẫn đến vi phạm ràng buộc khóa ngoại.
+									- Khi sử dụng DELETE RESTRICT, quy trình xóa dữ liệu giống như khi sử dụng DELETE NO ACTION, nghĩa là không có thứ tự xóa cụ thể được áp đặt. 													
+									- Specifies that the row in the parent table can be deleted if no other row depends on it. If a dependent row exists in the relationship, the DELETE fails. The check for
+									dependent rows is performed immediately.
+									- For example, you cannot delete a department from the department table if it is still responsible for some project that is described by a dependent row in the project table.
+									
+									CREATE TABLE OrderDetails (
+										DetailID INT PRIMARY KEY,
+										OrderID INT,
+										ProductName VARCHAR(50),
+										Quantity INT,
+										FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE RESTRICT
+									);
+												
+			DELETE CASCADE:
+												
+									- Xóa 1 dòng trong bảng cha thì các row của bảng con có liên kết đến foreign key chứa trong bảng cha sẽ bị xóa , xóa riêng từng row trong bảng con vẫn không sao
+									- DELETE CASCADE là một điều kiện trong các quan hệ cơ sở dữ liệu mà khi một dòng dữ liệu trong bảng cha (parent table) được xóa (deleted), tất cả các dòng dữ liệu trong
+									bảng con (child table) liên quan sẽ được tự động xóa (deleted) theo.
+									- Nói cách khác, khi bạn xóa một dòng dữ liệu từ bảng cha, tất cả các dòng dữ liệu trong bảng con mà có liên kết với dòng đó sẽ được xóa tự động mà không cần phải thực
+									hiện thêm bất kỳ hành động nào.
+									- Điều này thường được sử dụng khi bạn muốn đảm bảo tính toàn vẹn dữ liệu giữa các bảng và không muốn để lại dữ liệu không liên kết (orphans) trong cơ sở dữ liệu khi xóa
+									dữ liệu từ bảng cha.
+									- Specifies that first the designated rows in the parent table are deleted. Then, the dependent rows are deleted.
+									- For example, you can delete a department by deleting its row in the department table. Deleting the row from the department table also deletes.								
+									
+									CREATE TABLE OrderDetails (
+										DetailID INT PRIMARY KEY,
+										OrderID INT,
+										ProductName VARCHAR(50),
+										Quantity INT,
+										FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE
+									);
+												
+				Quy trình xóa theo DELETE CASCADE sẽ được thực hiện theo thứ tự sau:
+				
+					Xóa dữ liệu từ các bảng con (child tables):
+
+												Trước tiên, hệ thống sẽ xóa dữ liệu từ các bảng con mà có ràng buộc khóa ngoại đến bảng cha (parent table) mà bạn đang xóa. Điều này đảm bảo rằng không có dữ liệu từ các
+												bảng con được liên kết với bản ghi trong bảng cha sau khi bản ghi cha bị xóa.
+												
+					Xóa dữ liệu từ bảng cha (parent table):
+					
+												Sau khi xóa dữ liệu từ các bảng con, hệ thống sẽ tiếp tục xóa dữ liệu từ bảng cha.													
+			DELETE SET NULL:
+			
+									- Xóa 1 dòng trong bảng cha thì các row của bảng con có liên kết đến foreign key chứa trong bảng cha sẽ được đưa về giá trị mặc định , xóa riêng từng row trong bảng con vẫn không sao
+									- DELETE SET NULL là một điều kiện trong các quan hệ cơ sở dữ liệu (database) mà khi một dòng dữ liệu (record) trong một bảng cha (parent table) được xóa (deleted), các
+									giá trị trong các cột liên kết với bảng con (child table) sẽ được đặt thành NULL.
+									- Nói cách khác, khi bạn xóa một dòng dữ liệu từ bảng cha, các giá trị của các cột liên kết trong bảng con mà liên kết đến dòng dữ liệu đã bị xóa sẽ được đặt thành NULL tự động.
+									- Điều này thường được sử dụng khi có mối quan hệ cha con giữa các bảng và bạn muốn duy trì tính toàn vẹn của dữ liệu.
+									
+									CREATE TABLE OrderDetails (
+										DetailID INT PRIMARY KEY,
+										OrderID INT,
+										ProductName VARCHAR(50),
+										Quantity INT,
+										FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE SET NULL
+									);
+												
+				Quy trình xóa theo DELETE SET NULL sẽ được thực hiện theo thứ tự sau:
+				
+					Cập nhật các cột liên kết trong các bảng con (child tables):
+					
+												Thay vì xóa dữ liệu từ các bảng con, hệ thống sẽ cập nhật các cột liên kết trong các bảng con để đặt giá trị của chúng thành NULL. Điều này sẽ làm mất mối quan hệ giữa
+												các bản ghi trong bảng cha và bảng con.
+												
+					Xóa dữ liệu từ bảng cha (parent table):
+					
+												Sau khi cập nhật các cột liên kết trong các bảng con thành NULL, hệ thống sẽ tiếp tục xóa dữ liệu từ bảng cha.
+												
+			DELETE SET DEFAULT:			
+			
+												Specifies that each column of the foreign key in each dependent row is set to its default value. This means that the column is only set to its default value if it is a member
+												of a foreign key that references the row being deleted. Only the dependent rows that are immediate descendants are affected.
+												
+												CREATE TABLE OrderDetails (
+													DetailID INT PRIMARY KEY,
+													OrderID INT,
+													ProductName VARCHAR(50),
+													Quantity INT,
+													FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE SET DEFAULT
+												);
+												
+				Thứ tự xóa dữ liệu khi sử dụng DELETE SET DEFAULT:
+				
+					Cập nhật các cột liên kết trong các bảng con (child tables):
+					
+												Thay vì xóa dữ liệu từ các bảng con, hệ thống sẽ cập nhật các cột liên kết trong các bảng con thành giá trị mặc định được định nghĩa cho cột đó.
+												
+					Xóa dữ liệu từ bảng cha (parent table):
+					
+												Sau khi cập nhật các cột liên kết trong các bảng con thành giá trị mặc định, hệ thống sẽ tiếp tục xóa dữ liệu từ bảng cha.
+												
+		Cập Nhật Dữ Liệu (UPDATE)--FOREIGN KEY Constraint:
+		
+			NO ACTION:
+			
+										- Nếu một hàng trong bảng cha được cập nhật, hệ thống sẽ kiểm tra xem có bất kỳ hàng nào trong bảng con tham chiếu đến hàng đó hay không.
+										- Nếu không có hàng nào trong bảng con tham chiếu đến hàng được cập nhật trong bảng cha, thì hệ thống sẽ cho phép cập nhật đó.
+										- Tuy nhiên, nếu có bất kỳ hàng nào trong bảng con tham chiếu đến hàng đó, hệ thống sẽ từ chối thực hiện cập nhật và báo lỗi.
+										- NO ACTION là tùy chọn mặc định cho hành động UPDATE trong ràng buộc khóa ngoại trong MySQL. Khi NO ACTION được sử dụng, hệ thống sẽ không thực hiện bất kỳ hành động nào mà có
+										thể gây ra vi phạm ràng buộc khóa ngoại khi có thay đổi trong hàng cha. Tuy nhiên, hệ thống cũng sẽ không báo lỗi nếu xảy ra vi phạm.
+										- Khi sử dụng UPDATE NO ACTION, không có thứ tự cập nhật cụ thể đặc biệt được áp đặt. Thay vào đó, hệ thống sẽ không thực hiện bất kỳ hành động cập nhật nào trên dữ liệu
+										khi có một hoặc nhiều dòng trong bảng cha (parent table) được cập nhật.
+										
+										CREATE TABLE parents (
+											id INT PRIMARY KEY
+										);
+										CREATE TABLE children (
+											id INT PRIMARY KEY,
+											parent_id INT,
+											FOREIGN KEY (parent_id) REFERENCES parents(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+										);
+										-- Khi cố gắng cập nhật hoặc xóa một hàng trong bảng "parents" mà có các hàng con tương ứng trong bảng "children":
+										-- Hệ thống sẽ từ chối hành động và báo lỗi.
+										INSERT INTO parents (id) VALUES (1), (2);
+										INSERT INTO children (id, parent_id) VALUES (101, 1), (102, 1), (103, 2);
+												
+			RESTRICT:
+			
+										- Khi một hàng trong bảng cha được cập nhật (update), hệ thống sẽ kiểm tra xem có bất kỳ hàng nào trong bảng con tham chiếu đến hàng đó hay không.
+										- Nếu có bất kỳ hàng nào trong bảng con tham chiếu đến hàng đó, hệ thống sẽ từ chối thực hiện cập nhật và báo lỗi.
+										- Điều này đảm bảo rằng tính nhất quán của dữ liệu giữa các bảng được duy trì, và bạn phải giải quyết vấn đề ràng buộc trước khi thực hiện cập nhật.
+										- Khi RESTRICT được sử dụng với hành động UPDATE, nếu có một hàng con tham chiếu đến hàng cha mà có giá trị được cập nhật, hệ thống sẽ từ chối hành động cập nhật và báo lỗi.
+										RESTRICT yêu cầu không được phép thực hiện hành động cập nhật nếu nó có thể gây ra vi phạm ràng buộc khóa ngoại.
+										- Trong hầu hết các trường hợp, RESTRICT và NO ACTION sẽ có hành vi tương tự khi xảy ra hành động UPDATE. Tuy nhiên, RESTRICT là một lựa chọn rõ ràng hơn nếu bạn muốn hệ thống
+										báo lỗi ngay lập tức khi có thay đổi dẫn đến vi phạm ràng buộc khóa ngoại.
+										- Khi sử dụng UPDATE RESTRICT, hệ thống không thực hiện bất kỳ thao tác cập nhật nào trên dữ liệu trong trường hợp có một hoặc nhiều dòng trong bảng cha (parent table)
+										được cập nhật.
+										
+										CREATE TABLE departments (
+											id INT PRIMARY KEY,
+											name VARCHAR(100)
+										);
+
+										CREATE TABLE employees (
+											id INT PRIMARY KEY,
+											name VARCHAR(100),
+											department_id INT,
+											FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE RESTRICT ON UPDATE RESTRICT
+										);
+										INSERT INTO departments (id, name) VALUES (1, 'IT'), (2, 'HR');
+										INSERT INTO employees (id, name, department_id) VALUES (101, 'John Doe', 1), (102, 'Jane Smith', 1), (103, 'Mike Johnson', 2);													
+										UPDATE departments SET id = 10 WHERE id = 1; -- Khi cố gắng cập nhật giá trị id của phòng ban có id = 1 thành 10:
+																							 -- Kết quả: Hệ thống sẽ từ chối cập nhật và báo lỗi vì có nhân viên thuộc phòng ban đó.					
+			
+			CASCADE:
+			
+										- Khi một hàng trong bảng cha được cập nhật (update), hệ thống sẽ tự động cập nhật các giá trị tham chiếu trong các hàng tương ứng của bảng con.
+										- Cụ thể, tất cả các hàng trong bảng con mà tham chiếu đến hàng được cập nhật trong bảng cha sẽ cùng được cập nhật để phản ánh các thay đổi mới của hàng cha.
+										- Hành động cập nhật này sẽ lan truyền xuống tất cả các hàng tham chiếu từ hàng cha, tạo ra một chuỗi các cập nhật tự động.
+										- Thay đổi giá trị khóa chính trong bảng cha thì các giá trị khóa ngoại trong bảng con sẽ cập nhật bằng với giá trị đó
+										
+										CREATE TABLE departments (
+											id INT PRIMARY KEY,
+											name VARCHAR(100)
+										);
+										CREATE TABLE employees (
+											id INT PRIMARY KEY,
+											name VARCHAR(100),
+											department_id INT,
+											FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE ON UPDATE CASCADE
+										);
+										INSERT INTO departments (id, name) VALUES (1, 'IT'), (2, 'HR');
+										INSERT INTO employees (id, name, department_id) VALUES (101, 'John Doe', 1), (102, 'Jane Smith', 1), (103, 'Mike Johnson', 2);												
+										UPDATE departments SET id = 10 WHERE id = 1; -- Khi cố gắng cập nhật giá trị id của phòng ban có id = 1 thành 10:
+																							 -- Kết quả: Tất cả các nhân viên thuộc phòng ban có id = 1 sẽ được cập nhật tự động với department_id = 10.
+																							 
+				Thứ tự cập nhật dữ liệu sẽ là:
+				
+					Cập nhật dữ liệu trong bảng cha (parent table):
+					
+										Đầu tiên, hệ thống sẽ thực hiện cập nhật dữ liệu trong bảng cha theo các thay đổi được áp dụng. Điều này có nghĩa là nếu có bất kỳ thay đổi nào xảy ra trong các cột khóa
+										chính hoặc các cột mà có liên kết khóa ngoại với bảng con, các dòng tương ứng trong bảng con sẽ được cập nhật theo.
+												
+					Cập nhật dữ liệu trong bảng con (child table):
+					
+										Sau khi dữ liệu trong bảng cha đã được cập nhật, hệ thống sẽ tiếp tục cập nhật dữ liệu trong bảng con nếu có bất kỳ thay đổi nào trong các cột mà liên kết với bảng cha
+										thông qua ràng buộc khóa ngoại.
+																					 
+			SET NULL:
+			
+										- Khi một hàng trong bảng cha được cập nhật (update), hệ thống sẽ tự động đặt các giá trị tham chiếu trong các hàng tương ứng của bảng con thành NULL.
+										- Cụ thể, tất cả các hàng trong bảng con mà tham chiếu đến hàng được cập nhật trong bảng cha sẽ có các giá trị tham chiếu của chúng đặt thành NULL.
+										- Điều này đảm bảo rằng các hàng trong bảng con không còn liên kết với hàng cha sau khi hàng cha được cập nhật, và dữ liệu vẫn duy trì được tính nhất quán.
+										- Thay đổi giá trị khóa chính trong bảng cha thì các giá trị khóa ngoại trong bảng con sẽ cập nhật là null
+										
+										CREATE TABLE departments (
+											id INT PRIMARY KEY,
+											name VARCHAR(100)
+										);
+										CREATE TABLE employees (
+											id INT PRIMARY KEY,
+											name VARCHAR(100),
+											department_id INT,
+											FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL ON UPDATE SET NULL
+										);
+										INSERT INTO departments (id, name) VALUES (1, 'IT'), (2, 'HR');
+										INSERT INTO employees (id, name, department_id) VALUES (101, 'John Doe', 1), (102, 'Jane Smith', 1), (103, 'Mike Johnson', 2);												
+										UPDATE departments SET id = 10 WHERE id = 1; -- Khi cố gắng cập nhật giá trị id của phòng ban có id = 1 thành 10:
+																							 -- Kết quả: Tất cả các nhân viên thuộc phòng ban có id = 1 sẽ được cập nhật tự động với department_id = NULL.
+																							 
+				Thứ tự cập nhật dữ liệu sẽ là:
+				
+					Cập nhật dữ liệu trong bảng cha (parent table):
+					
+										Đầu tiên, hệ thống sẽ thực hiện cập nhật dữ liệu trong bảng cha theo các thay đổi được áp dụng. Nếu giá trị của các cột khóa chính hoặc các cột mà có liên kết khóa ngoại với
+										bảng con thay đổi, các dòng tương ứng trong bảng con sẽ được cập nhật để đặt các giá trị liên kết thành NULL.
+												
+					Cập nhật dữ liệu trong bảng con (child table):
+					
+										Sau khi dữ liệu trong bảng cha đã được cập nhật và các giá trị liên kết đã được đặt thành NULL, hệ thống sẽ không thực hiện bất kỳ thay đổi nào trên dữ liệu trong bảng con.																																											 
+
+	UNIQUE Constraint--Contraint MySQL:
+	
+												The UNIQUE constraint ensures that all values in a column are different.
+												Both the UNIQUE and PRIMARY KEY constraints provide a guarantee for uniqueness for a column or set of columns.
+												A PRIMARY KEY constraint automatically has a UNIQUE constraint.
+												However, you can have many UNIQUE constraints per table, but only one PRIMARY KEY constraint per table.
+												
+		UNIQUE Constraint on CREATE TABLE:
+		
+												CREATE TABLE Persons (
+													ID int NOT NULL,
+													LastName varchar(255) NOT NULL,
+													FirstName varchar(255),
+													Age int,
+													UNIQUE (ID)
+												);
+												
+												CREATE TABLE Persons (
+													ID int NOT NULL,
+													LastName varchar(255) NOT NULL,
+													FirstName varchar(255),
+													Age int,
+													CONSTRAINT UC_Person UNIQUE (ID,LastName)
+												);
+												
+		UNIQUE Constraint on ALTER TABLE:
+		
+												ALTER TABLE Persons
+												ADD UNIQUE (ID);
+												
+												ALTER TABLE Persons
+												ADD CONSTRAINT UC_Person UNIQUE (ID,LastName);
+		DROP a UNIQUE Constraint:
+												ALTER TABLE Persons
+												DROP INDEX UC_Person;

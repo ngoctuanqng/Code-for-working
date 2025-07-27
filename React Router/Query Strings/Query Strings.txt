@@ -1,0 +1,23 @@
+Query Strings--React Router:
+
+		- Bạn gần như chắc chắn đã gặp phải các chuỗi truy vấn trước đây. Họ là? và & bạn thấy được nối vào các URL. Chúng
+		là một khía cạnh cơ bản của cách hoạt động của Web vì chúng cho phép
+		bạn chuyển trạng thái qua URL.
+		- Kể từ phiên bản 6, React Router chủ yếu dựa vào API URLSearchParams để xử lý các chuỗi truy vấn. URLSearchParams
+		được tích hợp vào tất cả các trình duyệt (ngoại trừ IE) và cung cấp cho bạn các phương thức tiện ích để xử lý các
+		chuỗi truy vấn. Để thực hiện điều này, React Router đi kèm với một hookSearchParams sử dụng tùy chỉnh, là một trình bao bọc nhỏ
+		trên URLSearchParams.
+		- useSearchParams trả về một mảng với phần tử đầu tiên là một phiên bản của URLSearchParams và phần tử thứ hai
+		là một cách để cập nhật chuỗi truy vấn.
+		- Đây là cách chúng tôi lấy các giá trị từ chuỗi truy vấn của mình bằng cách sử dụng useSearchParams.
+		
+		import { useSearchParams } from <react-router-dom<
+		const Results = () => {
+		  const [searchParams, setSearchParams] = useSearchParams();
+		  const q = searchParams.get(<q<)
+		  const src = searchParams.get(<src<)
+		  const f = searchParams.get(<f<)
+		  return (
+			...
+		  )
+		}

@@ -1,0 +1,21 @@
+Conditional Rendering--REACTJS:
+
+		return (
+		  <div>
+			<h1>Hello!</h1>
+			{unreadMessages.length > 0 &&
+			  <h2>
+				You have {unreadMessages.length} unread messages.
+			  </h2>
+			}
+		  </div>
+		);
+		
+		render() {
+		  const isLoggedIn = this.state.isLoggedIn;
+		  return (
+			<div>
+			  {isLoggedIn ? <LogoutButton onClick={this.handleLogoutClick} />
+				: <LoginButton onClick={this.handleLoginClick} /> }
+			</div> );
+		}

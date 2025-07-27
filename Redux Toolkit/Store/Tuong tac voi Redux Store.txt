@@ -1,0 +1,27 @@
+Tương tác với Redux Store--Redux Toolkit:
+
+		- Để cập nhật state trong Store thì chúng ta cần dispatch action tương ứng được khai báo trong phần
+		reducers của slice.
+		- Chú ý là khi cập nhật state chúng ta có thể thay đổi trực tiếp state chứ không như khi dùng local state
+		trong Component, đó là do Redux Toolkit sử dụng thêm thư viện immer. Và ở trong các reducer này chúng
+		ta chỉ viết code sync chứ không viết code async.
+		- Để hiển thị giá trị state ta dùng useSelector
+		- Hàm useSelector cần truyền vào 1 hàm callback có tham số là root state và trả về state cần lấy
+		- Hook useSelector được sử dụng để trích xuất dữ liệu từ Redux store và hook useDispatch được sử
+		dụng để gửi action đến store.
+		
+		import React from "react";
+		import { Link } from "react-router-dom";
+		import { useSelector } from "react-redux";
+		import { selectUsername } from "../store/userSlice";
+		export default function Dashboard() {										  
+		  const username = useSelector(selectUsername); // Lấy ra state username từ store
+		  return (
+			<>
+			  <h1>Dashboard</h2>
+			  {/* In biến username ra màn hình */}
+			  <h2>Welcome {username}</h2>
+			  <Link to="/login">Log out</Link>
+			</>
+		  );
+		}

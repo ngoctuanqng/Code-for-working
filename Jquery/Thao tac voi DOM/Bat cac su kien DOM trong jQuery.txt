@@ -1,0 +1,164 @@
+Bắt các sự kiện DOM trong jQuery--Jquery
+
+	Bắt các sự kiện với jQuery
+	
+		jQuery cung cấp một công cụ mạnh mẽ để bắt các sự kiện trong JavaScript. Các sự kiện được phát
+		sinh khi người dùng thực hiện các hành động trên trang, ví dụ bấm vào một phần tử, di chuyển
+		chuột, gửi form ...
+
+	Xét một ví dụ: khi người dùng bấm vào một phần tử có id là "demo" thì hiện thị ngày tháng hiện tại. Nếu
+	chỉ dùng JavaScript thì bạn đã biết (Sự kiện với JavaScript) có thể thực hiện như sau:
+			
+			<button id="demo">Ngày hiện tại</button>
+			<script>
+				var x = document.getElementById("demo");
+				x.onclick = function () {
+					alert(Date());
+				}
+			</script>
+		
+	Còn thực hiện với jQuery như sau:
+	
+			$("#demo").click(function() {
+				alert(Date());
+			});
+			
+			Như bạn thấy tên sự kiện trong JavaScript là onclick thì với thư viện jQuery nó bỏ đi on thành click
+	
+	Danh sách các sự kiện hay dùng
+		
+		Sự kiện với chuột
+			
+			click xảy ra khi click chuột trên phần tử.
+			dblclick nháy kép chuột.
+			mouseenter chuột đi vào phần tử.
+			mouseleave chuột ra khỏi phần tử.
+			mouseover chuột trên phần tử.
+			
+		Sự kiện với bàn phím
+		
+			keydown phím ấn xuống
+			keyup phím nhả ra
+			
+		Sự kiện trên form
+			
+			submit gửi form
+			change giá trị phần tử trong form thay đổi
+			focus nhận focus
+			blur mất focus
+			
+		Sự kiện trên Document
+		
+			ready khi DOM đã tải xong hoàn toàn (trang được load và dựng đầy đủ)
+			resize khi cửa sổ Browser thay đổi kích thước
+			scroll khi người dùng cuộn trang, phần tử
+			
+	Ví dụ bắt dự kiện mouseover, mouseleave
+		
+		<style>
+			#ele1 {
+				background-color: #ff5329;
+				padding: 25px;
+				color: white;
+				cursor: pointer;
+			}
+		</style>
+		<div id="ele1">PHẦN TỬ KIỂM TRA</div>
+		<script>
+			$("#ele1").mouseover(function () {
+				$(this).html("Chuột trên phần tử : " + Date());
+			});
+			$("#ele1").mouseleave(function () {
+				$(this).html("Ra khỏi phần tử: " + Date());
+			});
+		</script>
+		
+	Bắt các sự kiện với on
+	
+		Đây là một cách khác, các sự kiện bắt bằng phương thức .on('eventname', handler) với tên sự kiện.
+		
+		Ví dụ bắt sự kiện click
+			
+			$( "p" ).on( "click", function() {
+			  alert("clicked");
+			});
+		Cách này có cái hay là có thể bắt một lúc nhiều sự kiện, ví dụ: .on("click, dbclcik", handler)
+	
+	Tắt sự kiện với off
+		
+		Sự kiện thực hiện trên jQuery có thể được loại bỏ bằng phương thức .off()
+
+		Ví dụ: nếu sự kiện click trên thẻ div được gán, có thể loại bỏ nó bằng cách:
+			
+			$("div").off("click");
+			
+	Đối tượng Event
+	
+		Các handler hàm xử lý sự kiện bắt được, đều có thể nhận được một đối tượng mang thông tin sự kiện nó
+		nhận được (các ví dụ trên chúng ta chưa viết để nhận đối tượng này), như các thuộc tính, phương thức liên
+		quan đến sự kiện.
+
+		Để nhận được đối tượng này, các hàm Handler ở trên chỉ cần cho thêm tên một tham số khi khai báo, tên
+		này chính là đối tượng Event.
+		
+		Ví dụ:
+			
+			//sự kiện với phần tử a
+			$( "a" ).click(function(event) {
+			  alert(event.pageX);
+			  event.preventDefault();
+			});
+			//sự kiện với phần tử p
+			$( "p" ).on( "click", function(doituongsukien) {
+				  alert(doituongsukien.pageX);
+			});
+			
+		Đối tượng Event có một số thuộc tính, phương thức hay dùng như:
+		
+			pageX, pageY vị trí chuột khi sự kiện xảy ra
+			type kiểu sự kiện, ví dụ "click"
+			which nút, phím được bấm
+			data dữ liệu được chuyển theo sự kiện
+			target phần tử DOM phát sinh sự kiện
+			preventDefault() phương thức chặn lại ứng sử mặc định của sự kiện (ví dụ bấm vào link sẽ chuyển trang, thì hàm này sẽ hủy hành động này)
+			stopPropagation() ngăn tiếp tục gửi sự kiện (nếu gọi thì sự kiên không còn được gửi tiếp trong hệ thống các đối tượng nhận sự kiện)
+	
+	Phát sinh sự kiện
+		
+		Như trên đã biết một sự kiện như click, keyup, focus ... phát sinh bởi hoạt động của người dùng trên trang. Nhưng bạn cũng có thể tự phát sinh sự kiện này, ví dụ bấm chuột vào một liên kết ...Thật đơn giản, chỉ
+		cần gọi phương thức .trigger("eventname");
+		
+		Ví dụ gửi form
+			
+			$("form").trigger("submit");
+	
+	Ví dụ tổng hợp, viết các việc cần làm:
+	
+		<style>
+			.rem {
+				margin-left: 5px;
+				background-color: white;
+				color: red;
+				border: none;
+				cursor: pointer;
+			}
+		</style>
+		<input type="text" placeholder="New item" />
+		<button id="add">Thêm việc</button>
+		<ol id="mylist"></ol>
+		<script>
+			$(function() {
+				$("#add").on("click", function() {
+					var val = $("input").val();
+					if(val !== '') {
+						var elem = $("<li></li>").text(val);
+						$(elem).append("<button class='rem'>X</button>");
+						$("#mylist").append(elem);
+						$("input").val("");
+						$(".rem").on("click", function() {
+							$(this).parent().remove();
+						});
+					}
+				});
+			});
+		</script>		

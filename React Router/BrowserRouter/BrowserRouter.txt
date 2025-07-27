@@ -1,0 +1,36 @@
+BrowserRouter--React Router:
+
+		- BrowserRouter giúp tích hợp URL với trạng thái ứng dụng React. Các route có thể được liên kết với các thành phần (component) React cụ thể và hiển thị nội dung tương ứng dựa trên
+		đường dẫn URL.
+		- Về cơ bản, BrowserRouter sử dụng cả thư viện lịch sử cũng như React Context. Thư viện lịch sử giúp React Router theo dõi lịch sử duyệt của ứng dụng bằng cách sử dụng ngăn xếp lịch
+		sử có sẵn của trình duyệt và React Context giúp cung cấp lịch sử ở bất cứ nơi nào React Router cần.
+		- BrowserRouter là một thành phần trong React Router, một thư viện được sử dụng để quản lý định hướng (routing) trong ứng dụng React. BrowserRouter được sử dụng để bọc toàn bộ ứng
+		dụng và cung cấp các tính năng của HTML5 History API để duyệt qua các trang mà không cần tải lại toàn bộ trang.
+		- BrowserRouter trong React Router giúp giải quyết vấn đề của việc quản lý định hướng (routing) trong ứng dụng React. Dưới đây là một số vấn đề cụ thể mà BrowserRouter giúp đỡ:
+					
+					Duyệt Trang Mà Không Tải Lại Toàn Bộ Trang:
+							
+							- Một ứng dụng React Router thường xuyên là một ứng dụng đơn trang (SPA), nơi người dùng có thể điều hướng giữa các "trang" mà không cần tải lại toàn bộ trang.
+							- BrowserRouter sử dụng HTML5 History API để thực hiện điều này mà không cần tải lại trang.
+					
+					Tích Hợp URL và Trạng Thái Ứng Dụng
+					
+					Xác Định Các Route và Liên Kết:
+							
+							BrowserRouter cung cấp các thành phần như Route và Link giúp xác định cách các đường dẫn URL sẽ được điều hướng và làm thế nào các liên kết sẽ được tạo ra.
+					
+					Lắng Nghe Sự Kiện Thay Đổi URL:
+							
+							BrowserRouter lắng nghe sự kiện thay đổi URL, giúp ứng dụng React phản ánh các thay đổi trong URL và điều hướng đến các component React tương ứng.
+							
+		- Không có nhiều thứ đối với BrowserRouter, bạn chỉ cần đảm bảo rằng nếu đang sử dụng React Router trên web, bạn sẽ bọc ứng dụng của mình bên trong thành phần BrowserRouter.
+		
+		import ReactDOM from <react-dom<
+		import * as React from <react<
+		import { BrowserRouter } from <react-router-dom<
+		import App from <./App`
+		ReactDOM.render(
+		  <BrowserRouter>
+			<App />
+		  </BrowserRouter>
+		, document.getElementById(<app<))

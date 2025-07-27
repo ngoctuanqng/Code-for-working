@@ -1,0 +1,54 @@
+Protected Routes--React Router:
+
+		- Thông thường, khi xây dựng một ứng dụng web, bạn sẽ cần phải bảo vệ các tuyến đường nhất định trong ứng dụng của
+		mình khỏi những người dùng không có xác thực thích hợp.
+		- Hãy để tôi đề xuất API cuối cùng có thể trông như thế nào, trước khi chúng ta đi sâu vào triển khai. Điều gì sẽ xảy ra
+		nếu, đối với mọi tuyến đường chúng ta muốn ở chế độ riêng tư, thay vì cung cấp cho phần tử Routes của chúng tôi hỗ trợ
+		thành phần mà chúng tôi muốn nó hiển thị trực tiếp, chúng tôi bọc nó bên trong một thành phần mới mà chúng tôi sẽ gọi là
+		RequestAuth.
+		- Tại thời điểm này, chúng ta biết hai điều chính về RequiAuth. Đầu tiên, nó chỉ có api là một phần tử con. Thứ hai,
+		nếu người dùng được xác thực, nó sẽ hiển thị phần tử con đó, nếu không, nó sẽ chuyển hướng người dùng đến một trang mà
+		họ có thể xác thực (trong trường hợp của chúng tôi là / login).
+		- Giả sử bạn có thể nhận được trạng thái xác thực của người dùng của mình từ móc useAuth tùy chỉnh, thì RequestAuth trở nên khá đơn giản.
+		- Lưu ý vì chúng tôi nhận được vị trí ban đầu mà người dùng đang cố gắng truy cập thông qua hook useLocation và chuyển
+		vị trí đó làm điểm tựa trạng thái khi chúng tôi chuyển hướng họ đến / đăng nhập, sau khi họ xác thực, chúng tôi có thể
+		chuyển hướng họ trở lại đường dẫn ban đầu này.
+		
+		<Routes>
+		  <Route path="/" element={<Home />} />
+		  <Route path="/pricing" element={<Pricing />} />
+		  <Route
+			path="/dashboard"
+			element={
+			  <RequireAuth>
+				<Dashboard />
+			  </RequireAuth>
+			}
+		  />
+		  <Route
+			path="/settings"
+			element={
+			  <RequireAuth>
+				<Settings />
+			  </RequireAuth>
+			}
+		  />
+		  <Route path="/login" element={<Login />} />
+		</Routes>
+		
+		function RequireAuth({ children }) {
+		  const { authed } = useAuth();
+		  const location = useLocation();
+		  return authed === true ? (
+			children
+		  ) : (
+			<Navigate to="/login" replace state={{ path: location.pathname }} />
+		  );
+		}
+		
+		// In the Login component
+		const handleLogin = () => {
+		  login().then(() => {
+			navigate(state?.path || "/dashboard");
+		  });
+		};

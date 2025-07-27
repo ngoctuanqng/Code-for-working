@@ -1,0 +1,22 @@
+UNION Operator--MySQL:
+											
+							- Toán tử UNION được sử dụng để kết hợp tập hợp kết quả của hai hoặc nhiều câu lệnh SELECT. Mỗi câu
+							lệnh SELECT với UNION phải có cùng số lượng cột, các cột phải có cùng kiểu dữ liệu, các cột trong
+							mỗi câu lệnh SELECT phải có cùng trật tự.
+							- The UNION operator is used to combine the result-set of two or more SELECT statements.
+							- The UNION operator selects only distinct values by default. To allow duplicate values, use UNION ALL.
+	
+	UNION:
+				Syntax:
+							SELECT column_name(s) FROM table1
+							UNION
+							SELECT column_name(s) FROM table2;
+				Example:
+							SELECT student_name AS name FROM students
+							UNION // selects only distinct values by default
+							SELECT teacher_name AS name FROM teachers;
+	UNION ALL:
+				Syntax:
+							SELECT column_name(s) FROM table1
+							UNION ALL // allow duplicate values
+							SELECT column_name(s) FROM table2;

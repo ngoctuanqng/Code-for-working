@@ -1,0 +1,41 @@
+INSERT INTO--MySQL:
+						The INSERT INTO statement is used to insert new records in a table.
+	Syntax:
+						INSERT INTO table_name (column1, column2, column3, ...)
+						VALUES (value1, value2, value3, ...);
+						
+						INSERT INTO table_name
+						VALUES (value1, value2, value3, ...);
+	Example:
+						INSERT INTO Customers (CustomerName, ContactName, Address, City, PostalCode, Country)
+						VALUES ('Cardinal', 'Tom B. Erichsen', 'Skagen 21', 'Stavanger', '4006', 'Norway');
+						
+						INSERT INTO products
+						VALUES (101, 'Laptop', 1200.00);
+						
+INSERT INTO SELECT Statement--MySQL:
+						The INSERT INTO SELECT statement copies data from one table and inserts it into another table.
+						The INSERT INTO SELECT statement requires that the data types in source and target tables matches.
+	Syntax:
+						INSERT INTO table2
+						SELECT * FROM table1
+						WHERE condition;
+						
+						INSERT INTO table2 (column1, column2, column3, ...)
+						SELECT column1, column2, column3, ...
+						FROM table1
+						WHERE condition;
+	Example:
+						INSERT INTO employees_department_1
+						SELECT * FROM employees
+						WHERE department_id = 1;
+						
+						INSERT INTO Customers (CustomerName, City, Country)
+						SELECT SupplierName, City, Country FROM Suppliers;
+						
+						INSERT INTO Customers (CustomerName, ContactName, Address, City, PostalCode, Country)
+						SELECT SupplierName, ContactName, Address, City, PostalCode, Country FROM Suppliers;
+						
+						INSERT INTO Customers (CustomerName, City, Country)
+						SELECT SupplierName, City, Country FROM Suppliers
+						WHERE Country='Germany';

@@ -1,0 +1,139 @@
+Selector - Chọn phần tử trong jQuery--Jquery:
+
+	Selector - Chọn phần tử trong jQuery
+	
+			Selector chọn phần tử là chức năng quan trong của jQuery, như bạn thấy Selector bắt đầu bằng ký tự $. Selector
+			cho phép bạn chọn phần tử HTML và tương tác với phần tử, Selector tìm kiếm và lựa chọn
+			phần tử dựa trên id, class, thẻ, thuộc tính phần tử, giá trị phần tử và cả nội dung trong phần tử.
+		
+		Lựa chọn theo tên thẻ phần tử
+			
+			Các phần tử HTML như đã biết thuộc một trong các thẻ như : <p> <h1> <span> ..., các tên thẻ này được jQuery
+			dùng để lựa chọn phần tử.
+
+			Giả sử chọn tất cả các phần tử thẻ <p> trên trang thì viết như sau:
+		
+				$("p")
+				
+			Ví dụ: khi bấm vào một nút <button> tất cả các phần tử thẻ <p> bị ẩn đi
+					
+					$(document).ready(
+						function () {
+
+							//Chọn các phần tử button và gán sự kiện click cho nó
+							$("button").click(function () {
+
+								//Chọn các phần tử p và thi hành ẩn các phần tử đó
+								$("p").hide();
+
+							});
+						}
+					);
+					
+		Lựa chọn theo id phần tử
+		
+				Một phần tử HTML có id thì có thể chọn bằng bằng ký hiệu #id trong Selector. Ví dụ phần tử có id
+				là 'test' thì chọn nó như sau
+					
+					$("#test")
+				
+				Ví dụ: khi bấm vào một nút <button> phần tử có id là test bị ẩn đi bị ẩn đi
+					
+					$(document).ready(
+						function () {
+
+							//Chọn các phần tử button và gán sự kiện click cho nó
+							$("button").click(function () {
+
+								//Chọn phần tử có id là test và thi hành ẩn các phần tử đó
+								$("#test").hide();
+
+							});
+						}
+					);
+					
+		Lựa chọn theo class
+		
+				Tương tự như chọn theo id, một phần tử có class là test thì chọn nó như sau
+					
+					$(".test")
+		
+		Bạn nhận thấy, cách chọn phần tử trong jQuery giống với cách chọn phần tử của CSS		
+
+	Các Selector hữu ích hay dùng trong jQuery
+		
+		Cơ bản thì Selector jQuery giống với Selector CSS, bảng dưới đây là các trường hợp có thể bạn dùng tới
+		
+		Selector cơ bản
+		
+		*							$("*")							Chọn tất cả các phần tử
+		#id							$("#lastname")					Chọn phần tử có id="lastname"
+		.class						$(".intro")						Chọn phần tử có class="intro"
+		.class,.class				$(".intro,.demo")				Chọn phần tử có class là "intro" hoặc "demo"
+		element						$("p")							Chọn các phần tử thẻ <p>
+		el1,el2,el3					$("h1,div,p")					Chọn tất cả các phần tử thẻ <h1> <div> và <p>			
+		
+		Selector nâng cao
+		:first						$("p:first")					Chọn phần tử <p> đầu tiên trong luồng HTML
+		:last						$("p:last")						Chọn phần tử <p> cuối cùng
+		:even						$("tr:even")					Chọn các phần tử <tr> ở vị trí chẵn
+		:odd						$("tr:odd")						Chọn các phần tử <tr> ở vị trí lẻ			
+		:first-child				$("p:first-child")				Chọn tất cả phần tử <p> với điều kiện nó là phần tử con đầu tiên trong phần tử cha chứa nó
+		:first-of-type				$("p:first-of-type")			Chọn các phần tử <p> với điều kiện nó là phần tử <p> đầu tiên gặp trong các phần tử con mà phần tử cha chứa
+		:last-child					$("p:last-child")				Chọn các phần tử <p> với điều kiện nó là phần tử cuối cùng trong phần tử cha chứa nó.
+		:last-of-type				$("p:last-of-type")				Chọn các phần tử <p> với điều kiện nó là phần tử <p> sau cùng thấy trong phần tử cha
+		:nth-child(n)				$("p:nth-child(2)")				Tất cả các phần tử <p> là phần tử con thứ 2
+		:nth-last-child(n)			$("p:nth-last-child(2)")		Tất cả phần tử <p> là phần tứ con thứ 2 đếm từ dưới lên.
+		:nth-of-type(n)				$("p:nth-of-type(2)")			Tất cả phần <p> là, nó là phần tử thứ 2 dạng <p> trong các phần tử con
+		:nth-last-of-type(n)		$("p:nth-last-of-type(2)")		Tất cả các phần tử <p>, nó là phần tử thứ 2 dạng <p> đếm từ dưới lên.
+		parent < child				$("div > p")					Tất cả phần tử <p> là phần tử con trực tiếp của phần tử <div>
+		parent descendant			$("div p")						Tất cả phần tử <p> là phần tử con, cháu ... của <div>
+		element + next				$("div + p")					Chọn phần tử <p> mà nó là phần tử tiếp theo của một phần tử <div>
+		element ~ siblings			$("div ~ p")					Các phần tử <p> có cấp ngang hàng với một phần tử <div>			
+		
+		Selector jQuery chọn phần tử danh sách
+
+		:eq(index)					$("ul li:eq(3)")				Phần tử thứ 4 trong một danh sách
+		:gt(no)						$("ul li:gt(3)")				Các phần tử có chỉ số lớn hơn 3
+		:lt(no)						$("ul li:lt(3)")				Các phần tử trong danh sách có chỉ số nhỏ hơn 3
+		:not(selector)				$("input:not(:empty)")			Các phần tử <input> không rỗng
+		
+		Selector jQuery theo trạng thái
+		
+		:header						$(":header")					Tất cả các phần tử <h1>, <h2> ...
+		:animated					$(":animated")					Các phần tử động
+		:focus						$(":focus")						Phần tử đang giữ focus
+		:contains(text)				$(":contains('Hello')")			Các phần tử có chứa chữ "Hello"
+		:has(selector)				$("div:has(p)")					Các phần tử <div> trong nó có chứa một phần tử <p>
+		:empty						$(":empty")						Tất cả các phần tử rỗng
+		:parent						$(":parent")					Các phần tử là cha của một phần tử khác
+		:hidden						$("p:hidden")					Tất cả các phần tử <p> đang ẩn
+		:visible					$("table:visible")				Tất cả các <table> đang hiện thị			
+		
+		Selector jQuery theo thuộc tính phần tử
+		
+		[attribute]					$("[href]")						Các phần tử có thuộc tính href
+		[attribute=value]			$("[href='default.htm']")		Các phần tử có thuộc tính href và giá trị thuộc tính là "default.htm"
+		[attribute!=value]			$("[href!='default.htm']")		Các phần tử có thuộc tính href nhưng giá trị khác "default.htm"
+		[attribute$=value]			$("[href$='.jpg']")				Các phần tử có thuộc tính href và giá trị có phần cuối bằng ".jpg"
+		[attribute|=value]			$("[title|='Tomorrow']")		Các phần tử có title bằng 'Tomorrow' hoặc bắt đầu bởi 'Tomorrow'
+		[attribute^=value]			$("[title^='Tom']")				Các phần tử có title với giá trị bắt đầu bằng "Tom"
+		[attribute~=value]			$("[title~='hello']")			Các phần tử có title, và giá trị có chứa "hello"
+		[attribute*=value]			$("[title*='hello']")			Các phần tử có title và giá trị chứa "hello"			
+		
+		Selector jQuery trong FORM
+
+		:input						$(":input")						Tất cả các phần tử input
+		:text						$(":text")						Tất cả các phần tử có type="text"
+		:password					$(":password")					Tất cả phần tử có type="password"
+		:radio						$(":radio")						Tất cả phần tử có type="radio"
+		:checkbox					$(":checkbox")					Tất cả phần tử có type="checkbox"
+		:submit						$(":submit")					Tất cả phần tử có type="submit"
+		:reset						$(":reset")						Tất cả phần tử cótype="reset"
+		:button						$(":button")					Tất cả phần tử có type="button"
+		:image						$(":image")						Tất cả phần tử có type="image"
+		:file						$(":file")						Tất cả phần tử có type="file"
+		:enabled					$(":enabled")					Tất cả các phần tử input là enable
+		:disabled					$(":disabled")					Các phần tử input bị vô hiệu
+		:selected					$(":selected")					Các phần tử input là selected
+		:checked					$(":checked")					Các phần tử input là checked

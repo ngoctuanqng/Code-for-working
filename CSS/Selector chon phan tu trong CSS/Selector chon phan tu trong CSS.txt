@@ -1,0 +1,303 @@
+Selector chọn phần tử trong CSS--CSS
+
+	Pesudo CSS Selector
+	
+		Code HTML:
+		
+			<div class="container">
+			  <div class="paragraph-container">
+				<p id="hola-id" class="hola-class">Hola world</p>
+				<p class="hello-class">Hello world</p>
+				<p class="hello-class again-class">Hello again world</p>
+			  </div>
+
+			  <p class="outside-class">I'm outside</p>
+
+			  <ul id="list-id" class="list-class">
+				<li class="list-item-class">First</li>
+				<li class="list-item-class">Second</li>
+				<li class="list-item-class">Third</li>
+				<li class="list-item-class">Fourth</li>
+				<li class="list-item-class">Fifth</li>
+			  </ul>
+
+			  <div class="single-paragraph-container">
+				<p>I'm the only child of this span</p>
+			  </div>
+			</div>
+			
+		Chọn phần tử đầu tiên: A:first-child. Nó chọn đến phần tử con đầu tiên. (A phải có cha mẹ).
+		
+			li:first-child {
+			  color: blue;
+			}
+			
+		Bạn đoán thử xem. Nhắm mục tiêu ul:first-child có thành công không?
+		
+			ul:first-child {
+			  color: red;
+			}
+			
+			Chẳng có gì xảy ra.
+			Điều này là do mặc dù ul có cha mẹ (div với class .container), nhưng ul không phải là con đầu
+			tiên (nó là con thứ 3).
+		
+		CSS dưới đây sẽ hoạt động vì .paragraph-container là con đầu tiên của .container.
+			
+			.paragraph-container:first-child {
+			  color: red;
+			}
+			
+		Chọn phần tử con cuối cùng: A:last-child. Hoạt động như A:first-child, ngoại trừ thay vì chọn phần tử con
+		đầu tiên, nó chọn phần tử con cuối cùng.
+			
+			li:last-child {
+			  color: purple;
+			}
+			
+		Chỉ chọn phần tử con: A:only-child. Chọn tất cả A là con duy nhất của cha mẹ nó. Tương tự như bộ chọn phần tử con đầu
+		tiên (A:first-child) và phần tử con cuối cùng (A:last-child). Ngoại trừ mục tiêu không được có anh chị em nào.
+			
+			p:only-child {
+			  color: red;
+			}
+			
+		Lưu ý mặc dù chúng ta có một số phần tử p, chỉ phần tử cuối cùng được áp dụng vì các phần tử p khác không phải là phần
+		tử con duy nhất của cha mẹ chúng.
+		
+		Nói cách khác, phần tử con có anh chị em thì không được áp dụng.
+		
+		Bộ chọn phần tử con thứ N: A:nth-child(n). Nó chọn từng mục tiêu là con thứ n của cha mẹ nó.
+			
+			li:nth-child(2) {
+			  color: red;
+			}
+			
+		Hãy thử với phần tử p:
+			
+			p:nth-child(2) {
+			  color: red;
+			}
+			
+			Bạn có thể thấy tại sao hai phần tử p thay đổi màu sắc?
+		
+		Bộ chọn con thứ N cuối cùng: A:nth-last-child(n). Nó tương tự như bộ chọn con thứ N, ngoại trừ nó được tính từ cuối cùng.
+			
+			li:nth-last-child(2) {
+			  color: red;
+			}
+			
+		Không chọn: A:not(B). Chọn tất cả các phần tử A mà không phải B.
+			
+			p:not(.outside-class) {
+			  color: blue;
+			}
+			
+		Bộ chọn loại đầu tiên: A:first-of-type. Nó chọn phần tử đầu tiên thuộc loại này trong số các phần tử anh chị em của nó.
+			
+			Nghe có vẻ tương tự :first-child nhỉ?
+			Nhưng không phải.
+			Để cảm nhận sự khác biệt của nó, hãy thử nghịch nó xem sao:
+				
+				li:first-of-type {
+				  color: blue;
+				}
+				
+			Ok, đó không phải là một ví dụ hay vì nó cho thấy kết quả tương tự như li:first-child .
+			
+			Hãy làm một ví dụ khác:
+				
+				p:first-of-type {
+				  color: red;
+				}
+				
+				So sánh với p:first-child. Bạn sẽ nhận thấy rằng p ở giữa chuyển sang màu đỏ khi sử dụng :first-of-type.
+
+				Điều này là do p ở giữa là loại phần tử p đầu tiên trong số các anh chị em của nó.
+		
+		Bộ chọn loại cuối cùng: A:last-of-type. Giống như trên, nhưng ngược lại.
+		
+			li:last-of-type {
+			  color: blue;
+			}
+			
+		Bộ chọn loại thứ N: A:nth-of-type(n). Cũng giống như hai bộ chọn trên, nhưng nó chọn phần tử thứ N.
+			
+			li:nth-of-type(2) {
+			  color: blue;
+			}
+			
+		Hãy thử với phần tử khác.
+			
+			p:nth-of-type(2) {
+			  color: blue;
+			}
+			
+		Nếu chúng ta thay đổi nó thành p:nth-of-type(1), thì nó hoạt động giống như first-of-type.
+		
+		Ngoài ra nếu chúng ta thay đổi nó thành p:nth-of-type(4), không có thay đổi gì. Đây là do không có phần tử p thứ 4 trong
+		số các anh chị em.
+		
+		Bộ chọn Only type: A:only-of-type. Chọn phần tử chỉ có loại đó, không có Anh / Chị / Em.
+			
+			p:only-of-type {
+			  color: purple;
+			}
+			
+			Chú ý, chúng ta có hai phần tử p đổi màu.
+
+			Điều này là do có hai phần tử p này không có Anh / Chị / Em cùng loại.
+	
+	Pesudo-Selector (links và input)
+		Dưới đây là danh sách các pesudo selector khác. Chúng thường được liên kết với các liên kết (a) (mặc dù chúng có thể hoạt
+		động với các phần tử không liên kết non-link).
+		
+		Code HTML:
+		
+			<div id="app">
+			  <a class="cheesyLink" href="#">I like cheese</a>
+			  <a class="sweetLink" href="#">I like donut</a>
+			  <div class="burger">I like cheezburger</div>
+			  <div class="container">
+				<form onsubmit="event.preventDefault()">
+				  <input class="myinput"type="text" />
+				  <input class="mysubmit" type="submit" />
+				</form>
+			  </div>
+			</div>
+			
+		Hover Selector: A:hover. Chọn phần tử được hover. Thường được sử dụng để làm nổi bật các liên kết.
+			
+			a:hover {
+			  color: red;
+			}
+			
+		Không chỉ hoạt động với thẻ a. Bộ chọn này hoạt động với mọi thứ.
+			
+			.burger:hover {
+			  color: red;
+			}
+			
+		Focus Selector: A:focus. Chọn phần tử bạn đang tập trung vào nó. Thường được sử dụng với input.
+			
+			input:focus {
+			  background: red;
+			}
+			
+		Active Selector: A:active. Chọn phần tử đang có trạng thái active.
+			
+			.cheesyLink:active {
+			  background: red;
+			}
+			
+		Lưu ý khi bạn click vào nó, nền (background) sẽ thay đổi.
+		
+		Link Selector: A:link. Nó chọn tất cả các link chưa được click.
+			
+			a:link {
+			  background: blue;
+			}
+			
+	Attribute CSS Selector
+		
+		Bộ chọn thuộc tính CSS (Attribute CSS Selector) sử dụng để chọn thuộc tính HTML (HTML Attributes).
+			
+			Code HTML:
+			
+				<div for="chocolate">Chocolate</div>
+				<div for="peanut">Peanut</div>
+				<div for="butter">Butter</div>
+				<div>Jelly</div>
+				 
+		Bộ chọn thuộc tính cơ bản: A[B]. Chọn tất cả các phần tử A có thuộc tính B.
+			
+			div[for] {
+			  color: red;
+			}
+		Bộ chọn thuộc tính cụ thể: A[B="C"]. Chọn các phần tử A có thuộc tính B với giá trị là C.
+			
+			div[for="chocolate"]{
+			  color: blue;
+			}
+			
+		Bộ chọn thuộc tính cụ thể (Bắt đầu với ...): A[B^="C"]. Chọn tất cả các phần tử A có thuộc tính B với giá trị bắt đầu
+		là C. Ký tự ^ là ký tự thể hiện chuỗi bắt đầu (trong Biểu thức chính quy (Regex)).
+			
+			div[for^="cho"] {
+			  color: magenta;
+			}
+			
+		Bộ chọn thuộc tính cụ thể (Kết thúc với ...): A[B$="C"]. Chọn tất cả các phần tử A có thuộc tính B với giá trị kết thúc
+		là C. Ký tự $ là ký tự thể hiện chuỗi kết thúc trong (Biểu thức chính quy (Regex)).
+			
+			div[for$="er"] {
+			  color: yellow;
+			}
+			
+		Bộ chọn thuộc tính cụ thể (Chứ ký tự ...): A[B*="C"]. Chọn tất cả phần tử A với thuộc tính B chứa giá trị C.
+			
+			div[for*="ut"]{
+			  color: cyan;
+			}		
+	CSS Selectors
+	
+		.class								.intro						Selects all elements with class="intro"
+		.class1.class2						.name1.name2				Selects all elements with both name1 and name2 set within its class attribute
+		.class1 .class2						.name1 .name2				Selects all elements with name2 that is a descendant of an element with name1
+		#id									#firstname					Selects the element with id="firstname"
+		*									*							Selects all elements
+		element								p							Selects all <p> elements
+		element.class						p.intro						Selects all <p> elements with class="intro"
+		element,element						div, p						Selects all <div> elements and all <p> elements
+		element element						div p						Selects all <p> elements inside <div> elements
+		element>element						div > p						Selects all <p> elements where the parent is a <div> element
+		element+element						div + p						Selects the first <p> element that is placed immediately after <div> elements
+		element1~element2					p ~ ul						Selects every <ul> element that is preceded by a <p> element
+		[attribute]							[target]					Selects all elements with a target attribute
+		[attribute=value]					[target="_blank"]			Selects all elements with target="_blank"
+		[attribute~=value]					[title~="flower"]			Selects all elements with a title attribute containing the word "flower"
+		[attribute|=value]					[lang|="en"]				Selects all elements with a lang attribute value equal to "en" or starting with "en-"
+		[attribute^=value]					a[href^="https"]			Selects every <a> element whose href attribute value begins with "https"
+		[attribute$=value]					a[href$=".pdf"]				Selects every <a> element whose href attribute value ends with ".pdf"
+		[attribute*=value]					a[href*="w3schools"]		Selects every <a> element whose href attribute value contains the substring "w3schools"
+		:active								a:active					Selects the active link
+		::after								p::after					Insert something after the content of each <p> element
+		::before							p::before					Insert something before the content of each <p> element
+		:checked							input:checked				Selects every checked <input> element
+		:default							input:default				Selects the default <input> element
+		:disabled							input:disabled				Selects every disabled <input> element
+		:empty								p:empty	Selects 			every <p> element that has no children (including text nodes)
+		:enabled							input:enabled				Selects every enabled <input> element
+		:first-child						p:first-child				Selects every <p> element that is the first child of its parent
+		::first-letter						p::first-letter				Selects the first letter of every <p> element
+		::first-line						p::first-line				Selects the first line of every <p> element
+		:first-of-type						p:first-of-type				Selects every <p> element that is the first <p> element of its parent
+		:focus								input:focus					Selects the input element which has focus
+		:fullscreen							:fullscreen					Selects the element that is in full-screen mode
+		:hover								a:hover						Selects links on mouse over
+		:in-range							input:in-range				Selects input elements with a value within a specified range
+		:indeterminate						input:indeterminate			Selects input elements that are in an indeterminate state
+		:invalid							input:invalid				Selects all input elements with an invalid value
+		:lang(language)						p:lang(it)					Selects every <p> element with a lang attribute equal to "it" (Italian)
+		:last-child							p:last-child				Selects every <p> element that is the last child of its parent
+		:last-of-type						p:last-of-type				Selects every <p> element that is the last <p> element of its parent
+		:link								a:link						Selects all unvisited links
+		::marker							::marker					Selects the markers of list items
+		:not(selector)						:not(p)						Selects every element that is not a <p> element
+		:nth-child(n)						p:nth-child(2)				Selects every <p> element that is the second child of its parent
+		:nth-last-child(n)					p:nth-last-child(2)			Selects every <p> element that is the second child of its parent, counting from the last child
+		:nth-last-of-type(n)				p:nth-last-of-type(2)		Selects every <p> element that is the second <p> element of its parent, counting from the last child
+		:nth-of-type(n)						p:nth-of-type(2)			Selects every <p> element that is the second <p> element of its parent
+		:only-of-type						p:only-of-type				Selects every <p> element that is the only <p> element of its parent
+		:only-child							p:only-child				Selects every <p> element that is the only child of its parent
+		:optional							input:optional				Selects input elements with no "required" attribute
+		:out-of-range						input:out-of-range			Selects input elements with a value outside a specified range
+		::placeholder						input::placeholder			Selects input elements with the "placeholder" attribute specified
+		:read-only							input:read-only				Selects input elements with the "readonly" attribute specified
+		:read-write							input:read-write			Selects input elements with the "readonly" attribute NOT specified
+		:required							input:required				Selects input elements with the "required" attribute specified
+		:root								:root						Selects the document's root element
+		::selection							::selection					Selects the portion of an element that is selected by a user
+		:target								#news:target				Selects the current active #news element (clicked on a URL containing that anchor name)
+		:valid								input:valid					Selects all input elements with a valid value
+		:visited							a:visited					Selects all visited links

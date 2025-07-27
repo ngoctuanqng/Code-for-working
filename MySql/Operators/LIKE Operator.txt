@@ -1,0 +1,25 @@
+LIKE Operator--MySQL:
+
+				The LIKE operator is used in a WHERE clause to search for a specified pattern in a column.
+				The percent sign (%) represents zero, one, or multiple characters
+				The underscore sign (_) represents one, single character
+	Syntax:
+				SELECT column1, column2, ...
+				FROM table_name
+				WHERE columnN LIKE pattern;
+	Example:
+				SELECT 
+					product_id,
+					product_name
+				FROM 
+					products
+				WHERE 
+					product_name LIKE '%phone'; // chứa tất cả các sản phẩm có tên kết thúc bằng từ "phone"
+
+				SELECT 
+					employee_id,
+					employee_name
+				FROM 
+					employees
+				WHERE 
+					employee_name LIKE 'J_'; // tất cả các nhân viên có tên bắt đầu bằng chữ "J" và có một ký tự tiếp theo là bất kỳ

@@ -1,0 +1,33 @@
+Programmatically Navigate--React Router:
+
+		- Để có quyền truy cập vào phương thức điều hướng bắt buộc, bạn sẽ cần sử dụng useNavigate Hook của React
+		Router. Từ đó, bạn có thể chuyển điều hướng đến đường dẫn mới mà bạn muốn
+		người dùng được đưa đến khi điều hướng được gọi.
+		- Điều hướng hoạt động giống như bất kỳ thành phần React nào khác, tuy nhiên, thay vì hiển thị một số giao
+		diện người dùng, nó điều hướng người dùng đến một vị trí mới.
+		- Nó phải nhập nhiều hơn, nhưng tôi tranh luận rằng trạng thái rõ ràng dẫn đến một API khai báo tốt hơn trạng
+		thái ngầm được xử lý bởi một API bắt buộc.
+		
+		import { useNavigate } from <react-router-dom
+		function Register () {
+		  const navigate = useNavigate()
+		  return (
+			<div>
+			  <h1>Register</h1>
+			  <Form afterSubmit={() => navigate(</dashboard<)} />
+			</div>
+		  )
+		}
+		
+		function Register() {
+		  const [toDashboard, setToDashboard] = React.useState(false);
+		  if (toDashboard === true) {
+			return <Navigate to="/dashboard" />;
+		  }
+		  return (
+			<div>
+			  <h1>Register</h1>
+			  <Form afterSubmit={() => toDashboard(true)} />
+			</div>
+		  );
+		}

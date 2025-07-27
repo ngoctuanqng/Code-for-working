@@ -1,0 +1,21 @@
+Luồng xử lý của Redux như sau--Redux Toolkit:
+
+	Trường hợp không sử dụng Middleware:
+	
+										-> State được khởi tạo bên trong Store
+										-> State được đưa vào Reducer
+										-> Reducer khởi tạo giá trị state ban đầu (initialState)
+										-> Thực hiện action ở component (dispatch event)
+										-> Thay đổi giá trị của state bên trong Reducer thành state mới
+										-> Đẩy state mới ra ngoài View (component)
+
+	Trường hợp sử dụng Middleware:
+	
+										-> State được khởi tạo bên trong Store
+										-> State được đưa vào Reducer
+										-> Reducer khởi tạo giá trị state ban đầu (initialState)
+										-> Thực hiện action ở component (dispatch event)
+										-> Gọi API ở Middleware
+										-> Đưa dữ liệu vừa gọi vào Reducer
+										-> Thay đổi giá trị của state bên trong Reducer thành state mới
+										-> Đẩy state mới ra ngoài View (component).

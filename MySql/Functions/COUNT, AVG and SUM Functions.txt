@@ -1,0 +1,28 @@
+COUNT(), AVG() and SUM() Functions--MySQL:
+	COUNT():
+				Syntax:
+											SELECT COUNT(column_name)
+											FROM table_name
+											WHERE condition;
+				Example:
+											SELECT COUNT(student_id) AS total_adults
+											FROM students
+											WHERE age >= 18;
+	AVG():
+				Syntax:
+											SELECT AVG(column_name)
+											FROM table_name
+											WHERE condition;
+				Example:
+											SELECT subject, AVG(score) AS average_score
+											FROM grades
+											GROUP BY subject;
+	SUM():
+				Syntax:
+											SELECT SUM(column_name)
+											FROM table_name
+											WHERE condition;
+
+				Example:
+											SELECT SUM(sale_amount) AS total_sales
+											FROM sales;

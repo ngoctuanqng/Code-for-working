@@ -1,0 +1,93 @@
+Nội dung phần tử với jQuery--Jquery
+
+	Lấy nội dung phần tử
+		
+		Có vài phương thức để tương tác với nội dung của các phần tử HTML. Trong đó phương thức html() được
+		dùng để lấy nội dung phần tử được chọn, nó lấy cả nội dung HTML markup. Còn nếu muốn chỉ lấy nội
+		dung text không HTML markup thì dùng phương thức text()
+
+		Ví dụ sau bấm vào phần tử p.example1 thì sẽ lấy nội dung HTML Markup và text rồi thông báo
+		
+			HTML + JavaScript
+				
+				<p class="example1"><strong>Bấm vào đây</strong> <i>để lấy nội dung</i></p>
+				<script>
+					//Bắt sự kiện click cho phần tử có class .example1
+					$(".example1").click(function () {
+						//lấy phần tử bấm chuột - chính là  $(".example1")
+						var ele_example1 = $(this);
+						//lấy nội dung
+						var htmlmarkup =  ele_example1.html();
+						var htmlcontent = ele_example1.text();
+						alert("HTML Markup:\n" + htmlmarkup);
+						alert("HTML Content:\n" + htmlcontent);
+					});
+				</script>
+
+	Gán nội dung cho phần tử
+	
+		Phương thức html(), text() như trên không có tham số thì là đọc và trả về nội dung phần tử, còn
+		nếu nó có tham số thì trở thành thiết lập gán giá trị tham số cho phần tử.
+			
+			<div class="card p-4 m-4">
+				<p class="example2"><strong>Bấm vào đây</strong> <i>để thay đổi</i></p>
+			</div>
+			<script>
+				$(".example2").click(function () {
+					var ele_example2 = $(this);
+					 var htmlmarkup =  ele_example2.html();
+					 ele_example2.html(htmlmarkup + htmlmarkup);
+				});
+			</script>
+
+	Đọc và gán giá trị phần tử val()
+	
+		Để đọc hoặc gán giá trị cho các phần tử trong <form> sử dụng phương thức val(), khi phương thức không
+		có tham số là đọc, khi có tham số thì là gán giá trị tham số vào giá trị phần tử.
+		
+		Ví dụ dọc giá trị của phần tử select
+			
+			<select id="single">
+				<option>Chọn 1</option>
+				<option>Chọn 2</option>
+			</select>
+			<br>
+			<select id="multiple" multiple="multiple">
+				<option selected="selected">Chọn 3</option>
+				<option>Chọn 4</option>
+				<option selected="selected">Chọn 5</option>
+			</select>
+			<br>
+			<input type="text" value="giá trị text">
+			<br>
+			<p id="info1">Nơi hiện thị thông tin</p>
+			<script>
+				//Hàm đọc và hiện thị thông tin
+				function displayVals() {
+					var singleValues =   $( "#single" ).val();
+					var multipleValues = $( "#multiple" ).val() || [];
+					$( "p#info1" ).html( "<b>Single:</b> " + singleValues +
+						" <b>Multiple:</b> " + multipleValues.join( ", " ) );
+				}
+				
+				
+				//Bắt sự kiện thi thay đổi giá trị
+				$( "#single, #multiple" ).change( displayVals );
+				displayVals();
+			</script>
+
+		Ví dụ đọc giá trị của input kiểu text
+			
+			<input id="inputtext" type="text" value="Nhập giá trị">
+			<p id="giatriinputtext"></p>
+			<script>
+				//Hàm đọc giá trị và hiện thị thông tin
+				function textthaydoi() {
+					var value = $( this ).val();
+					$( "p#giatriinputtext" ).text( value );
+				}
+				//Bắt sự kiện keyup của textbox
+				$( "#inputtext" ).keyup(textthaydoi);
+				//Cho #inputext phát sinh một sự kiện keyup ban đầu
+				$( "#inputtext" ).keyup();
+			</script>

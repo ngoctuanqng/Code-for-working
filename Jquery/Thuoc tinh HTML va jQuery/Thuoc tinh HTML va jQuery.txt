@@ -1,0 +1,73 @@
+Thuộc tính HTML và jQuery--Jquery:
+
+	Làm việc với thuộc tính phần tử HTML
+		
+		Chúng ta có thể tương tác lấy, gán giá trị cho thuộc tính HTML (href, src, id, class, style ... ) rất dễ
+		dàng thông qua jQuery. Phương thức attr() sử dụng để lấy giá trị thuộc tính và gán giá trị thuộc tính.
+			
+			attr(attr_name) : lấy giá trị của thuộc tính có tên attr_name
+			attr(attr_name, attr_val) : gián giá trị attr_val vào thuộc tính attr_name
+		
+		Lấy thuộc tính
+			
+			Ví dụ trong HTMl của bạn có phần tử thẻ <a> với id là 'exam', giờ ta dùng attr() để lấy giá trị thuộc tính href
+				
+				HTML
+				
+					<a id="exam" href="https://xuanthulab.net/">
+					   Bấm vào đây
+					</a>
+				
+				JavaScript
+				
+					$(function() {
+					  var val = $("a#exam").attr("href");
+					  alert(val);
+					});
+				// Hiện thị thông báo : https://xuanthulab.net/
+		
+		Gán giá trị cho thuộc tính
+		
+			Trở lại ví dụ trên, giờ viết JavaScript / jQuery để thay đổi thuộc tính href thanh địa chỉ link mới : google.com.vn
+			
+			JavaScript
+			
+				$(function() {
+					$("a#exam").attr("href", "https://www.google.com.vn/");
+				});
+				
+		Kiểm tra một thuộc tính tồn tại với jQuery
+		
+			Cách 1
+			
+				var attr = $("selector").attr('name');
+				if (typeof attr !== typeof undefined && attr !== false) {
+				  // Có thuộc tính name
+				}
+				else {
+				  // không có thuộc tính name
+				}
+				
+			Cách 2 - Sử dụng hàm JavaScript
+				
+				if ($("selector")[0].hasAttribute('name')) {
+					// có thuộc tính name
+				}
+				else {
+				  // không có thuộc tính name
+				}
+				
+	Loại bỏ thuộc tính HTML
+	
+		Thuộc tính của phần tử HTML có thể xóa bỏ khỏi phần tử bằng phương thức removeAttr(attr_name)
+		
+		JavaScript
+				
+				//xóa bỏ thuộc tính border khỏi phần tử table
+				$("table").removeAttr("border");
+
+				//xóa bỏ thuộc tính class khỏi phần tử div
+				$("div").removeAttr("class");
+
+				//xóa bỏ thuộc tính title khỏi phần tử a
+				$("table").removeAttr("title");		

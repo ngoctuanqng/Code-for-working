@@ -1,0 +1,393 @@
+Observable--Quản lý state MobX:
+
+				- Giá trị observable có thể là primitives values (number, string, boolean, null, undefined), reference values (array,
+				objects, function), plain object, class instance, ES6 Map, Set,… Nó là những giá trị mà component sẽ quan sát để biết có nên
+				re-render hay không?
+				- Đây là một decorator được sử dụng để đánh dấu các thuộc tính của một đối tượng là "observable", có nghĩa là bất kỳ
+				thay đổi nào trong giá trị của thuộc tính này cũng sẽ kích hoạt các cập nhật tương ứng trong giao diện người dùng.
+				
+				// Có hai cách viết như sau
+				// Theo dõi 1 mảng
+				const list = observable([1,2,3,4])
+				list[2] = 5
+				// Thay đổi 1 property của object
+				class Todo {
+				  @observable title = 'Mua banh mi';
+				}
+				const TODO = new Todo();
+				TODO.title = 'Da mua banh mi';
+				// Hoặc là
+				const person = observable({
+					firstName: "Clive Staples",
+					lastName: "Lewis",
+				})
+				person.firstName = "C.S."
+				
+Observer--Quản lý state MobX:
+
+				- Trong MobX, khi một observable thay đổi, tất cả các components được đánh dấu là @observer mà sử dụng giá trị của
+				observable đó sẽ tự động render lại để phản ánh các thay đổi. Điều này cho phép bạn đảm bảo rằng tất cả các thành phần
+				của ứng dụng sẽ được cập nhật một cách đồng bộ khi trạng thái thay đổi.
+				- Đây là một decorator được sử dụng để theo dõi các thay đổi trong trạng thái của một component React. Khi một component
+				được đánh dấu bằng @observer, nó sẽ tự động render lại khi các giá trị trạng thái theo dõi thay đổi. Điều này giúp đảm bảo
+				rằng giao diện người dùng sẽ được cập nhật một cách tự động mỗi khi trạng thái thay đổi.
+				- Tránh sử dụng quá nhiều observer không cần thiết, và tập trung vào việc chỉ sử dụng observer cho các components cần
+				theo dõi trực tiếp các observable cụ thể.
+				
+				import { observable } from 'mobx'
+				import { Observer, useObserver, observer } from 'mobx-react' // 6.x or mobx-react-lite@1.4.0
+				import ReactDOM from 'react-dom'
+				// tạo một dữ liệu observable
+				const person = observable({
+				  name: 'John',
+				})						
+				const P1 = observer(function P1({ person }) { // observer HOC: Observer cả function component
+				  return <h1>{person.name}</h1>
+				})				
+				const P2 = ({ person }) => ( // observer component: chỉ observer cho component con nằm bên trong
+				  <>
+					<p>{person.name} dont want to change my name</p> // sẽ không thay đổi vì không được observer
+					<Observer>{() => <h1>{person.name} will change to new name</h1>}</Observer> // thay đổi
+				  </>
+				)					
+				const P3 = ({ person }) => {
+				  return useObserver(() => <h1>{person.name}</h1>) // useObserver hook - trả về một component mới được observer
+				}
+				const DetailPerson = () => (
+				  <>
+					<P1 person={person} />
+					<P2 person={person} />
+					<P3 person={person} />
+				  </>
+				)
+				// Sau 3 giây chúng ta sẽ thay đổi dữ liệu của person
+				setTimeout(() => {
+				  person.name = 'Jane'
+				}, 1000)
+				
+Cấu trúc của mobx nên viết trong react--Quản lý state MobX:
+
+				Theo như mobx team khuyên dùng chúng ta nên sử dụng react context để truyền store. Chúng ta nên viết một file riêng chứa
+				toàn bộ dữ liệu observable (mình sẽ gọi là store.ts), trong file này mình sẽ định nghĩa một rootStore (sẽ truyền cái này
+				qua component Provider) và một hàm useStore (sẽ trả về store). Component nào cần dùng store mình sẽ import useStore vào. Để
+				hiểu chi tiết hơn các bạn xem ví dụ bên dưới
+
+				// store.ts
+				import { createContext, useContext } from "react";
+				import { observable, action } from 'mobx';
+				class Todo {
+				  @observable title = 'Mua banh mi';
+				  @action // chỉ có action mới có thể modify observable state
+				  changeTitle = () => {
+					this.title = 'Da mua banh my'
+				  }
+				  // changeTitle có thể viết lại như sau
+				  //  @action.bound
+				  //  changeTitle() {
+				  //    this.title = 'Da mua banh my'
+				  //  }
+				}
+				export const rootStore = {
+				  todoStore: new Todo()
+				};
+				export type TRootStore = typeof rootStore;
+				const RootStoreContext = createContext<null | TRootStore>(null);
+				// Tạo ra provider để cung cấp store cho toàn bộ app
+				// dung trong file index.tsx
+				export const Provider = RootStoreContext.Provider;
+				/** tra lai store, chi dung o function component */
+				export function useStore() {
+				  /** store này sẽ chứa toàn bộ data */
+				  const store = useContext(RootStoreContext);
+				  if (store === null) {
+					throw new Error("Store cannot be null, please add a context provider");
+				  }
+				  return store;
+				}
+				// index.tsx
+				import * as React from "react";
+				import { render } from "react-dom";
+				import { Provider, rootStore } from "./store";
+
+				const rootElement = document.getElementById("root");
+				/** Truyen store vao thong qua provider */
+				render(
+				  <Provider value={rootStore}>
+					<App />
+				  </Provider>,
+				  rootElement
+				);
+				// Todo.tsx
+				import { observer } from 'mobx'
+				import { Observer, useObserver, observer } from 'mobx-react-lite'
+				import ReactDOM from 'react-dom'
+				import React from 'react'
+				// import store
+				import { useStore } from './store';
+				export const Todo = observer(() => {
+				  const { todoStore } = useStore();
+				  return (
+					<>
+					  <p>title: {todoStore.title}</p>
+					  <button onClick={todoStore.changeTitle}>Click to change title</button>
+					</>
+				  )
+				});
+													
+computed--Quản lý state MobX:
+
+				Giá trị sẽ được tính toán lại mỗi khi observable value thay đổi
+
+				import { observable, computed } from "mobx"
+				class OrderLine {
+					@observable price = 0
+					@observable amount = 1
+					constructor(price) {
+					  this.price = price
+					}
+					// Giá trị này sẽ được tính toán và trả về mỗi khi 2 giá trị observable ở trên bị thay đổi
+					@computed get total() {
+					  return this.price * this.amount
+					}
+				}
+				OrderLine.price = 12;
+				console.log(OrderLine.total) // 12
+				
+toJS--Quản lý state MobX:
+
+				- Recursively converts an observable object to a JavaScript object. Supports observable arrays, objects, Maps and primitives.
+				- It does NOT recurse into non-observables, these are left as they are, even if they contain observables. Computed and
+				other non-enumerable properties are completely ignored and won't be returned.
+				- For more complex (de)serialization scenarios, it is recommended to give classes a (computed) toJSON method, or use a
+				serialization library like serializr.
+				- toJS là một hàm được sử dụng để chuyển đổi các đối tượng observable, arrays, và maps sang các đối tượng JavaScript thông
+				thường. Điều này đặc biệt hữu ích khi bạn cần làm việc với các thư viện hoặc API bên ngoài không biết cách xử lý các đối tượng
+				observable của MobX.
+				
+				const obj = mobx.observable({
+					x: 1
+				})
+				const clone = mobx.toJS(obj)
+				console.log(mobx.isObservableObject(obj)) // true
+				console.log(mobx.isObservableObject(clone)) // false
+				
+autorun--Quản lý state MobX:
+
+				- Thường dùng cho việc log thông tin
+				- Cũng giống như computed cũng sẽ chạy khi observable thay đổi, tuy nhiên autorun không trả về giá trị mới autorun trả về
+				một disposer function, hàm này có vai trò huỷ bỏ autorun. Tham số thứ nhất mà autorun trả về một biến dùng để debug
+				
+				import { observable, computed, autorun } from "mobx"
+				class OrderLine {
+					@observable price = 0
+					@observable amount = 1
+					constructor(price) {
+						this.price = price;
+						autorun((reaction) => {
+						  console.log(this.total)
+						  if (this.total > 10) {
+							reaction.dispose(); // dừng log lại nếu total > 10
+						  }
+						})
+					}
+					// Giá trị này sẽ được tính toán và trả về mỗi khi 2 giá trị observable ở trên bị thay đổi
+					@computed get total() {
+					  return this.price * this.amount
+					}
+				}
+				OrderLine.price = 9; // log ra 9
+				OrderLine.price = 11; // log ra 11 sau đó bị huỷ bỏ
+				OrderLine.price = 12: // ngưng log vì đã bị huỷ bỏ
+													
+when--Quản lý state MobX:
+
+				- Xảy ra với điều kiện nào
+				- Đôi lúc các bạn sẽ muốn biết khi nào dữ liệu đấy thay đổi và sẽ thay đổi khi nó phù hợp với điều kiện nào
+				
+				import { observable, computed, when } from "mobx"
+				class OrderLine {
+					@observable price = 0
+					@observable amount = 1
+					constructor(price) {
+					  this.price = price;
+					  // chỉ chạy một lần
+					  // Khi this.total lớn hơn 10 thì gán lại this.total = 0
+					  when(() => this.total > 10, () => (this.total = 0));
+					}
+					// Giá trị này sẽ được tính toán và trả về mỗi khi 2 giá trị observable ở trên bị thay đổi
+					@computed get total() {
+					  return this.price * this.amount
+					}
+				}
+				OrderLine.price = 11;
+				console.log(OrderLine.total) // 0
+													
+reaction--Quản lý state MobX:
+
+				- Một phiên bản nâng cấp so với autorun															
+				- function thứ nhất (data function) là function đóng vai trò là dữ liệu được theo dõi, dữ liệu trả lại sẽ là đầu vào
+				cho function thứ hai
+				- function thứ hai (effect function) có hai tham số được trả về, tham số thứ nhất là dữ liệu từ function thứ nhất, tham
+				số thứ hai là reaction (vai trò như trong autorun)
+				
+				import { observable, computed, reaction } from "mobx"
+				class Todo {
+					@observable todos = [
+					  {
+						  title: "Make coffee",
+						  done: true,
+					  },
+					  {
+						  title: "Find biscuit",
+						  done: false,
+					  },
+					]
+					constructor(price) {
+					  // reaction 1
+					  // Cách sửa dụng reaction sai: nó chỉ theo dõi dộ dài của array todos
+					  reaction(
+						() => todos.length,
+						(length) => console.log("reaction 1:", todos.map((todo) => todo.title).join(", "))
+					  )
+					  // reaction 2
+					  // Cách sửa dụng đúng: nó sẽ theo dõi cả độ dài và khi titles thay đổi
+					  reaction(
+						() => todos.map((todo) => todo.title),
+						(titles) => console.log("reaction 2:", titles.join(", "))
+					  )
+					}
+				}
+				Todo.todos.push({ title: "explain reactions", done: false })
+				// prints:
+				// reaction 1: Make coffee, find biscuit, explain reactions
+				// reaction 2: Make coffee, find biscuit, explain reactions
+				Todo.todos[0].title = "Make tea"
+				// prints:
+				// reaction 2: Make tea, find biscuit, explain reactions
+													
+useLocalStore - giải pháp thay thế useState hook--Quản lý state MobX:
+
+				Chúng ta hãy tưởng tượng có 10 state lại phải có 10 function đóng vai trò setState đi cùng. Thật là nhiều phải
+				không? Tuy nhiên, nếu chúng ta dùng useLocalStore, một function built-in nằm trong mobx-react thì không cần như
+				thế nữa. Khi dùng function này chúng ta sẽ có một local store cỡ nhỏ. Việc thay đổi nó sẽ dựa vào việc mutate
+				trực tiếp		
+
+				import React from "react";
+				import { useLocalStore, observer } from "mobx-react";
+				export const CounterWithLocalStore = observer(() => {
+				  // Khai báo một store
+				  const store = useLocalStore(() => ({
+					count: 0,
+					increase: () => (store.count += 1), // việc thay đổi sẽ được mutate trực tiếp
+					decrease: () => (store.count -= 1),
+					reset: () => (store.count = 0)
+				  }));
+				  const { count, increase, decrease, reset } = store;
+				  return (
+					<>
+					  <p>Count (with local store): {count}</p>
+					  <button onClick={increase}>Increase +</button>
+					  <button onClick={decrease}>Decrease -</button>
+					  <button onClick={reset}>Reset</button>
+					</>
+				  );
+				});
+				
+@inject--Quản lý state MobX:
+
+				- @inject là một decorator được sử dụng để tiêm các dependencies vào các React components. Nó thường được sử dụng
+				cùng với @observer để tự động cập nhật các components khi dữ liệu được thay đổi.
+				
+				- Cụ thể, @inject làm những việc sau:
+				
+					Tiêm Store vào Component:
+					
+						@inject cho phép bạn tiêm các stores được định nghĩa trong MobX vào một component cụ thể. Điều này giúp
+						component có thể truy cập và sử dụng các dữ liệu và hành vi từ store mà không cần phải truyền chúng qua props từ các component cha.
+						
+					Kết nối Component với Store:
+					
+						@inject giúp kết nối component với store, cho phép component tự động nhận các thay đổi từ store và cập
+						nhật giao diện người dùng tương ứng.
+						
+					Tổ chức và Quản lý State:
+					
+						Sử dụng @inject, bạn có thể tổ chức và quản lý state của ứng dụng một cách rõ ràng và hợp lý hơn bằng cách
+						chia state thành các stores và tiêm chúng vào các components khi cần thiết.
+						
+				Ví dụ về cách sử dụng @inject trong MobX:
+				
+					import { observable } from "mobx";
+					class UserStore {
+					  @observable user = {
+						name: "John Doe",
+						age: 30
+					  };
+					}
+					const userStore = new UserStore();
+					export default userStore;
+					
+					import React from "react";
+					import { inject, observer } from "mobx-react";
+					@inject("userStore") // Tiêm userStore vào component này
+					@observer // Đánh dấu component này là observer để nó tự động cập nhật khi dữ liệu thay đổi
+					class UserProfile extends React.Component {
+					  render() {
+						const { userStore } = this.props;
+						return (
+						  <div>
+							<h1>{userStore.user.name}</h1>
+							<p>Age: {userStore.user.age}</p>
+						  </div>
+						);
+					  }
+					}
+					export default UserProfile;
+					
+					- @inject("userStore"): Tiêm userStore vào UserProfile component. Tên của store cần được truyền dưới dạng chuỗi.
+					- @observer: Đánh dấu UserProfile là một observer component để nó tự động render lại khi dữ liệu trong userStore thay đổi.
+					
+					import React from "react";
+					import ReactDOM from "react-dom";
+					import { Provider } from "mobx-react";
+					import userStore from "./stores/UserStore";
+					import UserProfile from "./components/UserProfile";
+					const stores = {
+					  userStore
+					};
+					ReactDOM.render(
+					  <Provider {...stores}>
+						<UserProfile />
+					  </Provider>,
+					  document.getElementById("root")
+					);
+
+extendObservable--Quản lý state MobX:
+
+					- extendObservable trong MobX là một hàm được sử dụng để thêm các thuộc tính observable vào một đối tượng hiện
+					có. Điều này hữu ích khi bạn muốn mở rộng một đối tượng với các thuộc tính mới mà cần phản ứng lại với sự thay đổi
+					dữ liệu, mà không cần phải định nghĩa lại toàn bộ đối tượng hoặc class từ đầu.
+					- extendObservable cho phép bạn thêm các thuộc tính observable vào bất kỳ đối tượng nào một cách linh hoạt. Nó
+					thường được sử dụng khi bạn có một đối tượng ban đầu mà bạn muốn mở rộng với các thuộc tính observable mà không
+					thay đổi cấu trúc ban đầu của nó.
+					
+					import { extendObservable } from "mobx";
+					class Person {
+					  constructor(name) {
+						// Thêm thuộc tính observable ban đầu
+						extendObservable(this, {
+						  name: name,
+						  age: 30
+						});
+					  }
+					}
+					// Tạo một đối tượng Person
+					const person = new Person("John");
+					// Thêm thuộc tính mới một cách linh hoạt
+					extendObservable(person, {
+					  address: "123 Main St"
+					});
+					// Sử dụng observable
+					console.log(person.name); // "John"
+					console.log(person.age); // 30
+					console.log(person.address); // "123 Main St"

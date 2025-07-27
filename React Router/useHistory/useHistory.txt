@@ -1,0 +1,35 @@
+useHistory--React Router:
+
+		- Nếu bạn muốn sử dụng history object cho các tác vụ điều hướng trong trang, bạn có thể sử dụng useHistory.
+		- Thuộc tính:
+						length:		Số lượng các mục trong lịch sử duyệt.
+		- Phương thức:
+						push(path, [state]): 		Thêm một mục mới vào lịch sử duyệt, di chuyển đến đường dẫn được
+													chỉ định. Bạn cũng có thể chuyển một trạng thái tùy ý kèm theo đường dẫn.
+						replace(path, [state]): 	Thay thế mục hiện tại trong lịch sử duyệt bằng một mục mới, di chuyển đến
+													đường dẫn được chỉ định. Cũng có thể kèm theo trạng thái mới.
+						go(n): 						Di chuyển đến một mục trong lịch sử duyệt tương ứng với sự thay đổi của n. Nếu n
+													là số dương, nó sẽ di chuyển về trước. Nếu n là số âm, nó
+													sẽ di chuyển về phía trước. Ví dụ: go(-1) sẽ di chuyển về trang trước đó.
+						goBack(): 					Di chuyển về trang trước đó trong lịch sử duyệt, tương đương với go(-1).
+						goForward(): 				Di chuyển đến trang tiếp theo trong lịch sử duyệt, tương đương với go(1).
+						listen(listener): 			Lắng nghe sự kiện thay đổi trong lịch sử duyệt và gọi hàm listener mỗi khi có thay
+													đổi. Trả về một hàm để hủy lắng nghe sự kiện.
+						block(prompt): 				Ngăn chặn chuyển đổi đến một trang mới và yêu cầu người dùng xác nhận. Trả về
+													một hàm để hủy việc block.
+		- React Router cung cấp thêm cho chúng ta useNavigate hook, dành riêng cho các tác vụ điều hướng trong trang một cách thuận tiện hơn.
+		
+		import React from 'react';
+		import { useHistory } from 'react-router-dom';
+		function MyComponent() {
+		  const history = useHistory();
+		  const handleClick = () => {
+			history.push('/new-page'); // Di chuyển đến trang mới '/new-page'
+		  };
+		  return (
+			<div>
+			  <button onClick={handleClick}>Go to New Page</button>
+			</div>
+		  );
+		}
+		export default MyComponent;

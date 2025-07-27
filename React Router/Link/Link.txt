@@ -1,0 +1,30 @@
+Link--React Router:
+
+		- <Link> là một thành phần của React Router được sử dụng để tạo các liên kết trong ứng dụng React và thường được sử dụng để thay thế cho thẻ <a> khi bạn làm việc với định tuyến trong
+		ứng dụng React.
+		- Bước tiếp theo là có thể điều hướng giữa chúng. Đây là mục đích của thành phần Link.
+		- Để cho Link biết đường dẫn nào sẽ đưa người dùng đến khi được nhấp vào, bạn chuyển nó to để hỗ trợ.
+		- Nếu bạn cần kiểm soát nhiều hơn đối với Liên kết, bạn cũng có thể to dưới dạng một đối tượng. Làm như vậy cho phép bạn thêm một chuỗi truy vấn thông qua thuộc tính search hoặc
+		chuyển bất kỳ dữ liệu nào đến tuyến đường mới thông qua state.
+		- Khi bạn sử dụng <Link>, React Router sẽ chịu trách nhiệm điều hướng (routing) ứng dụng của bạn mà không làm tải lại trang.
+		- Khi sử dụng thẻ <a>, trang web sẽ thực hiện một tải lại khi bạn chuyển hướng đến một trang mới, điều này không hiệu quả như việc sử dụng React Router trong ứng dụng React.
+		
+		<nav>
+		  <Link to="/">Home</Link>
+		  <Link to="/about">About</Link>
+		  <Link to="/settings">Settings</Link>
+		</nav>
+		
+		<nav>
+		  <Link to="/">Home</Link>
+		  <Link to="/about">About</Link>
+		  <Link
+			to={{
+			  pathname: "/settings",
+			  search: "?sort=date",
+			  state: { fromHome: true },
+			}}
+		  >
+			Settings
+		  </Link>
+		</nav>

@@ -1,0 +1,46 @@
+useContext--REACTJS:
+
+		- Tóm tắt:
+						Tạo 1 biến với createContext, ví dụ biến A,
+						Trong 1 component cha khi render 1 component con khác (trong phần return) thì có thể truyền biến này qua thông qua <A.Provider value={...}>.
+						Trong component con được gọi để sử dụng được biến này cần gọi useContext, tên biến giữa biến truyền và biến gán phải giống nhau, chú ý không phải là biến tạo bằng createContext
+		- useContext là một hook được cung cấp bởi React để truy cập vào Context. Context là một cơ chế trong React cho phép truyền dữ liệu qua các thành phần con trong cây thành phần mà không cần truyền props qua từng cấp con.
+		- React context API là một cách cơ bản để tạo các biến toàn cục có thể được truyền qua trong ứng dụng React. đây là phương pháp thay thế cho “prop drilling”, hoặc truyền props từ ông nội sang cha và sang con, v..v..
+		Context thường được coi là đơn giản hơn, nhẹ nhàng hơn thay vì sử dụng Redux cho quản lý state.
+		- Bạn có thể tạo một context để thêm những shared state và sau đó component nào cần thì bạn gọi context đó ra xài, không cần phải truyền từ cha xuống con nữa. Nó cũng giống như biến global được chia sẻ và sử dụng ở
+		nhiều nơi
+		- Trong React, để các component con có thể sử dụng Context thông qua useContext, thì các component con phải là con trực tiếp hoặc con của các component mà đã sử dụng Provider để cung cấp Context.
+		- useContext() call in a component is not affected by providers returned from the same component. The corresponding <Context.Provider> needs to be above the component doing the useContext() call.
+		- React automatically re-renders all the children that use a particular context starting from the provider that receives a different value. The previous and the next values are compared with the Object.is comparison.
+		Skipping rerenders with memo does not prevent the children receiving fresh context values.
+		
+		import React, { useContext } from 'react';								
+		const ThemeContext = React.createContext('light'); // Khởi tạo context
+		// Component cha cung cấp context
+		function App() {
+		  return (
+			<ThemeContext.Provider value="dark">
+			  <Toolbar />
+			</ThemeContext.Provider>
+		  );
+		}
+		// Component con sử dụng useContext để truy cập context
+		function Toolbar() {
+		  const theme = useContext(ThemeContext);
+		  return (
+			<div>
+			  <h1>Current Theme: {theme}</h1>
+			  <ThemedButton />
+			</div>
+		  );
+		}
+		// Component con khác sử dụng useContext để truy cập context
+		function ThemedButton() {
+		  const theme = useContext(ThemeContext);
+		  return (
+			<button style={{ background: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#333' }}>
+			  Click me
+			</button>
+		  );
+		}
+		export default App;

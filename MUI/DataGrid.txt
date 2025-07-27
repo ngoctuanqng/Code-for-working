@@ -1,0 +1,109 @@
+DataGrid--MUI:					
+		Đối tượng params có thể chứa các thuộc tính như:
+			params.value: Giá trị của ô (cell) hiện tại.
+			params.row: Thông tin về hàng (row) hiện tại.
+			params.column: Thông tin về cột (column) hiện tại.
+			params.api: Tham chiếu đến API của bảng (table).
+			params.rowIndex: Chỉ mục của hàng (row) hiện tại.
+			params.colIndex: Chỉ mục của cột (column) hiện tại.
+			Và nhiều thuộc tính khác tùy thuộc vào framework hoặc thư viện sử dụng.
+
+		<DataGrid
+			rows={data?.dailyReportData?.info === undefined ? [] : data?.dailyReportData?.info}
+			columns={columns}
+			pagination
+			onRowDoubleClick={handleDoubleClick}
+			disableSelectionOnClick
+			style={{marginTop: '8px'}}
+			getRowId={(row) => row.seq}
+			sx={DataGridStyle}
+			page={pageNo}
+			pageSize={pageSize}
+			rowsPerPageOptions={[15, 30, 50, 100]}
+			rowCount={data?.dailyReportData?.total === undefined ? 0 : data?.dailyReportData?.total}
+			onPageChange={handleChangePage}
+			onPageSizeChange={handleChangeRowsPerPage}
+			paginationMode='server'
+			rowHeight={55}
+			getRowClassName={(params) =>
+				params.indexRelativeToCurrentPage === data.length - 1 ? 'last-row' : ''
+			}
+		/>
+		
+		const handleChangePage = (e) => {
+			setPage(e);
+		}
+
+
+		const handleChangeRowsPerPage = async (event) => {
+			setRowsPerPage(event);
+		};
+
+		const DataGridStyle = () => {
+			return {
+			  boxShadow: 2,
+			  borderRadius: 1,
+			  "& .MuiDataGrid-columnHeaders": {
+				backgroundColor: "rgba(192, 192, 192, 0.7)",
+			  },
+			  "& .MuiDataGrid-virtualScrollerRenderZone": {
+				"& .MuiDataGrid-row": {
+				  "&:nth-of-type(2n)": {
+					backgroundColor: "rgba(192, 192, 192, 0.24)",
+				  },
+				  "& .MuiDataGrid-cell": {
+					"&:nth-of-type(n)": {
+					  borderRight: "groove 1px rgba(235, 235, 235, 0.45)",
+					},
+				  },
+				},
+			  },
+			  "& .MuiDataGrid-footerContainer": {
+				backgroundColor: "rgba(235, 235, 235, 0.9)",
+			  },
+			  "& .MuiDataGrid-selectedRowCount": {
+				visibility: "hidden",
+			  },
+			};
+		};									
+		
+		{
+			field: "assign",
+			headerName: "Assign",
+			headerAlign: "center",
+			align: "left",
+			width: 260,
+			renderCell: renderAssign, // renderCell: Định nghĩa một hàm để tạo nội dung trong ô dữ liệu của cột
+			valueGetter: (params) => params.row.members, // valueGetter: Định nghĩa một hàm để trích xuất giá trị cho cột từ dữ liệu hàng (row)
+														 // giá trị của cột được lấy từ thuộc tính members của đối tượng params.row
+		}
+		
+		{
+		  headerName: "Project Manager",
+		  field: "koreaPM",
+		  // flex: 1.5,
+		  align: "left",
+		  headerAlign: "center",
+		  width: 200,
+		  renderCell: (params) => {
+			return (
+			  <div style={{ display: 'flex', alignItems: 'center' }}>
+				<UserAvatar avatar={params.row.koreaPmImage} size={40} /> // đối tượng params.row, đại diện cho hàng (row) hiện tại
+				<Tooltip style={{ marginLeft: '10px' }} title={params.row.koreaPM} arrow>
+				  <Typography noWrap>{params.row.koreaPM}</Typography>
+				</Tooltip>
+			  </div>
+			)
+		  }
+		},
+		
+		{
+			id: 1,
+			field: "name",
+			headerName: "Name",
+			editable: true,
+			width: 360,
+			minWidth: 110,
+			maxWidth: 360,
+			flex: 1,
+		},	

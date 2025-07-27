@@ -1,0 +1,85 @@
+Hiệu ứng ẩn hiện phần tử HTML DOM với jQuery--Jquery
+
+	Hiệu ứng Hide/Show
+	
+		jQuery có một số hiệu ứng động rất dễ để sử dụng. Trong đó, phương thức hide() và show() đùng
+		để ẩn đi hay hiện thị các phần tử chọn, tương tự toggle() sẽ tương đương với show() nếu phần
+		tử đang ẩn, và tương đương với hide() nếu phần tử đang hiện thị.
+			
+			<button id="vidu1">Bấm vào đây
+				<strong id="pvidu1">Sử dụng toggle()</strong>
+			</button>
+			<script>
+				$("#vidu1").click(function() {
+				   $("#pvidu1").toggle();
+				});
+			</script>
+			
+		Phương thức show(), hide(), toggle() có thể chứa tham số thứ nhất để chỉ ra thời gian hoàn
+		thành hiệu ứng (tính bằng mili giây).
+		
+		Ví dụ hiệu ứng xảy ra trong 1s
+			
+			<button id="vidu2">Bấm vào đây
+				<strong id="pvidu2">Sử dụng toggle(1000)</strong>
+			</button>
+			<script>
+				$("#vidu2").click(function() {
+					$("#pvidu2").toggle(1000);
+				});
+			</script>
+			
+		Phương thức show(), hide(), toggle() còn có thể chứa hàm callback, là hàm sẽ thi hành sau khi
+		hiệu ứng hoàn thành.
+		
+		Ví dụ sau sẽ gọi một hàm callback sau khi hiệu ứng hoàn thành.
+			
+			<button id="vidu3">Bấm vào đây
+				<strong id="pvidu3">Sử dụng toggle(1000)</strong>
+			</button>
+			<script>
+				$("#vidu3").click(function() {
+					$("#pvidu3").toggle(500, function() {
+						$("#pvidu3").toggle(500);
+					});
+				});
+			</script>
+			
+	Hiệu ứng mờ dần
+	
+		Tương tự như ba hàm show(), hide(), toggle() cũng có ba hàm với chức năng tương tự nhưng đi kèm
+		hiệu ứng phai dần đó là fadeIn(), fadeOut() và fadeToggle()
+
+		Tương tự nó cũng có thể có hai tham số tốc độ và ham callback, ví dụ:
+			
+			<button id="vidu4">Bấm vào đây
+				<strong id="pvidu4">Sử dụng fadeToggle(1000)</strong>
+			</button>
+			<script>
+				$("#vidu4").click(function() {
+					$("#pvidu4").fadeToggle(1000, function() {
+						$("#pvidu4").fadeToggle(1000);
+					});
+				});
+			</script>
+			
+		Ngoài ra còn có phương thức fadeTo(speed, opacity) để chạy hiệu ứng thiết lập opacity về giá trị
+		chỉ ra. Ví dụ:
+			
+			$("div").fadeTo(1500, 0.7);
+			
+	Hiệu ứng trượt phần tử
+	
+		Hiệu ứng xuất ẩn phần tử slideUp, xuất hiện phần tử slideDown là hiệu ứng giống với hide(), show()
+		nhưng kèm thêm trượt phần tử. Tương tự có slideToggle() để chuyển trạng thái qua lại giữa hai phương thức này
+			
+			<button id="vidu5">Bấm vào đây
+				<strong id="pvidu5">Sử dụng slideUp(1000)</strong>
+			</button>
+			<script>
+				$("#vidu5").click(function() {
+					$("#pvidu5").slideToggle(1000, function() {
+						//... code in callback
+					});
+				});
+			</script>

@@ -1,0 +1,162 @@
+jQuery.each() Function--Jquery:
+
+	jQuery .each() là gì?
+	
+		- jQuery each function được sử dụng để lặp qua từng phần tử của jQuery object.
+		- jQuery object là 1 object chứa 1 hoặc nhiều phần tử DOM và dùng để giao tiếp với tất cả jQuery functions. Nó rất có
+		ích cho thao tác với nhiều phần tử DOM, lặp qua nhiều array và thuộc tính của object. Thêm
+		vào đó, jQuery cung cấp 1 helper function có cùng tên và dùng để gọi mà không cần phải chọn hay tạo phần tử DOM trước đó.
+	
+	jQuery .each() cú pháp
+	
+		Ví dụ dưới đây chọn tất cả thẻ div trên trang web và in ra số thứ tự và id của chúng. Kết quả in ra có thể là: “div0:header”,
+		“div1:body”, “div2:footer”. Ví dụ này sử dụng jQuery each() function như 1 function tiện ích.
+			
+			// DOM ELEMENTS
+			$('div').each(function (index, value) {
+			  console.log('div' + index + ':' + $(this).attr('id'));
+			});
+		
+		Ví dụ tiếp theo sẽ cho ta thấy cách sử dụng của function tiệc ích này. Trong trường hợp object lặp được truyền vào như tham
+		số thứ nhất. Trong ví dụ 1 cho ta thấy cách lặp qua 1 mảng:
+			
+			// ARRAYS
+			var arr = [
+			   'one',
+			   'two',
+			   'three',
+			   'four',
+			   'five'
+			];
+			$.each(arr, function (index, value) {
+			  console.log(value);
+
+			  // Will stop running after "three"
+			  return (value !== 'three');
+			});
+			// Outputs: one two three
+			
+		Trong ví dụ cuối này sẽ cho ta thấy cách lặp qua thuộc tính của 1 object:
+			
+			// OBJECTS
+			var obj = {
+			   one: 1,
+			   two: 2,
+			   three: 3,
+			   four: 4,
+			   five: 5
+			};
+			$.each(obj, function (index, value) {
+			  console.log(value);
+			});
+			// Outputs: 1 2 3 4 5
+			
+	Basic jQuery.each() function example
+	
+		Hãy xem each() giúp chúng ta thế nào khi kết hợp với 1 jQuery object. Ví dụ đầu tiên chọn tất cả thẻ a trên trang và in ra
+		thuộc tính href của chúng.
+			
+			// DOM ELEMENTS
+			$('a').each(function (index, value){
+			  console.log($(this).attr('href'));
+			});
+				Ví dụ thứ 2 in tất cả giá trị href trên trang web (giả sử chỉ giao thức HTTP)
+					$('a').each(function (index, value){
+			  var link = $(this).attr('href');
+
+			  if (link.indexOf('http://') === 0) {
+				console.log(link);
+			  }
+			});
+			
+			<a href="http://www.jquery4u.com">JQUERY4U</a>
+			<a href="http://www.phpscripts4u.com">PHP4U</a>
+			<a href="http://www.blogoola.com">BLOGOOLA</a>
+				
+			http://jquery4u.com
+			http://www.phpscripts4u.com
+			http://www.blogoola.com
+			
+		Chúng ta cần để ý là các phần tử DOM từ 1 jQuery object cần phải được bọc lại khi sử dụng bên trong jQuery each(). Lí do
+		là jQuery thực tế là 1 vỏ bọc xung quanh 1 array của các phần tử DOM. Khi sử dụng jQuery each() mảng này sẽ được lặp qua
+		giống như cách lặp qua 1 array truyền thống. Vì điều này, chúng ta không lấy các phần tử đã được bọc ở bên ngoài.
+	
+	jQuery.each() Array Example
+	
+		Hãy xem 1 array truyền thống có thể được xử lý.
+			
+			var numbers = [1, 2, 3, 4, 5, 6];
+			$.each(numbers , function (index, value){
+			  console.log(index + ':' + value);
+			});
+			
+		Ví dụ trên sẽ in ra: 0:1, 1:2, 2:3, 3:4, 4:5, and 5:6.Ví dụ trên sẽ in ra: 0:1, 1:2, 2:3, 3:4, 4:5, and 5:6.
+		Không có gì đặc biệt ở đây. Thuộc tính số thứ tự của array, chúng ta có các số từ 0 đến N - 1, N là số các phần tử trong array.
+	
+	jQuery.each() JSON Example
+	
+		Chúng ta có thể có cấu trúc dữ liệu phức tạp hơn, như là arrays trong arrays, objects trong objects, arrays trong objects, hoặc
+		objects trong arrays. Hãy xem làm thế nào each() có thể giúp chúng ta trong những trường hợp này.
+			
+			var json = [
+			 { 'red': '#f00' },
+			 { 'green': '#0f0' },
+			 { 'blue': '#00f' }
+			];
+
+			$.each(json, function () {
+			   $.each(this, function (name, value) {
+				  console.log(name + '=' + value);
+			   });
+			});
+
+		Ví dụ này in ra: red=#f00, green=#0f0, blue=#00f.
+		
+		Chúng ta xử lý dữ liệu lồng nhau với cách gọi each() lồng nhau. Vòng gọi ở ngoài xử lý array ở biến JSON, vòng gọi ở trong xử lý
+		objects. Trong ví dụ này mỗi object có 1 key, mặc dù vậy, có thể gán bao
+		nhiều key tùy ý.
+	
+	jQuery.each() Class Example
+	
+		Ví dụ này cho thấy làm thế nào để lặp qua mỗi phần tử có class là productDescription như HTML bên dưới.
+			
+			<div class="productDescription">Red</div>
+			<div>Pink</div>
+			<div class="productDescription">Orange</div>
+			<div class="generalDescription">Teal</div>
+			<div class="productDescription">Green</div>
+			
+		Chúng ta sử dụng each() helper thay cho each() method của selector $('.productDescription').
+		
+			$.each($('.productDescription'), function (index, value) {
+			  console.log(index + ':' + $(value).text());
+			});
+			
+		Trong trường hợp này kết quả in ra là: 0:Red, 1:Orange, 2:Green.
+		Chúng ta không cần phải kèm theo index và value. Có 1 vài tham số trên phần tử DOM mà chúng ta đang lặp qua có thể giúp tìm ra. Xa
+		hơn, trong ví dụ này chúng ta cũng có thể sử dụng nhiều method tiện ích
+		hơn. Chúng ta có thể viết như thế này:
+			
+			$('.productDescription').each(function () {
+			  console.log($(this).text());
+			});
+			
+			Red
+			Orange
+			Green
+			
+			1 lần nữa, chúng ta cần bọc phần tử DOM trong 1 jQuery instance. Chúng ta sử dụng text() method để lấy text của phần tử ra.
+	
+	jQuery .each() Delay Example
+	
+		Trong ví dụ tiếp theo, khi user click vào phần tử có ID là 5demo tất cả các item sẽ được gán thành orange ngay lập tức. Sau 1 khoảng
+		thời gian phụ thuộc vào index (0, 200, 400, … milliseconds) chúng ta sẽ fade out phần tử.
+			
+			$('#5demo').bind('click', function (e) {
+			  $('li').each(function (index) {
+				$(this).css('background-color', 'orange')
+					  .delay(index * 200)
+					  .fadeOut(1500);
+			  });
+			  e.preventDefault();
+			});

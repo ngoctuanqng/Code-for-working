@@ -1,0 +1,28 @@
+Customizing Link--React Router:
+
+		- Một điều tôi thích ở React Router là cách nó có thể kết hợp. Khái niệm này thực sự tỏa sáng khi bạn cần xây
+		dựng thành phần Liên kết tùy chỉnh của riêng mình. Vì React Router có
+		API đầu tiên của thành phần, bạn có thể soạn Liên kết giống như bạn soạn bất kỳ thành phần React nào khác.
+		- Giả sử chúng tôi muốn tạo một thành phần Liên kết tùy chỉnh “phát sáng” và thêm biểu tượng cảm xúc vào bất kỳ
+		Liên kết nào đang hoạt động. Để làm điều đó, tất cả những gì chúng ta phải làm là soạn Liên kết và sau đó
+		useLocation để lấy vị trí hiện tại của ứng dụng.
+		
+		import { useLocation } from <react-router-dom<
+		function GlowLink ({ children, to }) {
+		  const location = useLocation()
+		  const match = location.pathname === to
+		  return (
+			<span className={match ? <glow< : <<}>
+			  {match ? < < : <<}
+			  <Link to={to}>
+				{children}
+			  </Link>
+			</span>
+		  )
+		}
+		...
+		<nav>
+		  <GlowLink to=</<>Home</GlowLink>
+		  <GlowLink to=</about<>About</GlowLink>
+		  <GlowLink to=</features<>Features</GlowLink>
+		</nav>

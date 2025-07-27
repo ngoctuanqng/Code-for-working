@@ -1,0 +1,19 @@
+Pass props to Link--React Router:
+
+		- Để chuyển dữ liệu qua một thành phần Liên kết đến một tuyến đường mới, hãy sử dụng bộ phận
+		hỗ trợ trạng thái của Liên kết.
+		- Bất cứ khi nào bạn chuyển dữ liệu qua phần hỗ trợ trạng thái, dữ liệu đó sẽ có sẵn trên thuộc
+		tính trạng thái của vị trí, bạn có thể truy cập vào thuộc tính này bằng cách sử dụng useLocation Hook
+		tùy chỉnh đi kèm với React Router.
+		
+		<Link to="/onboarding/profile" state={{ from: "occupation " }}>
+		  Next Step
+		</Link>									
+		import { useLocation } from <react-router-dom<
+		function Profile () {
+		  const location = useLocation()
+		  const { from } = location.state
+		  return (
+			...
+		  )
+		}

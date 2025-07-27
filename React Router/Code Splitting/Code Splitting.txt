@@ -1,0 +1,59 @@
+Code Splitting--React Router:
+
+		- Ý tưởng rất đơn giản, đừng tải mã xuống cho đến khi người dùng cần. Người dùng của bạn không cần phải
+		tải xuống toàn bộ ứng dụng của bạn khi tất cả những gì họ cần là một phần của nó. Nếu người dùng đang tạo
+		một bài đăng mới, việc họ tải xuống tất cả mã cho tuyến đường / đăng ký là không hợp lý. Nếu người dùng đang
+		đăng ký, họ không cần trình soạn thảo văn bản đa dạng thức khổng lồ mà ứng dụng của bạn cần trên lộ
+		trình / settings. Điều đó thật lãng phí và một số người sẽ cho rằng không tôn trọng những người dùng không có đặc quyền về băng
+		thông không giới hạn. Code Splitting không chỉ trở nên phổ biến hơn trong những năm gần đây mà còn trở nên dễ dàng hơn theo cấp số nhân.
+		- Đây là cách nó hoạt động. Thay vì coi nhập như một từ khóa như bạn thường làm, bạn sử dụng nó giống như một
+		hàm trả về Lời hứa. Lời hứa này sẽ giải quyết với mô-đun sau khi mô-đun được tải hoàn toàn.
+		- Điều đặc biệt về LazyHomeComponent là React sẽ không tải nó cho đến khi nó cần, khi nó được kết xuất. Điều đó
+		có nghĩa là, nếu chúng ta kết hợp React.lazy với React Router, chúng ta có thể tạm dừng việc tải bất kỳ thành
+		phần nào cho đến khi người dùng truy cập vào một đường dẫn nhất định.
+		
+		if (editingPost === true) {
+		  import(<./editpost<)
+			.then((module) => module.showEditor())
+			.catch((e) => )
+		}
+		
+		if (editingPost === true) {
+		  import(<./editpost<)
+			.then((module) => module.showEditor())
+			.catch((e) => )
+		}
+		
+		import * as React from "react";
+		import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+		import Loading from "./Loading";
+		const Home = React.lazy(() => import("./Home"));
+		const Topics = React.lazy(() => import("./Topics"));
+		const Settings = React.lazy(() => import("./Settings"));
+		export default function App() {
+		  return (
+			<Router>
+			  <div>
+				<ul>
+				  <li>
+					<Link to="/">Home</Link>
+				  </li>
+				  <li>
+					<Link to="/topics">Topics</Link>
+				  </li>
+				  <li>
+					<Link to="/settings">Settings</Link>
+				  </li>
+				</ul>
+				<hr />
+				<React.Suspense fallback={<Loading />}>
+				  <Routes>
+					<Route path="/" element={<Home />} />
+					<Route path="/topics" element={<Topics />} />
+					<Route path="/settings" element={<Settings />} />
+				  </Routes>
+				</React.Suspense>
+			  </div>
+			</Router>
+		  );
+		}

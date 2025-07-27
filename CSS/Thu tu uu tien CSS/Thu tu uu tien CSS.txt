@@ -1,0 +1,213 @@
+Thứ tự ưu tiên CSS--CSS
+
+	Selector
+	
+		CSS có thể phân làm 6 loại
+		
+			element (Vd: div, span,...)
+			pseudo-element (Vd: :before, :after)
+			class (Vd: .class-1, .class-2,...)
+			pseudo-class (vd: :last-child, :first-child,...)
+			attibute (vd: [href], [src])
+			id (vd: #pages, #pagination,...)
+			inline style
+			universal selector (*, +, >, ~)
+			
+	Thứ tự ưu tiên
+	
+		Dù là mới nghịch css thì chắc các bạn cũng nhận ra những thứ cơ bản như thằng dưới đè thằng trên, thằng id thì lớn hơn
+		class, và thằng inline thì "dưới một người trên vạn người", hay selector càng chi tiết thì ưu tiên càng cao,... Nhưng như
+		vậy thì chẳng lẽ mỗi element lại phải có 1 id, hay file css lại toàn những đoạn selector dài đến đau mắt? Không đâu, CSS
+		quy định cho id, class,.. nhưng giá trị khác nhau, dựa vào đó, chúng ta có thể tối ưu được selector hợp lý.
+		
+		Bắt đầu với universal selector
+		
+			Point: 0 - 0 - 0
+			
+			Hiệu ứng: Là một selector có tác dụng bổ trợ (ngoại trừ *), một khi xuất hiện, nhưng selector gần nó sẽ đc liên kết
+			tuỳ theo universal selector được "triệu hồi". Nó hoàn toàn không có giá trị khi tính thứ tự ưu tiên.
+			
+			VD:
+			
+				* = 0-0-0
+				* > * = 0-0-0
+				* + * + * = 0-0-0
+				
+		Element và pseudo-element
+		
+			Point: 0 - 0 - X
+			
+			Hiệu ứng: Với mỗi element hoặc pseudo-element xuất hiện trong selector, X sẽ được tăng thêm 1 điểm.
+			
+			VD:
+				
+				div = 0-0-1
+				div div = 0-0-2
+				10 element = 0-0-10
+				
+		Class, pseudo-class và attribute
+		
+			Point: 0 - X - 0
+			
+			Hiệu ứng: Với mỗi class, pseudo-class, hoặc attibute xuất hiện trong selector, X sẽ được tăng thêm 1 điểm.
+			
+			VD:
+			
+				.list = *:first-child = [type="text"] = 0-1-0
+				div.list = li:first-child = input[type="text"] = 0-1-1
+				div input[type="text"] = 0-1-2
+				.list .items = .list.items = .item:first-child = 0-2-0
+				input[type="text"]:not(.class) = 0-2-1
+				10 class + 11 element = 0-10-11
+				
+			Chú ý: độ ưu tiên áp dụng với cả pseudo-class :not(x), nhưng nó có hơi đặc thù khi mà selector x được chọn sẽ không
+			thay đổi giá trị nhưng những selector khác x sẽ được tăng độ ưu tiên
+		
+		ID
+		
+			Point: X - 0 - 0
+			
+			Hiệu ứng: Với mỗi ID xuất hiện trong selector, X sẽ được tăng thêm 1 điểm.
+			
+		Inline style
+		
+			Point: 1 - 0 - 0 - 0
+			
+			Hiệu ứng: là dạng chỉ mặt, đặt tay rồi, thuộc hàng COCC, dưới một người trên vạn người, là một sự phiền phức, rắc rồi,
+			nhưng đôi khi vẫn phải dùng đến
+			
+		!important
+		
+			Point: 1 - 0 - 0 - 0 - 0
+			
+			Hiệu ứng: Dù chỉ là giá trị thêm trong thuộc tính của css, nhưng nó lại thuộc hàng máu mặt nhất, đứng đầu thiên hạ, hiệu
+			triệu quần hùng, một khi anh xuất hiện thì toàn dân dẹp đường cho anh thả ga chạy, một sự cucsuc không hề nhẹ
+	
+	Với Cascading Style Sheets – CSS giúp chúng ta có thể định kiểu cho bất kỳ phần tử HTML nào trên trang web. Một phần tử trên trang
+	có thể sử dụng các bộ chọn khác nhau như bộ chọn class, bộ chọn id hoặc bộ chọn
+	thẻ. Cũng có nhiều cách nhúng CSS:
+	
+		Inline (nhúng trực tiếp vào phần tử HTML bằng việc sử dụng thuộc tính style của phần tử
+		Internal (tạo các bộ chọn trực tiếp trên trang bằng cách đặt trong thẻ <style></style>
+		External (tạo file css nằm riêng và nhúng vào trang sử dụng thẻ <link> để nhúng vào trang
+	
+	Vấn đề xảy ra khi một phần tử HTML chịu tác động của nhiều bộ chọn với nhiều giá trị giống nhau ví dụ như định kiểu màu sắc
+	cho chữ, thì nó sẽ ưu tiên giá trị nào để thiết lập định kiểu cho thẻ.
+
+	Và với một website làm sao để có thể tối ưu việc thiết kế để có thể tái sử dụng lại CSS, làm cho giữa các trang web được đồng
+	nhất về giao diện và rất nhiều khía cạnh khác như tối ưu tốc độ load trang, bảo hành, bảo
+	trì được dễ dàng và hiệu quả.
+	
+	CHỒNG CHÉO CSS VÀ THỨ TỰ ƯU TIÊN
+		
+		– Sự chồng chéo xảy ra khi một đối tượng chịu tác động bởi nhiều rule khác nhau.
+		– Khi sự chồng chéo xảy ra thì thứ tự ưu tiên sẽ quyết định định dạng của đối tượng.
+		
+		Dạng chồng chéo 1
+			
+			Chồng chéo giữa các rule khác loại.
+			
+			Thứ tự ưu tiên của 4 dạng rule như sau:
+			
+			Nhận xét: Thứ tự ưu tiên tỉ lệ nghịch với phạm vi tác động. Dạng rule có phạm vi tác động càng cao thì ưu tiên càng thấp,
+			ngược lại dạng rule có phạm vi tác động càng thấp thì ưu tiên càng cao.
+			
+			Ví dụ 1.1
+			
+				Đoạn văn “Chào mừng bạn đến với khoá học CSS!” chịu tác động bởi 4 rule thuộc 4 dạng khác nhau (inline, thẻ p, class .p1,
+				id #p2). 4 rule này quy định 4 màu chữ (color) khác nhau.
+				
+					<p class="p1" id="p2" style="color:black;">Chào mừng các bạn đến với khoá học CSS!</p>
+					p{
+					  color:red;
+					}
+					.p1{
+					  color:green;
+					}
+					#p2{
+					  color:blue;
+					}
+					Kết quả: Theo bảng thứ tự ưu tiên thì màu của chữ “Chào mừng bạn đến với khoá học CSS” sẽ theo màu ưu tiên
+					của rule inline (màu black)
+					
+			Ví dụ 1.2
+			
+				Bây giờ nếu ta bỏ đi style=”color:black” (rule dạng inline) thì theo bạn kết quả sẽ như thế nào?
+	
+				Chạy trực tiếp ví dụ 1.1 bằng cách xoá dòng style=”color:black” rồi kích nút Run để xem kết quả.
+
+				Kết quả dòng chữ “Chào mừng bạn đến với khoá học CSS!” sẽ có màu theo quy định của rule dạng id #p2 (màu blue)
+			
+			Ví dụ 1.3
+				
+				Nếu ta tiếp tục bỏ đi thuộc tính id (rule dạng id)
+
+				Kết quả chữ “Chào mừng bạn đến với khoá học CSS!” sẽ có màu theo quy định của rule dạng class .p1 (màu green)
+			
+			Ví dụ 1.4
+				
+				Ta có thể sử dụng !important để tăng mức độ ưu tiên.
+					
+					<p class="p1" id="p2" style="color:black;">Chào mừng các bạn đến với khoá học CSS!</p>
+					p{
+					  color:red!important;
+					}
+					.p1{
+					  color:green;
+					}
+					#p2{
+					  color:blue;
+					}
+					
+				Với việc thêm !important vào sau giá trị màu red thì rule dạng tag, lúc này css của thẻ này có mức độ ưu tiên cao nhất.
+			
+			Ví dụ 1.5
+				
+				<p class="p1" id="p2" style="color:black!important;">Chào mừng các bạn đến với khoá học CSS!</p>
+				p{
+				  color:red!important;
+				}
+				.p1{
+				  color:green!important;
+				}
+				#p2{
+				  color:blue;
+				}
+				
+				Nhưng nếu các dạng rule đều có !important thì thứ tự ưu tiên lại theo bảng ưu tiên ở trên (inline > id > class > tag)
+		
+		Dạng chồng chéo 2
+			
+			<p class="p1">Chào mừng các bạn đến với khoá học CSS!</p>
+			.p1{
+			  color:green;
+			}
+			.p1{
+			  color:blue;
+			  background-color:#FF0;
+			}
+			
+			Trong khai báo trên thì cả 2 rule đều là dạng class và cùng tên p1. Hai rule này có thuộc tính color chồng nhau.
+			
+			Trình duyệt xử lý mã (html,css,javascript) theo thứ tự từ trái qua phải, từ trên xuống dưới nên trong trường hợp này rule
+			nào nằm sau sẽ ưu tiên hơn rule nằm trước. Do đó, màu sẽ là blue
+	
+	TỐI ƯU CSS TRONG THIẾT KẾ WEB
+		
+		Qua các ví dụ phân tích ở trên, để tạo một website chuyên nghiệp như:
+			
+			Định kiểu đồng nhất trên tất cả các trang
+			
+			Tối ưu cho việc load trang, cache cho trang web
+			
+			Tối ưu cho việc bảo trì, tái sử dụng lại CSS, v.v.
+		
+		Một số khuyến nghị:
+			
+			Nên sử dụng CSS dạng External
+			
+			Hạn chế tối đa việc định kiểu CSS dạng Inline
+			
+			Dựa theo phạm vi hoạt động của CSS dạng thẻ, id, class, inline để thiết lập các CSS cho phù hợp
+			
+			Khi public website lên Internet, cần sử dụng các công cụ nén CSS để tối ưu việc load trang

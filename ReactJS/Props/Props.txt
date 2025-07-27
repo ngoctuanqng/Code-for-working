@@ -1,0 +1,38 @@
+Props--REACTJS:
+
+					- Chú ý props luôn luôn là 1 object duy nhất, khi gọi component và truyền đối số vào thì đối số đó chính là thuộc tính của object duy nhất đó
+					
+	props.children:
+	
+					- props.children là một thuộc tính đặc biệt của props trong React, chứa tất cả các phần tử con được bao bọc bên trong một component khi nó được sử dụng.
+					- Nó cho phép các component trở thành "containers" (bao chứa) và chứa các phần tử con mà không cần biết trước những phần tử con đó là gì.
+					
+		Ví dụ:
+
+					function Box(props) {
+					  return (
+						<div className="box">
+						  {props.children}
+						</div>
+					  );
+					}
+					
+					function App() {
+					  return (
+						<div>
+						  <Box>
+							<h1>Hello, World!</h1>
+							<p>This is a simple example of using props.children in React.</p>
+						  </Box>
+						</div>
+					  );
+					}
+					
+					Kết quả sẽ là:
+					
+						<div>
+						  <div class="box">
+							<h1>Hello, World!</h1>
+							<p>This is a simple example of using props.children in React.</p>
+						  </div>
+						</div>

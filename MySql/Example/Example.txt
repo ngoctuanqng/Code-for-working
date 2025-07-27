@@ -1,0 +1,897 @@
+Example--MySQL:
+
+		- Chú ý trong cùng 1 bảng mỗi lần chạy chỉ qua 1 row duy nhất
+		- Code chạy từ FROM trước, cuối cùng mới đến SELECT
+		- Chú ý khi table a có 3 row, table b có 3 row, thì khi FROM a, b sẽ tạo ra table có 3 x 3 = 9 row, có thể xem là từ 1 row của bảng a chiếu lần lượt với từng row của bảng b tạo thành
+		3 row, nếu từ bảng b chiếu ngược lại đến bảng a thì cũng thành 3 row đó, nên để dễ hình dung cứ lấy theo bảng a là base rồi nối đến bảng b
+		- Bản chất các thao tác được thực hiện trên tên của cột trong bảng, riêng FROM là theo table
+		- Đã dùng group by thì sẽ nhóm cùng giá trị về 1 row
+		- Bất kỳ một cột hay biểu thức trong danh sách của SELECT không phải là hàm nhóm dữ liệu thì phải có mệnh đề GROUP BY (nếu không có thì trong 1 group by của 1 cột sẽ có nhiều
+		giá trị của một cột SELECT khác mà không có group by, lúc đó tạo nên nhiều row với các giá trị khác nhau phá vỡ nguyên tắc group by)													
+		- Aggregate Functions thường được sử dụng để tính toán trên một tập hợp các hàng và trả về một giá trị duy nhất.
+		- Window Functions cho phép bạn thực hiện tính toán trên một tập hợp các hàng trong một phạm vi cửa sổ được xác định, không làm thay đổi số lượng các hàng.
+		- Chuỗi dùng '' thay vì ""
+		- Điều kiện P1.id <> P1.id sẽ luôn là FALSE, vì nó so sánh một giá trị với chính nó. Do đó, không có bản ghi nào sẽ được loại bỏ. Câu truy vấn đang cố gắng so sánh email của
+		mỗi người trong cùng bảng Person (P1) với tất cả các người khác trong cùng bảng, nhưng không phải là với chính họ (vì điều kiện P1.id <> P2.id đã bị loại bỏ). Có thể hiểu
+		là nó sẽ lặp qua từng row, khi cùng 1 bảng thì nó sẽ là cùng 1 row, nên cần thêm 1 bảng nữa để khi lặp có thể với 2 row khác nhau
+		- WHERE (product_id, change_date) in...nếu một cặp (product_id, change_date) trong bảng chính khớp với một cặp (product_id, change_date) trong kết quả của câu truy vấn con,
+		thì hàng đó sẽ được bao gồm trong kết quả cuối cùng của truy vấn.
+		- khi bạn kiểm tra CONCAT(:projectNumber) IS NULL, bạn đang kiểm tra xem danh sách projectNumber có rỗng hoặc null không.
+		- Các hàm như SUM...thì sẽ tính dựa theo kết quả của nhiều row nên bắt buộc phải dùng chung với group by (window function) hoặc over (Aggregation)
+		- Với join thì phần trùng là cấp nhân
+		- Khi sử dụng 2 bảng trong mệnh đề FROM, SQL sẽ thực hiện một CROSS JOIN theo mặc định. Điều này có nghĩa là nó sẽ tạo ra một kết quả là tích Descartes của hai bảng, tức là nó sẽ kết hợp mọi
+		hàng từ bảng này với mọi hàng từ bảng kia.
+		- Trong sql thì (a, b) in (c, d) để true thì a = c và b = d
+		- Toán tử UNION được sử dụng để kết hợp tập hợp kết quả của hai hoặc nhiều câu lệnh SELECT. Mỗi câu lệnh SELECT với UNION phải có cùng số lượng cột, các cột phải có cùng kiểu dữ liệu, các cột
+		trong mỗi câu lệnh SELECT phải có cùng trật tự.
+		- Chú ý mỗi lần select thì chỉ chạy trên 1 row duy nhất của kết quả sau khi đã from, where
+		- Thứ tự thực hiện FROM -> WHERE -> GROUP BY -> SELECT -> HAVING -> ORDER BY
+		- Cứ mỗi lần group by thì sẽ gom nhóm các row có cùng giá trị về 1 row duy nhất
+		- Khóa ngoại sẽ nằm trong bảng Many và sẽ tham chiếu đến khóa chính của bảng One. Bằng cách đặt khóa ngoại ở bảng Many (Orders), chúng ta có thể liên kết mỗi đơn hàng với một khách hàng
+		cụ thể, nhưng mỗi khách hàng có thể có nhiều đơn hàng.
+
+	Second Highest Salary--MySQL example:
+	
+						Sắp xếp salary theo thứ tự giảm dần rồi mình select giá trị thứ 2 trong đó, dùng hàm IFNULL để kiểm tra xem giá trị thứ 2 sau khi sắp xếp có hay không, nếu không (đồng nghĩa
+						với biểu thức ở tham số thứ 1 của IFNULL là null) thì giá trị thay thế của nó sẽ là null
+						
+						SELECT
+						IFNULL(
+						  (SELECT DISTINCT Salary // distinct ở đây có tác dụng nếu có lương trùng thì chỉ lấy 1 cái
+						   FROM Employee
+						   ORDER BY Salary DESC
+							LIMIT 1 OFFSET 1), // OFFSET 1 ở đây nghĩa là lấy từ phần từ thứ 2, LIMIT 1 là chỉ lấy duy nhất kết quả đấy
+						NULL) AS SecondHighestSalary
+												
+	Movie Rating--MySQL example:
+	
+						- Hoàn lại tên của user trong bảng Users đánh giá các phim nhiều nhất, nếu trùng số lượng đánh giá thì lấy tên đứng trước trong bảng chữ cái
+						- Tìm tên phim có đánh giá trung bình vào Feb 2020 cao nhất, nếu trùng giá trị trung bình thì lấy tên đứng trước trong bảng chữ cái
+						- Tính từng trường hợp rồi sử dụng UNION ALL để kết hợp 2 kết quả vào trong 1 bảng. Dùng LIKE để lặp ngày theo yêu cầu, tính với kết quả mong muốn rồi sắp xếp theo thứ tự
+						giảm dần, dùng giới hạn để chỉ lấy 1 phần tử đầu tiên của kết quả, đó là phần tử lớn
+						- Khi sử dụng toán tử UNION trong SQL, kết quả sẽ được ghép theo thứ tự cột của truy vấn đầu tiên. Điều này có nghĩa là tên cột và kiểu dữ liệu của kết quả sẽ giống với truy
+						vấn đầu tiên trong phép UNION. Các truy vấn sau đó cũng phải tuân thủ cùng số lượng cột và kiểu dữ liệu.												
+						
+						(Select u.name as results
+						from MovieRating as m, Users as u
+						where u.user_id = m.user_id
+						Group By m.user_id // Group By và Order By đi chung 1 cặp ở đây để thực hiện việc count theo user_id
+						Order by count(m.user_id) desc, u.name limit 1)
+						union all
+						(Select m.title as results
+						from MovieRating as r, Movies as m
+						where m.movie_id = r.movie_id 
+						and r.created_at like "2020-02-%"
+						Group By r.movie_id  // Group By và Order By đi chung 1 cặp ở đây để thực hiện việc tính trung bình rating theo theo movie_id
+						Order by avg(r.rating) desc, m.title limit 1);
+												
+	Top Travellers--MySQL example:
+	
+						- Liệt kê các tên với tổng khoảng cách lớn nhất, nếu cùng khoảng cách thì sắp theo tên
+						- Lựa chọn 1 cột theo tên, 1 cột để tính tổng distance với việc lặp qua distance với IFNULL phía trong dùng SUM OVER, nếu khác NULL thì trả về giá trị đó, nếu NULL thì trả
+						về 0, dùng RIGHT JOIN để lọc điều kiện 2 id (id của Users và user_id của Rides) của 2 table bằng nhau, cuối cùng sắp xếp với ORDER BY theo distance giảm, tiếp theo sẽ
+						theo name tăng
+						- SUM(distance) OVER (PARTITION BY user_id): Đây là một cửa sổ (window) function trong SQL. Nó tính tổng (SUM) của cột distance dựa trên một phân vùng được xác định bởi
+						PARTITION BY user_id. Cụ thể, nó tính tổng distance cho mỗi user_id riêng biệt. Chú ý nó thực hiện trong SELECT nên sẽ chạy sau khi các câu lệnh khác thực thi. Tạo
+						thành 1 row duy nhất
+						
+						SELECT DISTINCT u.name, // lựa chọn chỉ 1 tên không bị trùng các kết quả
+						IFNULL(SUM(distance) OVER (PARTITION BY user_id), 0) as travelled_distance // tổng khoảng cách lặp thông qua user_id
+						FROM Rides r 
+						RIGHT JOIN Users u // RIGHT JOIN là Users để lấy tất cả distance của user 
+							ON r.user_id = u.id // điều kiện để match JOIN là  id 2 bảng bằng nhau
+						ORDER BY travelled_distance DESC, name // sắp xếp giảm theo khoảng cách, sau đó tăng theo tên
+												
+	Average Selling Price--MySQL example:
+	
+						- Tính tổng trung bình giá
+						
+						SELECT u.product_id,
+							   ROUND(SUM(p.price * u.units) / SUM(u.units), 2) AS average_price// SUM theo group by, p.price * u.units mỗi đợt chỉ thực hiện trên 1 row
+						FROM unitssold u 
+						JOIN prices p ON p.product_id = u.product_id AND u.purchase_date BETWEEN p.start_date AND p.end_date // lọc thành 1 bảng với điều kiện được thỏa bởi on
+						GROUP BY u.product_id // nhóm lại để phục vụ cho phần select
+												
+	Capital Gain/Loss--MySQL example:
+	
+												- Lựa chọn theo nhóm tên với sell là cộng, buy thì trừ thông qua hàm sum kết hợp với group by hoặc sum với over
+				
+		Aggregation (GROUP BY):
+		
+												SELECT stock_name,
+													   SUM(CASE WHEN operation = 'Sell' THEN price
+														   ELSE -price END) AS capital_gain_loss
+												FROM Stocks
+												GROUP BY stock_name
+												
+		Window Function (SUM OVER):
+		
+												SELECT DISTINCT stock_name, 
+													   SUM(CASE WHEN operation = 'Sell' THEN price ELSE -price END)
+													   OVER(PARTITION BY stock_name) AS capital_gain_loss
+												FROM Stocks
+												
+	Replace Employee ID With The Unique Identifier--MySQL example:
+	
+												Lựa chọn dùng JOIN theo bảng của Employees (vì kết quả bảng này có đầy đủ theo mong đợi) với điều kiện ON là id 2 bảng bằng nhau
+												
+												select eu.unique_id as unique_id, e.name as name
+												from Employees e left join EmployeeUNI eu on e.id = eu.id
+												
+	Find Users With Valid E-Mails--MySQL example:
+	
+												Sử dụng REGEXP để lọc các điều kiện của tên
+												
+												SELECT *
+												FROM Users
+												WHERE mail REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$';
+												
+	Product Sales Analysis I--MySQL example:
+	
+												SELECT các cột cần thiết rồi cuối cùng lựa chọn với điều kiện ON của JOIN là giá trị product_id ở 2 bảng là bằng nhau, chú ý kết quả không có SAMSUNG nên không thể lấy
+												Product Table làm bảng JOIN gốc
+												
+												SELECT P.product_name ,S.year  ,S.price 
+												FROM Sales  S
+												LEFT JOIN Product P // LEFT JOIN để lấy tất cả các data của Sales
+												ON S.product_id = P.product_id
+												
+	Product Price at a Given Date--MySQL example:
+	
+												- Cái này yêu cầu tìm giá sản phẩm vào ngày 16/08/2019, nếu giá sản phẩm có cái nào chỉ có sau ngày 16 thì lấy giá trị là 10, nếu cái nào từ 16 trở về trước thì lấy cái nào
+												có ngày lớn nhất tính từ ngày 16 trở về trước.
+												- Chỗ này chưa rõ sao phải có GROUP BY product_id thì mới chạy đúng kết quả
+												
+												select distinct product_id, 10 as price
+												from Products
+												where product_id not in(select distinct product_id from Products where change_date <='2019-08-16' )
+												union 
+												select product_id, new_price as price
+												from Products
+												where
+													(product_id,change_date) in (select product_id , max(change_date) as date from Products where change_date <='2019-08-16' group by product_id)
+													
+	findWorkingTime--MySQL example:
+	
+												- Chú ý nhiều WHEN khác nhau trong 1 CASE
+												- CASE WHEN THEN sẽ trả về 1 kết quả theo WHEN, ta có thể để nó vào trong AND để check điều kiện
+	
+												@Query(value =
+														"SELECT A.*" +
+																", E.NAME" +
+																", E.PHOTO" +
+																", CASE WHEN  E.START_WORKING_TIME IS NULL OR  E.START_WORKING_TIME = '' THEN 0 " +
+																		"ELSE E.START_WORKING_TIME END AS START_WORKING_TIME " +
+																"FROM tb_pme00_working_time AS A " +
+																"JOIN tb_m00_employee AS E " +
+																"ON A.EMP_ID = E.EMP_ID " +
+																"WHERE 1=1 " +
+																"AND (:empId IS NULL OR :empId = '' OR A.EMP_ID = :empId) " +
+																"AND (:fromDate IS NULL OR A.REGISTER_DATE >= :fromDate) " +
+																"AND (:toDate IS NULL OR A.REGISTER_DATE <= :toDate) " +
+																"AND (:fromArrive IS NULL OR DATE_FORMAT(A.ARRIVE_TIME, '%H:%i:%s') >= :fromArrive) " +
+																"AND (:toArrive IS NULL OR DATE_FORMAT(A.ARRIVE_TIME,'%H:%i:%s') <= :toArrive) " +
+																"AND (:fromLeave IS NULL OR DATE_FORMAT(A.LEAVE_TIME, '%H:%i:%s') >= :fromLeave) " +
+																// on time
+																"AND CASE WHEN :status = 1 then " +
+																	"(A.ARRIVE_TIME is not NULL AND A.LEAVE_TIME is not NULL) \n" +
+																	"AND ((HOUR(A.ARRIVE_TIME) = E.START_WORKING_TIME AND MINUTE(A.ARRIVE_TIME) = 0) \n" +
+																	"OR (HOUR(A.ARRIVE_TIME) < E.START_WORKING_TIME)) \n" +
+																	"AND ((E.START_WORKING_TIME = 8 AND HOUR(A.LEAVE_TIME) >= 17) \n" +
+																	"OR (E.START_WORKING_TIME = 7 AND HOUR(A.LEAVE_TIME) >= 16))\n" +
+																//late time
+																"WHEN  :status = 2 THEN " +
+																	"((A.ARRIVE_TIME is NULL OR A.LEAVE_TIME is null) \n" +
+																	"OR (HOUR(A.ARRIVE_TIME) = E.START_WORKING_TIME AND MINUTE(A.ARRIVE_TIME) > 0) \n" +
+																	"OR (HOUR(A.ARRIVE_TIME) > E.START_WORKING_TIME)\n" +
+																	"OR (E.START_WORKING_TIME = 8 AND HOUR(A.LEAVE_TIME) < 17) \n" +
+																	"OR (E.START_WORKING_TIME = 7 AND HOUR(A.LEAVE_TIME) < 16))\n" +
+																"WHEN :status = 0 THEN \n" +
+																	"1=1\n" +
+																"END \n" +
+																"AND (:toLeave IS NULL OR DATE_FORMAT(A.LEAVE_TIME,'%H:%i:%s') <= :toLeave)",
+														nativeQuery = true)
+												List<Object[]> findWorkingTime(@Param("empId") String empId,
+																			   @Param("fromDate") Date fromDate, @Param("toDate") Date toDate,
+																			   @Param("fromArrive") String fromArrive, @Param("toArrive") String toArrive,
+																			   @Param("fromLeave") String fromLeave, @Param("toLeave") String toLeave, @Param("status") Integer status, Pageable pageable);
+	
+	findDailyReport--MySQL example:
+	
+												- Trong SQL, câu lệnh CONCAT thường được sử dụng để nối các chuỗi. Khi áp dụng CONCAT vào một danh sách các giá trị, nó sẽ nối tất cả các giá trị trong danh sách lại với
+												nhau thành một chuỗi duy nhất.
+												- Tuy nhiên, nếu danh sách đó là một danh sách rỗng hoặc null, kết quả của CONCAT sẽ là null. Do đó, khi bạn kiểm tra CONCAT(:projectNumber) IS NULL, bạn đang kiểm tra
+												xem danh sách projectNumber có rỗng hoặc null không.
+	
+												@Query(value =
+														"SELECT\n" +
+																" DR.SEQ,\n" +
+																" DR.EMPLOYEE_ID,\n" +
+																" DR.REGISTER_DATE,\n" +
+																" DR.PROJECT_NUMBER,\n" +
+																" DR.CONTENTS,\n" +
+																" DR.REMARKS,\n" +
+																" DR.ATTC_FILE_NM,\n" +
+																" DR.OP_SAT_DT,\n" +
+																" DR.OP_DN_DT,\n" +
+																" DR.CREATION_TIMESTAMP,\n" +
+																" DR.LAST_UPDATE_TIMESTAMP,\n" +
+																" DR.STATUS,\n" +
+																" EMP.NAME as empName,\n" +
+																" EMP.PHOTO\n" +
+																"FROM\n" +
+																"tb_m99_daily_report AS DR\n" +
+																"JOIN tb_m00_employee AS EMP\n" +
+																"ON DR.EMPLOYEE_ID = EMP.EMP_ID\n" +
+																"WHERE 1= 1\n" +
+																"AND (:employeeId IS NULL OR DR.EMPLOYEE_ID = :employeeId)\n" +
+																"AND CASE \n" +
+																"WHEN COALESCE(:projectNumber) IS NOT NULL \n" +
+																"THEN DR.PROJECT_NUMBER IN (:projectNumber) \n" +
+																"WHEN CONCAT(:projectNumber) IS NULL \n" +
+																"THEN DR.PROJECT_NUMBER LIKE '%%' OR DR.PROJECT_NUMBER IS NULL \n" +
+																"END \n" +
+																"AND ((:fromDate IS NULL) OR (DR.REGISTER_DATE >= :fromDate))\n" +
+																"AND ((:toDate IS NULL) OR  (DR.REGISTER_DATE <= :toDate))" +
+																"AND ((:contents IS NULL) OR (DR.CONTENTS LIKE CONCAT('%', :contents, '%')))\n" +
+																"AND ((:remarks IS NULL) OR (DR.REMARKS LIKE CONCAT('%', :remarks, '%')))\n"
+														, nativeQuery = true)
+												List<Object[]> findDailyReport(@Param("employeeId") String employeeId,
+																			   @Param("projectNumber") List<String> projectNumber,
+																			   @Param("fromDate") Date fromDate,
+																			   @Param("toDate") Date toDate,
+																			   @Param("contents") String contents,
+																			   @Param("remarks") String remarks,
+																			   Pageable pageable);
+	
+	searchPmeEmployee--MySQL example:
+					
+												@Query(value = "SELECT E.*\n" +
+														",E1.NAME AS CREATE_USER_NAME\n" +
+														",E1.PHOTO AS CREATE_USER_PHOTO\n" +
+														",CODE1.CD_V_MEANING AS SITE\n" +
+														",CODE2.CD_V_MEANING AS STATUS\n" +
+														" FROM\n" +
+														" TB_M00_EMPLOYEE AS E\n" +
+														" JOIN TB_M00_CODES030 CODE1\n" +
+														" ON CODE1.CD_V = E.SITE_CODE \n" +
+														" JOIN TB_M00_CODES030 CODE2\n" +
+														" ON CODE2.CD_V = E.EMP_STATUS \n" +
+														" LEFT JOIN TB_M00_EMPLOYEE AS E1\n" +
+														" ON E.CREATE_BY = E1.EMP_ID \n" +
+														" JOIN TB_M00_CODES030 CODE3 \n" +
+														" ON CODE3.CD_V = E.GENDER\n" +
+														" WHERE 1=1\n" +
+														" AND CODE1.CD_TP_ID = 51" +
+														" AND CODE2.CD_TP_ID = 99" +
+														" AND CODE3.CD_TP_ID = 68" +
+														" AND (:siteAll = TRUE OR (CODE1.CD_V_EXPLAIN IN (:site)))" +
+														" AND (:status IS NULL OR :status = '' OR (CODE2.CD_V =:status))" +
+														" AND (:name IS NULL OR :name = '' OR (E.NAME =:name))" +
+														" AND (:empId IS NULL OR :empId = '' OR (E.EMP_ID =:empId))" +
+														" AND (:joinDateFrom IS NULL OR (select tmp.JD  from (" +
+														"                                      SELECT CAST(E4.JOIN_DATE AS DATE) as JD" +
+														"                                             ,E4.emp_id as id " +
+														"                                      FROM TB_M00_EMPLOYEE as E4) as tmp " +
+														"                                            where" +
+														"                                                tmp.JD >= :joinDateFrom and tmp.id = E.emp_id) >=:joinDateFrom)\n" +
+														" AND (:joinDateTo IS NULL OR (select tmp.JD" +
+														"                                 from (" +
+														"                                      SELECT CAST(E5.JOIN_DATE AS DATE) as JD" +
+														"                                             ,E5.emp_id as id " +
+														"                                      FROM" +
+														"                                          TB_M00_EMPLOYEE as E5) as tmp " +
+														"                                      where tmp.JD <= :joinDateTo and tmp.id = E.emp_id) <=:joinDateTo)\n" +
+														" AND (:genderAll = TRUE OR (CODE3.CD_V IN (:gender))) \n" +
+														" AND (:birthdayAll = TRUE OR (SELECT SUBSTRING(E2.BIRTH_DATE, 5, 2) AS tmp " +
+														"                                    FROM" +
+														"                                        TB_M00_EMPLOYEE E2 " +
+														"                                    where" +
+														"                                        E2.emp_id = E.emp_id) IN (:birthday)) \n" +
+														" AND (:mobile is NULL OR :mobile= '' OR (E.MOBILE LIKE CONCAT('%', :mobile, '%'))) \n" +
+														" AND (:address is NULL OR :address = '' OR (E.ADDRESS LIKE CONCAT('%', :address, '%'))) \n" +
+														" ORDER BY E.EMP_ID\n"
+														, nativeQuery = true)
+												List<Object[]> searchPmeEmployee(@Param("siteAll") boolean siteAll,
+																				 @Param("site") List<String> site,
+																				 @Param("status") String status,
+																				 @Param("name") String name,
+																				 @Param("empId") String empId,
+																				 @Param("joinDateFrom") Date joinDateFrom,
+																				 @Param("joinDateTo") Date joinDateTo,
+																				 @Param("genderAll") boolean genderAll,
+																				 @Param("gender") List<String> gender,
+																				 @Param("birthdayAll") boolean birthdayAll,
+																				 @Param("birthday") List<String> birthday,
+																				 @Param("mobile") String mobile,
+																				 @Param("address") String address);
+	
+	getMediaList--MySQL example:
+	
+												@Query(value = "select * \n" +
+														"from TB_CMS06_MEDIA \n" +
+														"where 1=1 \n" +
+														"  AND (ID = :id or :id = 0) \n" +
+														"  AND NAME like %:name% \n" +
+														"  AND (CREATE_BY  = :createBy or :createBy = '') \n" +
+														"  AND ((TO_CHAR(CREATE_AT , 'YYYY-MM-DD')  between :fromDate and :toDate ) \n" +
+														"  or (:fromDate = '' and :toDate = '') \n" +
+														"  or(:fromDate <> '' and :toDate = '' and (TO_CHAR(CREATE_AT , 'YYYY-MM-DD')  >= :fromDate ) ) \n" +
+														"  or(:fromDate = '' and :toDate <> '' and (TO_CHAR(CREATE_AT , 'YYYY-MM-DD')  <= :toDate ) )) \n" +
+														"  AND (COALESCE(:types) IS NULL or `TYPE` in (:types)) \n" +
+														"  AND (STATUS = :status or :status = -1) \n" +
+														"  AND (COALESCE(:categoryIds) IS NULL or CATEGORY_ID in (:categoryIds))"
+														, nativeQuery = true)
+												List<Cms06MediaJpo> getMediaList(
+														@Param("id") Integer id,
+														@Param("name") String name,
+														@Param("fromDate") String fromDate,
+														@Param("toDate") String toDate,
+														@Param("createBy") String createBy,
+														@Param("status") Integer status,
+														@Param("types") List<Integer> types,
+														@Param("categoryIds") List<String> categoryIds);
+														
+	Another example--MySQL example:
+	
+		Example 1:
+		
+							
+							- union để nối các kết quả ở vị trí tương ứng lại với nhau
+							
+							select distinct product_id, 10 as price
+							from Products
+							group by product_id
+							having (min(change_date) > "2019-08-16")
+							union
+							select p2.product_id, new_price
+							from Products p2
+							where (p2.product_id, p2.change_date) in
+							(
+							select product_id, max(change_date) as recent_date
+							from Products
+							where change_date <= "2019-08-16"
+							group by product_id
+							)
+							
+		Example 2:
+		
+							- tạo các select con để tạo thành các table để sử dụng
+							
+							SELECT distinct a.product_id,ifnull(temp.new_price,10) as price 
+							FROM products as a
+							LEFT JOIN
+							(SELECT * 
+							FROM products 
+							WHERE (product_id, change_date) in (select product_id,max(change_date) from products where change_date<="2019-08-16" group by product_id)) as temp
+							on a.product_id = temp.product_id;
+		
+		Example 3:
+		
+							- lựa chọn 3 bảng để có thể cùng 1 select với 3 row khác nhau, với điều kiện where bên dưới thì sẽ là 3 row liên tiếp
+							
+							select distinct log1.num as ConsecutiveNums
+							from logs as log1, logs as log2, logs as log3
+							where
+								(log1.id + 1 = log2.id and log1.id + 2 = log3.id)
+								and log1.num = 1 and log2.num = 1 and log3.num = 1
+		Example 4:
+		
+							- đếm vị trí xuất hiện cao nhất nếu là requester_id, accepter_id
+		
+							select requester_id as id,
+								(select count(*) from RequestAccepted  where (requester_id = id or accepter_id = id)) as num
+							from RequestAccepted
+							group by requester_id
+							union 
+							select accepter_id as id,
+								(select count(*) from RequestAccepted  where (requester_id = id or accepter_id = id)) as num
+							from RequestAccepted
+							group by accepter_id
+							order by num desc limit 1;
+		
+		Example 5:	
+		
+							select requester_id as id,
+								(select count(*) from RequestAccepted  where (requester_id = id or accepter_id = id)) as num
+							from RequestAccepted
+							group by requester_id
+							union 
+							select accepter_id as id,
+								(select count(*) from RequestAccepted  where (requester_id = id or accepter_id = id)) as num
+							from RequestAccepted
+							group by accepter_id
+							order by num desc limit 1;
+		
+		Example 6:
+
+							- tạo bảng mới nhóm theo player_id, rồi lấy ngày sớm nhất, rồi lọc nó với bảng cũ
+		
+							SELECT ROUND(COUNT(t2.player_id)/COUNT(t1.player_id),2) AS fraction
+							FROM
+							(SELECT player_id, MIN(event_date) AS first_login FROM Activity GROUP BY player_id) t1
+							LEFT JOIN Activity t2
+							ON t1.player_id = t2.player_id AND t1.first_login = t2.event_date - 1
+		
+		Example 7:
+		
+							- tạo bảng mới, chú ý phạm vi của từng select
+							- Nếu có bất kỳ cặp nào (player_id, ngày 1 ngày trước event_date) xuất hiện trong tập kết quả của truy vấn con, thì nó sẽ được coi là "true" (đúng).
+							
+							SELECT
+							  ROUND(COUNT(DISTINCT player_id) / (SELECT COUNT(DISTINCT player_id) FROM Activity), 2) AS fraction
+							FROM
+							  Activity
+							WHERE
+							  (player_id, DATE_SUB(event_date, INTERVAL 1 DAY))
+							  IN (
+								SELECT player_id, MIN(event_date) AS first_login FROM Activity GROUP BY player_id
+							  )
+		
+		Example 8:		
+		
+							Select m.name
+							from employee as e
+							inner join employee as m on e.managerId=m.id
+							group by e.managerId 
+							having count(e.id)>=5
+		
+		Example 9:
+		
+							- tạo bảng con để lấy id với đúng điều kiện rồi kiểm tra id có chứa trong đó không
+							
+							select name from employee 
+							where id in 
+							(select managerId from Employee
+							group by managerId
+							having count(managerId)>=5)
+		
+		Example 10:
+		
+							- Mỗi lần SELECT là sẽ theo từng row của table trong FROM
+							- Vì CNT1, CNT2 có nằm trong bảng TBL nên có thể sử dụng cho điều kiện WHERE CNT1 >= 2 AND CNT2 = 1
+							- Mỗi cột CNT1, CNT2 sẽ count theo từng PARTITION BY khác nhau
+							
+							SELECT ROUND(SUM(TIV_2016),2) AS TIV_2016
+							FROM
+							(SELECT *,
+							COUNT(*) OVER(PARTITION BY TIV_2015) AS CNT1,
+							COUNT(*) OVER(PARTITION BY LAT, LON) AS CNT2
+							FROM INSURANCE
+							) AS TBL
+							WHERE CNT1 >= 2 AND CNT2 = 1
+		
+		Example 11:	
+		
+							- lựa chọn theo điều kiện select
+							
+							select sum(TIV_2016) TIV_2016
+							from insurance a
+							where 1 = (select count(*) from insurance b where a.LAT=b.LAT and a.LON=b.LON) 
+							and 1 < (select count(*) from insurance c where a.TIV_2015=c.TIV_2015)
+		
+		Example 12:
+		
+							- id ở đây là alias
+							- câu lệnh OVER() không đi kèm với bất kỳ phân vùng nào, điều này có nghĩa là lặp qua 1 lần nguyên table
+							
+							SELECT ROW_NUMBER() OVER() id, student
+							FROM seat
+							ORDER BY IF(MOD(id, 2) = 0, id-1, id+1)
+		
+		Example 13:
+		
+							- id mod 2=0: id này lấy theo bảng seat ở from seat
+							
+							if(id < (select count(*) from seat), if(id mod 2=0, id-1, id+1), if(id mod 2=0, id-1, id)) as id, student
+							from seat
+							order by id asc;
+		
+		Example 14:
+		
+							- from nhiều bảng khác nhau từ 1 bảng base là Seat
+							
+							/* get all the even numbered rows as odd numbered rows */
+							SELECT s1.id - 1 as id, s1.student
+							FROM Seat s1
+							WHERE s1.id MOD 2 = 0
+							UNION
+							/* get all the odd numbered rows as even numbered rows */
+							SELECT s2.id + 1 as id, s2.student
+							FROM Seat s2
+							WHERE s2.id MOD 2 = 1 AND s2.id != (SELECT MAX(id) FROM Seat)
+							/* Just don't get the last row as we will handle it in the next UNION */
+							UNION
+							/* get the last row if odd and don't change the id value */
+							SELECT s3.id, s3.student
+							FROM Seat s3
+							WHERE s3.id MOD 2 = 1 AND s3.id = (SELECT MAX(id) FROM Seat)
+							/* Order the result by id */
+							ORDER BY id ASC;
+		
+		Example 15:
+		
+							- lựa chọn theo điều kiện having của group by
+							
+							select customer_id
+							from customer c
+							group by customer_id
+							having count(distinct product_key)=(select count(distinct product_key) from product)
+		
+		Example 16:
+		
+							SELECT customer_id FROM Customer GROUP BY customer_id
+							HAVING COUNT(distinct product_key) = (SELECT COUNT(product_key) FROM Product)
+		
+		Example 17:
+		
+							- tạo bảng con với select dùng group by
+							
+							SELECT product_id, year AS first_year, quantity, price
+							FROM Sales
+							WHERE (product_id, year) IN (
+							SELECT product_id, MIN(year) as year
+							FROM Sales
+							GROUP BY product_id)
+		
+		Example 18:	
+		
+							SELECT product_id, year AS first_year, quantity, price
+							FROM Sales
+							WHERE (product_id, year) in (
+								SELECT product_id, MIN(year) 
+								FROM Sales
+								GROUP BY product_id
+							)
+		
+		Example 19:
+		
+							select product_id, year as first_year, quantity, price
+							from(
+							select *,
+							rank() over(partition by product_id order by year) as year_rnk
+							from sales) as tbl
+							where year_rnk = 1
+		
+		Example 20:
+		
+							- join bảng rồi group by để select
+							
+							SELECT u.user_id AS buyer_id, join_date, 
+							IFNULL(COUNT(order_date), 0) AS orders_in_2019 
+							FROM Users as u
+							LEFT JOIN
+							Orders as o
+							ON u.user_id = o.buyer_id
+							AND YEAR(order_date) = '2019'
+							GROUP BY u.user_id
+		
+		Example 21:
+							
+							- đọc từ from thay vì select để dễ hình dung hơn
+							
+							CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+							BEGIN
+							SET N = N-1;
+							  RETURN (
+								  SELECT DISTINCT(salary) from Employee order by salary DESC
+								  LIMIT 1 OFFSET N
+								  
+							  );
+							END
+		
+		Example 22:
+		
+							- having là để lọc cho aggregate function
+							- chú ý code đi từ from đầu tiên
+							- lọc theo điều kiện lấy giá trị đầu tiên của bảng đầu tiên có turn lớn hơn các turn mà có tổng weight nhỏ hơn 1000
+							- đầu tiên tạo thành bảng từ from và join, từ bảng đó thì mới tiếp tục group by rồi having sum để lọc tiếp thành bảng cuối cùng
+							- GROUP BY được dùng để sử dụng cho mệnh đề having
+							
+							SELECT q1.person_name
+							FROM Queue q1
+							JOIN Queue q2 ON q1.turn >= q2.turn
+							GROUP BY q1.turn
+							HAVING SUM(q2.weight) <= 1000
+							ORDER BY SUM(q2.weight) DESC
+							LIMIT 1
+
+		Example 23:
+		
+							- vì 2 bảng a, b nằm trong from nên có thể sử dụng với điều kiện WHERE DATEDIFF(a.visited_on, b.visited_on) BETWEEN 0 AND 6
+							- WHERE DATEDIFF(a.visited_on, b.visited_on) BETWEEN 0 AND 6: với chỉ điều kiện sau sẽ cho ra rất nhiều row, vậy nên ta cần kết hợp với having để lọc row
+							- aggregate function trong having dựa vào kết quả của group by
+							- GROUP BY cuối cùng chủ yếu để sử dụng cho mệnh đề having
+							
+							SELECT a.visited_on AS visited_on, SUM(b.day_sum) AS amount,
+								   ROUND(AVG(b.day_sum), 2) AS average_amount
+							FROM
+							  (SELECT visited_on, SUM(amount) AS day_sum FROM Customer GROUP BY visited_on ) a,
+							  (SELECT visited_on, SUM(amount) AS day_sum FROM Customer GROUP BY visited_on ) b 
+							WHERE DATEDIFF(a.visited_on, b.visited_on) BETWEEN 0 AND 6
+							GROUP BY a.visited_on
+							HAVING COUNT(b.visited_on) = 7
+		
+		Example 24:
+		
+							- sau khi from từ bảng cha thực hiện xong sẽ cho ra kết quả là 1 bảng dựa từ bảng cha với số row đã được lọc, rồi select trong bảng con có thể sử dụng from từ bảng cha để sử
+							dụng. Điều này là đúng về mặt dữ liệu vì về bản chất sau from và where thực hiện xong cũng sẽ là chính bảng đó mà lọc bớt row
+							- WHERE visited_on BETWEEN DATE_SUB(c.visited_on, INTERVAL 6 DAY) AND c.visited_on: bảng con có thể sử dụng dữ liệu trong bảng cha
+							
+							SELECT
+								visited_on,
+								(
+									SELECT SUM(amount)
+									FROM customer
+									WHERE visited_on BETWEEN DATE_SUB(c.visited_on, INTERVAL 6 DAY) AND c.visited_on
+								) AS amount,
+								ROUND(
+									(
+										SELECT SUM(amount) / 7
+										FROM customer
+										WHERE visited_on BETWEEN DATE_SUB(c.visited_on, INTERVAL 6 DAY) AND c.visited_on
+									),
+									2
+								) AS average_amount
+							FROM customer c
+							WHERE visited_on >= (
+									SELECT DATE_ADD(MIN(visited_on), INTERVAL 6 DAY)
+									FROM customer
+								)
+							GROUP BY visited_on;
+		
+		Example 25:
+		
+							select distinct visited_on, amount, round(amount/7, 2) as average_amount
+							from (select visited_on, 
+								  sum(amount) over (order by visited_on range between interval 6 day preceding and current row) as amount,
+								  dense_rank() over (order by visited_on) as rk
+								  from Customer) as t
+							where rk >= 7
+		
+		Example 26:
+		
+							- sum theo điều kiện
+							
+							SELECT "Low Salary" AS category,
+								   sum(income < 20000) AS accounts_count
+							  FROM Accounts
+							UNION
+							SELECT "Average Salary" AS category,
+								   sum(income BETWEEN 20000 AND 50000) AS accounts_count
+							  FROM Accounts
+							UNION
+							SELECT "High Salary" AS category,
+								   sum(income > 50000) AS accounts_count
+							  FROM Accounts;
+		
+		Example 27:
+		
+							WITH CTE AS(
+							SELECT account_id,
+								CASE 
+									WHEN income < 20000 THEN "Low Salary"
+									WHEN income > 50000 THEN "High Salary"
+									ELSE "Average Salary"
+								END AS category
+							FROM Accounts),
+							CTE_C AS(        
+							SELECT "Low Salary" AS Category
+							UNION 
+							SELECT "Average Salary" AS Category
+							UNION 
+							SELECT "High Salary" AS Category
+							) #need a table of category to make left join 
+							#>>> prevent  those category without value in CTE from disappearing 
+							SELECT CTE_C.Category, COUNT(account_id) AS  accounts_count
+							FROM CTE_C
+							LEFT JOIN CTE ON CTE_C.Category = CTE.Category
+							GROUP BY CTE_C.Category
+		
+		Example 28:
+		
+							select s.user_id, round(avg(if(c.action="confirmed",1,0)),2) as confirmation_rate
+							from Signups as s left join Confirmations as c on s.user_id= c.user_id group by user_id;
+		
+		Example 29:
+		
+							SELECT s.user_id, 
+							  ROUND(AVG(IF(c.action='confirmed',1,0)),2) as confirmation_rate 
+							FROM Signups s
+							LEFT JOIN Confirmations c using (user_id)
+							GROUP BY s.user_id
+							
+		Example 30:
+		
+							SELECT c.company_code, c.founder,
+								COUNT(DISTINCT lm.lead_manager_code),
+								COUNT(DISTINCT sm.senior_manager_code),
+								COUNT(DISTINCT m.manager_code),
+								COUNT(DISTINCT e.employee_code)
+							FROM company c
+							LEFT JOIN lead_manager lm ON c.company_code = lm.company_code
+							LEFT JOIN senior_manager sm ON lm.company_code = sm.company_code
+							LEFT JOIN manager m ON sm.company_code = m.company_code
+							LEFT JOIN employee e ON m.company_code = e.company_code
+							GROUP BY c.company_code, c.founder
+							ORDER BY c.company_code ASC
+
+		Example 31:
+		
+							SELECT
+									ROUND(AVG(LAT_N),4) AS median
+							FROM (
+									SELECT
+											LAT_N,
+											ROW_NUMBER() OVER(ORDER BY LAT_N) AS row_num,
+											COUNT(LAT_N) OVER() AS total_rows
+									FROM STATION) AS numbered
+							WHERE 
+									row_num IN (FLOOR((total_rows+1)/2.0), CEIL((total_rows+1)/2.0));
+									
+		Example 32:
+		
+							SELECT c.hacker_id, d.name
+							FROM Difficulty a
+							JOIN Challenges b ON a.difficulty_level = b. difficulty_level
+							JOIN Submissions c ON c.challenge_id = b.challenge_id 
+							JOIN Hackers  d ON d.hacker_id  = c.hacker_id 
+							WHERE c.score = a.score
+							GROUP BY c.hacker_id, d.name
+							HAVING COUNT(c.challenge_id) > 1
+							ORDER BY COUNT(c.challenge_id) DESC, c.hacker_id ASC
+							
+		Example 33:
+		
+							SELECT w.id, wp.age, w.coins_needed, w.power
+							FROM Wands w
+							JOIN Wands_Property wp 
+							ON w.code = wp.code
+							WHERE wp.is_evil = 0 AND w.coins_needed = (
+								SELECT MIN(w2.coins_needed) FROM Wands w2 WHERE w2.code = w.code AND w2.power = w.power
+							)
+							ORDER BY w.power DESC, wp.age DESC;
+							
+		Example 34:
+		
+							SELECT w.id, wp.age, w.coins_needed, w.power
+							FROM wands w
+							JOIN wands_property wp 
+							ON w.code = wp.code
+							JOIN (
+								SELECT wp1.age, MIN(w1.coins_needed) AS min_coins_needed, w1.power
+								FROM wands w1
+								JOIN wands_property wp1
+								ON w1.code = wp1.code
+								WHERE wp1.is_evil = 0
+								GROUP BY wp1.age, w1.power
+							) mc 
+							ON w.power = mc.power AND wp.age = mc.age AND w.coins_needed = mc.min_coins_needed 
+							WHERE wp.is_evil = 0
+							ORDER BY w.power DESC, wp.age DESC;
+							
+		Example 35:
+		
+							WITH ChallengeCounts AS (
+								SELECT
+									h.hacker_id,
+									h.name,
+									COUNT(c.challenge_id) AS total_challenges
+								FROM
+									Hackers h
+								JOIN
+									Challenges c ON h.hacker_id = c.hacker_id
+								GROUP BY
+									h.hacker_id, h.name
+							),
+							MaxChallengeCount AS (
+								SELECT
+									MAX(total_challenges) AS max_challenges
+								FROM
+									ChallengeCounts
+							),
+							FilteredChallengeCounts AS (
+								SELECT
+									cc.hacker_id,
+									cc.name,
+									cc.total_challenges
+								FROM
+									ChallengeCounts cc
+								JOIN
+									MaxChallengeCount mcc ON cc.total_challenges = mcc.max_challenges
+								OR cc.total_challenges IN (
+									SELECT
+										total_challenges
+									FROM
+										ChallengeCounts
+									GROUP BY
+										total_challenges
+									HAVING
+										COUNT(*) = 1
+								)
+							)
+							SELECT
+								hacker_id,
+								name,
+								total_challenges
+							FROM
+								FilteredChallengeCounts
+							ORDER BY
+								total_challenges DESC,
+								hacker_id ASC;
+								
+		Example 36:
+		
+							WITH cte1 AS (
+								SELECT hacker_id, COUNT(*) AS count
+								FROM challenges
+								GROUP BY hacker_id
+							),
+							cte2 AS (
+								SELECT count
+								FROM cte1
+								WHERE count != (SELECT MAX(count) FROM cte1)
+								GROUP BY count
+								HAVING COUNT(*) > 1
+							)
+							SELECT h.hacker_id, h.name, count
+							FROM cte1
+							JOIN hackers h ON h.hacker_id = cte1.hacker_id
+							WHERE count NOT IN (SELECT count FROM cte2)
+							ORDER BY count DESC, hacker_id;
+							
+		Example 37:
+		
+							select h.hacker_id, h.name, sum(a.maxscore)
+							from hackers h
+							inner join (select s.hacker_id, s.challenge_id, max(s.score) as maxscore
+										from submissions s
+										group by s.hacker_id, s.challenge_id) as a
+									on h.hacker_id = a.hacker_id
+							group by h.hacker_id, h.name
+							having sum(a.maxscore)> 0
+							order by sum(a.maxscore) desc , h.hacker_id
+							
+		Example 38:
+		
+							with my_cte as
+							( 	select s1.id, s1.name, f.friend_id, s2.name as friend_name, p.salary as salary
+								from Students s1
+								join Friends f on f.id = s1.id
+								join students s2 on f.friend_id = s2.id
+								join Packages p on s1.id = p.id 
+							)
+							select my_cte.name
+							from my_cte
+							join Packages p
+							on my_cte.friend_id = p.id
+							where my_cte.salary < p.salary
+							order by p.salary
+							
+		Example 39:
+		
+							WITH ordered_list as
+							(	SELECT ROW_NUMBER() OVER (ORDER BY x) pair_id, x, y
+								FROM functions
+							)
+							SELECT DISTINCT f1.x, f1.y
+							FROM ordered_list f1
+							JOIN ordered_list f2 ON f1.x=f2.y AND f2.x=f1.y AND f1.pair_id != f2.pair_id
+							WHERE f1.x<=f1.y
+							ORDER BY f1.x
+							
+		Example 40:
+		
+							WITH RECURSIVE Series AS(
+								SELECT 2 AS n 
+								UNION 
+								SELECT n+1 FROM Series 
+								WHERE n<1000
+							) 
+							SELECT GROUP_CONCAT(n SEPARATOR '&') FROM(
+								SELECT n FROM Series AS Numbers 
+								WHERE NOT EXISTS(
+									SELECT n FROM Series AS Divisors 
+									WHERE Numbers.n%Divisors.n=0 AND Divisors.n<Numbers.n
+							)
+							) AS A;

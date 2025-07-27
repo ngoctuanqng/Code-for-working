@@ -1,0 +1,27 @@
+CASE Statement--MySQL:
+
+		The CASE statement goes through conditions and returns a value when the first condition is
+		met (like an if-then-else statement). So, once a condition is true, it will stop reading
+		
+		and return the result. If no conditions are true, it returns the value in the ELSE clause.
+	
+	Syntax:
+			CASE
+				WHEN condition1 THEN result1
+				WHEN condition2 THEN result2
+				WHEN conditionN THEN resultN
+				ELSE result
+			END;
+	Example:
+			SELECT 
+				employee_id,
+				first_name,
+				last_name,
+				salary,
+				CASE
+					WHEN salary < 30000 THEN 'Low'
+					WHEN salary >= 30000 AND salary < 60000 THEN 'Medium'
+					ELSE 'High'
+				END AS salary_category
+			FROM 
+				employees;

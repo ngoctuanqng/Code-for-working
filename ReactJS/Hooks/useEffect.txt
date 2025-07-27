@@ -1,0 +1,28 @@
+useEffect--REACTJS:
+						
+		- useEffect is a React Hook that lets you synchronize a component with an external system. If you’re not trying to synchronize with some external system, you probably don’t need an Effect.
+		- useEffect() là function nắm bắt tất cả các sự thay đổi của code. Nó giúp chúng ta xử lý các side effects, useEffect sẽ tương đương với các hàm componentDidMount, componentDidUpdate và
+		componentWillUnMount trong LifeCycle
+		- Để quản lý các tác dụng phụ như lệnh gọi API, đăng ký, bộ tính giờ, đột biến, v.v.
+		- Không có dependency: luôn luôn gọi sau khi render.
+		- Dependency là mảng rỗng: phần setup chỉ được gọi 1 lần duy nhất khi component mounted.
+		- Dependency là 1 mảng đầy đủ: setup sẽ được gọi khi component mounted và được gọi lại khi dependency thay đổi
+		- Phần setup trong useEffect được chạy sau mỗi lần render của component, bao gồm cả lần render đầu tiên. Nó chạy ngay sau khi component đã được render lại hoặc lần đầu tiên khi component
+		được mount lên DOM.
+		- Phần cleanup trong useEffect được chạy trước khi component bị unmount hoặc trước khi nó chạy lại lần tiếp theo. Nó chạy trước khi phần setup mới của useEffect được thực thi.
+		
+		import { useEffect } from 'react';
+		import { createConnection } from './chat.js';
+		function ChatRoom({ roomId }) {
+		  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+		  useEffect(() => {
+			// Phần setup
+			const connection = createConnection(serverUrl, roomId);
+			connection.connect();
+			// Phần cleanup
+			return () => {
+			  connection.disconnect();
+			};
+		  }, [serverUrl, roomId]);
+		  // ...
+		}

@@ -1,0 +1,21 @@
+useMemo--REACTJS:
+
+		- useMemo is a React Hook that lets you cache the result of a calculation between re-renders.
+		- useMemo giúp ta kiểm soát được việc render dư thừa của các component con, nó khá giống với hàm shouldComponentUpdate trong LifeCycle. Bằng cách truyền vào 1 tham số thứ 2 thì chỉ khi
+		tham số này thay đổi thì thằng useMemo mới được thực thi.
+		- useMemo là một react hooks giúp mình tạo ra một memoized value và chỉ tính toán ra value mới khi dependencies thay đổi.
+		- useMemo giúp chúng ta hạn chế việc thực hiện những tính toán phức tạp mỗi lần component re-render. Bằng cách truyền dependencies ở đối số thứ 2, chỉ khi giá trị một trong các
+		dependencies thay đổi thì việc tính toán mới thực hiện lại.
+		- useMemo(calculateValue, dependencies)
+				On the initial render, useMemo returns the result of calling calculateValue with no arguments.
+				During next renders, it will either return an already stored value from the last render (if the dependencies haven’t changed), or call calculateValue again, and return the result
+				that calculateValue has returned.
+		
+		import { useMemo } from 'react';
+		function TodoList({ todos, tab }) {
+		  const visibleTodos = useMemo(
+			() => filterTodos(todos, tab),
+			[todos, tab]
+		  );
+		  // ...
+		}

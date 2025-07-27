@@ -1,0 +1,42 @@
+Rendering a Sidebar--React Router:
+
+		- Việc hiển thị một thanh bên với React Router không đặc biệt thú vị vì nó chỉ là một tập hợp các
+		Liên kết. Tuy nhiên, điều gì sẽ xảy ra nếu chúng ta muốn thanh bên đó cũng nhận biết
+		được vị trí của ứng dụng? Chắc chắn bạn có thể sử dụng useLocation Hook của React Router cho việc này,
+		nhưng React Router đi kèm với một công cụ tốt hơn để ánh xạ vị trí của ứng dụng
+		với các thành phần nhất định, cụ thể là Routes và Route.
+		- Chìa khóa để hiển thị thanh bên nhận biết vị trí là hiểu rằng với Bộ định tuyến React, bạn có thể
+		hiển thị bao nhiêu Tuyến tùy thích. Có thể bạn đã quen với việc hiển thị các Tuyến
+		đường ở cấp cao nhất của ứng dụng, nhưng không có gì ngăn cản bạn hiển thị các Tuyến đường khác ở
+		một nơi khác trong ứng dụng của bạn, chẳng hạn như trong thanh bên.
+		
+		export default function App() {
+		  return (
+			<div className="wrapper">
+			  <div className="sidebar">
+				<ul className="nav">
+				  <li>
+					<Link to="/">Home</Link>
+				  </li>
+				  <li>
+					<Link to="/p">Profile</Link>
+				  </li>
+				  <li>
+					<Link to="/s">Settings</Link>
+				  </li>
+				</ul>
+				<Routes>
+				  <Route path="/" element={<HomeDesc />} />
+				  <Route path="/p" element={<ProfileDesc />} />
+				  <Route path="/s" element={<SettingsDesc />} />
+				</Routes>
+			  </div>
+
+			  <Routes>
+				<Route path="/" element={<Home />} />
+				<Route path="/p" element={<Profile />} />
+				<Route path="/s" element={<Settings />} />
+			  </Routes>
+			</div>
+		  );
+		}

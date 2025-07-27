@@ -1,0 +1,30 @@
+NULL Functions--MySQL:
+	IFNULL():
+								The MySQL IFNULL() function lets you return an alternative value if an expression is NULL.
+				Syntax:
+								IFNULL(value, replacement)
+				Example:
+								SELECT ProductName, UnitPrice * (UnitsInStock + IFNULL(UnitsOnOrder, 0))
+								FROM Products;
+	COALESCE():
+								Hàm COALESCE trong MySQL được sử dụng để trả về giá trị đầu tiên không NULL từ danh sách các biểu thức được
+								cung cấp. Nếu tất cả các biểu thức đều NULL, hàm COALESCE sẽ trả về giá trị NULL.
+								So với IFNULL() thì Hàm COALESCE() có thể nhận nhiều hơn hai đối số. Nó sẽ trả về giá trị đầu tiên không phải
+								NULL từ danh sách các đối số. Nếu tất cả các đối số đều là NULL, nó sẽ trả về NULL.
+				Syntax:
+								COALESCE(value1, value2, ...)
+				Example:
+								SELECT 
+									employee_id,
+									CONCAT(first_name, ' ', COALESCE(middle_name, 'N/A'), ' ', last_name) AS full_name // nếu middle_name là NULL, thì nó sẽ được thay thế bằng chuỗi 'N/A'.
+								FROM 
+									employees;
+								
+								SELECT 
+									employee_id,
+									COALESCE(CONCAT(first_name, ' ', middle_name, ' ', last_name), 'N/A') AS full_name // trả về giá trị đầu tiên không phải là NULL từ danh sách các đối số. Trong trường hợp này,
+																													   // nếu first_name, middle_name và last_name đều là NULL, thì giá trị trả về sẽ là 'N/A'.
+								FROM 
+									employees;		
+								SELECT ProductName, UnitPrice * (UnitsInStock + COALESCE(UnitsOnOrder, 0))
+								FROM Products;

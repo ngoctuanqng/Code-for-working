@@ -1,0 +1,36 @@
+Example--Oracle:
+
+	Customers Who Never Order:
+	
+										Tìm name trong bảng Customers mà không có customerId order trong bảng Orders
+										
+										SELECT name AS Customers
+										FROM Customers
+										WHERE Customers.id NOT IN (SELECT customerId FROM Orders) // Một kết quả không nằm trong một kết quả khác
+										
+	Duplicate Emails:
+
+										- Điều kiện P1.id <> P1.id sẽ luôn là FALSE, vì nó so sánh một giá trị với chính nó. Do đó, không có bản ghi nào sẽ được loại bỏ.
+										- Câu truy vấn này không thực sự so sánh các bản ghi khác nhau. Vì P1 được sử dụng cho cả hai bảng, nó chỉ so sánh các bản ghi của Person với chính nó,
+										không có ý nghĩa.
+										
+										SELECT DISTINCT P1.Email FROM Person P1,Person P2 // distinct ở đây để loại phần tử trùng ví dụ như email phần tử 1 của P1 giống  với phần tử 3,
+																						  // của P2 nhưng email của phần tử 3 của P1 cũng giống email của phần tử thứ 1 của P2
+										WHERE P1.id <> P2.id AND P1.Email=P2.Email
+										
+										SELECT DISTINCT P1.Email
+										FROM Person P1, Person P1
+										WHERE P1.id <> P1.id AND P1.Email = P1.Email;
+
+	Department Top Three Salaries:
+	
+										
+										SELECT DEPT.name AS Department, EMP.name AS Employee, EMP.salary AS Salary 
+										FROM Department DEPT JOIN Employee EMP ON EMP.DepartmentId=DEPT.id 
+										WHERE 3 > // Lọc để lấy các row 0, 1, 2 giá trị lớn hơn nó
+										  (SELECT COUNT(DISTINCT EMP1.salary) // đếm số lượng giá trị duy nhất (distinct) trong cột salary của bảng Employee với điều kiện được xác định trong
+																			  // mệnh đề WHERE của câu truy vấn con. Nghĩa là với where ta sẽ lọc các row khác nhau, khi count sẽ chỉ đếm với 
+																			  // có salary khác nhau không trùng, lọc hàng trước rồi mới select
+										  FROM Employee EMP1 WHERE EMP1.salary > EMP.salary AND // điều kiện với salary nào đó lớn hơn salary hiện tại, trường hợp chính nó thì bằng sẽ không
+																								// nằm trong này
+										  EMP.departmentId = EMP1.departmentId) // tổng hợp thì select phần count với điều kiện có employee khác có salary lớn hơn

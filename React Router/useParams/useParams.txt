@@ -1,0 +1,31 @@
+useParams--React Router:
+
+		- Giống như các tham số hàm cho phép bạn khai báo trình giữ chỗ khi bạn xác định một hàm, Tham
+		số URL cho phép bạn khai báo trình giữ chỗ cho các phần của URL.
+		- Lấy Wikipedia làm ví dụ. Khi bạn truy cập một chủ đề trên Wikipedia, bạn sẽ nhận thấy rằng mẫu
+		URL luôn giống nhau, wikipedia.com/wiki/{topicId}.
+		- Thay vì xác định lộ trình cho mọi chủ đề trên trang web, họ có thể khai báo một lộ trình với trình
+		giữ chỗ cho id của chủ đề. Cách bạn nói với React Router rằng một phần nhất định của URL là trình giữ
+		chỗ (hoặc Tham số URL), là bằng cách sử dụng: trong phần hỗ trợ đường dẫn của Route
+		- Trong React Router, khi bạn định nghĩa một tham số trong đường dẫn sử dụng cú pháp :parameter, giá trị
+		của tham số đó thường được truyền dưới dạng chuỗi (string)
+		
+		<Route path="/wiki/:topicId" element={<Article />} /> // Giờ đây, bất cứ khi nào bất cứ ai truy cập vào một URL khớp với mẫu / wiki /: topicId (/ wiki / javascript,
+															  // / wiki / Brendan_Eich, / wiki / anything), thành phần Article sẽ được hiển thị.
+		import * as React from <react<
+		import { useParams } from <react-router-dom<
+		import { getArticle } from <../utils<
+		function Article () {
+		  const [article, setArticle] = React.useState(null)
+		  const { topicId } = useParams()
+		  React.useEffect(() => {
+			getArticle(topicId)
+			  .then(setUser)
+		  }, [topicId])
+		  return (
+			...
+		  )
+		}
+		
+		<Route path="/item/:id" element={<ItemDetail />} /> // Khi bạn truy cập URL như "/item/123", giá trị của id trong component ItemDetail sẽ là chuỗi "123", không phải số nguyên. Điều
+															// này là do React Router không tự động chuyển đổi tham số thành kiểu dữ liệu khác ngoại trừ chuỗi.

@@ -1,0 +1,30 @@
+IN Operator--MySQL:
+					The IN operator allows you to specify multiple values in a WHERE clause.
+					The IN operator is a shorthand for multiple OR conditions.
+	Syntax:
+					SELECT column_name(s)
+					FROM table_name
+					WHERE column_name IN (value1, value2, ...);
+					
+					SELECT column_name(s)
+					FROM table_name
+					WHERE column_name IN (SELECT STATEMENT);
+	Example:
+					SELECT 
+						product_id,
+						product_name,
+						category
+					FROM 
+						products
+					WHERE 
+						category IN ('Electronics', 'Clothing');
+
+					SELECT 
+						employee_id,
+						first_name,
+						last_name,
+						department_id
+					FROM 
+						employees
+					WHERE 
+						department_id IN (SELECT department_id FROM departments WHERE department_name IN ('IT', 'Finance'));

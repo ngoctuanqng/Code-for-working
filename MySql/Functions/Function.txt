@@ -1,0 +1,2485 @@
+Function--MySQL:
+
+	String Functions--MySQL Function:
+	
+		ASCII--MySQL String Functions:
+		
+			Returns the ASCII value for the specific character
+			
+			ASCII(character)
+				character: Required. The character to return the ASCII value for. If more than one character is entered, it will only return the value for the first character
+			
+			Example
+				
+				// Return the ASCII value of the first character in "CustomerName"
+				SELECT ASCII(CustomerName) AS NumCodeOfFirstChar
+				FROM Customers;
+					
+		CHAR_LENGTH--MySQL String Functions:
+		
+			Returns the length of a string (in characters)
+			
+			CHAR_LENGTH(string)
+				string: Required. The string to count the length for
+			
+			Example
+			
+				SELECT CHAR_LENGTH("SQL Tutorial") AS LengthOfString; // Return the length of the string
+				
+				// Return the length of the text in the "CustomerName" column
+				SELECT CustomerName, CHAR_LENGTH(CustomerName) AS LengthOfName
+				FROM Customers;
+					
+		
+		CHARACTER_LENGTH()--MySQL String Functions:
+		
+			The CHARACTER_LENGTH() function return the length of a string (in characters).
+			
+			CHARACTER_LENGTH(string)
+				
+				string: Required. The string to count the length for
+			
+			Note: This function is equal to the CHAR_LENGTH() function.
+			
+			Example
+				
+				SELECT CHARACTER_LENGTH("SQL Tutorial") AS LengthOfString; // Return the length of the string
+				
+				// Return the length of the text in the "CustomerName" column
+				SELECT CustomerName, CHARACTER_LENGTH(CustomerName) AS LengthOfName
+				FROM Customers;
+					
+		
+		CONCAT--MySQL String Functions:
+		
+			The CONCAT() function adds two or more expressions together.
+				
+			CONCAT(expression1, expression2, expression3,...)
+				expression1, expression2, expression3, etc.: Required. The expressions to add together.
+		
+			Note: If any of the expressions is a NULL value, it returns NULL
+			
+			Example
+				
+				SELECT CONCAT("SQL ", "Tutorial ", "is ", "fun!") AS ConcatenatedString; // Add several strings together
+				
+				// Add three columns into one "Address" column
+				SELECT CustomerName, CONCAT(Address, " ", PostalCode, " ", City) AS Address
+				FROM Customers;					
+		
+		CONCAT_WS--MySQL String Functions:
+		
+			The CONCAT_WS() function adds two or more expressions together with a separator.
+			
+			CONCAT_WS(separator, expression1, expression2, expression3,...)
+				separator: Required. The separator to add between each of the expressions. If separator is NULL, this function returns NULL
+				expression1, expression2, expression3, etc.: Required. The expressions to add together. An expression with a NULL value will be skipped
+			
+			Example
+			
+				SELECT CONCAT_WS("-", "SQL", "Tutorial", "is", "fun!") AS ConcatenatedString; // SQL-Tutorial-is-fun! Add several expressions together, and add a "-" separator between them
+				
+				// Add three columns (and add a space between them) into one "Address" column
+				SELECT CustomerName, CONCAT_WS(" ", Address, PostalCode, City) AS Address
+				FROM Customers;			
+		
+		FIELD--MySQL String Functions:
+		
+			The FIELD() function returns the index position of a value in a list of values.
+
+			This function performs a case-insensitive search.
+
+			Note: If the specified value is not found in the list of values, this function will return 0. If value is NULL, this function will return 0.
+				
+			FIELD(value, val1, val2, val3, ...)
+				value: Required. The value to search for in the list
+				val1, val2, val3, ....: Required. The list of values to search
+			
+			Example
+			
+				SELECT FIELD("q", "s", "q", "l"); // 2. Return the index position of  "q" in the string list
+				
+				SELECT FIELD("Q", "s", "q", "l"); // 2. Return the index position of "Q" in the string list
+				
+				SELECT FIELD(5, 0, 1, 2, 3, 4, 5); // 6. Return the index position of 5 in the numeric list
+		
+		FIND_IN_SET--MySQL String Functions:
+		
+			The FIND_IN_SET() function returns the position of a string within a list of strings.
+			
+			FIND_IN_SET(string, string_list)
+				string: Required. The string to search for
+				string_list: Required. The list of string values to be searched (separated by commas)
+			
+			If string is not found in string_list, this function returns 0
+			If string or string_list is NULL, this function returns NULL
+			If string_list is an empty string (""), this function returns 0
+			
+			Example
+				
+				SELECT FIND_IN_SET("q", "s,q,l"); // 2. Search for "q" within the list of strings
+				
+				SELECT FIND_IN_SET("a", "s,q,l"); // 0. Search for "a" within the list of strings
+				
+				SELECT FIND_IN_SET("q", null); // Search for "q" within the list of strings (string list is NULL)
+		
+		FORMAT--MySQL String Functions:
+		
+			The FORMAT() function formats a number to a format like "#,###,###.##", rounded to a specified number of decimal places, then it returns the result as a string.
+			
+			FORMAT(number, decimal_places)
+				number: Required. The number to be formatted
+				decimal_places: Required. The number of decimal places for number. If this parameter is 0, this function returns a string with no decimal places
+			
+			Example
+			
+				SELECT FORMAT(250500.5634, 2); // 250,500.56. Format the number as "#,###,###.##" (and round with two decimal places)
+				
+				SELECT FORMAT(250500.5634, 0); // 250,501. Format the number as a format of "#,###,###.##" (and round with 0 decimal places)
+		
+		INSERT--MySQL String Functions:
+		
+			The INSERT() function inserts a string within a string at the specified position and for a certain number of characters.
+			
+			INSERT(string, position, number, string2)
+				string: Required. The string that will be modified
+				position: Required. The position where to insert string2
+				number: Required. The number of characters to replace
+				string2: Required. The string to insert into string
+				
+				If position is outside the length of string, this function returns string
+				If number is higher than the length of the rest of the string, this function replaces string from position until the end of string
+			
+			Example
+			
+				SELECT INSERT("W3Schools.com", 1, 9, "Example"); // Example.com. Insert the string "Example" into the string "W3Schools.com". Replace the first nine characters
+				
+				SELECT INSERT("W3Schools.com", 11, 3, "no"); // W3Schools.no. Insert the string "no" into the string "W3Schools.com". Replace three characters, starting from position 11
+	
+		INSTR--MySQL String Functions:
+		
+			The INSTR() function returns the position of the first occurrence of a string in another string.
+
+			This function performs a case-insensitive search.
+				INSTR(string1, string2)
+					string1: Required. The string that will be searched
+					string2: Required. The string to search for in string1. If string2 is not found, this function returns 0
+			Example
+				SELECT INSTR("W3Schools.com", "3") AS MatchPosition; // 2
+					Search for "3" in string "W3Schools.com", and return position
+				SELECT INSTR("W3Schools.com", "COM") AS MatchPosition; // 11
+					Search for "COM" in string "W3Schools.com", and return position
+				SELECT CustomerName, INSTR(CustomerName, "a")
+			FROM Customers;
+					Search for "a" in CustomerName column, and return position
+		
+		LCASE()--MySQL String Functions:
+		
+			The LCASE() function converts a string to lower-case.
+
+			Note: The LOWER() function is a synonym for the LCASE() function.
+				LCASE(text)
+					text: Required. The string to convert
+			Example
+				SELECT LCASE("SQL Tutorial is FUN!") AS LowercaseText; // sql tutorial is fun!
+					Convert the text to lower-case
+				SELECT LCASE(CustomerName) AS LowercaseCustomerName
+			FROM Customers;
+					Convert the text in "CustomerName" to lower-case
+		
+		LEFT()--MySQL String Functions:
+		
+			The LEFT() function extracts a number of characters from a string (starting from left).
+				LEFT(string, number_of_chars)
+					string: Required. The string to extract from
+					number_of_chars: Required. The number of characters to extract. If this parameter is larger than the number of characters in string, this function will return string
+			Example
+				SELECT LEFT("SQL Tutorial", 3) AS ExtractString; // SQL
+					Extract 3 characters from a string (starting from left)
+				SELECT LEFT(CustomerName, 5) AS ExtractString
+			FROM Customers;
+					Extract 5 characters from the text in the "CustomerName" column (starting from left)
+		
+		LENGTH()--MySQL String Functions:
+		
+			The LENGTH() function returns the length of a string (in bytes).
+				LENGTH(string)
+					string: Required. The string to count the length for
+			Example
+				SELECT LENGTH("SQL Tutorial") AS LengthOfString; // 12
+					Return the length of the string, in bytes
+				SELECT CustomerName, LENGTH(CustomerName) AS LengthOfName
+			FROM Customers;
+					Return the length of the text in the "CustomerName" column, in bytes
+		
+		LOCATE()--MySQL String Functions:
+		
+			The LOCATE() function returns the position of the first occurrence of a substring in a string.
+
+			If the substring is not found within the original string, this function returns 0.
+
+			This function performs a case-insensitive search.
+
+			Note: This function is equal to the POSITION() function.
+				LOCATE(substring, string, start)
+					substring: Required. The substring to search for in string
+					string: Required. The string that will be searched
+					start: Optional. The starting position for the search. Position 1 is default
+			Example
+				SELECT LOCATE("3", "W3Schools.com") AS MatchPosition; // 2
+					Search for "3" in string "W3Schools.com", and return position
+				SELECT LOCATE("com", "W3Schools.com", 3) AS MatchPosition; // 11
+					Search for "com" in string "W3Schools.com" (start at position 3), and return position
+				SELECT CustomerName, LOCATE("a", CustomerName)
+			FROM Customers;
+					Search for "a" in CustomerName column, and return position
+			LOWER()
+			The LOWER() function converts a string to lower-case.
+
+			Note: The LCASE() function is equal to the LOWER() function.
+				LOWER(text)
+					text: Required. The string to convert
+			Example
+				SELECT LOWER("SQL Tutorial is FUN!") AS LowercaseText; // sql tutorial is fun!
+					Convert the text to lower-case
+				SELECT LOWER(CustomerName) AS LowercaseCustomerName
+			FROM Customers;
+					Convert the text in "CustomerName" to lower-case
+		
+		LPAD()--MySQL String Functions:
+		
+			The LPAD() function left-pads a string with another string, to a certain length.
+				LPAD(string, length, lpad_string)
+					string: Required. The original string. If the length of the original string is larger than the length parameter, this function removes the overfloating characters from string
+					length: Required. The length of the string after it has been left-padded
+					lpad_string: Required. The string to left-pad to string
+			Example
+				SELECT LPAD("SQL Tutorial", 20, "ABC"); // ABCABCABSQL Tutorial
+					Left-pad the string with "ABC", to a total length of 20
+				SELECT LPAD(CustomerName, 30, "ABC") AS LeftPadCustomerName
+			FROM Customers; 
+					Left-pad the text in "CustomerName" with "ABC", to a total length of 30
+		
+		LTRIM()--MySQL String Functions:
+		
+			The LTRIM() function removes leading spaces from a string.
+				string: Required. The string to remove leading spaces from
+			Example
+				SELECT LTRIM("    SQL Tutorial") AS LeftTrimmedString; // SQL Tutorial
+					Remove leading spaces from a string
+		
+		MID()--MySQL String Functions:
+		
+			The MID() function extracts a substring from a string (starting at any position).
+
+			Note: The MID() and SUBSTR() functions equals the SUBSTRING() function.
+			
+			MID(string, start, length)
+				string: Required. The string to extract from
+				start: Required. The start position. Can be both a positive or negative number. If it is a positive number, this function extracts from the beginning of the string. If it is a negative number, this function extracts from the end of the string
+				length: Required. The number of characters to extract
+			
+			Example
+				SELECT MID("SQL Tutorial", 5, 3) AS ExtractString; // Tut. Extract a substring from a string (start at position 5, extract 3 characters)
+				
+				SELECT MID("SQL Tutorial", -5, 5) AS ExtractString; // orial. Extract a substring from a string (start from the end, at position -5, extract 5 characters)
+				
+				// Extract a substring from the text in a column (start at position 2, extract 5 characters)
+				SELECT MID(CustomerName, 2, 5) AS ExtractString
+				FROM Customers;						
+		
+		POSITION()--MySQL String Functions:
+		
+			The POSITION() function returns the position of the first occurrence of a substring in a string.
+
+			If the substring is not found within the original string, this function returns 0.
+
+			This function performs a case-insensitive search.
+
+			Note: The LOCATE() function is equal to the POSITION() function.
+			
+			POSITION(substring IN string)
+				
+				substring: Required. The substring to search for in string
+				string: Required. The original string that will be searched
+			
+			Example
+				
+				SELECT POSITION("3" IN "W3Schools.com") AS MatchPosition; // 2. Search for "3" in string "W3Schools.com", and return position
+				
+				SELECT POSITION("COM" IN "W3Schools.com") AS MatchPosition; // 11. Search for "COM" in string "W3Schools.com", and return position
+				
+				// Search for "a" in CustomerName column, and return position
+				SELECT CustomerName, POSITION("a" IN CustomerName)
+				FROM Customers;						
+		
+		REPEAT()--MySQL String Functions:
+		
+			The REPEAT() function repeats a string as many times as specified.
+			
+			REPEAT(string, number)
+				string: Required. The string to repeat
+				number: Required. The number of times to repeat the string
+			
+			Example
+				
+				SELECT REPEAT("SQL Tutorial", 3); // SQL TutorialSQL TutorialSQL Tutorial. Repeat a string 3 times
+				
+				// Repeat the text in CustomerName 2 times
+				SELECT REPEAT(CustomerName, 2)
+				FROM Customers;
+					
+				SELECT REPEAT("SQL Tutorial", 0); // Repeat the string 0 times
+		
+		REPLACE()--MySQL String Functions:
+		
+			The REPLACE() function replaces all occurrences of a substring within a string, with a new substring.
+
+			Note: This function performs a case-sensitive replacement.
+			
+			REPLACE(string, substring, new_string)
+				string: Required. The original string
+				substring: Required. The substring to be replaced
+				new_string
+						Required. The new replacement substring
+			Example
+			
+				SELECT REPLACE("SQL Tutorial", "SQL", "HTML"); // HTML Tutorial. Replace "SQL" with "HTML
+				
+				SELECT REPLACE("XYZ FGH XYZ", "X", "M"); // MYZ FGH MYZ. Replace "X" with "M"
+				
+				SELECT REPLACE("XYZ FGH XYZ", "X", "m"); // mYZ FGH mYZ. Replace "X" with "m"
+				
+				SELECT REPLACE("XYZ FGH XYZ", "x", "m"); // XYZ FGH XYZ. Replace "x" with "m"
+		
+		REVERSE()--MySQL String Functions:
+		
+			The REVERSE() function reverses a string and returns the result.
+			
+			REVERSE(string)
+				string: Required. The string to reverse
+			
+			Example
+				
+				SELECT REVERSE("SQL Tutorial"); // lairotuT LQS. Reverse a string
+				
+				// Reverse the text in CustomerName
+				SELECT REVERSE(CustomerName)
+				FROM Customers;					
+		
+		RIGHT()--MySQL String Functions:
+		
+			The RIGHT() function extracts a number of characters from a string (starting from right).
+			
+			RIGHT(string, number_of_chars)
+				string: Required. The string to extract from
+				number_of_chars: Required. The number of characters to extract. If this parameter is larger than the number of characters in string, this function will return string
+			
+			Example
+				
+				SELECT RIGHT("SQL Tutorial is cool", 4) AS ExtractString; // cool. Extract 4 characters from a string (starting from right)
+				
+				// Extract 5 characters from the text in the "CustomerName" column (starting from right)
+				SELECT RIGHT(CustomerName, 5) AS ExtractString
+				FROM Customers;					
+		
+		RPAD()--MySQL String Functions:
+		
+			Example
+				
+				SELECT RPAD("SQL Tutorial", 20, "ABC"); // SQL TutorialABCABCAB. Right-pad the string with "ABC", to a total length of 20
+				
+				// Right-pad the text in "CustomerName" with "ABC", to a total length of 30
+				SELECT RPAD(CustomerName, 30, "ABC") AS RightPadCustomerName
+				FROM Customers; 
+					
+			The RPAD() function right-pads a string with another string, to a certain length.
+			
+			RPAD(string, length, rpad_string)
+				string: Required. The original string. If the length of the original string is larger than the length parameter, this function removes the overfloating characters from string
+				length: Required. The length of the string after it has been right-padded
+				rpad_string: Required. The string to right-pad to string
+		
+		RTRIM()--MySQL String Functions:
+		
+			The RTRIM() function removes trailing spaces from a string.
+			
+			RTRIM(string)
+				string: Required. The string to remove trailing spaces from
+			
+			Example
+				
+				SELECT RTRIM("SQL Tutorial    ") AS RightTrimmedString; // SQL Tutorial. Remove trailing spaces from a string
+		
+		SPACE()--MySQL String Functions:
+		
+			The SPACE() function returns a string of the specified number of space characters.
+			
+			SPACE(number)
+				number: Required. The number of space characters to return
+			
+			Example
+			
+				SELECT SPACE(10); // Return a string with 10 space characters
+		
+		POSITION()--MySQL String Functions:
+		
+			The POSITION() function returns the position of the first occurrence of a substring in a string.
+
+			If the substring is not found within the original string, this function returns 0.
+
+			This function performs a case-insensitive search.
+
+			Note: The LOCATE() function is equal to the POSITION() function.
+			
+			POSITION(substring IN string)
+				substring: Required. The substring to search for in string
+				string: Required. The original string that will be searched
+		
+		REPEAT()--MySQL String Functions:
+			
+			The REPEAT() function repeats a string as many times as specified.
+			
+			REPEAT(string, number)
+				string: Required. The string to repeat
+				number: Required. The number of times to repeat the string
+			
+			Example
+				
+				SELECT REPEAT("SQL Tutorial", 3); // SQL TutorialSQL TutorialSQL Tutorial. Repeat a string 3 times
+				
+				// Repeat the text in CustomerName 2 times
+				SELECT REPEAT(CustomerName, 2)
+				FROM Customers;
+					
+				SELECT REPEAT("SQL Tutorial", 0); // Repeat the string 0 times
+		
+		REPLACE()--MySQL String Functions:
+		
+			The REPLACE() function replaces all occurrences of a substring within a string, with a new substring.
+
+			Note: This function performs a case-sensitive replacement.
+			
+			REPLACE(string, substring, new_string)
+				string: Required. The original string
+				substring: Required. The substring to be replaced
+				new_string: Required. The new replacement substring
+			
+			Example
+				
+				SELECT REPLACE("SQL Tutorial", "SQL", "HTML"); // HTML Tutorial. Replace "SQL" with "HTML
+				
+				SELECT REPLACE("XYZ FGH XYZ", "X", "M"); // MYZ FGH MYZ. Replace "X" with "M"
+				
+				SELECT REPLACE("XYZ FGH XYZ", "X", "m"); // mYZ FGH mYZ. Replace "X" with "m"
+				
+				SELECT REPLACE("XYZ FGH XYZ", "x", "m"); // XYZ FGH XYZ. Replace "x" with "m"
+		
+		REVERSE()--MySQL String Functions:
+		
+			The REVERSE() function reverses a string and returns the result.
+			
+			REVERSE(string)
+				string: Required. The string to reverse
+			
+			Example
+				
+				SELECT REVERSE("SQL Tutorial"); // lairotuT LQS. Reverse a string
+				
+				// Reverse the text in CustomerName
+				SELECT REVERSE(CustomerName)
+				FROM Customers;
+					
+		RIGHT()--MySQL String Functions:
+		
+			The RIGHT() function extracts a number of characters from a string (starting from right).
+			
+			RIGHT(string, number_of_chars)
+				string: Required. The string to extract from
+				number_of_chars: Required. The number of characters to extract. If this parameter is larger than the number of characters in string, this function will return string
+			
+			Example
+				
+				SELECT RIGHT("SQL Tutorial is cool", 4) AS ExtractString; // cool. Extract 4 characters from a string (starting from right)
+				
+				// Extract 5 characters from the text in the "CustomerName" column (starting from right)
+				SELECT RIGHT(CustomerName, 5) AS ExtractString
+				FROM Customers;					
+		
+		RPAD()--MySQL String Functions:
+		
+			The RPAD() function right-pads a string with another string, to a certain length.
+				
+			RPAD(string, length, rpad_string)
+				string: Required. The original string. If the length of the original string is larger than the length parameter, this function removes the overfloating characters from string
+				length: Required. The length of the string after it has been right-padded
+				rpad_string: Required. The string to right-pad to string
+			
+			Example
+				
+				SELECT RPAD("SQL Tutorial", 20, "ABC"); // SQL TutorialABCABCAB. Right-pad the string with "ABC", to a total length of 20
+				
+				// Right-pad the text in "CustomerName" with "ABC", to a total length of 30
+				SELECT RPAD(CustomerName, 30, "ABC") AS RightPadCustomerName
+				FROM Customers; 					
+		
+		RTRIM()--MySQL String Functions:
+		
+			The RTRIM() function removes trailing spaces from a string.
+			
+			RTRIM(string)
+				string: Required. The string to remove trailing spaces from
+			
+			Example
+				
+				SELECT RTRIM("SQL Tutorial    ") AS RightTrimmedString; // SQL Tutorial
+		
+		SPACE()--MySQL String Functions:
+		
+			Example
+				
+				SELECT SPACE(10); // Return a string with 10 space characters
+			
+			The SPACE() function returns a string of the specified number of space characters.
+				SPACE(number)
+					number: Required. The number of space characters to return
+		
+		STRCMP()--MySQL String Functions:
+		
+			Example
+				SELECT STRCMP("SQL Tutorial", "SQL Tutorial"); // 0. Compare two strings
+				
+				SELECT STRCMP("SQL Tutorial", "HTML Tutorial"); // 1. Compare two strings
+			
+			The STRCMP() function compares two strings.
+				string1, string2: Required. The two strings to be compared
+			
+			If string1 = string2, this function returns 0
+			If string1 < string2, this function returns -1
+			If string1 > string2, this function returns 1
+		
+		SUBSTR()--MySQL String Functions:
+		
+			The SUBSTR() function extracts a substring from a string (starting at any position).
+
+			Note: The SUBSTR() and MID() functions equals to the SUBSTRING() function.
+			
+			SUBSTR(string, start, length)
+			SUBSTR(string FROM start FOR length)
+				string: Required. The string to extract from
+				start: Required. The start position. Can be both a positive or negative number. If it is a positive number, this function extracts from the beginning of the string. If it is a negative number, this
+				function extracts from the end of the string
+				length: Optional. The number of characters to extract. If omitted, the whole string will be returned (from the start position)
+			
+			Example
+			
+				SELECT SUBSTR("SQL Tutorial", 5, 3) AS ExtractString; // Tut. Extract a substring from a string (start at position 5, extract 3 characters)
+				
+				SELECT SUBSTR("SQL Tutorial", -5, 5) AS ExtractString; // orial. Extract a substring from a string (start from the end, at position -5, extract 5 characters)
+				
+				// Extract a substring from the text in a column (start at position 2, extract 5 characters)
+				SELECT SUBSTR(CustomerName, 2, 5) AS ExtractString
+				FROM Customers;
+				
+		SUBSTRING()--MySQL Function:
+		
+			The SUBSTRING() function extracts a substring from a string (starting at any position).
+
+			Note: The SUBSTR() and MID() functions equals to the SUBSTRING() function.
+			
+			SUBSTRING(string, start, length)
+			OR
+			SUBSTRING(string FROM start FOR length)
+						string: Required. The string to extract from
+						start: Required. The start position. Can be both a positive or negative number. If it is a positive number, this function extracts from the beginning of the string. If it is a negative number, this
+						function extracts from the end of the string
+						length: Optional. The number of characters to extract. If omitted, the whole string will be returned (from the start position)
+			
+			Example
+			
+					SELECT SUBSTRING("SQL Tutorial", 5, 3) AS ExtractString; // Tut. Extract a substring from a string (start at position 5, extract 3 characters)
+					
+					// Extract a substring from the text in a column (start at position 2, extract 5 characters)
+					SELECT SUBSTRING(CustomerName, 2, 5) AS ExtractString
+					FROM Customers;
+						
+					SELECT SUBSTRING("SQL Tutorial", -5, 5) AS ExtractString; // orial. Extract a substring from a string (start from the end, at position -5, extract 5 characters)
+						
+		SUBSTRING_INDEX()--MySQL Function:
+		
+			The SUBSTRING_INDEX() function returns a substring of a string before a specified number of delimiter occurs.
+			
+			SUBSTRING_INDEX(string, delimiter, number)
+				string: Required. The original string
+				delimiter: Required. The delimiter to search for
+				number: Required. The number of times to search for the delimiter. Can be both a positive or negative number. If it is a positive number, this function returns all to the left of the delimiter.If it is
+				a negative number, this function returns all to the right of the delimiter.
+			
+			Example
+			
+				SELECT SUBSTRING_INDEX("www.w3schools.com", ".", 1); // www. Return a substring of a string before a specified number of delimiter occurs
+				
+				SELECT SUBSTRING_INDEX("www.w3schools.com", ".", 2); // www.w3schools. Return a substring of a string before a specified number of delimiter occurs
+					
+		TRIM()--MySQL Function:
+		
+			The TRIM() function removes leading and trailing spaces from a string.
+			
+			TRIM(string)
+				string: Required. The string to remove leading and trailing spaces from
+			
+			Example
+			
+				SELECT TRIM("    SQL Tutorial    ") AS TrimmedString; // SQL Tutorial. Remove leading and trailing spaces from a string
+					
+		UCASE()--MySQL Function:
+		
+			The UCASE() function converts a string to upper-case.
+
+			Note: This function is equal to the UPPER() function.
+			
+			UCASE(text)
+				text: Required. The string to convert
+		
+			Example
+			
+				SELECT UCASE("SQL Tutorial is FUN!") AS UppercaseText; // SQL TUTORIAL IS FUN!
+				
+				// Convert the text in "CustomerName" to upper-case
+				SELECT UCASE(CustomerName) AS UppercaseCustomerName
+				FROM Customers;				
+
+		UPPER()--MySQL Function:
+		
+			Example
+			
+				SELECT UPPER("SQL Tutorial is FUN!") AS UppercaseText; // SQL TUTORIAL IS FUN!
+				
+				// Convert the text in "CustomerName" to upper-case
+				SELECT UPPER(CustomerName) AS UppercaseCustomerName
+				FROM Customers;
+					
+			The UPPER() function converts a string to upper-case.
+
+			Note: This function is equal to the UCASE() function.
+				
+			UPPER(text)
+				text: Required. The string to convert
+				
+	Numeric Functions--MySQL Function:
+					
+		ABS()--MySQL Numeric Functions:
+		
+			The ABS() function returns the absolute (positive) value of a number.
+			
+			ABS(number)
+				number: Required. A numeric value
+			
+			Example
+				SELECT ABS(-243.5); // 243.5. Return the absolute value of a number
+					
+		ACOS()--MySQL Numeric Functions:
+		
+			The ACOS() function returns the arc cosine of a number.
+
+			The specified number must be between -1 to 1, otherwise this function returns NULL.
+				ACOS(number)
+					number: Required. A numeric value
+			Example
+				SELECT ACOS(0.25); // 1.318116071652818. Return the arc cosine of a number
+				SELECT ACOS(-0.8); // 2.498091544796509. Return the arc cosine of a number
+					
+		ASIN()--MySQL Numeric Functions:
+		
+			The ASIN() function returns the arc sine of a number.
+
+			The specified number must be between -1 to 1, otherwise this function returns NULL.
+			
+			ASIN(number)
+				number: Required. A numeric value
+			
+			Example
+				SELECT ASIN(0.25); // 0.25268025514207865
+				SELECT ASIN(-0.8); //-0.9272952180016123
+				
+		ATAN()--MySQL Numeric Functions:
+		
+			The ATAN() function returns the arc tangent of one or two numbers.
+			
+			ATAN(number)
+				number: A numeric value
+			ATAN(a, b)
+				a, b: Two numeric values to calculate the arc tangent of
+			
+			Example
+				SELECT ATAN(-0.8, 2); //-0.3805063771123649
+				
+				SELECT ATAN(2.5); //1.1902899496825317
+		
+		ATAN2()--MySQL Numeric Functions:
+		
+			The ATAN2() function returns the arc tangent of two numbers.
+			
+			ATAN2(a, b)
+				a, b: Required. Two numeric values to calculate the arc tangent of
+			
+			Example
+				
+				SELECT ATAN2(0.50, 1); //0.4636476090008061
+				
+				SELECT ATAN2(-0.8, 2); // -0.3805063771123649
+		
+		AVG()--MySQL Numeric Functions:
+		
+			The AVG() function returns the average value of an expression.
+
+			Note: NULL values are ignored.
+			
+			AVG(expression)
+				expression: Required. A numeric value (can be a field or a formula)
+			
+			Example
+			
+				SELECT AVG(Price) AS AveragePrice FROM Products; // 28.866364
+				
+				SELECT * FROM Products
+				WHERE Price > (SELECT AVG(Price) FROM Products);
+		
+		CEIL()--MySQL Numeric Functions:
+		
+			The CEIL() function returns the smallest integer value that is bigger than or equal to a number.
+
+			Note: This function is equal to the CEILING() function.
+			
+			CEIL(number)
+				number: Required. A numeric value
+			
+			Example
+			
+				SELECT CEIL(25.75); // 26
+				
+				SELECT CEIL(25); // 25
+				
+		CEILING()--MySQL Numeric Functions:
+		
+			The CEILING() function returns the smallest integer value that is bigger than or equal to a number.
+
+			Note: This function is equal to the CEIL() function.
+			
+			CEILING(number)
+				number: Required. A numeric value
+			
+			Example
+				
+				SELECT CEILING(25.75); // 26
+				
+				SELECT CEILING(25); // 25
+		COS()--MySQL Numeric Functions:
+		
+			The COS() function returns the cosine of a number.
+				COS(number)
+					number: Required. A numeric value
+			Example
+				SELECT COS(2);
+					-0.4161468365471424
+				SELECT COS(PI());
+					-1
+		COT()--MySQL Numeric Functions:
+		
+			The COT() function returns the cotangent of a number.
+				COT(number)
+					number: Required. A numeric value. If number is 0, an error or NULL is returned
+			Example
+				SELECT COT(6);
+					-3.436353004180128
+				SELECT COT(-2);
+					0.45765755436028577
+					
+		COUNT()--MySQL Numeric Functions:
+		
+			The COUNT() function returns the number of records returned by a select query.
+
+			Note: NULL values are not counted.
+			
+			COUNT(expression)
+				expression: Required. A field or a string value
+			
+			Example
+				
+				SELECT COUNT(ProductID) AS NumberOfProducts FROM Products; // 77
+				
+		DEGREES()--MySQL Numeric Functions:
+			
+			The DEGREES() function converts a value in radians to degrees.
+				DEGREES(number)
+					number: Required. A numeric value
+			Example
+				SELECT DEGREES(1.5);
+					85.94366926962348
+				SELECT DEGREES(PI()*2);
+					360
+		
+		DIV--MySQL Numeric Functions:
+		
+			The DIV function is used for integer division (x is divided by y). An integer value is returned.
+			
+			x DIV y
+				x: Required. A value that will be divided by y
+				y: Required. The divisor
+			
+			Example
+				
+				SELECT 10 DIV 5; // 2
+				
+				SELECT 8 DIV 3; // 2
+		
+		EXP()--MySQL Numeric Functions:
+		
+			The EXP() function returns e raised to the power of the specified number.
+
+			The constant e (2.718281...), is the base of natural logarithms.
+
+			Tip: Also look at the LOG() and LN() functions.
+			
+			EXP(number)
+				number: Required. The power number
+			
+			Example
+				
+				SELECT EXP(1); // 2.718281828459045
+				
+				SELECT EXP(2); // 7.38905609893065
+		
+		FLOOR()--MySQL Numeric Functions:
+		
+			The FLOOR() function returns the largest integer value that is smaller than or equal to a number.
+			
+			FLOOR(number)
+				number: Required. A numeric value
+				
+			Example
+				
+				SELECT FLOOR(25.75); // 25
+				
+				SELECT FLOOR(25); // 25
+		
+		GREATEST()--MySQL Numeric Functions:
+		
+			The GREATEST() function returns the greatest value of the list of arguments.
+			
+			GREATEST(arg1, arg2, arg3, ...)
+				Required. The list of arguments to be evaluated
+			
+			Example
+				
+				SELECT GREATEST(3, 12, 34, 8, 25); // 34
+				
+				SELECT GREATEST("w3Schools.com", "microsoft.com", "apple.com"); // w3Schools.com
+		
+		LEAST()--MySQL Numeric Functions:
+		
+			The LEAST() function returns the smallest value of the list of arguments.
+				
+			LEAST(arg1, arg2, arg3, ...)
+				arg1, arg2, arg3, ...: Required. The list of arguments to be evaluated
+			
+			Example
+				
+				SELECT LEAST(3, 12, 34, 8, 25); // 3
+				
+				SELECT LEAST("w3Schools.com", "microsoft.com", "apple.com"); // apple.com
+		
+		LN()--MySQL Numeric Functions:
+		
+			The LN() function returns the natural logarithm of a number.
+			
+			LN(number)
+				number: Required. A number. Must be greater than 0
+			
+			Example
+				
+				SELECT LN(2); // 0.6931471805599453
+				
+				SELECT LN(1); // 0
+		
+		LOG()--MySQL Numeric Functions:
+		
+			The LOG() function returns the natural logarithm of a specified number, or the logarithm of the number to the specified base.
+				
+			LOG(number)
+				number: Required. A number. Must be greater than 0
+				
+			LOG(base, number)
+				number: Required. A number. Must be greater than 0
+				base: The base of number. Must be greater than 1
+			
+			Example
+				
+				SELECT LOG(2); // 0.6931471805599453
+				
+				SELECT LOG(2, 4); // 2		
+				
+		LOG10()--MySQL Numeric Functions:
+		
+			The LOG10() function returns the natural logarithm of a number to base-10.
+			
+			LOG10(number)
+				number: A number greater than 0
+			
+			Example
+				
+				SELECT LOG10(2); // 0.3010299956639812
+				
+				SELECT LOG10(4.5); // 0.6532125137753437
+		
+		LOG2()--MySQL Numeric Functions:
+		
+			The LOG2() function returns the natural logarithm of a number to base-2.
+			
+			LOG2(number)
+				number: A number. Must be greater than 0
+			
+			Example
+				
+				SELECT LOG2(6); // 2.584962500721156
+				
+				SELECT LOG2(64); // 6
+		
+		MAX()--MySQL Numeric Functions:
+		
+			The MAX() function returns the maximum value in a set of values.
+			
+			MAX(expression)
+				expression: Required. A numeric value (can be a field or a formula)
+			
+			Example
+				
+				SELECT MAX(Price) AS LargestPrice FROM Products; // Find the price of the most expensive product in the "Products" table:
+		
+		MIN()--MySQL Numeric Functions:
+		
+			The MIN() function returns the minimum value in a set of values.
+			
+			MIN(expression)
+				expression: Required. A numeric value (can be a field or a formula)
+			
+			Example
+				SELECT MIN(Price) AS SmallestPrice FROM Products; // 2.50
+		
+		MOD()--MySQL Numeric Functions:
+		
+			The MOD() function returns the remainder of a number divided by another number.
+				MOD(x, y)
+				x MOD y
+				x % y
+				x: Required. A value that will be divided by y
+				y: Required. The divisor
+			
+			Example
+				
+				SELECT MOD(18, 4); // 2
+				
+				SELECT 18 MOD 4; // 2
+				
+				SELECT 18 % 4; // 2
+		
+		PI()--MySQL Numeric Functions:
+		
+			The PI() function returns the value of PI.
+			
+			Example
+				
+				SELECT PI(); // 3.141593
+		
+		POW()--MySQL Numeric Functions:
+		
+			The POW() function returns the value of a number raised to the power of another number.
+			
+			POW(x, y)
+				x: Required. A number (the base)
+				y: Required. A number (the exponent)
+			
+			Example
+				
+				SELECT POW(4, 2); // 16
+				
+				SELECT POW(8, 3); // 512
+		
+		POWER()--MySQL Numeric Functions:
+		
+			The POWER() function returns the value of a number raised to the power of another number.
+				
+			POWER(x, y)
+				x: Required. A number (the base)
+				y: Required. A number (the exponent)
+			
+			Example
+				
+				SELECT POWER(4, 2); // 16
+				
+				SELECT POWER(8, 3); // 512		
+				
+		RADIANS()--MySQL Numeric Functions:
+		
+			The RADIANS() function converts a degree value into radians.
+				RADIANS(number)
+					number: Required. A number in degrees
+			Example
+				SELECT RADIANS(180);
+					3.141592653589793
+				SELECT RADIANS(-45);
+					-0.7853981633974483
+		
+		RAND()--MySQL Numeric Functions:
+		
+			The RAND() function returns a random number between 0 (inclusive) and 1 (exclusive).
+				RAND(seed)
+					seed: Optional. If seed is specified, it returns a repeatable sequence of random numbers. If no seed is specified, it returns a completely random number
+			Example
+				SELECT RAND();
+					0.4184526134454204
+						Return a random decimal number (no seed value - so it returns a completely random number >= 0 and <1)
+				SELECT RAND(6);
+					0.6563190842571847
+						Return a random decimal number (with seed value of 6)
+				SELECT RAND()*(10-5)+5;
+					8.310752160205276
+						Return a random decimal number >= 5 and <10
+				SELECT FLOOR(RAND()*(10-5+1)+5);
+					10
+		
+		ROUND()--MySQL Numeric Functions:
+		
+			The ROUND() function rounds a number to a specified number of decimal places.
+				ROUND(number, decimals)
+					number: Required. The number to be rounded
+					decimals: Optional. The number of decimal places to round number to. If omitted, it returns the integer (no decimals)
+			Example
+				SELECT ROUND(135.375, 2);
+					135.38
+						Round the number to 2 decimal places
+				SELECT ROUND(345.156, 0);
+					345
+						Round the number to 0 decimal places
+				SELECT ProductName, Price, ROUND(Price, 1) AS RoundedPrice
+		FROM Products;
+					Round the Price column (to 1 decimal) in the "Products" table
+		
+		SIGN()--MySQL Numeric Functions:
+		
+			The SIGN() function returns the sign of a number.
+			This function will return one of the following:
+				If number > 0, it returns 1
+		If number = 0, it returns 0
+		If number < 0, it returns -1
+			SIGN(number)
+				number: Required. The number to return the sign for
+			Example
+				SELECT SIGN(255.5);
+					1
+				SELECT SIGN(-12);
+					-1
+		
+		SIN()--MySQL Numeric Functions:
+		
+			The SIN() function returns the sine of a number.
+				SIN(number)
+					number: Required. A numeric value
+			Example
+				SELECT SIN(2);
+					0.9092974268256817
+				SELECT SIN(-1);
+					-0.8414709848078965
+		
+		SQRT()--MySQL Numeric Functions:
+		
+			The SQRT() function returns the square root of a number.
+				SQRT(number)
+					number: Required. A number to calculate the square root of. Must be greater than 0
+			Example
+				SELECT SQRT(64);
+					8
+				SELECT SQRT(13);
+					3.605551275463989
+		
+		SUM()--MySQL Numeric Functions:
+		
+			The SUM() function calculates the sum of a set of values.
+
+		Note: NULL values are ignored.
+				SUM(expression)
+					expression: Required. A field or a formula
+			Example
+				SELECT SUM(Quantity) AS TotalItemsOrdered FROM OrderDetails;
+					51317
+						Return the sum of the "Quantity" field in the "OrderDetails" table
+		
+		TAN()--MySQL Numeric Functions:
+		
+			The TAN() function returns the tangent of a number.
+				TAN(number)
+					number: Required. A numeric value
+			Example
+				SELECT TAN(1.75);
+					-5.52037992250933
+				SELECT TAN(-3);
+					0.1425465430742778
+		
+		TRUNCATE()--MySQL Numeric Functions:
+		
+			The TRUNCATE() function truncates a number to the specified number of decimal places.
+
+			Note: See also the FLOOR(), CEIL(), CEILING(), and ROUND() functions.
+			
+			TRUNCATE(number, decimals)
+				number: Required. The number to be truncated
+				decimals: Required. The number of decimal places to truncate to
+			
+			Example
+				
+				SELECT TRUNCATE(135.375, 2); // 135.37
+				
+				SELECT TRUNCATE(345.156, 0);
+				
+				SELECT TRUNCATE(345.156, 0);		
+				
+	Date Functions--MySQL Function:
+
+		ADDDATE()--MySQL Date Functions:
+		
+			The ADDDATE() function adds a time/date interval to a date and then returns the date.
+			
+			ADDDATE(date, INTERVAL value addunit)			
+			ADDDATE(date, days)
+				date: Required.  The date to be modified
+				days: Required. The number of days to add to date
+				value: Required. The value of the time/date interval to add. Both positive and negative values are allowed
+				addunit: Required. The type of interval to add. Can be one of the following values:
+					MICROSECOND
+					SECOND
+					MINUTE
+					HOUR
+					DAY
+					WEEK
+					MONTH
+					QUARTER
+					YEAR
+					SECOND_MICROSECOND
+					MINUTE_MICROSECOND
+					MINUTE_SECOND
+					HOUR_MICROSECOND
+					HOUR_SECOND
+					HOUR_MINUTE
+					DAY_MICROSECOND
+					DAY_SECOND
+					DAY_MINUTE
+					DAY_HOUR
+					YEAR_MONTH
+			
+			Example
+				
+				SELECT ADDDATE("2017-06-15", INTERVAL 10 DAY); // 2017-06-25. Add 10 days to a date and return the date
+				
+				SELECT ADDDATE("2017-06-15 09:34:21", INTERVAL 15 MINUTE); // 2017-06-15 09:49:21. Add 15 minutes to a date and return the date
+				
+				SELECT ADDDATE("2017-06-15 09:34:21", INTERVAL -3 HOUR); // 2017-06-15 06:34:21. Subtract 3 hours to a date and return the date
+				
+				SELECT ADDDATE("2017-06-15", INTERVAL -2 MONTH); // 2017-04-15. Subtract 2 months to a date and return the date
+		
+		ADDTIME()--MySQL Date Functions:
+		
+			The ADDTIME() function adds a time interval to a time/datetime and then returns the time/datetime.
+			
+			ADDTIME(datetime, addtime)
+				datetime: Required.  The time/datetime to be modified
+				addtime: Required. The time interval to add to datetime. Both positive and negative values are allowed
+			
+			Example
+				
+				SELECT ADDTIME("2017-06-15 09:34:21", "2"); // 2017-06-15 09:34:23. Add 2 seconds to a time and return the datetime
+				
+				SELECT ADDTIME("2017-06-15 09:34:21.000001", "5.000003"); // 2017-06-15 09:34:26.000004. Add 5 seconds and 3 microseconds to a time and return the datetime
+				
+				SELECT ADDTIME("2017-06-15 09:34:21.000001", "2:10:5.000003"); // 2017-06-15 11:44:26.000004. Add 2 hours, 10 minutes, 5 seconds, and 3 microseconds to a time and return the datetime
+				
+				SELECT ADDTIME("2017-06-15 09:34:21.000001", "5 2:10:5.000003"); // 2017-06-20 11:44:26.000004. Add 5 days, 2 hours, 10 minutes, 5 seconds, and 3 microseconds to a time and return the datetime
+				
+				SELECT ADDTIME("09:34:21.000001", "2:10:5.000003"); // 11:44:26.000004. Add 2 hours, 10 minutes, 5 seconds, and 3 microseconds to a time and return the time
+		
+		CURDATE()--MySQL Date Functions:
+		
+			The CURDATE() function returns the current date.
+
+			Note: The date is returned as "YYYY-MM-DD" (string) or as YYYYMMDD (numeric).
+
+			Note: This function equals the CURRENT_DATE() function.
+				
+			CURDATE()
+			
+			Example
+				
+				SELECT CURDATE(); // 2024-04-27
+				
+				SELECT CURDATE() + 1; // 20240428
+		
+		CURRENT_DATE()--MySQL Date Functions:
+		
+			The CURRENT_DATE() function returns the current date.
+
+			Note: The date is returned as "YYYY-MM-DD" (string) or as YYYYMMDD (numeric).
+
+			Note: This function equals the CURDATE() function.
+			
+			CURRENT_DATE()
+			
+			Example
+				
+				SELECT CURRENT_DATE(); // 2024-04-27
+				
+				SELECT CURRENT_DATE() + 1; // 20240428
+		
+		CURRENT_TIME()--MySQL Date Functions:
+		
+			The CURRENT_TIME() function returns the current time.
+
+			Note: The time is returned as "HH-MM-SS" (string) or as HHMMSS.uuuuuu (numeric).
+
+			Note: This function equals the CURTIME() function.
+				
+			CURRENT_TIME()
+			
+			Example
+				
+				SELECT CURRENT_TIME(); // 23:59:32
+				
+				SELECT CURRENT_TIME() + 1; // 235947
+		
+		CURRENT_TIMESTAMP()--MySQL Date Functions:
+		
+			The CURRENT_TIMESTAMP() function returns the current date and time.
+
+			Note: The date and time is returned as "YYYY-MM-DD HH-MM-SS" (string) or as YYYYMMDDHHMMSS.uuuuuu (numeric).
+			
+			CURRENT_TIMESTAMP()
+			
+			Example
+				
+				SELECT CURRENT_TIMESTAMP(); // 2024-04-28 00:24:44
+				
+				SELECT CURRENT_TIMESTAMP() + 1; // 20240428002502
+		
+		CURTIME()--MySQL Date Functions:
+		
+			The CURTIME() function returns the current time.
+
+			Note: The time is returned as "HH-MM-SS" (string) or as HHMMSS.uuuuuu (numeric).
+
+			Note: This function equals the CURRENT_TIME() function.
+			
+			CURTIME()
+			
+			Example
+				
+				SELECT CURTIME(); // 00:26:03
+				
+				SELECT CURTIME() + 1; // 2621
+		
+		DATE()--MySQL Date Functions:
+		
+			The DATE() function extracts the date part from a datetime expression.
+			
+			DATE(expression)
+				expression: Required.  A valid date/datetime value. Returns NULL if expression is not a date or a datetime
+			
+			Example
+				
+				SELECT DATE("2017-06-15"); // 2017-06-15
+				
+				SELECT DATE("2017-06-15 09:34:21"); // 2017-06-15
+				
+				SELECT DATE("The date is 2017-06-15"); // Extract the date part (will return NULL)
+				
+				SELECT DATE(OrderDate) FROM Orders;
+		
+		DATEDIFF()--MySQL Date Functions:
+		
+			The DATEDIFF() function returns the number of days between two date values.
+			
+			DATEDIFF(date1, date2)
+				date1, date2
+					Required. Two dates to calculate the number of days between. (date1 - date2)
+			
+			Example
+				
+				SELECT DATEDIFF("2017-06-25", "2017-06-15"); // 10
+				
+				SELECT DATEDIFF("2017-06-25 09:34:21", "2017-06-15 15:25:35"); // 10
+				
+				SELECT DATEDIFF("2017-01-01", "2016-12-24"); // 8
+		
+		DATE_ADD()--MySQL Date Functions:
+		
+			The DATE_ADD() function adds a time/date interval to a date and then returns the date.
+			
+			DATE_ADD(date, INTERVAL value addunit)
+				date: Required. The date to be modified
+				value: Required. The value of the time/date interval to add. Both positive and negative values are allowed
+				addunit: Required. The type of interval to add. Can be one of the following values:
+					MICROSECOND
+					SECOND
+					MINUTE
+					HOUR
+					DAY
+					WEEK
+					MONTH
+					QUARTER
+					YEAR
+					SECOND_MICROSECOND
+					MINUTE_MICROSECOND
+					MINUTE_SECOND
+					HOUR_MICROSECOND
+					HOUR_SECOND
+					HOUR_MINUTE
+					DAY_MICROSECOND
+					DAY_SECOND
+					DAY_MINUTE
+					DAY_HOUR
+					YEAR_MONTH
+			
+			Example
+				
+				SELECT DATE_ADD("2017-06-15", INTERVAL 10 DAY); // 2017-06-25
+				
+				SELECT DATE_ADD("2017-06-15 09:34:21", INTERVAL 15 MINUTE); // 2017-06-15 09:49:21
+				
+				SELECT DATE_ADD("2017-06-15 09:34:21", INTERVAL -3 HOUR); // 2017-06-15 06:34:21
+				
+				SELECT DATE_ADD("2017-06-15", INTERVAL -2 MONTH); // 2017-04-15
+		
+		DATE_FORMAT()--MySQL Date Functions:
+		
+			The DATE_FORMAT() function formats a date as specified.
+			
+			DATE_FORMAT(date, format)
+				date: Required. The date to be formatted
+				format: Required. The format to use. Can be one or a combination of the following values:
+					%a	Abbreviated weekday name (Sun to Sat)
+					%b	Abbreviated month name (Jan to Dec)
+					%c	Numeric month name (0 to 12)
+					%D	Day of the month as a numeric value, followed by suffix (1st, 2nd, 3rd, ...)
+					%d	Day of the month as a numeric value (01 to 31)
+					%e	Day of the month as a numeric value (0 to 31)
+					%f	Microseconds (000000 to 999999)
+					%H	Hour (00 to 23)
+					%h	Hour (00 to 12)
+					%I	Hour (00 to 12)
+					%i	Minutes (00 to 59)
+					%j	Day of the year (001 to 366)
+					%k	Hour (0 to 23)
+					%l	Hour (1 to 12)
+					%M	Month name in full (January to December)
+					%m	Month name as a numeric value (00 to 12)
+					%p	AM or PM
+					%r	Time in 12 hour AM or PM format (hh:mm:ss AM/PM)
+					%S	Seconds (00 to 59)
+					%s	Seconds (00 to 59)
+					%T	Time in 24 hour format (hh:mm:ss)
+					%U	Week where Sunday is the first day of the week (00 to 53)
+					%u	Week where Monday is the first day of the week (00 to 53)
+					%V	Week where Sunday is the first day of the week (01 to 53). Used with %X
+					%v	Week where Monday is the first day of the week (01 to 53). Used with %x
+					%W	Weekday name in full (Sunday to Saturday)
+					%w	Day of the week where Sunday=0 and Saturday=6
+					%X	Year for the week where Sunday is the first day of the week. Used with %V
+					%x	Year for the week where Monday is the first day of the week. Used with %v
+					%Y	Year as a numeric, 4-digit value
+					%y	Year as a numeric, 2-digit value
+			
+			Example
+			
+				SELECT DATE_FORMAT("2017-06-15", "%Y"); // 2017
+				
+				SELECT DATE_FORMAT("2017-06-15", "%M %d %Y"); // June 15 2017
+				
+				SELECT DATE_FORMAT("2017-06-15", "%W %M %e %Y"); // Thursday June 15 2017
+				
+				SELECT DATE_FORMAT(BirthDate, "%W %M %e %Y") FROM Employees;
+		
+		DATE_SUB()--MySQL Date Functions:
+		
+			The DATE_SUB() function subtracts a time/date interval from a date and then returns the date.
+			
+			DATE_SUB(date, INTERVAL value interval)
+				date: Required. The date to be modified
+				value: Required. The value of the time/date interval to subtract. Both positive and negative values are allowed
+				interval: Required. The type of interval to subtract. Can be one of the following values:
+					MICROSECOND
+					SECOND
+					MINUTE
+					HOUR
+					DAY
+					WEEK
+					MONTH
+					QUARTER
+					YEAR
+					SECOND_MICROSECOND
+					MINUTE_MICROSECOND
+					MINUTE_SECOND
+					HOUR_MICROSECOND
+					HOUR_SECOND
+					HOUR_MINUTE
+					DAY_MICROSECOND
+					DAY_SECOND
+					DAY_MINUTE
+					DAY_HOUR
+					YEAR_MONTH
+			
+			Example
+				
+				SELECT DATE_SUB("2017-06-15", INTERVAL 10 DAY); // 2017-06-05
+				
+				SELECT DATE_SUB("2017-06-15 09:34:21", INTERVAL 15 MINUTE); // 2017-06-15 09:19:21
+				
+				SELECT DATE_SUB("2017-06-15 09:34:21", INTERVAL 3 HOUR); // 2017-06-15 06:34:21
+				
+				SELECT DATE_SUB("2017-06-15", INTERVAL -2 MONTH); // 2017-08-15			
+				
+		DAY()--MySQL Date Functions:
+		
+			The DAY() function returns the day of the month for a given date (a number from 1 to 31).
+
+			Note: This function equals the DAYOFMONTH() function.
+			
+			DAY(date)
+				date: Required. The date to extract the day from
+			
+			Example
+				
+				SELECT DAY("2017-06-15"); // 15
+				
+				SELECT DAY("2017-06-15 09:34:21"); // 15
+				
+				SELECT DAY(CURDATE()); // 28
+		
+		DAYNAME()--MySQL Date Functions:
+		
+			The DAYNAME() function returns the weekday name for a given date.
+			
+			DAYNAME(date)
+				date: Required.  The date to extract the weekday name from
+			
+			Example
+				
+				SELECT DAYNAME("2017-06-15"); // Thursday
+				
+				SELECT DAYNAME("2017-06-15 09:34:21"); // Thursday
+				
+				SELECT DAYNAME(CURDATE()); // Sunday
+		
+		DAYOFMONTH()--MySQL Date Functions:
+		
+			The DAYOFMONTH() function returns the day of the month for a given date (a number from 1 to 31).
+
+			Note: This function equals the DAY() function.
+			
+			DAYOFMONTH(date)
+				date: Required. The date to extract the day from
+			
+			Example
+				
+				SELECT DAYOFMONTH("2017-06-15"); // 15. Return the day of the month for a date
+				
+				SELECT DAYOFMONTH("2017-06-15 09:34:21"); // 15. Return the day of the month for a date
+				
+				SELECT DAYOFMONTH(CURDATE()); // 28. Return the day of the month for the current system date
+		
+		DAYOFWEEK()--MySQL Date Functions:
+		
+			The DAYOFWEEK() function returns the weekday index for a given date (a number from 1 to 7).
+
+			Note: 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday.
+			
+			DAYOFWEEK(date)
+				date: Required. The date to return the weekday index from
+			
+			Example
+				
+				SELECT DAYOFWEEK("2017-06-15"); // 5. Return the weekday index for a date
+				
+				SELECT DAYOFWEEK("2017-06-15 09:34:21"); // 5. Return the weekday index for a date
+				
+				SELECT DAYOFWEEK(CURDATE()); // 1. Return the weekday index for the current system date
+		
+		DAYOFYEAR()--MySQL Date Functions:
+		
+			The DAYOFYEAR() function returns the day of the year for a given date (a number from 1 to 366).
+			
+			DAYOFYEAR(date)
+				date: Required. The date to return the day of the year from
+			
+			Example
+				
+				SELECT DAYOFYEAR("2017-06-15"); // 166
+				
+				SELECT DAYOFYEAR("2017-01-01"); // 1
+				
+				SELECT DAYOFYEAR(CURDATE()); // 119
+		
+		EXTRACT()--MySQL Date Functions:
+		
+			The EXTRACT() function extracts a part from a given date.
+			
+			EXTRACT(part FROM date)
+				part: Required. The part to extract. Can be one of the following:
+					MICROSECOND
+					SECOND
+					MINUTE
+					HOUR
+					DAY
+					WEEK
+					MONTH
+					QUARTER
+					YEAR
+					SECOND_MICROSECOND
+					MINUTE_MICROSECOND
+					MINUTE_SECOND
+					HOUR_MICROSECOND
+					HOUR_SECOND
+					HOUR_MINUTE
+					DAY_MICROSECOND
+					DAY_SECOND
+					DAY_MINUTE
+					DAY_HOUR
+					YEAR_MONTH
+					date: Required. The date to extract a part from
+			
+			Example
+				
+				SELECT EXTRACT(MONTH FROM "2017-06-15"); // 6. Extract the month from a date
+				
+				SELECT EXTRACT(WEEK FROM "2017-06-15"); // 24. Extract the week from a date
+				
+				SELECT EXTRACT(MINUTE FROM "2017-06-15 09:34:21"); // 34. Extract the minute from a datetime
+				
+				SELECT EXTRACT(YEAR_MONTH FROM "2017-06-15 09:34:21"); // 201706. Extract the year and month from a datetime		
+		
+		FROM_DAYS()--MySQL Date Functions:
+		
+			The FROM_DAYS() function returns a date from a numeric datevalue.
+
+			The FROM_DAYS() function is to be used only with dates within the Gregorian calendar.
+
+			Note: This function is the opposite of the TO_DAYS() function.
+			
+			FROM_DAYS(number)
+				number: Required.  The numeric day to convert to a date
+			
+			Example
+				
+				SELECT FROM_DAYS(685467); // 1876-09-29. Return a date from a numeric representation of the day
+				
+				SELECT FROM_DAYS(780500); // 2136-12-08. Return a date from a numeric representation of the day
+		
+		HOUR()--MySQL Date Functions:
+		
+			The HOUR() function returns the hour part for a given date (from 0 to 838).
+			
+			HOUR(datetime)
+				datetime: Required. The datetime value to extract the hour from
+			
+			Example
+				
+				SELECT HOUR("2017-06-20 09:34:00"); // 9. Return the hour part of a datetime
+				
+				SELECT HOUR("838:59:59"); // 838. Return the hour part of a datetime
+		
+		LAST_DAY()--MySQL Date Functions:
+		
+			The LAST_DAY() function extracts the last day of the month for a given date.
+			
+			LAST_DAY(date)
+				date: Required. The date to extract the last day of the month from
+			
+			Example
+				
+				SELECT LAST_DAY("2017-06-20");// 2017-06-30. Extract the last day of the month for the given date
+				
+				SELECT LAST_DAY("2017-02-10 09:34:00"); // 2017-02-28. Extract the last day of the month for the given date
+		
+		LOCALTIME()--MySQL Date Functions:
+		
+			The LOCALTIME() function returns the current date and time.
+
+			Note: The date and time is returned as "YYYY-MM-DD HH-MM-SS" (string) or as YYYYMMDDHHMMSS.uuuuuu (numeric).
+			
+			LOCALTIME()
+			
+			Example
+				
+				SELECT LOCALTIME(); // 2024-04-28 05:41:40. Return current date and time
+				
+				SELECT LOCALTIME() + 1; // 20240428054211. Return current date and time + 1
+		
+		LOCALTIMESTAMP()--MySQL Date Functions:
+		
+			The LOCALTIMESTAMP() function returns the current date and time.
+
+			Note: The date and time is returned as "YYYY-MM-DD HH-MM-SS" (string) or as YYYYMMDDHHMMSS.uuuuuu (numeric).
+			
+			LOCALTIMESTAMP()
+			
+			Example
+				
+				SELECT LOCALTIMESTAMP(); // 2024-04-28 05:45:00. Return current date and time
+				
+				SELECT LOCALTIMESTAMP() + 1; // 20240428055460. Return current date and time + 1
+		
+		MAKEDATE()--MySQL Date Functions:
+		
+			The MAKEDATE() function creates and returns a date based on a year and a number of days value.
+			
+			MAKEDATE(year, day)
+				year: Required. A year (4-digits)
+				day: Required. A number that indicates the day of the year
+			
+			Example
+				
+				SELECT MAKEDATE(2017, 3); // 2017-01-03.Create and return a date based on  a year and a number of days value
+				
+				SELECT MAKEDATE(2017, 175); // 2017-06-24
+				
+				SELECT MAKEDATE(2017, 100); // 2017-04-10
+				
+				SELECT MAKEDATE(2017, 366); // 2018-01-01
+		
+		MAKETIME()--MySQL Date Functions:
+		
+			The MAKETIME() function creates and returns a time based on an hour, minute, and second value.
+			
+			MAKETIME(hour, minute, second)
+				hour: Required. The hour value
+				minute: Required. The minute value
+				second: Required. The seconds value
+			
+			Example
+				
+				SELECT MAKETIME(11, 35, 4); // 11:35:04. Create and return a time value based on an hour, minute, and second value
+				
+				SELECT MAKETIME(16, 1, 0); // 16:01:00
+				
+				SELECT MAKETIME(21, 59, 59); // 21:59:59
+				
+				SELECT MAKETIME(838, 59, 59); // 838:59:59			
+				
+		MICROSECOND()--MySQL Date Functions:
+		
+			The MICROSECOND() function returns the microsecond part of a time/datetime (from 0 to 999999).
+			
+			MICROSECOND(datetime)
+				datetime: Required. The time or datetime to extract the microsecond from
+			
+			Example
+				
+				SELECT MICROSECOND("2017-06-20 09:34:00.000023"); // 23. Return the microsecond part of a datetime
+				
+				SELECT MICROSECOND("23:59:59.000045"); // 45
+		
+		MINUTE()--MySQL Date Functions:
+		
+			The MINUTE() function returns the minute part of a time/datetime (from 0 to 59).
+			
+			MINUTE(datetime)
+				datetime: Required. The time or datetime extract the minute from
+			
+			Example
+				
+				SELECT MINUTE("2017-06-20 09:34:00"); // 34. Return the minute part of a datetime value
+				
+				SELECT MINUTE("23:59:59"); // 59
+		
+		MONTH()--MySQL Date Functions:
+		
+			The MONTH() function returns the month part for a given date (a number from 1 to 12).
+			
+			MONTH(date)
+				date: Required. The date or datetime to extract the month from
+			
+			Example
+				
+				SELECT MONTH("2017-06-15"); // 6
+				
+				SELECT MONTH("2017-06-15 09:34:21"); // 6
+		
+		MONTHNAME()--MySQL Date Functions:
+		
+			The MONTHNAME() function returns the name of the month for a given date.
+			
+			MONTHNAME(date)
+				date: Required. The date or datetime value to extract the month name from 
+			
+			Example
+				
+				SELECT MONTHNAME("2017-06-15"); // June
+				
+				SELECT MONTHNAME("2017-06-15 09:34:21"); // June
+				
+				SELECT MONTHNAME(CURDATE()); // April
+		
+		NOW()--MySQL Date Functions:
+		
+			The NOW() function returns the current date and time.
+
+			Note: The date and time is returned as "YYYY-MM-DD HH:MM:SS" (string) or as YYYYMMDDHHMMSS.uuuuuu (numeric).
+			
+			NOW()
+			
+			Example
+				
+				SELECT NOW(); // 2024-04-28 07:17:26
+				
+				SELECT NOW() + 1; // 20240428071748
+		
+		PERIOD_ADD()--MySQL Date Functions:
+		
+			The PERIOD_ADD() function adds a specified number of months to a period.
+
+			The PERIOD_ADD() function will return the result formatted as YYYYMM.
+			
+			PERIOD_ADD(period, number)
+				period: Required. A period. Format: YYMM or YYYYMM
+				number: Required. The number of months to add to period. Both positive and negative values are allowed
+			
+			Example
+				
+				SELECT PERIOD_ADD(201703, 5); // 201708. Add a specified number of months to a period
+				
+				SELECT PERIOD_ADD(201703, 15); // 201806
+				
+				SELECT PERIOD_ADD(201703, -2);
+				
+				SELECT PERIOD_ADD(201703, -2);
+		
+		PERIOD_DIFF()--MySQL Date Functions:
+		
+			The PERIOD_DIFF() function returns the difference between two periods. The result will be in months.
+
+			Note: period1 and period2 should be in the same format.
+			
+			PERIOD_DIFF(period1, period2)
+				period1: Required. A period. Format: YYMM or YYYYMM
+				period2: Required. Another period. Format: YYMM or YYYYMM
+			
+			Example
+				
+				SELECT PERIOD_DIFF(201710, 201703); // 7. Return the difference between two periods
+				
+				SELECT PERIOD_DIFF(201703, 201803); // -12
+				
+				SELECT PERIOD_DIFF(1703, 1612);3					
+				
+		QUARTER()--MySQL Date Functions:
+			
+			The QUARTER() function returns the quarter of the year for a given date value (a number from 1 to 4).
+				January-March returns 1
+				April-June returns 2
+				July-Sep returns 3
+				Oct-Dec returns 4
+			
+			QUARTER(date)
+				date: Required. The date or datetime to extract the quarter from
+			
+			Example
+				
+				SELECT QUARTER("2017-06-15"); // 2
+				
+				SELECT QUARTER("2017-01-01 09:34:21"); // 1
+				
+				SELECT QUARTER(CURDATE()); // 2
+		
+		SECOND()--MySQL Date Functions:
+			
+			The SECOND() function returns the seconds part of a time/datetime (from 0 to 59).
+			
+			SECOND(datetime)
+				datetime: Required. The time or datetime to extract the second from
+			
+			Example
+				
+				SELECT SECOND("2017-06-20 09:34:00.000023"); // 0
+				
+				SELECT SECOND("23:59:59"); // 59
+		
+		SEC_TO_TIME()--MySQL Date Functions:
+		
+			The SEC_TO_TIME() function returns a time value (in format HH:MM:SS) based on the specified seconds.
+			
+			SEC_TO_TIME(seconds)
+				seconds: Required. The number of seconds. Both positive or negative values are allowed
+			
+			Example
+				
+				SELECT SEC_TO_TIME(1); // 00:00:01
+				
+				SELECT SEC_TO_TIME(-6897); // -01:54:57
+		
+		STR_TO_DATE()--MySQL Date Functions:
+		
+			The STR_TO_DATE() function returns a date based on a string and a format.
+			
+			STR_TO_DATE(string, format)
+				string: Required. The string to be formatted to a date
+				format: Required. The format to use. Can be one or a combination of the following values:
+					%a	Abbreviated weekday name (Sun to Sat)
+					%b	Abbreviated month name (Jan to Dec)
+					%c	Numeric month name (0 to 12)
+					%D	Day of the month as a numeric value, followed by suffix (1st, 2nd, 3rd, ...)
+					%d	Day of the month as a numeric value (01 to 31)
+					%e	Day of the month as a numeric value (0 to 31)
+					%f	Microseconds (000000 to 999999)
+					%H	Hour (00 to 23)
+					%h	Hour (00 to 12)
+					%I	Hour (00 to 12)
+					%i	Minutes (00 to 59)
+					%j	Day of the year (001 to 366)
+					%k	Hour (0 to 23)
+					%l	Hour (1 to 12)
+					%M	Month name in full (January to December)
+					%m	Month name as a numeric value (01 to 12)
+					%p	AM or PM
+					%r	Time in 12 hour AM or PM format (hh:mm:ss AM/PM)
+					%S	Seconds (00 to 59)
+					%s	Seconds (00 to 59)
+					%T	Time in 24 hour format (hh:mm:ss)
+					%U	Week where Sunday is the first day of the week (00 to 53)
+					%u	Week where Monday is the first day of the week (00 to 53)
+					%V	Week where Sunday is the first day of the week (01 to 53). Used with %X
+					%v	Week where Monday is the first day of the week (01 to 53). Used with %X
+					%W	Weekday name in full (Sunday to Saturday)
+					%w	Day of the week where Sunday=0 and Saturday=6
+					%X	Year for the week where Sunday is the first day of the week. Used with %V
+					%x	Year for the week where Monday is the first day of the week. Used with %V
+					%Y	Year as a numeric, 4-digit value
+					%y	Year as a numeric, 2-digit value
+			
+			Example
+				
+				SELECT STR_TO_DATE("August 10 2017", "%M %d %Y"); // 2017-08-10
+				
+				SELECT STR_TO_DATE("August,5,2017", "%M %e %Y");
+				
+				SELECT STR_TO_DATE("Monday, August 14, 2017", "%W %M %e %Y");
+				
+				SELECT STR_TO_DATE("2017,8,14 10,40,10", "%Y,%m,%d %h,%i,%s"); // 2017-08-14 10:40:10
+		
+		SUBDATE()--MySQL Date Functions:
+		
+			The SUBDATE() function subtracts a time/date interval from a date and then returns the date.
+			
+			SUBDATE(date, INTERVAL value unit)			
+			SUBDATE(date, days)
+				date: Required. The original date
+				days: Required. The number of days to subtract from date
+				value: Required. The value of the time/date interval to subtract. Both positive and negative values are allowed
+				unit: Required. The type of interval. Can be one of the following values:
+					MICROSECOND
+					SECOND
+					MINUTE
+					HOUR
+					DAY
+					WEEK
+					MONTH
+					QUARTER
+					YEAR
+					SECOND_MICROSECOND
+					MINUTE_MICROSECOND
+					MINUTE_SECOND
+					HOUR_MICROSECOND
+					HOUR_SECOND
+					HOUR_MINUTE
+					DAY_MICROSECOND
+					DAY_SECOND
+					DAY_MINUTE
+					DAY_HOUR
+					YEAR_MONTH
+			
+			Example
+				
+				SELECT SUBDATE("2017-06-15", INTERVAL 10 DAY); // 2017-06-05. Subtract 10 days from a date and return the date
+				
+				SELECT SUBDATE("2017-06-15 09:34:21", INTERVAL 15 MINUTE); // 2017-06-15 09:19:21
+				
+				SELECT SUBDATE("2017-06-15 09:34:21", INTERVAL 3 HOUR); // 2017-06-15 06:34:21
+				
+				SELECT SUBDATE("2017-06-15", INTERVAL -2 MONTH); // 2017-08-15
+		
+		SUBTIME()--MySQL Date Functions:
+		
+			The SUBTIME() function subtracts time from a time/datetime expression and then returns the new time/datetime.
+			
+			SUBTIME(datetime, time_interval)
+				datetime: Required. The time or datetime to be modified
+				time_interval: Required. The time interval to subtract from datetime. Both positive and negative values are allowed
+			
+			Example
+				
+				SELECT SUBTIME("2017-06-15 10:24:21.000004", "5.000001"); // 2017-06-15 10:24:16.000003. Subtract 5.000001 seconds and return the datetime
+				
+				SELECT SUBTIME("2017-06-15 10:24:21.000004", "3:2:5.000001"); // 2017-06-15 07:22:16.000003. Subtract 3 hours, 2 minutes, 5.000001 seconds and return the datetime
+				
+				SELECT SUBTIME("10:24:21", "5"); // 10:24:16. Subtract 5 seconds and return the time
+				
+				SELECT SUBTIME("10:24:21", "300"); // 10:21:21. Subtract 3 minutes and return the time
+				
+				SELECT SUBTIME("10:24:21", "-3:2:5"); // 13:26:26					
+				
+		SYSDATE()--MySQL Date Functions:
+		
+			The SYSDATE() function returns the current date and time.
+
+			Note: The date and time is returned as "YYYY-MM-DD HH:MM:SS" (string) or as YYYYMMDDHHMMSS (numeric).
+			
+			SYSDATE()
+			
+			Example
+				
+				SELECT SYSDATE(); // 2024-04-28 08:21:41. Return the current date and time
+				
+				SELECT SYSDATE() + 1; // 20240428082205. Return the current date and time + 1
+		
+		TIME()--MySQL Date Functions:
+		
+			The TIME() function extracts the time part from a given time/datetime.
+
+			Note: This function returns "00:00:00" if expression is not a datetime/time, or NULL if expression is NULL.
+			
+			TIME(expression)
+				expression: Required. The time/datetime to extract the time from
+			
+			Example
+				
+				SELECT TIME("19:30:10"); // 19:30:10. Extract the time part from a time expression
+				
+				SELECT TIME("2017-08-15 19:30:10"); // 19:30:10
+				
+				SELECT TIME("2017-08-15 19:30:10.000001"); // 19:30:10.000001
+				
+				SELECT TIME(NULL);
+		
+		TIME_FORMAT()--MySQL Date Functions:
+		
+			The TIME_FORMAT() function formats a time by a specified format.
+			
+			TIME_FORMAT(time, format)
+				time: Required. The time to be formatted
+				format: Required. The format to use. Can be one or a combination of the following:
+					%f	Microseconds (000000 to 999999)
+					%H	Hour (00 to 23)
+					%h	Hour (00 to 12)
+					%I	Hour (00 to 12)
+					%i	Minutes (00 to 59)
+					%p	AM or PM
+					%r	Time in 12 hour AM or PM format (hh:mm:ss AM/PM)
+					%S	Seconds (00 to 59)
+					%s	Seconds (00 to 59)
+					%T	Time in 24 hour format (hh:mm:ss)
+			
+			Example
+				
+				SELECT TIME_FORMAT("19:30:10", "%H %i %s"); // 19 30 10
+				
+				SELECT TIME_FORMAT("19:30:10", "%h %i %s %p"); // 07 30 10 PM
+				
+				SELECT TIME_FORMAT("19:30:10", "%r"); // 07:30:10 PM
+				
+				SELECT TIME_FORMAT("19:30:10", "%T"); // 19:30:10
+		
+		TIME_TO_SEC()--MySQL Date Functions:
+		
+			The TIME_TO_SEC() function converts a time value into seconds.
+			
+			TIME_TO_SEC(time)
+				time: Required. The time value
+			
+			Example
+				
+				SELECT TIME_TO_SEC("19:30:10"); // 70210. Convert a time value into seconds
+				
+				SELECT TIME_TO_SEC("00:00:05"); // 5
+				
+				SELECT TIME_TO_SEC("03:30:00.999999"); // 12600
+				
+				SELECT TIME_TO_SEC("-03:30:00"); // -12600
+		
+		TIMEDIFF()--MySQL Date Functions:
+		
+			The TIMEDIFF() function returns the difference between two time/datetime expressions.
+
+			Note: time1 and time2 should be in the same format, and the calculation is time1 - time2.
+				
+			TIMEDIFF(time1, time2)
+				time1: Required. A time value
+				time2: Required. Another time value
+			
+			Example
+				
+				SELECT TIMEDIFF("13:10:11", "13:10:10"); // 00:00:01
+				
+				SELECT TIMEDIFF("2017-06-25 13:10:11", "2017-06-15 13:10:10"); // 240:00:01
+		
+		TIMESTAMP()--MySQL Date Functions:
+		
+			The TIMESTAMP() function returns a datetime value based on a date or datetime value.
+
+			Note: If there are specified two arguments with this function, it first adds the second argument to the first, and then returns a datetime value.
+			
+			TIMESTAMP(expression, time)
+				expression: Required. A date or datetime value
+				time: Optional. A time value to add to expression
+			
+			Example
+				
+				SELECT TIMESTAMP("2017-07-23",  "13:10:11"); // 2017-07-23 13:10:11
+				
+				SELECT TIMESTAMP("2017-07-23"); // 2017-07-23 00:00:00
+		
+		TO_DAYS()--MySQL Date Functions:
+		
+			The TO_DAYS() function returns the number of days between a date and year 0 (date "0000-00-00").
+
+			The TO_DAYS() function can be used only with dates within the Gregorian calendar.
+
+			Note: This function is the opposite of the FROM_DAYS() function.
+			
+			TO_DAYS(date)
+				date: Required. The given date
+			
+			Example
+			
+				SELECT TO_DAYS("2017-06-20"); // 736865. Return the number of days between the date and year 0
+				
+				SELECT TO_DAYS("2017-06-20 09:34:00"); // 736865					
+				
+		WEEK()--MySQL Date Functions:
+		
+			The WEEK() function returns the week number for a given date (a number from 0 to 53).
+			
+			WEEK(date, firstdayofweek)
+				date: Required.  The date or datetime to extract the week number form
+				firstdayofweek: Optional. Specifies what day the week starts on. Can be one of the following:
+					0 - First day of week is Sunday
+					1 - First day of week is Monday and the first week of the year has more than 3 days
+					2 - First day of week is Sunday
+					3 - First day of week is Monday and the first week of the year has more than 3 days
+					4 - First day of week is Sunday and the first week of the year has more than 3 days
+					5 - First day of week is Monday
+					6 - First day of week is Sunday and the first week of the year has more than 3 days
+					7 - First day of week is Monday
+			
+			Example
+			
+				SELECT WEEK("2017-06-15"); // 24. Return the week number for a date
+				
+				SELECT WEEK("2017-10-25"); // 43
+				
+				SELECT WEEK(CURDATE()); // 17. Return the week number for the current system date
+		
+		WEEKDAY()--MySQL Date Functions:
+		
+			The WEEKDAY() function returns the weekday number for a given date.
+
+			Note: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday.
+			
+			WEEKDAY(date)
+				date: Required.  The date or datetime to extract the weekday number from
+			
+			Example
+				
+				SELECT WEEKDAY("2017-06-15"); // 3
+				
+				SELECT WEEKDAY("2017-01-01"); // 6
+				
+				SELECT WEEKDAY(CURDATE()); // 0
+		
+		WEEKOFYEAR()--MySQL Date Functions:
+		
+			The WEEKOFYEAR() function returns the week number for a given date (a number from 1 to 53).
+
+			Note: This function assumes that the first day of the week is Monday and the first week of the year has more than 3 days.
+			
+			WEEKOFYEAR(date)
+			
+			Example
+				
+				SELECT WEEKOFYEAR("2017-06-15"); // 24
+				
+				SELECT WEEKOFYEAR("2017-01-01"); // 52
+				
+				SELECT WEEKOFYEAR(CURDATE()); // 18
+		
+		YEAR()--MySQL Date Functions:
+		
+			The YEAR() function returns the year part for a given date (a number from 1000 to 9999).
+			
+			YEAR(date)
+				date: Required.  The date/datetime to extract the year from
+			
+			Example
+				
+				SELECT YEAR("2017-06-15"); // 2017
+				
+				SELECT YEAR("2017-06-15 09:34:21"); // 2017
+				
+				SELECT YEAR(CURDATE()); // 2024
+		
+		YEARWEEK()--MySQL Date Functions:
+		
+			The YEARWEEK() function returns the year and week number (a number from 0 to 53) for a given date.
+			
+			YEARWEEK(date, firstdayofweek)
+				date: Required.  The date or datetime value to extract the year and week number from
+				firstdayofweek
+					Optional. Specifies what day the week starts on. Can be one of the following:
+						0 - First day of week is Sunday
+						1 - First day of week is Monday and the first week has more than 3 days
+						2 - First day of week is Sunday
+						3 - First day of week is Monday and the first week has more than 3 days
+						4 - First day of week is Sunday and the first week has more than 3 days
+						5 - First day of week is Monday
+						6 - First day of week is Sunday and the first week has more than 3 days
+						7 - First day of week is Monday
+			
+			Example
+				
+				SELECT YEARWEEK("2017-06-15"); // 201724. Return the year and week number for a date
+				
+				SELECT YEARWEEK("2017-10-25"); // 201743
+				
+				SELECT YEARWEEK(CURDATE()); // 202417					
+				
+	Advanced Functions--MySQL Function:
+
+		BIN()--MySQL Advanced Functions:
+			
+			The BIN() function returns a binary representation of a number, as a string value.
+			
+			BIN(number)
+				number: Required. A number
+			
+			Example
+				
+				SELECT BIN(15); // 1111
+				
+				SELECT BIN(111); // 1101111
+				
+				SELECT BIN(8); // 1000			
+				
+		BINARY--MySQL Function:
+		
+			The BINARY function converts a value to a binary string.
+
+			This function is equivalent to using CAST(value AS BINARY).
+			
+			BINARY value
+				value: Required. The value to convert
+			
+			Example
+				
+				SELECT BINARY "W3Schools.com"; // W3Schools.com
+				
+				SELECT "HELLO" = "hello"; // 1. Here MySQL performs a character-by-character comparison of  "HELLO" and "hello" and return 1 (because on a character-by-character basis, they are equivalent)
+				
+				SELECT BINARY "HELLO" = "hello"; // 0
+		
+		CASE--MySQL Function:
+		
+			The CASE statement goes through conditions and return a value when the first condition is met (like an IF-THEN-ELSE statement). So, once a condition is true, it will stop reading and return the result.
+
+			If no conditions are true, it will return the value in the ELSE clause.
+
+			If there is no ELSE part and no conditions are true, it returns NULL.
+			
+			CASE
+				WHEN condition1 THEN result1
+				WHEN condition2 THEN result2
+				WHEN conditionN THEN resultN
+				ELSE result
+			END;
+					condition1, condition2, ...conditionN: Required. The conditions. These are evaluated in the same order as they are listed
+					result1, result2, ...resultN: Required. The value to return once a condition is true
+			
+			Example
+				
+				// Go through conditions and return a value when the first condition is met
+				SELECT OrderID, Quantity,
+				CASE
+					WHEN Quantity > 30 THEN "The quantity is greater than 30"
+					WHEN Quantity = 30 THEN "The quantity is 30"
+					ELSE "The quantity is under 30"
+				END
+				FROM OrderDetails;
+						
+				SELECT CustomerName, City, Country
+				FROM Customers
+				ORDER BY
+				(CASE
+					WHEN City IS NULL THEN Country
+					ELSE City
+				END);
+			
+		CAST()--MySQL Function:
+			
+			The CAST() function converts a value (of any type) into the specified datatype.
+
+			Tip: See also the CONVERT() function.
+			
+			CAST(value AS datatype)
+				value: Required. The value to convert
+				datatype: Required. The datatype to convert to. Can be one of the following:
+					DATE	Converts value to DATE. Format: "YYYY-MM-DD"
+					DATETIME	Converts value to DATETIME. Format: "YYYY-MM-DD HH:MM:SS"
+					DECIMAL	Converts value to DECIMAL. Use the optional M and D parameters to specify the maximum number of digits (M) and the number of digits following the decimal point (D).
+					TIME	Converts value to TIME. Format: "HH:MM:SS"
+					CHAR	Converts value to CHAR (a fixed length string)
+					NCHAR	Converts value to NCHAR (like CHAR, but produces a string with the national character set)
+					SIGNED	Converts value to SIGNED (a signed 64-bit integer)
+					UNSIGNED	Converts value to UNSIGNED (an unsigned 64-bit integer)
+					BINARY	Converts value to BINARY (a binary string)
+			
+			Example
+				
+				SELECT CAST("2017-08-29" AS DATE); // 2017-08-29. Convert a value to a DATE datatype
+				
+				SELECT CAST(150 AS CHAR); // 150. Convert a value to a CHAR datatype
+				
+				SELECT CAST("14:06:10" AS TIME); // 14:06:10. Convert a value to a TIME datatype
+				
+				SELECT CAST(5-10 AS SIGNED); // -5. Convert a value to a SIGNED datatype
+		
+		COALESCE()--MySQL Function:
+		
+			- The COALESCE() function returns the first non-null value in a list.
+			- Khi :groups là một mảng rỗng, thì COALESCE(:groups) sẽ trả về NULL
+			
+			COALESCE(val1, val2, ...., val_n)
+				val1, val2, val_n: Required. The values to test
+			
+			Example
+				
+				SELECT COALESCE(NULL, NULL, NULL, 'W3Schools.com', NULL, 'Example.com'); // W3Schools.com. Return the first non-null value in a list
+				
+				SELECT COALESCE(NULL, 1, 2, 'W3Schools.com'); // 1
+		
+		CONNECTION_ID()--MySQL Function:
+		
+			The CONNECTION_ID() function returns the unique connection ID for the current connection.
+			
+			CONNECTION_ID()
+			
+			Example
+				
+				SELECT CONNECTION_ID(); // 3002772. Return the unique connection ID for the current connection
+		
+		CONV()--MySQL Function:
+		
+			The CONV() function converts a number from one numeric base system to another, and returns the result as a string value.
+
+			Note: This function returns NULL if any of the parameters are NULL.
+			
+			CONV(number, from_base, to_base)
+				number: Required. A number
+				from_base: The numeric base system of number (a number between 2 and 36)
+				to_base
+					The numeric base system to convert to (a number between 2 and 36 or -2 and -36)
+			
+			Example
+				
+				SELECT CONV(15, 10, 2); // 1111. Convert a number from numeric base system 10 to numeric base system 2
+				
+				SELECT CONV(1111, 2, 10); // 15. Convert a number from numeric base system 2 to numeric base system 10
+				
+				SELECT CONV(88, 10, 16); // 58. Convert a number from numeric base system 10 to numeric base system 16
+		
+		CONVERT()--MySQL Function:
+		
+			The CONVERT() function converts a value into the specified datatype or character set.
+			
+			CONVERT(value, type)
+				CONVERT(value USING charset)
+				value: Required. The value to convert
+				type: Required. The datatype to convert to. Can be one of the following:
+					DATE	Converts value to DATE. Format: "YYYY-MM-DD"
+					DATETIME	Converts value to DATETIME. Format: "YYYY-MM-DD HH:MM:SS"
+					DECIMAL	Converts value to DECIMAL. Use the optional M and D parameters to specify the maximum number of digits (M) and the number of digits following the decimal point (D).
+					TIME	Converts value to TIME. Format: "HH:MM:SS"
+					CHAR	Converts value to CHAR (a fixed length string)
+					NCHAR	Converts value to NCHAR (like CHAR, but produces a string with the national character set)
+					SIGNED	Converts value to SIGNED (a signed 64-bit integer)
+					UNSIGNED	Converts value to UNSIGNED (an unsigned 64-bit integer)
+					BINARY	Converts value to BINARY (a binary string)
+				charset: Required. The character set to convert to
+			
+			Example
+				
+				SELECT CONVERT("2017-08-29", DATE); // 2017-08-29. Convert a value to a DATE datatype
+				
+				SELECT CONVERT(150, CHAR); // 150. Convert a value to a CHAR datatype
+				
+				SELECT CONVERT("14:06:10", TIME); // 14:06:10. Convert a value to a TIME datatype
+				
+				SELECT CONVERT("W3Schools.com" USING latin1); // W3Schools.com.Convert a value to LATIN1 character set					
+				
+		CURRENT_USER()--MySQL Function:
+		
+			The CURRENT_USER() function returns the user name and host name for the MySQL account that the server used to authenticate the current client.
+
+			The result is returned as a string in the UTF8 character set.
+			
+			CURRENT_USER()
+			
+			Example
+				
+				SELECT CURRENT_USER(); // guest@%
+					
+		DATABASE()--MySQL Function:
+		
+			The DATABASE() function returns the name of the current database.
+
+			If there is no current database, this function returns NULL or "".
+			
+			DATABASE()
+			
+			Example
+				
+				SELECT DATABASE(); // northwind
+		
+		IF()--MySQL Function:
+		
+			The IF() function returns a value if a condition is TRUE, or another value if a condition is FALSE.
+			
+			IF(condition, value_if_true, value_if_false)
+				condition: Required. The value to test
+				value_if_true: Required. The value to return if condition is TRUE
+				value_if_false: Required. The value to return if condition is FALSE
+			
+			Example
+				
+				SELECT IF(500<1000, "YES", "NO"); // YES
+				
+				SELECT IF(500<1000, 5, 10); // 5
+				
+				SELECT IF(STRCMP("hello","bye") = 0, "YES", "NO"); // NO. Test whether two strings are the same and return "YES" if they are, or "NO" if not
+				
+				// Return "MORE" if the condition is TRUE, or "LESS" if the condition is FALSE
+				SELECT OrderID, Quantity, IF(Quantity>10, "MORE", "LESS")
+				FROM OrderDetails;					
+		
+		IFNULL()--MySQL Function:
+		
+			The IFNULL() function returns a specified value if the expression is NULL.
+
+			If the expression is NOT NULL, this function returns the expression.
+			
+			IFNULL(expression, alt_value)
+				expression: Required. The expression to test whether is NULL
+				alt_value: Required. The value to return if expression is NULL
+			
+			Example
+				
+				SELECT IFNULL(NULL, "W3Schools.com"); // W3Schools.com. Return the specified value IF the expression is NULL, otherwise return the expression
+				
+				SELECT IFNULL("Hello", "W3Schools.com"); // Hello
+				
+				SELECT IFNULL(NULL, 500); // 500
+		
+		ISNULL()--MySQL Function:
+		
+			The ISNULL() function returns 1 or 0 depending on whether an expression is NULL.
+
+			If expression is NULL, this function returns 1. Otherwise, it returns 0.
+				
+			ISNULL(expression)
+				expression: Required. The value to test
+			
+			Example
+				
+				SELECT ISNULL(NULL); // 1
+				
+				SELECT ISNULL(""); // 0
+				
+				SELECT ISNULL(350); // 0
+				
+				SELECT ISNULL("Hello world!"); // 0
+		
+		LAST_INSERT_ID()--MySQL Function:
+		
+			The LAST_INSERT_ID() function returns the AUTO_INCREMENT id of the last row that has been inserted or updated in a table.
+				
+			LAST_INSERT_ID(expression)
+				expression: Optional. An expression
+			
+			Example
+				
+				SELECT LAST_INSERT_ID(); // 0
+		
+		NULLIF()--MySQL Function:
+		
+			The NULLIF() function compares two expressions and returns NULL if they are equal. Otherwise, the first expression is returned.
+			
+			NULLIF(expr1, expr2)
+				expr1, expr2: Required. The two expressions to be compared
+			
+			Example
+				
+				SELECT NULLIF(25, 25);
+				
+				SELECT NULLIF(25, "Hello"); // 25
+				
+				SELECT NULLIF("Hello", "world"); // Hello
+				
+				SELECT NULLIF("2017-08-25", "2017-08-25");
+		
+		SESSION_USER()--MySQL Function:
+		
+			The SESSION_USER() function returns the current user name and host name for the MySQL connection.
+
+			Note: This function is equal to the SYSTEM_USER() and the USER() function.
+			
+			SESSION_USER()
+			
+			Example
+				
+				SELECT SESSION_USER(); // guest@35.192.20.199					
+				
+		SYSTEM_USER()--MySQL Function:
+			
+			The SYSTEM_USER() function returns the current user name and host name for the MySQL connection.
+
+			Note: This function is equal to the SESSION_USER() function and the USER() function.
+			
+			SYSTEM_USER()
+			
+			Example
+				
+				SELECT SYSTEM_USER(); // guest@35.192.20.199
+		
+		USER()--MySQL Function:
+			
+			The USER() function returns the current user name and host name for the MySQL connection.
+
+			Note: This function is equal to the SESSION_USER() function and the SYSTEM_USER() function.
+			
+			USER()
+			
+			Example
+				
+				guest@35.192.20.199 // Return the current user name and host name for the MySQL connection
+		
+		VERSION()--MySQL Function:
+		
+			The VERSION() function returns the current version of the MySQL database, as a string.
+			
+			VERSION()
+			
+			Example
+				
+				SELECT VERSION(); // 5.7.44		

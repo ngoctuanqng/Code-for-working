@@ -1,0 +1,59 @@
+Select--MUI:
+		<FormControl sx={{ margin: "8px 16px 8px 8px", minWidth: 120 }} className="checkbox">
+			<InputLabel id="demo-controlled-open-select-label">Project Name</InputLabel>
+			<Select
+			  labelId="demo-multiple-checkbox-label"
+			  id="demo-multiple-checkbox"
+			  multiple
+			  value={searchProject}
+			  onChange={(event) => {
+				if (event.target.value.includes("All")) {
+				  setSearchProject(listProName?.map(item => item?.pme00ProjectInfo?.cdV));
+				} else {
+				  setSearchProject(event.target.value);
+				}
+			  }}
+			  renderValue={(selected) => {
+				const selectedValue = selected.map(item => {
+				  const selectedItem = listProName.find(e => e?.pme00ProjectInfo?.cdV === item);
+				  return selectedItem ? selectedItem?.m00Codes030?.cdvMeaning : ""
+				});
+				return selectedValue.join(", ");
+			  }}
+			  MenuProps={MenuProps}
+			  style={{ width: '358px', height: '40px', backgroundColor: 'white'}}
+			  label="Project Name"
+			>
+			  <MenuItem value={searchAllProject}>
+				<Checkbox
+				  checked={searchProject?.length === listProName?.length} 
+				  onChange={(e) => {
+					if (!e.target.checked) {
+					  setSearchProject([]);
+					}
+				  }}
+				/>
+				<ListItemText primary="All" />
+			  </MenuItem>
+			  {listProName?.map((field) => {
+				return (
+				  <MenuItem key={field?.pme00ProjectInfo?.cdV} value={field?.pme00ProjectInfo?.cdV}>
+					<Checkbox
+					  checked={searchProject?.length === listProName?.length || searchProject?.indexOf(field?.pme00ProjectInfo?.cdV) > -1} />
+					<ListItemText primary={field?.m00Codes030?.cdvMeaning} />
+				  </MenuItem>
+				);
+			  })}
+			</Select>
+		</FormControl>
+		
+		const ITEM_HEIGHT = 48;
+		const ITEM_PADDING_TOP = 4;
+		const MenuProps = {
+			PaperProps: {
+			  style: {
+				maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+				width: 200,
+			  },
+			},
+		};

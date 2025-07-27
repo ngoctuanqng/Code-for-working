@@ -1,0 +1,34 @@
+PieChart--MUI:
+		<PieChart
+			colors={[
+			  "#0d57f7",
+			  "#ffa500cc",
+			  "#64c864cc",
+			  "#00bfff",
+			  "#008000cc",
+			  "#8B008B",
+			  "pink",
+			]}
+			series={[
+			  {
+				data: [
+				  { value: [totalNewTasks], label: "New" },
+				  {
+					value: [totalInProgressTasks],
+					label: "In Progress",
+				  },
+				  { value: [totalTestingTasks], label: "Testing" },
+				  { value: [totalDeliveredTasks], label: "Delivered" },
+				  { value: [totalCompletedTasks], label: "Completed" },
+				  { value: [totalCancelTasks], label: "Cancel" },
+				],
+				innerRadius: 80,
+				cx: 150,
+				cy: 110,
+			  },
+			]}
+			margin={{ right: 50 }}
+			width={450}
+			height={250}>
+			<PieCenterLabel>{totalTask} Task(s)</PieCenterLabel>
+		</PieChart>

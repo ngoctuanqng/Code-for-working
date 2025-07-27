@@ -1,0 +1,511 @@
+Các hàm trong Oracle--Oracle:
+	String/Char Functions
+		ASCII( single_character ):
+												Trong Oracle hàm ASCII dùng để lấy số thứ tự nằm trong bảng mã ASCI của một kí tự bất kì, nghĩa là bạn truyền kí tự vào và nó sẽ trả về số thứ tự của ký tự đó trong bảng mã
+												ASCII.
+		
+												SELECT ASCII('c') AS ASCII_NUMBER
+												
+												ASCII('t')
+												Result: 116
+												
+												ASCII('T')
+												Result: 84
+												
+												ASCII('T2')
+												Result: 84
+		ASCIISTR( string ):
+												Hàm ASCIISTR dùng để chuyển đổi các ký tự đặc biệt trong một chuỗi bất kì thành chuỗi kí tự trong bảng mã ASCII bằng cách sử dụng kiểu ký tự lưu trong database.
+												
+												ASCIISTR('A B C Ä Ê')
+												Result: 'A B C \00C4 \00CA'
+												 
+												ASCIISTR('A B C Õ Ø')
+												Result: 'A B C \00D5 \00D8'
+												 
+												ASCIISTR('A B C Ä Ê Í Õ Ø')
+												Result: 'A B C \00C4 \00CA \00CD \00D5 \00D8'
+		CHR( number_code ):
+												Hàm CHR có công dụng ngược với hàm ASCII, nó sẽ chuyển đổi một số thành ký tự tương ứng trong bảng mã ASCII.
+												
+												CHR(116)
+												Result: 't'
+												 
+												CHR(84)
+												Result: 'T'
+		COMPOSE( string ):
+												Hàm COMPOSE chuyển đổi một chuỗi sang định dạng Unicode.
+												
+												COMPOSE('o' || unistr('\0308') )
+												Result: ö
+												 
+												COMPOSE('a' || unistr('\0302') )
+												Result: â
+												 
+												COMPOSE('e' || unistr('\0301') )
+												Result: é
+		CONCAT( string1, string2 ):
+												Hàm CONCAT dùng để nối hai chuỗi lại với nhau và trả về một chuỗi là tổng của của hai chuỗi đó.
+												
+												CONCAT('Tech on', ' Freetuts')
+												Result: 'Tech on Freetuts'
+												 
+												CONCAT('a', 'b')
+												Result: 'ab'
+		CONVERT( string1, char_set_to [, char_set_from] ):
+																	Hàm CONVERT dùng để chuyển đổi định dạng của một chuỗi từ bộ kí tự này sang bộ kí tự khác.
+																	
+																	CONVERT('A B C D E Ä Ê Í Õ Ø', 'US7ASCII', 'WE8ISO8859P1')
+																	Result: 'A B C D E A E I ? ?'
+		DECOMPOSE:
+												Hàm này có tác dụng ngược với hàm COMPOSE
+												
+												DECOMPOSE('Très bien')
+												Result: 'Tre`s bien'
+												 
+												DECOMPOSE('é')
+												Result: 'e´'
+												 
+												DECOMPOSE('olé')
+												Result: 'ole´'
+		DUMP( expression [, return_format] [, start_position] [, length] ):
+																					Hàm DUM dùng để xem thông tin chi tiết của một giá trị biểu thức, nó sẽ trả về một chuỗi
+																					gồm các thông tin: datatype code, the length in bytes, và hệ biểu diễn của giá
+																					trị đó. Hàm này thường dùng để debug.
+	
+																					DUMP('Tech')
+																					Result: 'Typ=96 Len=4: 84,101,99,104'
+																					 
+																					DUMP('Tech', 10)
+																					Result: 'Typ=96 Len=4: 84,101,99,104'
+																					 
+																					DUMP('Tech', 16)
+																					Result: 'Typ=96 Len=4: 54,65,63,68'
+																					 
+																					DUMP('Tech', 1016)
+																					Result: 'Typ=96 Len=4 CharacterSet=US7ASCII: 54,65,63,68'
+																					 
+																					DUMP('Tech', 1017)
+																					Result: 'Typ=96 Len=4 CharacterSet=US7ASCII: T,e,c,h'
+		INITCAP( string1 ):
+												Hàm INITCAP dùng để chuyển đuổi ký tự đầu tiên của mỗi từ sang chữ hoa, còn các ký tự còn lại sang chữ thường. Hàm này khá thú vị và dễ sử dụng.
+												
+												INITCAP('tech on the net');
+												Result: 'Tech On The Net'
+												 
+												INITCAP('GEORGE BURNS');
+												Result: 'George Burns'
+		INSTR( string, substring [, start_position [, th_appearance ] ] ):
+																					Đây là hàm khá đặc biệt, nó dùng để kiểm tra xem chuỗi con có xuất hiện trong chuỗi
+																					cha không, nếu có thì trả về vị trí xuất hiện, nếu không thì trả về 0.
+																					
+																					INSTR('Tech on the net', 'e')
+																					Result: 2   (the first occurrence of 'e')
+																					 
+																					INSTR('Tech on the net', 'e', 1, 1)
+																					Result: 2   (the first occurrence of 'e')
+																					 
+																					INSTR('Tech on the net', 'e', 1, 2)
+																					Result: 11  (the second occurrence of 'e')
+																					 
+																					INSTR('Tech on the net', 'e', 1, 3)
+																					Result: 14  (the third occurrence of 'e')
+																					 
+																					INSTR('Tech on the net', 'e', -3, 2)
+																					Result: 2
+		INSTR2( string, substring [, start_position [, th_appearance ] ] ):
+																					Hàm INSTR2 dùng để tìm vị trí xuất hiện của chuỗi con trong chuỗi cha, nó giống như
+																					hàm INSTR, chỉ khác là nó sử dụng UCS2 code point.
+																					
+																					INSTR2('freetuts.net', 'e')
+																					Result: 3   (the first occurrence of 'e')
+																					 
+																					INSTR2('freetuts.net', 'e, 1, 1)
+																					Result: 3   (the first occurrence of 'e')
+																					 
+																					INSTR2('freetuts.net', 'e', 1, 2)
+																					Result: 4   (the second occurrence of 'e')
+																					 
+																					INSTR2('freetuts.net', 'e', 1, 3)
+																					Result: 11  (the third occurrence of 'e')
+																					 
+																					INSTR2('freetuts.net', 'e', -3, 2)
+																					Result: 10
+		INSTR4( string, substring [, start_position [, th_appearance ] ] ):
+																					Hàm INSTR4 dùng để tìm vị trí xuất hiện của chuỗi con trong chuỗi cha, nó giống như
+																					hàm INSTR, chỉ khác là nó sử dụng UCS4 code point.
+																					
+																					INSTR4('freetuts.net', 'e')
+																					Result: 3   (the first occurrence of 'e')
+																					 
+																					INSTR4('freetuts.net', 'e, 1, 1)
+																					Result: 3   (the first occurrence of 'e')
+																					 
+																					INSTR4('freetuts.net', 'e', 1, 2)
+																					Result: 4   (the second occurrence of 'e')
+																					 
+																					INSTR4('freetuts.net', 'e', 1, 3)
+																					Result: 11  (the third occurrence of 'e')
+																					 
+																					INSTR4('freetuts.net', 'e', -3, 2)
+																					Result: 10
+		INSTRB( string, substring [, start_position [, th_appearance ] ] ):
+																					Hàm INSTRB dùng để tìm vị trí xuất hiện của chuỗi con trong chuỗi cha, nó giống như
+																					hàm INSTR, chỉ khác là nó sử dụng Byte thay cho ký tự.
+																					
+																					INSTRB('freetuts.net', 'e')
+																					Result: 3   (the first occurrence of 'e')
+																					 
+																					INSTRB('freetuts.net', 'e, 1, 1)
+																					Result: 3   (the first occurrence of 'e')
+																					 
+																					INSTRB('freetuts.net', 'e', 1, 2)
+																					Result: 4   (the second occurrence of 'e')
+																					 
+																					INSTRB('freetuts.net', 'e', 1, 3)
+																					Result: 11  (the third occurrence of 'e')
+																					 
+																					INSTRB('freetuts.net', 'e', -3, 2)
+																					Result: 10
+		INSTRC( string, substring [, start_position [, th_appearance ] ] ):
+																					Hàm INSTRC dùng để tìm vị trí xuất hiện của chuỗi con trong chuỗi cha, nó giống như
+																					hàm INSTR, chỉ khác là nó sử dụng các ký tự Unicode.
+																					
+																					INSTRC('freetuts.net', 'e')
+																					Result: 3   (the first occurrence of 'e')
+																					 
+																					INSTRC('freetuts.net', 'e, 1, 1)
+																					Result: 3   (the first occurrence of 'e')
+																					 
+																					INSTRC('freetuts.net', 'e', 1, 2)
+																					Result: 4   (the second occurrence of 'e')
+																					 
+																					INSTRC('freetuts.net', 'e', 1, 3)
+																					Result: 11  (the third occurrence of 'e')
+																					 
+																					INSTRC('freetuts.net', 'e', -3, 2)
+																					Result: 10
+		LENGTH( string1 ):
+												Hàm LENGTH dùng để tính độ dài của một chuỗi, hay nói cách khác nó dùng để đếm tổng số ký tự có trong chuỗi, kể
+												cả ký tự khoảng trắng (space).
+												
+												LENGTH(NULL)
+												Result: NULL
+												 
+												LENGTH('')
+												Result: NULL
+												 
+												LENGTH(' ')
+												Result: 1
+												 
+												LENGTH('Tech on the Net')
+												Result: 15
+												 
+												LENGTH('Tech on the Net ')
+												Result: 16
+																					
+		LENGTH2( string1 ):
+												Hàm LENGTH2 dùng để tính độ dài của một chuỗi, hay nói cách khác nó dùng để đếm tổng số ký tự có trong chuỗi, kể cả ký
+												tự khoảng trắng (space). Nó giống với hàm LENGTH, chỉ khác là dùng UCS2.
+												
+												LENGTH2(NULL)
+												Result: NULL
+												 
+												LENGTH2('')
+												Result: NULL
+												 
+												LENGTH2(' ')
+												Result: 1
+												 
+												LENGTH2('Tech on the Net')
+												Result: 15
+												 
+												LENGTH2('Tech on the Net ')
+												Result: 16
+		LOWER( string1 ):
+												Hàm LOWER có tác dụng chuyển đổi chữ hoa thành chữ thường, nó sẽ chuyển đổi tất cả ký tự có trong chuỗi mà bạn truyền vào.
+												
+												LOWER('freetuts.NET');
+												Result: 'freetuts.net'
+												 
+												LOWER('Freetuts.net   ');
+												Result: 'freetuts.net'
+		LPAD( string1, padded_length [, pad_string] ):
+																	Hàm này có công dụng là đệm vào bên trái của chuỗi với tập ký tự được xác định trong tham số của nó.
+																	
+																	LPAD('freetuts', 10);
+																	Result: '  freetuts'
+																	 
+																	LPAD('freetuts', 8);
+																	Result: 'freetuts'
+																	 
+																	LPAD('freetuts', 11, '0');
+																	Result: '000freetuts'
+																	 
+																	LPAD('freetuts', 4);
+																	Result: 'free'
+																	 
+																	LPAD('freetuts', 5, 'z');
+																	Result: 'freet'
+		LTRIM( string1 [, trim_string] ):
+																	Đây là hàm dùng để xóa đi những kí tự được chỉ định nằm phía bên trái của chuỗi.
+																	
+																	LTRIM('   tech')
+																	Result: 'tech'
+																	 
+																	LTRIM('   tech', ' ')
+																	Result: 'tech'
+																	 
+																	LTRIM('000123', '0')
+																	Result: '123'
+																	 
+																	LTRIM('123123Tech', '123')
+																	Result: 'Tech'
+																	 
+																	LTRIM('123123Tech123', '123')
+																	Result: 'Tech123'
+																	 
+																	LTRIM('xyxzyyyTech', 'xyz')
+																	Result: 'Tech'
+																	 
+																	LTRIM('6372Tech', '0123456789')
+																	Result: 'Tech'
+		NCHR( number_code ):
+																	NCHR(116)
+																	Result: 't'
+																	 
+																	NCHR(84)
+																	Result: 'T'
+																	 
+																	NCHR(82)
+																	Result: 'R'
+		REGEXP_INSTR:												
+																	Một hàm rất hay dùng để xử lý chuỗi nâng cao dựa vào chuỗi pattern, đó là hàm REGEXP_INSTR. hàm
+																	này có công dụng là tìm một chuỗi con nằm trong chuỗi cha ào mẫu so khớp pattern, hay còn gọi
+																	là mẫu Regular Expression.
+			Cú pháp:
+																	REGEXP_INSTR( 
+																		STRING, 
+																		pattern [,
+																		start_position [, 
+																		nth_appearance [, 
+																		return_option [, 
+																		match_parameter [, s
+																		ub_expression ] ] ] ] ]
+																	)
+			Ví dụ
+																	SELECT REGEXP_INSTR ('Freetuts is a great resource', 't')
+																	FROM message;																	
+																	Result: 5
+																					
+																	SELECT REGEXP_INSTR ('FReetuts is a great resource', 'r', 1, 1, 0, 'i')
+																	FROM message;																	 
+																	Result: 2				
+																					
+																	SELECT REGEXP_INSTR ('Freetuts is a great resource', 'a|b|s', 1, 1, 0, 'i')
+																	FROM message;																		 
+																	Result: 8				
+	CONVERSION FUNCTIONS:
+		TO_CHAR( value [, format_mask] [, nls_language] ):
+																	Hàm TO_CHAR dùng để chuyển đổi một số hoặc ngày tháng sang kiểu chuỗi.
+																	
+																	TO_CHAR(1210.73, '9999.9')
+																	# Kết quả: ' 1210.7'
+																	 
+																	TO_CHAR(-1210.73, '9999.9')
+																	# Kết quả: '-1210.7'
+																	 
+																	TO_CHAR(1210.73, '9,999.99')
+																	# Kết quả: ' 1,210.73'
+																	 
+																	TO_CHAR(1210.73, '$9,999.00')
+																	# Kết quả: ' $1,210.73'
+																	 
+																	TO_CHAR(21, '000099')
+																	# Kết quả: ' 000021'
+		TO_DATE( string1 [, format_mask] [, nls_language] ):
+																	Hàm TO_DATE có tác dụng chuyển định dạng của một chuỗi hoặc một dãy số sang định dạng ngày tháng
+																	
+																	TO_DATE('2003/07/09', 'yyyy/mm/dd')
+																	# Kết quả: date value of July 9, 2003
+																	 
+																	TO_DATE('070903', 'MMDDYY')
+																	# Kết quả: date value of July 9, 2003
+																	 
+																	TO_DATE('20020315', 'yyyymmdd')
+																	# Kết quả: date value of Mar 15, 2002
+																	
+																	SELECT TO_DATE('2015/05/15 8:30:25', 'YYYY/MM/DD HH:MI:SS')
+																	FROM dual;
+																	Kết quả: 2015/05/15 8:30:25
+		ABS( number ):
+																	Hàm ABS có công dụng là chuyển đổi một số thành giá trị tuyệt đối của chính nó, tức là nó
+																	chuyển số âm thành số dương, và số dương vẫn được giữ nguyên.
+																	
+																	ABS(-23)
+																	Result: 23
+																	 
+																	ABS(-23.6)
+																	Result: 23.6
+																	 
+																	ABS(-23.65)
+																	Result: 23.65
+																	 
+																	ABS(23.65)
+																	Result: 23.65
+																	 
+																	ABS(23.65 * -1)
+																	Result: 23.65
+		ACOS( number ):
+																	Hàm ACOS dùng để lấy giá trị cosin của một số cho trước.
+																	
+																	ACOS(0.2)
+																	# Result: 1.36943840600457
+																	 
+																	ACOS(0.35)
+																	# Result: 1.21322522314939
+																	 
+																	ACOS(-0.15)
+																	# Result: 1.72136459957158
+		CEIL( number ):
+																	CEIL là hàm dùng để làm tròn một số với số được làm tròn luôn lấy số ở trên. Số ở trên tức là
+																	số có giá trị lớn hơn số cần làm tròn, ví dụ 3.2 thì làm tròn là 4 chứ không phải là 3.
+																	
+																	CEIL(32.63)
+																	# Kết quả: 33
+																	 
+																	CEIL(32.12)
+																	# Kết quả: 33
+																	 
+																	CEIL(32)
+																	# Kết quả: 32
+																	 
+																	CEIL(-32.61)
+																	# Kết quả: -32
+																	 
+																	CEIL(-33)
+																	# Kết quả: -33
+		COUNT:
+																	Hàm COUNT dùng để đếm số lượng records trả về của một biểu thức, và thường được sử dụng
+																	trong câu lệnh Select để đếm tổng số record của table.
+			Cú pháp:
+																	SELECT COUNT(aggregate_expression)
+																	FROM tables
+																	[WHERE conditions];
+			Ví dụ:
+																	SELECT COUNT(employee_id) AS total 
+																	FROM employees
+																	WHERE salary > '5000000'
+		FLOOR( number ):
+																	Hàm FLOOR dùng để làm tròn một số vơí số làm tròn ở cận dưới, tức số sau khi làm tròn luôn
+																	luôn bé hơn hoặc bằng số cần làm tròn. Ví dụ với số 5.8 thì sau khi làm tròn sẽ là 5 chứ không phải 6.
+																	
+																	FLOOR(5.9)
+																	# Kết quả: 5
+																	 
+																	FLOOR(34.29)
+																	# Kết quả: 34
+																	 
+																	FLOOR(-5.9)
+																	# Kết quả: -6
+																	 
+																	FLOOR(7)
+																	# Kết quả: 7
+	NUMERIC/MATH FUNCTION:
+		MAX:
+																	Hàm MAX dùng để lấy giá trị lớn nhất trong một của một field của table, hàm này thường
+																	dùng trong lệnh SELECT và những field có giá trị là number hoặc ngày tháng.
+			Cú pháp:
+																	SELECT MAX(aggregate_expression)
+																	FROM tables
+																	[WHERE conditions];
+			Ví dụ:
+																	SELECT MAX(salary) AS "Highest Salary"
+																	FROM employees;
+																	
+																	SELECT department, MAX(salary) AS "Highest salary"
+																	FROM employees
+																	GROUP BY department;
+		MIN:
+																	Ngược lại với hàm MAX, hàm MIN dùng để lấy giá trị nhỏ nhất của một column hoặc một
+																	biểu thức, thường được dùng để lấy số hoặc ngày tháng.
+			Cú pháp:
+																	SELECT MIN(aggregate_expression)
+																	FROM tables
+																	[WHERE conditions];
+			Ví dụ:
+																	SELECT MIN(salary) AS "Lowest Salary"
+																	FROM employees;
+																	
+																	SELECT department, MIN(salary) AS "Lowest salary"
+																	FROM employees
+																	GROUP BY department;
+		SQRT( n ):
+																	Hàm SQRT dùng để lấy giá trị căn bậc hai của một số tự nhiên bất kì, nó sẽ trả về giá trị căn bậc hai của số đó.
+																	Hàm này rất ít khi sử dụng trong Oracle, tuy nhiên bạn cũng nên biết vì có thể sau này sẽ cần.
+																	
+																	SQRT(9)
+																	# Kết quả: 3
+																	 
+																	SQRT(37)
+																	# Kết quả: 6.08276253029822
+																	 
+																	SQRT(5.617)
+																	# Kết quả: 2.37002109695251
+		TRUNC( number [, decimal_places] ):
+																	TRUNC là viết tắt của chữ TRUNCATE.
+																	Hàm TRUNC dùng để thu gọn một số đến một vị trí nào đó sau dấu phẩy, vị trí sẽ được chỉ
+																	định bởi tham số truyền vào. Ví dụ với số 8.12 thì ta có thể chuyển thành 8.1 hoặc 8 bằng
+																	cách sử dụng hàm TRUNC.
+
+																	TRUNC(125.815)
+																	# Kết quả: 125
+																	 
+																	TRUNC(125.815, 0)
+																	# Kết quả: 125
+																	 
+																	TRUNC(125.815, 1)
+																	# Kết quả: 125.8
+																	 
+																	TRUNC(125.815, 2)
+																	# Kết quả: 125.81
+																	 
+																	TRUNC(125.815, 3)
+																	# Kết quả: 125.815
+																	 
+																	TRUNC(-125.815, 2)
+																	# Kết quả: -125.81
+																	 
+																	TRUNC(125.815, -1)
+																	# Kết quả: 120
+																	 
+																	TRUNC(125.815, -2)
+																	# Kết quả: 100
+																	 
+																	TRUNC(125.815, -3)
+																	# Kết quả: 0
+	DATE/TIME FUNCTION:
+		ADD_MONTHS( date1, number_months ):
+																	Hàm ADD_MONTHS có tác dụng thêm hoặc bớt đi một hoặc nhiều tháng dựa vào tham số
+																	truyền vào, nếu bạn truyền số dương thì sẽ thêm tháng và số âm thì sẽ trừ
+																	tháng. Ví dụ hôm nay ngày 30/5 và bạn bạn muốn cộng vào 3 tháng nữa thì sẽ thay đổi thành 30/8.
+																	
+																	ADD_MONTHS('01-Aug-03', 3)
+																	# Kết quả: '01-Nov-03'
+																	 
+																	ADD_MONTHS('01-Aug-03', -3)
+																	# Kết quả: '01-May-03'
+																	 
+																	ADD_MONTHS('21-Aug-03', -3)
+																	# Kết quả: '21-May-03'
+																	 
+																	ADD_MONTHS('31-Jan-03', 1)
+																	# Kết quả: '28-Feb-03'
+		CURRENT_DATE:
+																	Hàm CURRENT_DATE sẽ trả về ngày - tháng - giờ hiện tại, giá trị của nó sẽ phụ thuộc vào
+																	time_zone mà bạn đã thiết lập bằng cách sử dụng lệnh ALTER SESSION.
+																	
+																	ALTER SESSION SET TIME_ZONE = '-7:0'; // Trước khi bắt đầu thì mình sẽ chạy lệnh sau để thiết lập time_zone.
+																	SELECT CURRENT_DATE
+																	FROM DUAL;
+																	Kết quả trên máy tính của mình như sau: 29/12/2018 10:58:24 PM

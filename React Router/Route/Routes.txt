@@ -1,0 +1,33 @@
+Routes--React Router:
+
+		- Bạn có thể nghĩ về Routes như là người dẫn đường ẩn dụ cho các tuyến đường của bạn. Bất cứ khi nào bạn có một hoặc nhiều Route, rất có thể bạn sẽ muốn gói chúng trong một Routes.
+		- Với React Router v6, <Routes> được sử dụng để thay thế cho <Switch> trong phiên bản v5 và nhóm các <Route> lại với nhau. Nếu bạn không sử dụng <Routes>, bạn có thể thấy mình cần
+		phải điều chỉnh cú pháp và cách tổ chức mã nguồn của mình.
+		- Để thiết lập một đường dẫn mặc định ban đầu cho React Router, bạn có thể sử dụng một Route không có thuộc tính path. Điều này có nghĩa là nếu không có đường dẫn nào khớp với URL,
+		Route sẽ được kích hoạt và hiển thị component được chỉ định.
+		
+		import { Routes, Route } from "react-router-dom";
+		function App() {
+		  return (
+			<Routes>
+			  <Route path="/" element={<Home />} />
+			  <Route path="/about" element={<About />} />
+			  <Route path="/settings" element={<Settings />} />
+			  <Route path="*" element={<NotFound />} />
+			</Routes>
+		  );
+		}
+		
+		import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+		function App() {
+		  return (
+			<Router>
+			  <Routes>
+				<Route path="/" element={<HomePage />} />
+				<Route path="/about" element={<AboutPage />} />
+				{/* Các Route khác nếu cần */}
+				<Route element={<NotFoundPage />} />
+			  </Routes>
+			</Router>
+		  );
+		}

@@ -1,0 +1,73 @@
+Chèn thêm nội dung vào HTML với jQuery--Jquery:
+
+	Thêm nội dùng vào trang HTML
+	
+		Ở phần trước chúng ta đã dử dụng các phương thức html(), text() để lấy cũng như thiết lập giá trị/nội
+		dung trong phần tử. Tuy nhiên khi sử dụng các phương thức này thì nội dung cũ của phần tử sẽ bị ghi đè,
+		mất đi. Do vậy jQuery còn cung cấp thêm các phương thức linh hoạt hơn là:
+			
+			append() chèn nội dùng vào cuối trong các phần tử chọn
+			prepend() chèn nội dùng vào phần đầu trong phần tử chọn
+			after() chèn nội dùng vào phía sau phần tử chọn
+			before() chèn nội dùng vào phía trước phần tử chọn
+			
+		Nội dung chèn có thể là HTML Markup, Text hoặc tạo ra một phần tử DOM mới bằng jQuery, ví dụ tạo phần
+		tử <p> mới sau đó thiết lập nội dung text cho nó là 'Hello World'
+			
+			var newelement = $("<p></p>").text("Hello World");
+	
+	Ví dụ sử dụng append(), prepend(), after(), before() trong jQuery
+		
+		Ở ví dụ dưới đây, dùng jQuery chọn phần tử div có nền màu đen, sau đó chèn nội dung vào bên trong
+		nó (chèn ở đầu (prepend, ở cuối append) và phía trước (before) phía sau (after)
+			
+			<style>
+				#containerexample {
+					background: #9c27b0;
+					padding: 20px;
+					color: white;
+					font-weight: bold;
+				}
+				#phantudiv {
+					background: #1d1e1f;
+					padding: 30px;
+				}
+				#containerexample p {
+					border: 1px dashed gray;
+					padding: 5px;
+					animation-name: keyframes1;
+					animation-duration: 2s;
+				}
+				#phantudiv>p.phantup {
+					color: yellow;
+				}
+				@keyframes keyframes1 {
+					0%  {opacity: 0;}
+					100% {opacity: 1;}
+				}
+			</style>
+			<div id="containerexample">
+				<div id="phantudiv">
+					<p class="phantup">Nội dung ban đầu trong phần tử</p>
+				</div>
+				<br>
+				<button onclick="append_jquery()">append()</button>
+				<button onclick="prepend_jquery()">prepend()</button>
+				<button onclick="after_jquery()">after()</button>
+				<button onclick="before_jquery()">before()</button>
+			</div>
+			<script>
+				var phantuchon = $("#phantudiv");
+				function append_jquery() {
+					phantuchon.append("<p>Chèn thêm bằng append()</p>");
+				}
+				function prepend_jquery() {
+					phantuchon.prepend("<p>Chèn thêm bằng prepend()</p>");
+				}
+				function after_jquery() {
+					phantuchon.after("<p>Chèn thêm bằng after()</p>");
+				}
+				function before_jquery() {
+					phantuchon.before("<p>Chèn thêm bằng before()</p>");
+				}
+			</script>

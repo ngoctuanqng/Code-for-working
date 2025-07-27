@@ -1,0 +1,43 @@
+Styled---:
+
+		import TableCell, { tableCellClasses } from "@mui/material/TableCell";
+		import { styled } from "@mui/material/styles";														  
+		// styled table
+		const StyledTableCell = styled(TableCell)(({ theme }) => ({
+			[`&.${tableCellClasses.head}`]: {
+			  backgroundColor: "#d3d3d3",
+			  color: theme.palette.common.black,
+			},
+			[`&.${tableCellClasses.body}`]: {
+			  fontSize: 14,
+			},
+			[`&.${tableCellClasses.alignCenter}`]: {
+			  // fontSize: 14,
+			  // textAlign: 'center',
+			  display: 'flex',
+			  alignItems: 'center',
+			  justifyContent: 'center',
+			},
+		}));
+		<TableRow>
+		  {columns.map((column) => (
+			<StyledTableCell key={column.field} className={tableCellClasses.head}>
+			  {column.headerName}
+			</StyledTableCell>
+		  ))}
+		</TableRow>
+
+		const StyledText = styled("text")(({ theme }) => ({
+			fill: theme.palette.text.primary,
+			textAnchor: "middle",
+			dominantBaseline: "central",
+			fontSize: 25,
+		}));
+		function PieCenterLabel({ children }) {
+			const { width, height, left, top } = useDrawingArea();
+			return (
+			  <StyledText x={left + width / 2.6} y={(top + height) / 2.1}>
+				{children}
+			  </StyledText>
+			);
+		}

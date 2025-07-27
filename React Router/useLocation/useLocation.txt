@@ -1,0 +1,104 @@
+useLocation--React Router:
+
+		- useLocation sẽ trả về location object hiện tại. Nó sẽ giúp ích trong trường hợp chúng ta muốn lấy thông tin
+		từ URL hiện tại. Ví dụ như, bạn muốn gửi một sự kiện "page view" đến một analytics service mỗi khi URL thay đổi.
+		- Hook này trả về một đối tượng với các thuộc tính và phương thức sau:
+					pathname: 	Một chuỗi đại diện cho phần đường dẫn của URL hiện tại. Trả về phần đường dẫn của URL, bao
+								gồm tất cả các thành phần của đường dẫn trừ chuỗi truy vấn và fragment identifier. Đây thường
+								được sử dụng khi bạn cần lấy thông tin về phần đường dẫn của URL.
+					search:		Một chuỗi đại diện cho phần truy vấn của URL hiện tại (bao gồm ký tự ?).
+					hash:		Một chuỗi đại diện cho phần mở đầu bằng dấu # của URL hiện tại.
+					state:		Một đối tượng đại diện cho trạng thái được chuyển đến từ phương thức history.push() khi di chuyển đến vị trí hiện tại.
+		- useLocation cũng cung cấp một phương thức:
+					toString(): Trả về một chuỗi đại diện cho toàn bộ URL, bao gồm cả phần đường dẫn, chuỗi truy vấn và fragment identifier.
+		
+		import { Switch, useLocation } from 'react-router'
+		function usePageViews() {
+		  let location = useLocation()
+		  useEffect(
+			() => {
+			  ga.send(['pageview', location.pathname])
+			},
+			[location]
+		  )
+		}
+		function App() {
+		  usePageViews()
+		  return <Switch>{/* your routes here */}</Switch>
+		}
+		
+		Khi bạn truy cập vào URL "http://localhost:3000/about?id=123#section1"
+		import React from 'react';
+		import { BrowserRouter as Router, Route, Link, useLocation } from 'react-router-dom';
+		function Home() {
+		  return <h2>Home</h2>;
+		}
+		function About() {
+		  return <h2>About</h2>;
+		}
+		function MyComponent() {
+		  const location = useLocation();
+		  return (
+			<div>
+			  <h2>Location Info:</h2>
+			  <p>Pathname: {location.pathname}</p> // Pathname: /about
+			  <p>Search: {location.search}</p> // Search: ?id=123
+			  <p>Hash: {location.hash}</p> // Hash: #section1
+			</div>
+		  );
+		}
+		function App() {
+		  return (
+			<Router>
+			  <div>
+				<nav>
+				  <ul>
+					<li>
+					  <Link to="/">Home</Link>
+					</li>
+					<li>
+					  <Link to="/about">About</Link>
+					</li>
+				  </ul>
+				</nav>
+				<Route path="/" exact component={Home} />
+				<Route path="/about" component={About} />
+				<Route path="/" component={MyComponent} />
+			  </div>
+			</Router>
+		  );
+		}
+		export default App;
+		
+		http://example.com/page?query1=value1&query2=value2
+		import React from 'react';
+		import { useLocation } from 'react-router-dom';
+		function MyComponent() {
+		  const location = useLocation();
+		  return (
+			<div>
+			  <h2>Location Info:</h2>
+			  <p>Pathname: {location.pathname}</p> // /page
+			  <p>Search: {location.search}</p> // ?query1=value1&query2=value2
+			  <p>Hash: {location.hash}</p>
+			</div>
+		  );
+		}
+		export default MyComponent;
+
+		http://example.com/page/subpage?param=value#section
+		import React from 'react';
+		import { useLocation } from 'react-router-dom';
+		function MyComponent() {
+		  const location = useLocation();
+		  return (
+			<div>
+			  <h2>Location Info:</h2>
+			  <p>Pathname: {location.pathname}</p> // /page/subpage
+			  <p>Search: {location.search}</p> // ?param=value
+			  <p>Hash: {location.hash}</p> // #section
+			  <p>Full URL: {location.toString()}</p> // http://example.com/page/subpage?param=value#section
+			</div>
+		  );
+		}
+		export default MyComponent;

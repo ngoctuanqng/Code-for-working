@@ -1,0 +1,45 @@
+Redirect--React Router:
+
+		- Chúng ta có thể chuyển hướng bằng cách sử dụng thành phần <Redirect> bằng cách chỉ cần chuyển tuyến đường mà
+		chúng ta muốn chuyển hướng đến và hiển thị thành phần. Nó đã được tải
+		trong thư viện react-router-dom.
+		- Cách dễ nhất để sử dụng phương pháp này là duy trì một thuộc tính chuyển hướng bên trong trạng thái của thành phần.
+		- Bất cứ khi nào bạn muốn chuyển hướng đến một đường dẫn khác, bạn có thể chỉ cần thay đổi trạng thái để hiển thị lại
+		thành phần, do đó hiển thị thành phần <Redirect>.
+		- <Link> được sử dụng để tạo ra các liên kết trong ứng dụng React Router DOM. Nó giúp bạn tạo các liên kết để điều
+		hướng giữa các trang mà không làm tải lại trang hoàn toàn.
+		- <Redirect> được sử dụng để chuyển hướng người dùng từ một URL đến một URL khác. Nó thường được sử dụng khi bạn muốn
+		tự động chuyển hướng người dùng sau một số hành động hoặc điều kiện nhất định.
+		
+		state = { redirect: null };
+		render() {
+		  if (this.state.redirect) {
+			return <Redirect to={this.state.redirect} />
+		  }
+		  return(
+		  // Your Code goes here
+		  )
+		}
+		
+		import { Redirect } from 'react-router-dom';
+		class MyComponent extends React.Component {
+		  constructor(props) {
+			super(props);
+			this.state = {
+			  shouldRedirect: false,
+			};
+		  }
+		  handleRedirect = () => {
+			this.setState({ shouldRedirect: true });
+		  };
+		  render() {
+			if (this.state.shouldRedirect) {
+			  return <Redirect to="/new-page" />;
+			}
+			return (
+			  <div>
+				<button onClick={this.handleRedirect}>Go to New Page</button>
+			  </div>
+			);
+		  }
+		}

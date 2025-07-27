@@ -1,0 +1,129 @@
+Utility Types--TypeScript:
+
+	TypeScript comes with a large number of types that can help with some common type manipulation,
+	usually referred to as utility types.
+
+	This chapter covers the most popular utility types.
+	
+	Partial--Utility Types Typescript:
+	
+		Partial changes all the properties in an object to be optional.
+			
+			interface Point {
+			  x: number;
+			  y: number;
+			}					
+			let pointPart: Partial<Point> = {}; // `Partial` allows x and y to be optional
+			pointPart.x = 10;
+			console.log(pointPart);
+			
+			interface Point {
+			  x: number;
+			  y: number;
+			}						
+			let pointPart: Partial<Point> = {}; // `Partial` allows x and y to be optional
+			pointPart.x = 10;
+			pointPart.y = 10;
+			console.log(pointPart);
+			
+	Required--Utility Types Typescript:
+	
+		Required changes all the properties in an object to be required.
+			
+			interface Car {
+			  make: string;
+			  model: string;
+			  mileage?: number;
+			}			
+			let myCar: Required<Car> = {
+			  make: 'Ford',
+			  model: 'Focus',
+			  mileage: 12000 // `Required` forces mileage to be defined
+			};
+			console.log(myCar);
+			
+			interface Car {
+			  make: string;
+			  model: string;
+			  mileage?: number;
+			}						
+			let myCar: Required<Car> = {
+			  make: 'Ford',
+			  model: 'Focus'
+			//  mileage: 12000 // `Required` forces mileage to be defined
+			};
+			console.log(myCar)
+			
+	Record--Utility Types Typescript:
+	
+		Record is a shortcut to defining an object type with a specific key type and value type.
+			
+			const nameAgeMap: Record<string, number> = {
+			  'Alice': 21,
+			  'Bob': 25
+			};
+			console.log(nameAgeMap);
+			
+		Record<string, number> is equivalent to { [key: string]: number }
+		
+	
+	Omit--Utility Types Typescript:
+	
+		Omit removes keys from an object type.
+			
+			interface Person {
+			  name: string;
+			  age: number;
+			  location?: string;
+			}
+			const bob: Omit<Person, 'age' | 'location'> = {
+			  name: 'Bob'
+			  // `Omit` has removed age and location from the type and they can't be defined here
+			};
+			console.log(bob);
+			
+	Pick--Utility Types Typescript:
+	
+		Pick removes all but the specified keys from an object type.
+			
+			interface Person {
+			  name: string;
+			  age: number;
+			  location?: string;
+			}						
+			const bob: Pick<Person, 'name'> = {
+			  name: 'Bob'
+			  // `Pick` has only kept name, so age and location were removed from the type and
+			  they can't be defined here
+			};
+			console.log(bob);
+			
+	Exclude--Utility Types Typescript:
+	
+		Exclude removes types from a union.
+			type Primitive = string | number | boolean;
+			const value: Exclude<Primitive, string> = true;
+			// a string cannot be used here since Exclude removed it from the type.
+			console.log(typeof value);
+			
+	ReturnType--Utility Types Typescript:
+	
+		ReturnType extracts the return type of a function type.
+			
+			// Không hiển thị kết quả nào cả
+			type PointGenerator = () => { x: number; y: number; };
+			const point: ReturnType<PointGenerator> = {
+			  x: 10,
+			  y: 20
+			};
+				
+	Parameters--Utility Types Typescript:
+	
+		Parameters extracts the parameter types of a function type as an array.
+			
+			// Không hiển thị kết quả nào cả
+			type PointPrinter = (p: { x: number; y: number; }) => void;
+			const point: Parameters<PointPrinter>[0] = {
+			  x: 10,
+			  y: 20
+			};

@@ -1,0 +1,11 @@
+Catch all (404) Pages--React Router:
+
+		- Tất cả những gì bạn phải làm là kết xuất một Lộ trình với đường dẫn là * và React Router sẽ
+		đảm bảo chỉ hiển thị phần tử nếu không có Đường dẫn nào khác khớp
+		
+		<Routes>
+		  <Route path="*" element={<NotFound />} />
+		  <Route path="/" element={<Home />} />
+		  <Route path="/about" element={<About />} />
+		  <Route path="/settings" element={<Settings />} />
+		</Routes>

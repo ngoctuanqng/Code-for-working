@@ -1,0 +1,172 @@
+JSX trong ReactJS--REACTJS:
+
+			- JSX là viết tắt là Javascript XML, một template languges nhưng nó lại mang hầu hết tính năng của Javascript. Nó cho phép
+			bạn viết các đoạn mã HTML trong React một cách dẽ dàng và có cấu trúc hơn. React sử dụng JSX cho việc xây dựng bố cục
+			thay vì javascript thông thường. JSX giúp tạo ra các React 'elements'.
+			- Nhiều dòng thì cần bao trong () (khi có nhiều thẻ HTML)
+			- Với JSX nếu có biểu thức thì ta cần bao nó trong {}
+										
+	With JSX--REACTJS JSX:
+
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										const myElement = <h1>I Love JSX!</h1>;
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(myElement);
+										
+	Without JSX--REACTJS JSX:
+	
+										import React from 'react';
+										import ReactDOM from 'react-dom/client';
+										const myElement = React.createElement('h1', {}, 'I do not use JSX!');
+										const root = ReactDOM.createRoot(document.getElementById('root'));
+										root.render(myElement);
+	
+	
+	Gán một biểu thức trong JSX--REACTJS JSX:
+	
+										const name = 'Freetuts.net';
+										const element = <h1>Welcome to {name}</h1>;										
+										ReactDOM.render(
+										  element,
+										  document.getElementById('root')
+										);
+										
+										function formatName(user) {
+										  return user.firstName + ' ' + user.lastName;
+										}										 
+										const user = {
+										  firstName: 'Nguyễn',
+										  lastName: 'Trí'
+										};										 
+										const element = (
+										  <h1>
+											Xin chào, {formatName(user)}!
+										  </h1>
+										);										 
+										ReactDOM.render(
+										  element,
+										  document.getElementById('root')
+										);
+										
+	JSX là một biểu thức--REACTJS JSX:
+	
+										Sau khi complie, các đoạn đoạn mã JSX sẽ như các object Javasript thông thường, cho phép bạn
+										có thể gọi hoặc làm bất cứ gì với nó.
+										
+										Có nghĩa là bạn có thể sử dụng JSX bên trong if, for, function,...hay là chỉ định nó làm giá trị
+										của một biến,..Trong ví dụ mình có một hàm trả về một JSX:
+										
+										function sayHi(name) {
+											if(name) {
+												return <p>Xin chào, {name} !</p>
+											}else{
+												return <p>Xin chào bạn !</p>
+											}
+										}
+										
+	Chỉ định attributes với JSX--REACTJS JSX:
+	
+										Bạn nên dùng dấu ngoặc kép ( "" ) cho giá trị chuỗi và ngoặc nhọn ( {} ) cho biểu thức như trong ví
+										dụ trên, React khuyên chúng ta không nên dùng cả 2 cái lồng nhau
+										
+										const element = <div tabIndex="0"></div>;
+										
+										const element = <img src={user.avatarUrl}></img>;
+										
+										const element = <div tabIndex={"1"}></div>;
+										
+	Phần tử con trong JSX--REACTJS JSX:
+	
+										- Nếu chỉ có một tag bạn chỉ cần đóng nó bằng dấu />.
+										- Trong trường hợp trong tag có nhiều phần tử con bạn cần phải bọc ngoài nó bằng một JSX tags:
+										
+										const element = <img src={user.avatarUrl} />;
+										
+										//Đúng cú pháp
+										//Phải bọc nó bằng một tags
+										const element = (
+										  <div>
+											<h1>Hello</h1>
+											<p>Welcome to Freetuts</p>
+										  </div>
+										);										 
+										//Viết sai
+										//Các phần từ không được bọc
+										const element = (
+											<h1>Hello</h1>
+											<p>Welcome to Freetuts</p>
+										);
+										
+	JSX Object--REACTJS JSX:
+	
+										- Để complide một JSX object thành JSX thông thường chúng ta sử dụng React.createElement()
+										- JSX object cho phép bạn tạo ra các JSX dễ dàng debug hơn
+										
+										const element = React.createElement(
+										  "p",
+										  { className: "welcome" },
+										  "Welcome to Freetuts.net!"
+										);										 
+										const element = <p className="welcome">Welcome to Freetuts.net!</p>
+										
+										const element = {
+										  type: "p",
+										  props: {
+											className: "welcome",
+											children: "Welcome to Freetuts.net!"
+										  }
+										};										 
+										const element = <p className="welcome">Welcome to Freetuts.net!</p>;
+										
+	Kết hợp JSX và string literal--REACTJS JSX:
+	
+										import React from 'react';
+										function Greeting() {
+										  const name = 'John';
+										  const greeting = `Hello, ${name}!`;
+										  return (
+											<div>
+											  <h1>Greeting</h1>
+											  <p>{greeting}</p>
+											</div>
+										  );
+										}
+										export default Greeting;
+										
+										import React from 'react';
+										function ItemList() {
+										  const items = [
+											{ id: 1, name: 'Item 1', description: 'Description for Item 1' },
+											{ id: 2, name: 'Item 2', description: 'Description for Item 2' },
+											{ id: 3, name: 'Item 3', description: 'Description for Item 3' }
+										  ];
+										  return (
+											<div>
+											  <h1>Item List</h1>
+											  <ul>
+												{items.map(item => (
+												  <li key={item.id}>
+													<h2>{item.name}</h2>
+													<p>{`Description: ${item.description}`}</p> // Trong React, bạn cần sử dụng cặp dấu {} để nhúng biểu thức JavaScript vào JSX. 
+												  </li>
+												))}
+											  </ul>
+											</div>
+										  );
+										}
+										export default ItemList;
+										
+										<p>{`Description: `}</p>
+										
+										import React from 'react';
+										function MyComponent() {
+										  const isActive = true;
+										  const className = `button ${isActive ? 'active' : ''}`;
+										  return (
+											<button className={className}>
+											  Click me
+											</button>
+										  );
+										}
+										export default MyComponent;

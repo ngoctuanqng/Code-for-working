@@ -1,0 +1,3182 @@
+Container--Standard MobX:
+							/* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+							import { toJS } from 'mobx';
+							import React, { Component } from 'react';
+							import { inject, observer } from 'mobx-react';
+							import {Checkbox, ContentLayout, dialog, Grid, Header, link, message, Segment} from '@mes/mes-ui-react';
+							import { mesAutobind } from '@mes/mes-shared';
+							import qs from 'qs';
+							import SearchView from '../view/SearchView';
+							import ButtonView from '../view/ButtonView';
+							import TableView1 from '../view/TableView1';
+							import TableView2 from '../view/TableView2';
+							import TableView2a2 from '../view/TableView2a2';
+							import TableView3 from '../view/TableView3';
+							import TableView3a2 from '../view/TableView3a2';
+							import { commonUtil } from '../../common/utility';
+							@inject('viewRegisterAbnormalMaterialCardStore')
+							@mesAutobind
+							@observer
+							class ViewRegisterAbnormalMaterialCardContainer extends Component {
+							  // lifecycle.componentDidMount
+							  componentDidMount() {
+								this.asyncInit();
+							  }
+							  // 순차실행
+							  async asyncInit() {
+								await commonUtil.setCommonSecurity(this.props.viewRegisterAbnormalMaterialCardStore, this.props); // Security 데이터 setting
+								await commonUtil.setCommonFacOpCdLov(this.props.viewRegisterAbnormalMaterialCardStore, this.props); // 공장,공정LOV 데이터 setting
+								await this.props.viewRegisterAbnormalMaterialCardStore.setParentData(this.props.location ? qs.parse(location.search, { ignoreQueryPrefix: true }) : ''); // 모화면 데이터 setting
+								await this.props.viewRegisterAbnormalMaterialCardStore.setInitData(); // 초기데이터 init
+								// await this.getCrDefOcrOpCdLov(); //발생공정
+								await this.findAllRowData();
+								await this.props.viewRegisterAbnormalMaterialCardStore.setMenuItems(); // 연관메뉴 세팅
+							  }
+							  async getCrDefOcrOpCdLov() {
+								const itemList = []; // 요청할 LOV item
+								itemList.push({ req: 'item', codeGrp: 'SZ0000', codeId: 'CR_DEF_OCR_OP_CD' });
+								const operFlag = this.props.viewRegisterAbnormalMaterialCardStore.securityData.operFlag;
+								const facOpCdN = this.props.viewRegisterAbnormalMaterialCardStore.searchParams.selectedOpCdData;
+								const opCds = ['153', '1F1', '351', '3F1', '156', '1F2', '157', '1F3', '124'];
+								if (operFlag === '5' && opCds.includes(facOpCdN)) {
+								  itemList.push({ req: 'item', codeGrp: 'SZ0000', codeId: 'HR_DEF_OCR_OP_CD' });
+								}
+								await commonUtil.setShowAllLov(this.props.viewRegisterAbnormalMaterialCardStore, this.props, itemList);
+							  }
+							  // lifecycle.componentWillUnmount
+							  componentWillUnmount() {
+								// this.props.viewRegisterAbnormalMaterialCardStore.clear(); //TODO
+							  }
+							  // LOV.공장 onChange
+							  onChangeFacLov(e, data) {
+								commonUtil.onChangeCommonFacLov(this.props.viewRegisterAbnormalMaterialCardStore, data);
+							  }
+							  // LOV.공정 onChange
+							  onChangeOpCdLov(e, data) {
+								commonUtil.onChangeCommonOpCdLov(this.props.viewRegisterAbnormalMaterialCardStore, data, this.props);
+							  }
+							  // SearchView OnChange 이벤트
+							  onChangeSearchData(e, data) {
+								let value = data.value;
+								if (data.case === 'Upper') {
+								  value = value.toUpperCase();
+								}
+								this.props.viewRegisterAbnormalMaterialCardStore.setSearchParam(data.name, value);
+								this.onChangeAbnomalCard(e, data);
+							  }
+							  // onChange input 값
+							  onChangeInputData(e, data) {
+								let value = data.value;
+								if (data.case === 'Upper') {
+								  value = value.toUpperCase();
+								}
+								this.props.viewRegisterAbnormalMaterialCardStore.setSearchParam(data.name, value);
+							  }
+							  // onChange input(number) 값
+							  onChangeInputNumberData(e, data) {
+								const re = /^[0-9\b]+$/;
+								if (e.target.value === '' || re.test(e.target.value)) {
+								  console.log(data.name, data.value);
+								  this.props.viewRegisterAbnormalMaterialCardStore.setSearchParam(data.name, data.value);
+								}
+							  }
+							  // onChange checkbox 값
+							  onChangeCheckbox(e, data) {
+								console.log(data.name, data.checked);
+								this.props.viewRegisterAbnormalMaterialCardStore.setSearchParam(data.name, data.checked);
+							  }
+							  // DatePicker.날짜 onChange
+							  onChangeDate = (changedDate, propName) => {
+								this.props.viewRegisterAbnormalMaterialCardStore.setSearchParam(propName, changedDate);
+							  };
+							  //onChange 이상재카드 NO
+							  async onChangeAbnomalCard(e, data) {
+								console.log('onChangeAbnomalCard', data);
+								await this.props.viewRegisterAbnormalMaterialCardStore.setSearchParam(data.name, data.value);
+								await this.props.viewRegisterAbnormalMaterialCardStore.setCardInfo();
+								await this.findAllRowData();
+							  }
+							  /*
+							  * 조회
+							  */
+							  async findAllRowData() {
+								const newFlag = this.props.viewRegisterAbnormalMaterialCardStore.searchParams.newFlag;
+								// const cardFind = this.props.viewRegisterAbnormalMaterialCardStore.searchParams.cardFind;
+
+								await this.getCrDefOcrOpCdLov(); //발생공정
+								await this.props.viewRegisterAbnormalMaterialCardStore.reqCardNoList();
+								if (newFlag) {
+								  await this.props.viewRegisterAbnormalMaterialCardStore.processNewFind();
+								} else {
+								  // pp2.find & pp3.cardFind
+								  await this.props.viewRegisterAbnormalMaterialCardStore.processCardFind();
+								}
+								// await this.props.viewRegisterAbnormalMaterialCardStore.setMenuItems(); // test후 올리기
+							  }
+							  /*
+							  * 이상재카드 등록
+							  * 구: reqInsert
+							  */
+							  async onBtnRegister() {
+								const result = await this.props.viewRegisterAbnormalMaterialCardStore.reqRegister();
+								if(result) {
+								  await this.clearParameters();
+								  await this.props.viewRegisterAbnormalMaterialCardStore.processCardFind();
+								}
+							  }
+							  /*
+							  * 이상재카드 삭제
+							  * 구: reqDelete
+							  */
+							  async onBtnDelete() {
+								const conf = await dialog.confirm(message('N1AJS2141')); // 삭제처리하시겠습니까?
+								if (conf) {
+								  const result = await this.props.viewRegisterAbnormalMaterialCardStore.reqDelete();
+								  if(result) {
+									await this.props.viewRegisterAbnormalMaterialCardStore.processDelete();
+									await this.clearParameters(); //TODO url 변경
+									await this.props.viewRegisterAbnormalMaterialCardStore.processCardFind();
+
+									// await this.props.viewRegisterAbnormalMaterialCardStore.clear();
+									// await this.asyncInit();
+								  }
+								}
+							  }
+							  /*
+							  * url 변경
+							  */
+							  clearParameters() {
+								console.log('[clearParameters]');
+								// const getParameters = qs.parse(location.search, { ignoreQueryPrefix: true });
+								const securityData = this.props.viewRegisterAbnormalMaterialCardStore.securityData;
+								let parameters = '';
+								parameters += 'm2n0000046?NS_FKEY=' + securityData.nsFkey;
+								parameters += '&NS_RKEY=' + securityData.nsRkey;
+								// parameters += '&layout=hidden';
+								// parameters += '&selectedFacData=' + getParameters.selectedFacData;
+								// parameters += '&selectedOpCdData=' + getParameters.selectedOpCdData;
+								// parameters += '&mtlNo=' + getParameters.mtlNo;
+								// parameters += '&facOpCdN=' + getParameters.facOpCdN;
+								// parameters += '&coilType=' + getParameters.coilType;
+								// parameters += '&cardFind=1';
+								// link.loadSelf((urlPath.targetLocation === 'PORTAL' ? urlPath.redirectPortalPath : urlPath.redirectLocalPath) + parameters, screenName.m2n0000046);
+								if(typeof(history.pushState) !== undefined)
+								{
+								  let renewURL = '/'+parameters;
+								  console.log('renewURL ===>', renewURL);
+								  //페이지 갱신 실행!
+								  history.pushState(null, null, renewURL);
+								}
+							  }
+							  // lifecycle.render
+							  render() {
+								/* 변수 */
+								const { viewRegisterAbnormalMaterialCardStore } = this.props;
+								// console.log('카드 등록전 스토어 데이터 >>', toJS(viewRegisterAbnormalMaterialCardStore));
+								return (
+								  <ContentLayout>
+									{/* 타이틀 */}
+									<ContentLayout.Header
+									  title="냉연이상재카드조회및등록"
+									  menuItems={viewRegisterAbnormalMaterialCardStore.menuItems}
+									/>
+									{/* 검색 */}
+									<SearchView
+									  facData={viewRegisterAbnormalMaterialCardStore.facData}
+									  reSetOpCdData={viewRegisterAbnormalMaterialCardStore.reSetOpCdData}
+									  searchParams={viewRegisterAbnormalMaterialCardStore.searchParams}
+									  abnlCardNoListResult={viewRegisterAbnormalMaterialCardStore.abnlCardNoListResult}
+									  onChangeFacLov={this.onChangeFacLov}
+									  onChangeOpCdLov={this.onChangeOpCdLov}
+									  findAllRowData={this.findAllRowData}
+									  onChangeDate={this.onChangeDate}
+									  onChangeAbnomalCard={this.onChangeAbnomalCard}
+									  onChangeInputData={this.onChangeInputData}
+									  onChangeSearchData={this.onChangeSearchData}
+									  cardNoLov={viewRegisterAbnormalMaterialCardStore.cardNoLov}
+									  abnomalCardInfo={viewRegisterAbnormalMaterialCardStore.abnomalCardInfo}
+									/>
+									<Segment>
+									  {/* 버튼 */}
+									  <ButtonView
+										onBtnRegister={this.onBtnRegister}
+										onBtnDelete={this.onBtnDelete}
+										abnomalCardInfo={viewRegisterAbnormalMaterialCardStore.abnomalCardInfo}
+										searchParams={viewRegisterAbnormalMaterialCardStore.searchParams}
+										securityData={viewRegisterAbnormalMaterialCardStore.securityData}
+										setSearchParam={viewRegisterAbnormalMaterialCardStore.setSearchParam}
+										findAllRowData={this.findAllRowData}
+										optionsCrEucCngBadF={viewRegisterAbnormalMaterialCardStore.optionsCrEucCngBadF}
+									  />
+									  <TableView1
+										abnomalCardInfo = {viewRegisterAbnormalMaterialCardStore.abnomalCardInfo}
+										searchParams={viewRegisterAbnormalMaterialCardStore.searchParams}
+									  />
+									</Segment>
+									<Segment>
+									  <Header content="발생상황" />
+									  {/* 삭제금지 */}
+									  {(viewRegisterAbnormalMaterialCardStore.searchParams.preserveFlag || viewRegisterAbnormalMaterialCardStore.searchParams.newFlag) ? (
+										<Checkbox
+										  label="삭제금지"
+										  name="preventDelFlag"
+										  checked={viewRegisterAbnormalMaterialCardStore.searchParams.preventDelFlag}
+										  onChange={this.onChangeCheckbox}
+										/>) : ('')}
+									  <Grid>
+										<Grid.Row>
+										  <Grid.Column width={12}>
+											<TableView2
+											  abnomalCardInfo = {viewRegisterAbnormalMaterialCardStore.abnomalCardInfo}
+											  searchParams={viewRegisterAbnormalMaterialCardStore.searchParams}
+											  showItemLov={viewRegisterAbnormalMaterialCardStore.showItemLov}
+											  onChangeInputData={this.onChangeInputData}
+											  onChangeInputNumberData={this.onChangeInputNumberData}
+											  chkInsertEmpNo={viewRegisterAbnormalMaterialCardStore.chkInsertEmpNo}
+											  optionsCrEucCngBadF={viewRegisterAbnormalMaterialCardStore.optionsCrEucCngBadF}
+											/>
+										  </Grid.Column>
+										  <Grid.Column width={4}>
+											<TableView2a2
+											  abnomalCardInfo = {viewRegisterAbnormalMaterialCardStore.abnomalCardInfo}
+											  searchParams={viewRegisterAbnormalMaterialCardStore.searchParams}
+											  onChangeInputData={this.onChangeInputData}
+											/>
+										  </Grid.Column>
+										</Grid.Row>
+										<Grid.Row>
+										  <Grid.Column width={12}>
+											<TableView3
+											  abnomalCardInfo = {viewRegisterAbnormalMaterialCardStore.abnomalCardInfo}
+											  searchParams={viewRegisterAbnormalMaterialCardStore.searchParams}
+											/>
+										  </Grid.Column>
+										  <Grid.Column width={4}>
+											<TableView3a2
+											  abnomalCardInfo = {viewRegisterAbnormalMaterialCardStore.abnomalCardInfo}
+											  searchParams={viewRegisterAbnormalMaterialCardStore.searchParams}
+											  onChangeInputData={this.onChangeInputData}
+											/>
+										  </Grid.Column>
+										</Grid.Row>
+									  </Grid>
+									</Segment>
+									{/*<Segment>*/}
+									{/*  <TableView3*/}
+									{/*    abnomalCardInfo = {viewRegisterAbnormalMaterialCardStore.abnomalCardInfo}*/}
+									{/*    searchParams={viewRegisterAbnormalMaterialCardStore.searchParams}*/}
+									{/*  />*/}
+									{/*</Segment>*/}
+								  </ContentLayout>
+								);
+							  }
+							}
+							export default ViewRegisterAbnormalMaterialCardContainer;
+							
+Model--Standard MobX:
+							
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+							import { extendObservable } from 'mobx';
+							class ViewRegisterAbnormalMaterialCardModel {
+							  constructor(item = {}) {
+								extendObservable(this, item);
+							  }
+							  static toSampleModel(item) {
+								return new ViewRegisterAbnormalMaterialCardModel(item);
+							  }
+							  static toSampleModels(items) {
+
+								if (!Array.isArray(items)) {
+								  return [];
+								}
+								return items.map(item => ViewRegisterAbnormalMaterialCardModel.toSampleModel(item));
+							  }
+							  static toDomainModel(item) {
+								return item;
+							  }
+							  /**
+							   * NameValue target
+							   *
+							   * @param { itemNo, parentNo, shapeType, state, cutDateTime } item
+							   */
+							  static asNameValues(item) {
+								return {
+								  nameValues: [
+									{ name: 'itemNo',       value: JSON.stringify(item.itemNo) },
+									{ name: 'parentNo',     value: JSON.stringify(item.parentNo) },
+									{ name: 'shapeType',    value: JSON.stringify(item.shapeType) },
+									{ name: 'stage',        value: JSON.stringify(item.stage) },
+									{ name: 'cutDateTime',  value: JSON.stringify(item.cutDateTime) },
+								  ],
+								};
+							  }
+							  static asIconNameValue(item) {
+								return {
+								  nameValues: [
+									{ name: 'base64Icon', value: item.base64Icon },
+								  ],
+								};
+							  }
+							}
+							export default ViewRegisterAbnormalMaterialCardModel;
+							export {
+							  ViewRegisterAbnormalMaterialCardModel,
+							};
+							
+Render--Standard MobX:
+							
+							/*===============================================
+							*@FileName : 냉연이상재조회 및 등록에서 사용하는 Util class
+							*
+							*Change history
+							*@수정 날짜,SCR_NO,수정자,수정내용
+							*@2020-04-28;00000;최솔빛누리;MES3.0 React 최초생성
+							*
+							================================================*/
+							import React from 'react';
+							import moment from 'moment';
+							/**
+							 * JudgeTd
+							 * @param abnrMatJdgTp
+							 * @param avAcCd
+							 * @param incongruentProdCardJdgDt
+							 * @param abnrMatJdgManNm
+							 * @return
+							 */
+							export const JudgeTd = (props) => {
+							  const abnrMatJdgTp = props.abnrMatJdgTp || '';
+							  const avAcCd = props.avAcCd || '';
+							  const incongruentProdCardJdgDt = props.incongruentProdCardJdgDt ? moment(props.incongruentProdCardJdgDt).format('YYYY-MM-DD HH:mm') : '';
+							  const abnrMatJdgManNm = props.abnrMatJdgManNm || '';
+							  return (
+								<div>
+								  <div align="left">
+									{abnrMatJdgTp === '5' ? (
+									  <span><b style={{ color: 'red' }}>판정</b> - {avAcCd}</span>) : (
+									  abnrMatJdgTp === '1' ? (
+										<b style={{ color: 'blue' }}>확인</b>) : (
+										'')
+									)}
+								  </div>
+								  <div align="left">{incongruentProdCardJdgDt}</div>
+								  <div align="left">{abnrMatJdgManNm}</div>
+								</div>
+							  );
+							};
+							export default {
+							  JudgeTd,
+							};
+							
+Repository--Standard MobX:
+							
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+							import axios from 'axios';
+							import { instance } from '@mes/mes-shared';
+							class ViewRegisterAbnormalMaterialCardRepository {
+							  @instance
+							  static instance;
+							  // new 200618ver.
+							  process(params, process) {
+								console.log(process, '==>', params);
+								return axios.post(`/m2nz03-operation-common/m2nz03-operation-common/viewRegisterAbnormalMaterialCard/${process}`, params)
+								  .then(response => response.data);
+							  }
+							}
+							export default ViewRegisterAbnormalMaterialCardRepository;
+							
+Store--Standard MobX:
+							
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+							import { action, computed, observable, toJS } from 'mobx';
+							import { instance, mesAutobind } from '@mes/mes-shared';
+							import { notification, dialog, message } from '@mes/mes-ui-react';
+							import moment from 'moment';
+							import qs from 'qs';
+							import ViewRegisterAbnormalMaterialCardRepository from '../repository/ViewRegisterAbnormalMaterialCardRepository';
+							import ViewRegisterAbnormalMaterialCardModel from '../model/ViewRegisterAbnormalMaterialCardModel';
+							import CommonApi from '../../common/api/commonApi';
+							import { urlPath } from '../../common/constant';
+							@mesAutobind
+							class ViewRegisterAbnormalMaterialCardStore {
+							  @instance(ViewRegisterAbnormalMaterialCardRepository.instance)
+							  static instance;
+							  repository;
+							  constructor(repository) {
+								this.repository = repository;
+							  }
+							  @observable
+							  _securityData; // security 데이터
+							  @computed
+							  get securityData() {
+								return toJS(this._securityData);
+							  }
+							  @observable
+							  _facData; // 공장LOV 데이터
+							  @computed
+							  get facData() {
+								return toJS(this._facData);
+							  }
+
+							  @observable
+							  _opCdData; // 공정LOV 데이터
+
+							  @computed
+							  get opCdData() {
+								return toJS(this._opCdData);
+							  }
+
+							  @observable
+							  _reSetOpCdData; // 공장값에 의해 재정의된 공정LOV 데이터 P_FacOpCdLOV
+
+							  @computed
+							  get reSetOpCdData() {
+								return toJS(this._reSetOpCdData);
+							  }
+
+							  @observable
+							  _cardNoLov = [];  // 이상재카드 NO Lov.
+
+							  @computed
+							  get cardNoLov() {
+								return toJS(this._cardNoLov);
+							  }
+
+							  @observable
+							  _abnomalCardInfo; // AbnlMtlCardResult    ABNL_CARD_IMAGE_RESULT
+
+							  @computed
+							  get abnomalCardInfo() {
+								return toJS(this._abnomalCardInfo);
+							  }
+
+							  @observable
+							  _inspRemResult;
+
+							  @computed
+							  get inspRemResult() { //
+								return toJS(this._inspRemResult);
+							  }
+
+							  @observable
+							  _mtlExamResult;
+
+							  @computed
+							  get mtlExamResult() { //
+								return toJS(this._mtlExamResult);
+							  }
+
+							  @observable
+							  _abnlCardNoListResult = [];
+
+							  @computed
+							  get abnlCardNoListResult() { // PosGetAbnlMtlCardNoList의 결과값
+								return toJS(this._abnlCardNoListResult);
+							  }
+
+							  @observable
+							  _showItemLov = {
+								crDefOcrOpCdLov: [], // 냉연결함발생공정코드
+								hrDefOcrOpCdLov: [],
+							  };
+
+							  @computed
+							  get showItemLov() {
+								return toJS(this._showItemLov);
+							  }
+
+							  @observable
+							  searchParams = { // 검색 파라미터
+								newFlag: false,             //newFind = "new" 면 true
+								cardFind: '',
+								preserveFlag: false,       //P_PreventDelFlag="1"(삭제금지)이면 true
+
+								confirmFlag1: false,
+								confirmFlag2: false,
+								nextFacOpCdIsPacking: false, //incongruentProdFetchLocTp 항목 구분
+
+								//hidden
+								crAbnorOcrDate: '',
+								facOpCdN: '',
+								mtlNo: '',
+								coilType: 'C',
+
+								// [SearchView  values]..
+								selectedFacData: '&',   // "1냉연공장"
+								selectedOpCdData: '&',  // facOpCdN
+								jdgTp: 'ALL',
+								selectedDate: '&',      // 발생일  selectedDate = [ P_DateFrom, P_DateTo ]
+								pMtlNo4Query: '',
+								cardNo: '',             // 이상재카드No
+
+								// [TableView2 values].. 카드작성영역
+								crDefCd: '',
+								crDefOcrOpCd: '',
+								iFacOpCdN: '', // 구: I_FacOpCd //TODO
+								crInsporEmpNo: '',
+								opSft: '',
+								lenDirDefOcrShpTp: '',
+
+								lenDirDefOcrQt: '',
+								wDirtDefOcrLocTp: '',
+								wDirtDefOcrDetailLoc: '',
+								difSurTp: '',
+								defOcrPitch: '',
+								defOcrNum: '',
+								defOcrSize: '',
+								defExfoliaF: '',
+								defCorF: '',
+
+								defFigF: '',
+								shpBadWDirtLocTp: '',
+								shpBadWaveMseV: '',
+								shpBadWaveHgtMseV: '',
+								shpBadSteepMseV: '',
+								tscpeMseV: '',
+								incongruentProdSdtrmF: '',
+								incongruentProdOilF: '',
+
+								shpBadWthMseV: '',
+								incongruentProdFetchLocTp2: '',
+								incongruentProdFetchLocTp: '',
+								crNetTheoWgt: '',
+
+								// [TableView2a2 values]..
+								incongruentInsporOpinion: '',
+
+								avAcCd:'',
+
+								crEucCngBadF: '', //냉연공정재변경불가여부
+							  };
+
+							  @action
+							  setSearchParam(name, value) {
+								this.searchParams = new ViewRegisterAbnormalMaterialCardModel({ ...this.searchParams, [name]: value });
+							  }
+
+							  @action
+							  putAllSearchParams(obj) {
+								console.log('putAllSearchParams', obj);
+								this.searchParams = new ViewRegisterAbnormalMaterialCardModel(obj);
+							  }
+
+							  @action
+							  clear() {
+								console.log('clear');
+
+								// this._securityData = null;
+								this._cardNoLov = [];
+								this._crDefOcrOpCdLov = [];
+								this._abnomalCardInfo;
+								this._inspRemResult;
+								this._mtlExamResult;
+								this._abnlCardNoListResult = [];
+								this.searchParams = { // 검색 파라미터
+								  newFlag: false,             //newFind = "new" 면 true
+								  cardFind: '',
+								  preserveFlag: false,       //P_PreventDelFlag="1"(삭제금지)이면 true
+
+								  confirmFlag1: false,
+								  confirmFlag2: false,
+								  nextFacOpCdIsPacking: false, //incongruentProdFetchLocTp 항목 구분
+
+								  //hidden
+								  crAbnorOcrDate: '',
+								  facOpCdN: '',
+								  mtlNo: '',
+								  coilType: 'C',
+
+								  // [SearchView  values]..
+								  selectedFacData: '&',   // "1냉연공장"
+								  selectedOpCdData: '&',  // facOpCdN
+								  jdgTp: 'ALL',
+								  selectedDate: '&',      // 발생일  selectedDate = [ P_DateFrom, P_DateTo ]
+								  pMtlNo4Query: '',
+								  cardNo: '',             // 이상재카드No
+
+								  // [TableView2 values].. 카드작성영역
+								  crDefCd: '',
+								  crDefOcrOpCd: '',
+								  iFacOpCdN: '', // 구: I_FacOpCd //TODO
+								  crInsporEmpNo: '',
+								  opSft: '',
+								  lenDirDefOcrShpTp: '',
+
+								  lenDirDefOcrQt: '',
+								  wDirtDefOcrLocTp: '',
+								  wDirtDefOcrDetailLoc: '',
+								  difSurTp: '',
+								  defOcrPitch: '',
+								  defOcrNum: '',
+								  defOcrSize: '',
+								  defExfoliaF: '',
+								  defCorF: '',
+
+								  defFigF: '',
+								  shpBadWDirtLocTp: '',
+								  shpBadWaveMseV: '',
+								  shpBadWaveHgtMseV: '',
+								  shpBadSteepMseV: '',
+								  tscpeMseV: '',
+								  incongruentProdSdtrmF: '',
+								  incongruentProdOilF: '',
+
+								  shpBadWthMseV: '',
+								  incongruentProdFetchLocTp2: '',
+								  incongruentProdFetchLocTp: '',
+								  crNetTheoWgt: '',
+
+								  // [TableView2a2 values]..
+								  incongruentInsporOpinion: '',
+
+								  //
+								  crEucCngBadF: '', //냉연공정재변경불가여부
+								};
+							  }
+
+							  @observable
+							  menuItems = [
+								{ text: '이상재 List 조회', link: '/m2n0000161', target: '_self' },
+								{ text: '반제품실적처리', link: '/m2n0000044', target: '_parent' },
+							  ];
+
+							  //냉연공정재변경불가여부 값 리스트
+							  @observable
+							  optionsCrEucCngBadF = [
+								{ value: '', text: '　' },
+								{ value: 'Y', text: 'Y' },
+								{ value: 'N', text: 'N' },
+							  ];
+
+							  @action
+							  setMenuItems() {
+								const currentGetParameters = qs.parse(location.search, { ignoreQueryPrefix: true });
+								console.log('연관메뉴 세팅 >>>', currentGetParameters);
+								const tempMenuItems =  this.menuItems.map((menu) => {
+								  const abnomalCardInfo = this._abnomalCardInfo || {};
+
+								  const operFlag = this.securityData.operFlag;
+								  const facOpCdN = this.searchParams.selectedOpCdData;
+								  const mtlNo = abnomalCardInfo !== {} ? abnomalCardInfo.mtlNo || '' : '';
+
+								  const screenName = menu.text;
+								  let screenId = menu.link.substring(1);
+								  const authority = this.securityData.authority;
+
+								  let getParameters = '';
+								  getParameters += '?NS_FKEY=' + screenId + '_' + authority;
+								  getParameters += '&NS_RKEY=' + currentGetParameters.NS_RKEY;
+
+								  switch (screenName) {
+									case '반제품실적처리':
+									  //광양산세
+									  // const kwPicklingFacList = ['1F1', '3F1', '1F2', '1F3', '124', '153', '32B', '156', '157' ];
+									  // if (operFlag === '5' && kwPicklingFacList.includes(facOpCdN)) {
+									  const selectedFacData = this.searchParams.selectedFacData; // 현업요청 2020.07.02
+									  if (operFlag === '5' && selectedFacData === '산세공장') {
+										screenId = 'm2nd010045';
+										getParameters += '&mtlNo=' + mtlNo;
+									  }
+									  //포)1CGL
+									  else if (operFlag === 'L' && facOpCdN === '2A1') {
+										screenId = 'm2n0000044';
+										getParameters += '&mtlNo=' + mtlNo;
+									  }
+									  //기타
+									  else {
+										screenId = 'm2n0000044';
+										getParameters += '&mtlNo=' + mtlNo;
+									  }
+									  break;
+									case '이상재 List 조회':
+
+									  // const listCardExist = currentGetParameters.List_cardExist;
+									  const listHistory = currentGetParameters.List_AbnlConfirm;
+									  console.log('listHistory >>>', listHistory);
+
+									  if(listHistory !== undefined) {
+										// 1. list 화면에서 넘어온 경우(currentGetParameters 존재)
+										let listFindParam = '';
+										if (listHistory === 'History') { listFindParam = 'historyFind'; } //이력조회
+										else if (listHistory === 'Y') { listFindParam = 'cardFind'; } //판정후
+										else if (listHistory === 'N') { listFindParam = 'mlnFind'; } //판정전
+										else { listFindParam = ''; }
+										getParameters += '&selectedFacData=' + currentGetParameters.selectedFacData;
+										getParameters += '&selectedOpCdData=' + currentGetParameters.selectedOpCdData; // P_FacOpCdLOV
+										getParameters += '&pParentMtlNo=' + currentGetParameters.pParentMtlNo;
+										getParameters += '&pDateFrom=' + currentGetParameters.List_DateFrom;
+										getParameters += '&pDateTo=' + currentGetParameters.List_DateTo;
+										// getParameters += '&mtlNo=' + mtlNo;
+										getParameters += '&pFacOpCdN=' + currentGetParameters.List_FacOpCdN;
+										getParameters += '&cardExist=' + currentGetParameters.List_cardExist;
+										getParameters += '&pAbnlConfirm=' + currentGetParameters.List_AbnlConfirm;
+										getParameters += '&pRsitDateFrom=' + currentGetParameters.List_RsitDateFrom;
+										getParameters += '&pRsitDateTo=' + currentGetParameters.List_RsitDateTo;
+										getParameters += '&pRsitDateChk=' + currentGetParameters.List_RsitDateChk;
+										getParameters += '&' + listFindParam + '=1';
+
+									  } else {
+										// 2. 바로 등록화면으로 들어온 경우
+										getParameters += '&selectedFacData=' + this.searchParams.selectedFacData;
+										getParameters += '&selectedOpCdData=' + this.searchParams.selectedOpCdData; // P_FacOpCdLOV
+									  }
+									  getParameters += '&layout=hidden';
+									  break;
+									default:
+									  break;
+								  }
+
+								  const url = (urlPath.targetLocation === 'PORTAL' ? urlPath.redirectPortalPath : urlPath.redirectLocalPath) + screenId + getParameters;
+								  return { ...menu, link: url };
+								});
+								this.menuItems = tempMenuItems;
+							  }
+
+							  @action
+							  setInitData() { // 초기 데이터 setting
+								console.log('[setInitData]');
+
+								//worksCode
+								const worksCode = this._securityData.plantFlag;
+								const crInsporEmpNo = this._securityData.employeeNumber;
+								this.searchParams = { ...this.searchParams, worksCode };
+
+								if (this.searchParams.selectedDate === '&') {
+								  const today = moment().format('YYYY-MM-DD');
+								  const sevenDaysAgo = moment().subtract(7, 'days').format('YYYY-MM-DD');
+
+								  const selectedDate = [sevenDaysAgo, today];
+								  this.setSearchParam('selectedDate', selectedDate);
+
+								} else {
+
+								  const today = this.searchParams.selectedDate !== '&' ? this.searchParams.selectedDate[0] : '';
+								  const oneMonthsAgo = moment(today).subtract(1, 'M').format('YYYY-MM-DD');
+
+								  const selectedDate = [oneMonthsAgo, today];
+								  this.setSearchParam('selectedDate', selectedDate);
+								}
+
+								//facOpCds - for searchView의 cardNoList
+								const reSetOpCdData = this._reSetOpCdData || [];
+								const facOpCdNs = [];
+								reSetOpCdData.map((data, i) => {
+								  const value = data.value;
+								  if (value !== 'ALL') {
+									facOpCdNs.push(value);
+								  }
+								});
+								this.setSearchParam('facOpCdNs', facOpCdNs);
+								this.setSearchParam('crInsporEmpNo', crInsporEmpNo);
+
+							  }
+
+							  @action
+							  setParentData(requestParams) {
+								console.log('카드등록 [setParentData] requestParams', requestParams);
+								// default 파라미터: selectedFacData, selectedOpCdData, mtlNo
+								// // for 이상재List setting위한 값
+								// List_FacOpCdN
+								// List_DateFrom
+								// List_DateTo
+								// List_AbnlConfirm
+								// List_cardExist
+
+								// [1 카드가 이미 작성된 경우]
+								// selectedDate
+								// jdgTp
+								// cardFind=1
+
+								//[2 카드작성 X]
+								// newFind=new
+
+								const newFlag = requestParams.newFind === 'new'? true:'';
+								const cardFind = requestParams.cardFind || '';
+								const preserveFlag = requestParams.preventDelFlag === '1';
+
+								console.log('[setParentData]', 'newFlag: ', newFlag, ', preserveFlag: ', preserveFlag);
+
+								this.searchParams = { ...this.searchParams,
+								  newFlag,
+								  cardFind,
+								  preserveFlag,
+								};
+
+								if(requestParams.selectedFacData) {
+								  this.searchParams = { ...this.searchParams, selectedFacData: requestParams.selectedFacData };
+								}
+								if(requestParams.mtlNo) {
+								  this.setSearchParam('mtlNo', requestParams.mtlNo);
+								}
+								if(requestParams.facOpCdN) {
+								  this.searchParams = { ...this.searchParams, selectedOpCdData: requestParams.facOpCdN };
+								  this.searchParams = { ...this.searchParams, iFacOpCdN: requestParams.facOpCdN };
+								  if(requestParams.facOpCdN !== requestParams.selectedOpCdData){//다른공정의 소재 일시
+									this.reSetFacData(requestParams.facOpCdN);
+								  }
+								}
+								if(requestParams.pMtlNo4Query) {
+								  this.searchParams = { ...this.searchParams, pMtlNo4Query: requestParams.pMtlNo4Query };
+								}
+								if(requestParams.coilType) {
+								  this.searchParams = { ...this.searchParams, coilType: requestParams.coilType };
+								}
+								if(requestParams.jdgTp) {
+								  this.searchParams = { ...this.searchParams, jdgTp: requestParams.jdgTp };
+								}
+								if (requestParams.mtlNo !== undefined && !newFlag) {
+								  this.searchParams = { ...this.searchParams, pMtlNo4Query: requestParams.mtlNo };
+								}
+
+								//crAbnorOcrDate
+								if(requestParams.selectedDate) {
+								  this.setSearchParam('crAbnorOcrDate', requestParams.selectedDate);
+								}
+
+								const selectedDateSubstr = requestParams.selectedDate ? requestParams.selectedDate.substring(0, 10) : ''; // [1 카드가 이미 작성된 경우]
+								if (selectedDateSubstr !== '') {
+								  const selectedDateArr = [];
+								  selectedDateArr.push(selectedDateSubstr);
+								  selectedDateArr.push(selectedDateSubstr);
+								  this.setSearchParam('selectedDate', selectedDateArr);
+								}
+							  }
+
+							  @action
+							  async reSetFacData(facOpCdN){ //다른공정의 소재 일시
+								console.log("reSetFacData start");
+								const plantFlag = this._securityData.plantFlag;
+								const id = this._securityData.screenId;
+								console.log("reSetFacData facOpCdN : ", facOpCdN);
+								const facOpCdData = await CommonApi.getFacOpLov(plantFlag, facOpCdN, id);
+								let facData = [];
+								let opCdData = [];
+								let opCdCnt = 0;
+								let opCdDataFac = ''; // 공장
+								facOpCdData.facList.map((facTarget, i) => {
+								  facData = facData.concat({ key: i, text: facTarget, value: facTarget});
+								  facOpCdData.opCdList.map((opCdTarget, j) => {
+									if(opCdTarget[facTarget] != undefined) {
+									  opCdTarget[facTarget].map((singleOpCdTarget, k) => {
+										opCdData = opCdData.concat({ key: opCdCnt, text: singleOpCdTarget.facOpName, value: singleOpCdTarget.facOpCdN, fac: facTarget, url: singleOpCdTarget.viewCode });
+										opCdCnt++;
+									  })
+									}
+								  });
+								});
+								console.log("reSetFacData opCdData", opCdData);
+								this._facData = facData;
+								this._opCdData = opCdData;
+								Object.keys(opCdData).forEach(key => {
+								  if (opCdData[key].value === facOpCdN) {
+									opCdDataFac = opCdData[key].fac;
+								  }
+								});
+								let tempReSetOpCdData = await this._opCdData.filter(target => target.fac === opCdDataFac); //새공장에 따른 공정lov
+								this._reSetOpCdData = tempReSetOpCdData;
+								console.log("reSetFacData tempReSetOpCdData", tempReSetOpCdData);
+								this.setSearchParam('selectedFacData', opCdDataFac);
+								this.setSearchParam('selectedOpCdData', facOpCdN);
+								console.log("reSetFacData end");
+							  }
+
+							  @action
+							  processNewFind() { //pp1
+								console.log('[pp1.processNewFind]');
+								const operFlag = this._securityData.operFlag;
+								const facOpCdN = this.searchParams.selectedOpCdData;
+
+								const dateFrom = this.searchParams.selectedDate !== '&' ? this.searchParams.selectedDate[0] : '';
+								const dateTo = this.searchParams.selectedDate !== '&' ? this.searchParams.selectedDate[1] : '';
+								const crAbnorOcrDate = this.searchParams.crAbnorOcrDate === '' ? '' : this.searchParams.crAbnorOcrDate.replace(/\s/g, '').replace(/-/gi, '').replace(/:/gi, '').substring(0, 14);
+
+								const securityData = this._securityData;
+
+								const params = { ...this.searchParams,
+								  securityData,
+								  operFlag, facOpCdN, crAbnorOcrDate, dateFrom, dateTo };
+
+								if (this.searchParams.preventDelFlag !== true) { // 삭제금지 check안된 경우만
+								  this.setSearchParam('crDefOcrOpCd', ''); // 새로 조회한 경우 발생공정 선택해둔거 닦기
+								}
+
+								return this.repository.process(params, 'newFind')
+								  .then((data) => {
+									console.log('@@test newFind 조회후', data);
+									const errorMessage = data.errorMessage || '';
+									if (errorMessage !== '') {
+									  console.log('@@ERROR :: ', errorMessage);
+									  dialog.alert(message('M2NJS1275')); // 에러발생 //임의작성
+									} else {
+									  //성공
+									  const abnlMtlCardResult = data.abnlMtlCardResult;
+									  const inspRemResult = data.inspRemResult;
+									  const mtlExamResult = data.mtlExamResult;
+
+									  this._abnomalCardInfo = abnlMtlCardResult;
+									  this._inspRemResult = inspRemResult;
+									  this._mtlExamResult = mtlExamResult;
+									}
+								  }).then(() => this.setAfterFind());
+
+
+							  }
+
+							  @action
+							  processCardFind() { //pp2,3
+								console.log('[pp23.processCardFind]');
+
+								const operFlag = this._securityData.operFlag;
+								const facOpCdN = this.searchParams.selectedOpCdData;
+
+								const dateFrom = this.searchParams.selectedDate !== '&' ? this.searchParams.selectedDate[0] : '';
+								const dateTo = this.searchParams.selectedDate !== '&' ? this.searchParams.selectedDate[1] : '';
+								console.log('dateFrom : ', dateFrom);
+								console.log('selectDate : ', this.searchParams.selectedDate);
+								const crAbnorOcrDate = this.searchParams.crAbnorOcrDate === '' ? '' : this.searchParams.crAbnorOcrDate.replace(/\s/g, '').replace(/-/gi, '').replace(/:/gi, '').substring(0, 14);
+								console.log('processCardFind crAbnorOcrDate', crAbnorOcrDate);
+								const securityData = this._securityData;
+
+								let params = { ...this.searchParams,
+								  securityData,
+								  operFlag, facOpCdN, crAbnorOcrDate, dateFrom, dateTo };
+
+								return this.repository.process(params, 'cardFind')
+								  .then((data) => {
+									if (data !== undefined) {
+									  console.log('@@ 조회response', data);
+									  const errorMessage = data.errorMessage || '';
+									  if (errorMessage !== '') {
+										console.log('@@ERROR :: ', errorMessage);
+										dialog.alert(message('M2NJS1275')); // 에러발생 //임의작성
+									  } else {
+										//성공AbnormalMaterialStore
+										const abnlMtlCardResult = data.abnlMtlCardResult;
+										const inspRemResult = data.inspRemResult;
+										const mtlExamResult = data.mtlExamResult;
+										if (abnlMtlCardResult !== undefined) {
+										  console.log('@@test abnlMtlCardResult', abnlMtlCardResult);
+										  this._abnomalCardInfo = abnlMtlCardResult;
+										  this._abnomalCardInfo.opDnDt = abnlMtlCardResult ? abnlMtlCardResult.crAbnorOcrDate : moment().format('YYYY-MM-DD'); // newFlag아닐때 발생일로 치환
+										  this._inspRemResult = inspRemResult;
+										  this._mtlExamResult = mtlExamResult;
+										  let abnlCardNoListResult = [];
+										  if (data.abnlCardNoListResult !== undefined && data.abnlCardNoListResult !== null) {
+											console.log("======20201210 가동계 판단 abnlCardNoListResult::",data.abnlCardNoListResult);
+											abnlCardNoListResult = data.abnlCardNoListResult;
+											if (abnlCardNoListResult !== undefined && Array.isArray(abnlCardNoListResult) && abnlCardNoListResult.length > 0) {
+											  // const cardNo = abnlCardNoListResult[0].cardNo;  // 20201023 현재 조회된 카드NO로 우선 요청
+											  const cardNo = data.cardNo !== undefined? data.cardNo : abnlCardNoListResult[0].cardNo;
+											  this.setSearchParam('cardNo', cardNo);
+											}
+										  }
+										  this._abnlCardNoListResult = abnlCardNoListResult;
+										  this._cardNoLov = abnlCardNoListResult;
+										  console.log("======20201222 가동계 판단2 this._abnlCardNoListResult::",this._abnlCardNoListResult,"||",this._cardNoLov);
+										}
+									  }
+									}
+								  }).then(() => this.setAfterFind());
+							  }
+
+							  @action
+							  processSave() { //pp4
+								console.log('[pp4.processSave]');
+
+								const securityData = this._securityData;
+								const abnomalCardInfo = this._abnomalCardInfo;
+
+								const operFlag = this._securityData.operFlag;
+								const facOpCdN = abnomalCardInfo.facOpCdN;
+
+								const dateFrom = abnomalCardInfo.crAbnorOcrDate ? moment(abnomalCardInfo.crAbnorOcrDate).format('YYYY-MM-DD') : '';
+								const dateTo = abnomalCardInfo.crAbnorOcrDate ? moment(abnomalCardInfo.crAbnorOcrDate).format('YYYY-MM-DD') : '';
+								const crAbnorOcrDate = this.searchParams.crAbnorOcrDate === '' || this.searchParams.crAbnorOcrDate === undefined ? '' : this.searchParams.crAbnorOcrDate.replace(/\s/g, '').replace(/-/gi, '').replace(/:/gi, '').substring(0, 14);
+
+								// 20201007 sleeve 항목 카드등록시에 추가
+								this.setSearchParam("crSleeveUseF",abnomalCardInfo.sleeveInsertFlag);
+
+								const params = {
+								  ...this.searchParams,
+								  securityData,
+								  operFlag,
+								  facOpCdN,
+								  dateFrom,
+								  dateTo,
+								  crAbnorOcrDate,
+								  abnlMtlCardResult: abnomalCardInfo,
+
+								};
+
+								return this.repository.process(params, 'save')
+								  .then((data) => {
+									console.log('@@test save 조회후', data);
+									const errorMessage = data.errorMessage || '';
+									if (errorMessage !== '') {
+									  console.log('@@ERROR :: ', errorMessage);
+									  dialog.alert(message('M2NJS1275')); // 에러발생 //임의작성
+									} else {
+									  //성공
+									  const abnlMtlCardResult = data.abnlMtlCardResult;
+									  this._abnomalCardInfo = abnlMtlCardResult;
+
+									  const mtlExamResult = data.mtlExamResult;
+									  this._mtlExamResult = mtlExamResult;
+
+									  const abnlCardNoListResult = data.abnlCardNoListResult || [];
+									  if (Array.isArray(abnlCardNoListResult) && abnlCardNoListResult.length > 0) {
+										let cardNo = '';
+										if(data.cardNo) {
+										  cardNo = data.cardNo;
+										} else {
+										  cardNo = abnlCardNoListResult[0].cardNo;
+										}
+										this.setSearchParam('cardNo', cardNo);
+									  }
+									  this._abnlCardNoListResult = abnlCardNoListResult;
+									  this._cardNoLov = abnlCardNoListResult;
+
+									  //save 성공시
+									  // 발생일 기간을 당일로 변경
+									  const crAbnorOcrDate = this.searchParams.crAbnorOcrDate || '';
+									  if(crAbnorOcrDate !== '') {
+										const ocrDate = crAbnorOcrDate.split(' ')[0];
+
+										const selectedDate = [ocrDate, ocrDate];
+										this.setSearchParam('selectedDate', selectedDate);
+									  }
+
+									  this.setSearchParam('newFlag', false);
+									  notification(message('M00999110')); // 정상처리되었습니다.
+
+									}
+								  }).then(() => this.setAfterFind());
+
+							  }
+
+							  @action
+							  processDelete() { //pp5
+								console.log('[pp5.processDelete]');
+
+								const securityData = this._securityData;
+								const abnomalCardInfo = this._abnomalCardInfo;
+
+								const operFlag = this._securityData.operFlag;
+								const facOpCdN = abnomalCardInfo.facOpCdN;
+
+								const dateFrom = abnomalCardInfo.crAbnorOcrDate ? moment(abnomalCardInfo.crAbnorOcrDate).format('YYYY-MM-DD') : '';
+								const dateTo = abnomalCardInfo.crAbnorOcrDate ? moment(abnomalCardInfo.crAbnorOcrDate).format('YYYY-MM-DD') : '';
+								// const crAbnorOcrDate = this.searchParams.crAbnorOcrDate === '' ? '' : this.searchParams.crAbnorOcrDate.replace(/\s/g, '').replace(/-/gi, '').replace(/:/gi, '').substring(0, 14);
+
+								const params = {
+								  ...this.searchParams,
+								  securityData,
+								  operFlag,
+								  facOpCdN,
+								  dateFrom,
+								  dateTo,
+								  // crAbnorOcrDate,
+								  abnlMtlCardResult: abnomalCardInfo,
+
+								};
+
+								return this.repository.process(params, 'delete')
+
+								  .then((data) => {
+									console.log('@@test delete 조회후',data);
+									const errorMessage = data.errorMessage || '';
+									if (errorMessage !== '') {
+									  console.log('@@ERROR :: ', errorMessage);
+									  dialog.alert(message('M2NJS1275')); // 에러발생 //임의작성
+									} else {
+									  //성공
+									  const abnlCardNoListResult = data.abnlCardNoListResult || [];
+									  if(Array.isArray(abnlCardNoListResult) && abnlCardNoListResult.length > 0) {
+										const cardNo = abnlCardNoListResult[0].cardNo;
+										this.searchParams = {...this.searchParams, cardNo};
+									  }
+									  this._abnlCardNoListResult = abnlCardNoListResult;
+									  this._cardNoLov = abnlCardNoListResult;
+									  notification(message('M00999110')); // 정상처리되었습니다.
+									  // this._abnomalCardInfo = undefined;
+									  // this._inspRemResult = undefined;
+									  // this._mtlExamResult = undefined;
+									  // this.searchParams = {...this.searchParams, examResult: ''};
+									}
+								  });
+
+							  }
+
+							  /*
+							  @action
+							  findRowData() {
+								console.log('[findRowData]');
+								const operFlag = this._securityData.operFlag;
+								const facOpCdN = this.searchParams.selectedOpCdData;
+								const mtlNo = this.searchParams.mtlNo;
+
+								const dateFrom = this.searchParams.selectedDate !== '&' ? this.searchParams.selectedDate[0] : '';
+								const dateTo = this.searchParams.selectedDate !== '&' ? this.searchParams.selectedDate[1] : '';
+								const crAbnorOcrDate = this.searchParams.crAbnorOcrDate === '' ? '' : this.searchParams.crAbnorOcrDate.replace(/\s/g, '').replace(/-/gi, '').replace(/:/gi, '').substring(0, 14);
+
+								const coilType = this.searchParams.coilType;
+								const jdgTp = this.searchParams.jdgTp;
+
+								const newFlag = this.searchParams.newFlag;
+								const params = { operFlag, facOpCdN, mtlNo, crAbnorOcrDate, jdgTp, dateFrom, dateTo, coilType };
+
+								return this.repository.findRowData(params, newFlag)
+								  .then((data) => {
+									console.log('@@test 조회후',data);
+									if(newFlag) { // new
+									  const abnomalCardInfo = data.abnlMtlCardResult;
+									  const mtlExamResult = data.mtlExamResult;
+									  const inspRemResult = data.inspRemResult;
+
+									  this._abnomalCardInfo = abnomalCardInfo;
+									  this._mtlExamResult = mtlExamResult;
+									  this._inspRemResult = inspRemResult;
+
+									  if (abnomalCardInfo) {
+										this.searchParams = {
+										  ...this.searchParams,
+										  mtlNo: abnomalCardInfo.mtlNo || '',
+										  crClMatThk: abnomalCardInfo.crClMatThk || '',
+										  crClMatW: abnomalCardInfo.crClMatW || '',
+										  crClMatLen: abnomalCardInfo.crClMatLen || '',
+										  crMatPrcQt: abnomalCardInfo.crMatPrcQt || '',
+										  crNetActualWgt: abnomalCardInfo.crNetActualWgt || '',
+										  opDnDt: abnomalCardInfo.opDnDt || '',
+										  avOcrCauCd: abnomalCardInfo.avOcrCauCd || '',
+										  avAcUqrCd: abnomalCardInfo.avAcUqrCd || '',
+										  remFacOpCdN: abnomalCardInfo.remFacOpCdN || '',
+										  trackingCode: abnomalCardInfo.trackingCode || '',
+										  streLocCd: abnomalCardInfo.streLocCd || '',
+										  planPassFacOpCdN: abnomalCardInfo.planPassFacOpCdN || '',
+										  orderHeadLineNo: abnomalCardInfo.orderHeadLineNo || '',
+										  orderThick: abnomalCardInfo.orderThick || '',
+										  orderWidth: abnomalCardInfo.orderWidth || '',
+										  orderInnerDiameter: abnomalCardInfo.orderInnerDiameter || '',
+										  poscoProdGrd: abnomalCardInfo.poscoProdGrd || '',
+										  surfaceFinishCd: abnomalCardInfo.surfaceFinishCd || '',
+										  tempGrade: abnomalCardInfo.tempGrade || '',
+										  orderUsageCdN: abnomalCardInfo.orderUsageCdN || '',
+										  productNameCode: abnomalCardInfo.productNameCode || '',
+										  postTreatmentMethodCd: abnomalCardInfo.postTreatmentMethodCd || '',
+										  oilingMethodCd: abnomalCardInfo.oilingMethodCd || '',
+										  sleeveInsertFlag: abnomalCardInfo.sleeveInsertFlag || '',
+										  crIndiDesignEdge: abnomalCardInfo.crIndiDesignEdge || '',
+										  surfaceGrd: abnomalCardInfo.surfaceGrd || '',
+										  shapeGrd: abnomalCardInfo.shapeGrd || '',
+										  passFacOpCdN: abnomalCardInfo.passFacOpCdN || '',
+										  slabNo: abnomalCardInfo.slabNo || '',
+										  crThk: abnomalCardInfo.crThk || '',
+										  crWth: abnomalCardInfo.crWth || '',
+										  prodStdPackTol: abnomalCardInfo.prodStdPackTol || '',
+										  packingType: abnomalCardInfo.packingType || '',
+										  hotCoilNo: abnomalCardInfo.hotCoilNo || '',
+										  hrRollDate: abnomalCardInfo.hrRollDate || '',
+										  hrClWgt: abnomalCardInfo.hrClWgt || '',
+										  smSteelGrd: abnomalCardInfo.smSteelGrd || '',
+										  stsSurAvp: abnomalCardInfo.stsSurAvp || '',
+										  stsFlatdSvyV: abnomalCardInfo.stsFlatdSvyV || '',
+										  stsGuaranteeSurfaceFlag: abnomalCardInfo.stsGuaranteeSurfaceFlag || '',
+										  crAbnorOcrDate: abnomalCardInfo.crAbnorOcrDate || '',
+										  endUserNumber: abnomalCardInfo.endUserNumber || '',
+										  otOrdPrdRsitDt: abnomalCardInfo.otOrdPrdRsitDt || '',
+										  orderTypeGroupCode: abnomalCardInfo.orderTypeGroupCode || '',
+										  ordPdtItdsCdN: abnomalCardInfo.ordPdtItdsCdN || '',
+										  prodStdPackTolMin: abnomalCardInfo.prodStdPackTolMin || '',
+										  prodStdPackTolMax: abnomalCardInfo.prodStdPackTolMax || '',
+										  steelGroup: abnomalCardInfo.steelGroup || '',
+										  endUserName: abnomalCardInfo.endUserName || '',
+										  crAbnrMatOcrTp: abnomalCardInfo.crAbnrMatOcrTp || '',
+										  crOpSft: abnomalCardInfo.crOpSft || '',
+										  orderProductNameCode: abnomalCardInfo.orderProductNameCode || '',
+										  ordPdtItpCdN: abnomalCardInfo.ordPdtItpCdN || '',
+										};
+									  }
+									} else { //cardInfo
+
+									}
+
+								  })
+								  .then(() => this.setAfterFind());
+							  }
+							  */
+
+							  @action
+							  async setAfterFind() {
+								console.log('setAfterFind');
+								// row데이터 검색후 data setting하기
+								const abnlMtlCardResult = this._abnomalCardInfo;
+								const inspRemResult = this._inspRemResult;
+								const mtlExamResult = this._mtlExamResult;
+								const newFlag = this.searchParams.newFlag;
+
+								if (abnlMtlCardResult) {
+								  const mtlNo = abnlMtlCardResult ? abnlMtlCardResult.mtlNo || '' : '';
+								  const facOpCdN = abnlMtlCardResult ? abnlMtlCardResult.facOpCdN || '' : '';
+
+								  //고강도강 2차소둔일때 lov공장체크변환변수 추가
+								  let sSFacOpCd = facOpCdN;
+								  if (sSFacOpCd === '2Q1') {
+									sSFacOpCd = '2P1';
+								  } else if (sSFacOpCd === '4Q2') {
+									sSFacOpCd = '4P2';
+								  }
+
+								  let confirmFlag1 = false;
+								  let confirmFlag2 = false;
+								  const reSetOpCdData = this._reSetOpCdData;
+								  const nsFkey = this._securityData.nsFkey;
+
+								  // 품질담당 - 해당공장 판정가능
+								  if (mtlNo !== '' && reSetOpCdData.filter(info => info.value === sSFacOpCd)[0] !== undefined && nsFkey === 'm2n0000046_f003')
+								  {
+									confirmFlag1 = true;
+								  }
+								  //주임, 파트장 - 해당공정만 판정가능 => 해당공장 판정가능 수정 (2004.11.23)
+								  else if (mtlNo !== '' && reSetOpCdData.filter(info => info.value === sSFacOpCd)[0] !== undefined && nsFkey === 'm2n0000046_f002')
+								  {
+									confirmFlag2 = true;
+								  }
+								  //임가공 이상재판정 추가 (2018.10.11)
+								  else if (facOpCdN.substring(1) === '2A' || facOpCdN.substring(1) === '2B')
+								  {
+									confirmFlag1 = true;
+								  }
+								  // MCL 이상재판정 추가 (2020.09.21)
+								  else if (facOpCdN === '2S5')
+								  {
+									confirmFlag1 = true;
+									this.setSearchParam('selectedOpCdData', '223');
+								  }
+
+								  //판정 확인 여부
+								  // const tmpAvAcCd = abnlMtlCardResult ? abnlMtlCardResult.tmpAvAcCd || '' : '';
+								  const tmpAbnrMatJdgTp3 = abnlMtlCardResult ? abnlMtlCardResult.abnrMatJdgTp3 || '' : '';
+								  const tmpAbnrMatJdgTp2 = abnlMtlCardResult ? abnlMtlCardResult.abnrMatJdgTp2 || '' : '';
+								  const tmpAbnrMatJdgTp1 = abnlMtlCardResult ? abnlMtlCardResult.abnrMatJdgTp || '' : '';
+								  if (tmpAbnrMatJdgTp1 !== '' && tmpAbnrMatJdgTp2 !== '' && tmpAbnrMatJdgTp3 !== '') {
+									confirmFlag1 = false;
+									confirmFlag2 = false;
+								  }
+								  console.log('@@[setInitData]', ', confirmFlag1:', confirmFlag1, ', confirmFlag2: ', confirmFlag2);
+
+								  this.setSearchParam('confirmFlag1', confirmFlag1);
+								  this.setSearchParam('confirmFlag2', confirmFlag2);
+
+								  const avAcCd = abnlMtlCardResult ? abnlMtlCardResult.avAcCd || '' : '';
+								  this.setSearchParam('avAcCd', avAcCd);
+
+								  const wDirtDefOcrLocTp2 = abnlMtlCardResult ? abnlMtlCardResult.wDirtDefOcrLocTp2 || '' : '';
+								  this.searchParams = { ...this.searchParams, wDirtDefOcrLocTp2 };
+
+								  // 결함코드 TableView2
+								  //sAvOcrCauCd, coilType
+								  if (abnlMtlCardResult !== undefined) {
+									let sAvOcrCauCd = '';
+									const coilType = abnlMtlCardResult.coilType || 'C';
+									if (newFlag) {
+									  sAvOcrCauCd = abnlMtlCardResult.avOcrCauCd || '';
+									} else {
+									  sAvOcrCauCd = abnlMtlCardResult.crDefCd || '';
+									}
+									console.log('[setAfterFind]', 'crDefCd: ', sAvOcrCauCd, ', coilType: ', coilType);
+									this.searchParams = { ...this.searchParams,
+									  wDirtDefOcrLocTp2,
+									  crDefCd: sAvOcrCauCd,
+									  coilType };
+								  } // abnlMtlCardResult is not undefined
+
+								  // default 근조Setting
+								  let opSft = '';
+								  const workDate = moment().format('YYYYMMDDHHmmss');
+								  if (newFlag) {
+									const opSftParams = {
+									  workDate,
+									  worksCode: this._securityData.plantFlag,
+									  operFlag: this._securityData.operFlag,
+									  facOpCd: this.searchParams.selectedOpCdData,
+									};
+									opSft = await CommonApi.getOpshift('SHIFTOPER', opSftParams).then((data) => data.workShift);
+								  }  else if (abnlMtlCardResult !== undefined) {
+									opSft = abnlMtlCardResult.opSft;
+								  } else {
+									opSft = '&nbsp;';
+								  }
+								  this.setSearchParam('opSft', opSft);
+
+								  // 검사자의견 setting
+								  let incongruentInsporOpinion = '';
+								  if (newFlag) {
+									if (abnlMtlCardResult !== undefined) {
+									  const prdDate = moment(abnlMtlCardResult.productDueDate).format('YYYY-MM-DD');
+									  incongruentInsporOpinion += `생산기한일: ${prdDate}\n`;
+									}
+									if (inspRemResult !== undefined) {
+									  inspRemResult.map(insp => incongruentInsporOpinion += `${insp.facOpCdN}: ${insp.esdOtTp}: ${insp.inspRem}\n`);
+									}
+									this.searchParams = { ...this.searchParams, incongruentInsporOpinion };
+								  }
+
+								  // 검사자의견2 ExamResult
+								  let examResult = '';
+								  if (mtlExamResult !== undefined) {
+									examResult += `${mtlExamResult.exAMastGdCauOpTp || ' '}`;
+									examResult += `${mtlExamResult.extTotJdgGd || ' '}`;
+									examResult += `${mtlExamResult.extTotGdCauCd || ' '}`;
+									examResult += `${mtlExamResult.extSurJdgGd || ' '}`;
+									examResult += `${mtlExamResult.extShpJdgGd || ' '}`;
+									examResult += `${mtlExamResult.extSizeJdgGd || ' '}`;
+									examResult += `${mtlExamResult.extUtWgtJdgGd || ' '}`;
+									examResult += `  / `;
+									examResult += `${mtlExamResult.ordSurPrdFlag || '  '}`;
+									examResult += `${mtlExamResult.sprdCauCd || '  '}`;
+									examResult += ` \n`;
+									if (mtlExamResult.crDefOcrOpCd !== null) {
+									  examResult += `${mtlExamResult.crDefOcrOpCd || ' '}`;
+									  examResult += `${mtlExamResult.crDefCd || '  '}`;
+									  examResult += `${mtlExamResult.crDefAvp || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrOccupaRt || '    '}`;
+									  examResult += `${mtlExamResult.crDefOcrFcTp || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrSatLoc || '    '}`;
+									}
+									examResult += `  / `;
+									if (mtlExamResult.crDefOcrOpCd2 !== null) {
+									  examResult += `${mtlExamResult.crDefOcrOpCd2 || ' '}`;
+									  examResult += `${mtlExamResult.crDefCd2 || '  '}`;
+									  examResult += `${mtlExamResult.crDefAvp2 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrOccupaRt2 || '    '}`;
+									  examResult += `${mtlExamResult.crDefOcrFcTp2 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrSatLoc2 || '    '}`;
+									}
+									examResult += `   \n`;
+									if (mtlExamResult.crDefOcrOpCd3 !== null) {
+									  examResult += `${mtlExamResult.crDefOcrOpCd3 || ' '}`;
+									  examResult += `${mtlExamResult.crDefCd3 || '  '}`;
+									  examResult += `${mtlExamResult.crDefAvp3 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrOccupaRt3 || '    '}`;
+									  examResult += `${mtlExamResult.crDefOcrFcTp3 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrSatLoc3 || '    '}`;
+									}
+									examResult += `  / `;
+									if (mtlExamResult.crDefOcrOpCd4 !== null) {
+									  examResult += `${mtlExamResult.crDefOcrOpCd4 || ' '}`;
+									  examResult += `${mtlExamResult.crDefCd4 || '  '}`;
+									  examResult += `${mtlExamResult.crDefAvp4 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrOccupaRt4 || '    '}`;
+									  examResult += `${mtlExamResult.crDefOcrFcTp4 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrSatLoc4 || '    '}`;
+									}
+									examResult += `   \n`;
+									if (mtlExamResult.crDefOcrOpCd5 !== null) {
+									  examResult += `${mtlExamResult.crDefOcrOpCd5 || ' '}`;
+									  examResult += `${mtlExamResult.crDefCd5 || '  '}`;
+									  examResult += `${mtlExamResult.crDefAvp5 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrOccupaRt5 || '    '}`;
+									  examResult += `${mtlExamResult.crDefOcrFcTp5 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrSatLoc5 || '    '}`;
+									}
+									examResult += `  / `;
+									if (mtlExamResult.crDefOcrOpCd6 !== null) {
+									  examResult += `${mtlExamResult.crDefOcrOpCd6 || ' '}`;
+									  examResult += `${mtlExamResult.crDefCd6 || '  '}`;
+									  examResult += `${mtlExamResult.crDefAvp6 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrOccupaRt6 || '    '}`;
+									  examResult += `${mtlExamResult.crDefOcrFcTp6 || ' '}`;
+									  examResult += `${mtlExamResult.crDefOcrSatLoc6 || '    '}`;
+									}
+									this.searchParams = { ...this.searchParams, examResult };
+								  }
+
+								  // 포장공정체크(2.0: 5,6,7,8,9 => 3.0: '5')
+								  const nextFacOpCdN = abnlMtlCardResult ? abnlMtlCardResult.nextFacOpCdN : '';
+								  const nextFacOpCd = (nextFacOpCdN !== '' && nextFacOpCdN !== undefined) ? nextFacOpCdN.substring(1, 2) : '';
+								  let nextFacOpCdIsPacking = false;
+								  if (nextFacOpCd === '5') {
+									nextFacOpCdIsPacking = true;
+								  }
+								  this.searchParams = { ...this.searchParams, nextFacOpCdIsPacking };
+
+								  // abnlCardNoListResult 조회후로 옮겼.. 테스트필fi요
+								  // searchView
+								  // cardNo   _cardNoLov
+								  // const abnlCardNoListResult = this._abnlCardNoListResult;
+								  // if (abnlCardNoListResult && abnlCardNoListResult.length > 0) {
+								  //
+								  const crAbnorOcrDate = abnlMtlCardResult ? abnlMtlCardResult.crAbnorOcrDate : '';
+								  this.setSearchParam('crAbnorOcrDate', crAbnorOcrDate);
+								  console.log('@@crAbnorOcrDate : ', crAbnorOcrDate);
+								  //   const cardNo = facOpCdN
+								  //     + moment(crAbnorOcrDate).format('YYMMDDHHmm')
+								  //     + mtlNo;
+								  //   this.searchParams = { ...this.searchParams, cardNo };
+								  //
+								  //   let dataList = [];
+								  //   dataList = dataList.concat({ key: 0, text: cardNo, value: cardNo });
+								  //
+								  //   console.log('[setAfterFind] 카드 NO LIst : ', dataList);
+								  //   this._cardNoLov = dataList;
+								  // }
+								}
+
+
+							  }
+
+							  /*
+							  * 이상재카드 등록
+							  * 구: reqInsert
+							  */
+							  @action
+							  async reqRegister() {
+								console.log('reqRegister');
+								if (!this.searchParams.newFlag) {
+								  await dialog.alert(message('M2NJS1306')); //카드작성 후 다시 시도하세요.
+								  return false;
+								}
+
+								if (this.searchParams.crDefCd === '') {
+								  await dialog.alert(message('M2NJS1046')); //결함코드를 입력하세요.
+								  // document.body.querySelector('input[name=crDefCd]').focus();
+								  return false;
+								}
+
+								if (this.searchParams.crDefOcrOpCd === '') {
+								  await dialog.alert(message('M2NJS1094')); //발생공정을 선택하세요.
+								  // document.body.querySelector('select[name=crDefOcrOpCd]').focus(); // select focus 안됨 TODO
+								  return false;
+								}
+
+								if (this.searchParams.crInsporEmpNo === ''
+								// && this._securityData.operFlag === 'L'
+								) {
+								  await dialog.alert(message('M2NJS1034')); // 검사자직번을 6자리로 입력하세요.
+								  // document.body.querySelector('input[name=crInsporEmpNo]').focus();
+								  return false;
+								}
+
+								if (this.searchParams.opSft === '') {
+								  await dialog.alert(message('M2NJS1548')); // 근조값이 올바르지 않습니다.M27	JS1548
+								  // document.body.querySelector('input[name=opSft]').focus();
+								  return false;
+								}
+
+								//검사Line 에러체크
+								if (this.checkValidFacOpCd() === false) {
+								  return false;
+								}
+
+								if (!this.checkMyLength()) {
+								  return false;
+								}
+
+								let matPrgTp = this._abnomalCardInfo.trackingCode;
+								console.log("카드 정보::",this._abnomalCardInfo);
+								if (matPrgTp !== undefined && matPrgTp.length > 4) {
+								  matPrgTp = matPrgTp.substring(4, 5);
+								}
+
+								console.log('matPrgTp : ', matPrgTp);
+								console.log('crAbnrMatOcrTp : ', this.searchParams.crAbnrMatOcrTp);
+								console.log('avOcrCauCd : ', this.searchParams.avOcrCauCd);
+
+								//matPrgTp == "K" 냉연 보류재, matPrgTp == "" 열연/STS재 보류재
+								if ((matPrgTp === 'K' || matPrgTp === '') && this.searchParams.crAbnrMatOcrTp !== 'J' && this.searchParams.avOcrCauCd === '') {
+								  // const exeFlag = confirm('이상발생원인코드가 없어서 판정이 불가능합니다. \n 정보전달용으로 카드만 작성하시겠습니까?'); /*** m_mark */
+								  const exeFlag = await dialog.confirm(message("M2NJS1550"));
+								  if (exeFlag === false) {
+									return false;
+								  }
+								}
+
+								//정보전달용일 경우 이상발생일시 Set
+								const today = moment().format('YYYY-MM-DD HH:mm:ss');
+								const crAbnorOcrDate = this._abnomalCardInfo.crAbnorOcrDate;
+
+								this.searchParams = { ...this.searchParams,
+								  crAbnorOcrDate,
+								  otOrdPrdRsitDt: this._abnomalCardInfo.otOrdPrdRsitDt !== null? this._abnomalCardInfo.otOrdPrdRsitDt : today }; // null인 경우 임시 현재 날짜
+
+								//이상재카드 NO List 재조회를 위해
+								// this.searchParams = {
+								//   ...this.searchParams,
+								//   dateFrom: this._abnomalCardInfo.crAbnorOcrDate.substring(0,10),
+								//   dateTo: this._abnomalCardInfo.crAbnorOcrDate.substring(0,10),
+								//   pMtlNo4Query: '',
+								//   jdgTp: '0',
+								//   facOpCdN: this.searchParams.iFacOpCdN,
+								//   crAbnorOcrDate: this._abnomalCardInfo.crAbnorOcrDate.substring(0,19),
+								// };
+
+								// this.setSearchParam('newFlag', false);
+								// const params = this.searchParams;
+								// return this.repository.process(params, 'save')
+
+								return this.processSave()
+								  .then(() => true);
+							  }
+
+
+							  /*
+							  * 이상재카드 삭제
+							  * 구: reqDelete
+							  */
+							  @action
+							  reqDelete() {
+								console.log('reqDelete');
+								if (this.searchParams.newFlag) {
+								  dialog.alert(message('M2NJS1106')); //새로작성 중인 카드입니다. 삭제하실 수 없습니다.
+								  return false;
+								}
+
+								if (this.searchParams.cardNo === '') {
+								  dialog.alert(message('M2NJS1305')); //카드를 먼저 조회하세요.
+								  return false;
+								}
+
+								this.setCardInfo();
+
+								//이상재카드 NO List 재조회를 위해
+								this.reqCardNoList();
+
+								const params = { ...this.searchParams, facOpCdN: this.searchParams.iFacOpCdN };
+								console.log(params);
+								// return this.repository.processAbnormalMaterialCard('delete', params);
+								return true;
+							  }
+
+							  @action
+							  reqCardNoList() {
+								console.log('reqCardNoList');
+
+								// 발생일
+								const selectedDate = this.searchParams.selectedDate;
+								console.log('[reqCardNoList]  selectedDate:', selectedDate);
+								if (selectedDate !== '&' && (selectedDate[0].length !== 10 || selectedDate[1].length !== 10)) {
+								  dialog.alert(message('M2NJS1095')); // 발생일을 [YYYY-MM-DD] 형식으로 입력하세요.
+								  return false;
+								}
+								return true;
+							  }
+
+							  /* cardLov의 값으로 cardNo, crAbnorOcrDate, mtlNo setting한다. */
+							  @action
+							  setCardInfo() {
+								console.log('[setCardInfo');
+								// cardLov의 값으로 cardNo, P_CrAbnorOcrDate,P_MtlNo setting한다.
+								const cardNoObj = this.searchParams.cardNo;
+
+								const facOpCdN = cardNoObj.substring(0, 3);
+								const mtlNo = cardNoObj.substring(13);
+								// console.log('[setCardInfo] ==> facOpCdN', facOpCdN, ',mtlNo :', mtlNo );
+								this.setSearchParam('facOpCdN', facOpCdN);
+								this.setSearchParam('mtlNo', mtlNo);
+
+								let crAbnorOcrDate = '';
+								const abnlCardNoListResult = this._abnlCardNoListResult || [];
+								// console.log('@@test==> abnlCardNoListResult:', abnlCardNoListResult);
+								console.log('@@20201222==> abnlCardNoListResult:', abnlCardNoListResult);
+								if (abnlCardNoListResult !== undefined) {
+								  if (abnlCardNoListResult.length > 0) {
+									const cardNoInfo = abnlCardNoListResult.filter((rowValue) => rowValue.cardNo === cardNoObj)[0];
+									console.log('cardNoInfo :', cardNoInfo);
+									crAbnorOcrDate = cardNoInfo.crAbnorOcrDate;
+									this.setSearchParam('crAbnorOcrDate', crAbnorOcrDate);
+								  } else {
+									// crAbnorOcrDate = cardNoObj;
+									// this.searchParams = { ...this.searchParams, crAbnorOcrDate };
+								  }
+								}
+							  }
+
+							  @action
+							  checkMyLength() {
+								const incongruentInsporOpinion = this.searchParams.incongruentInsporOpinion;
+								const nStrSize = incongruentInsporOpinion !== undefined? incongruentInsporOpinion.length : 0;
+								const nMax = 400;
+
+								if (nStrSize > nMax) {
+								  dialog.alert(message('M2NJS1547'),[nMax, nStrSize]); //검사자의견: {0}자 이하로 입력해 주십시요.현재 입력된 길이 : {1}자 입니다.
+								  return false;
+								}
+								return true;
+							  }
+
+							  @action
+							  checkValidFacOpCd() {
+								const iFacOpCdN = this.searchParams.iFacOpCdN;  //구: I_FacOpCd
+								// console.log("iFacOpCdN",iFacOpCdN);
+								if (iFacOpCdN === '' || iFacOpCdN.length !== 3) {
+								  dialog.alert(message('M2NJS1040')); //검사Line을 2자리로 입력하세요. [예) 1A,1C,1F]
+								  // document.body.querySelector('input[name=iFacOpCdN]').focus();
+								  return false;
+								}
+
+								let validFacOpCd = false;
+								const reSetOpCdData = this._reSetOpCdData ? this._reSetOpCdData : [];
+								reSetOpCdData.map(opCd => {
+								  const value = opCd.value;
+								  if (value === 'ALL') {
+									//skip
+									//TODO ALL의 value값 체크
+								  } else if (value === iFacOpCdN || ['2Q1', '4Q2', '2S5', 'A24'].includes(iFacOpCdN)) {  //검사LINE 고강도강 공정추가 20201019 경남스틸 추가
+									validFacOpCd = true;
+								  }
+								});
+
+								if (validFacOpCd === false) {
+								  dialog.alert(message('M2NJS1549')); //검사LINE에 유효하지 않은 공장공정코드가 입력되었습니다.
+								  return false;
+								}
+
+								if (iFacOpCdN.substring(1, 2) === '5') { // 포장
+								  dialog.alert(message('M2NJS1039')); //검사Line에 포장Line은 입력할 수 없습니다.
+								  // document.body.querySelector('input[name=iFacOpCdN]').focus();
+								  return false;
+								}
+
+								return true;
+							  }
+
+							  /* 직번유효성체크무시
+							   입력된 직번과 로그인 직번 체크
+							  */
+							  @action
+							  chkInsertEmpNo() {
+
+								const crInsporEmpNo = this.searchParams.crInsporEmpNo;
+								const loginEmpNo = this._securityData ? this._securityData.userEmpNo.substring(2) : '';
+
+								if (crInsporEmpNo === '' || crInsporEmpNo === undefined) { return false; }
+
+								if (crInsporEmpNo.length < 6) {
+								  dialog.alert(message('M2NJS1034')); // 검사자직번을 6자리로 입력하세요.
+								  this.searchParams = { ...this.searchParams, crInsporEmpNo: '' };
+								  document.body.querySelector('input[name=crInsporEmpNo]').focus();
+								  return false;
+								}
+
+								if (crInsporEmpNo !== loginEmpNo) {
+								  dialog.alert(message('M2NJS1616'));
+								  this.searchParams = { ...this.searchParams, crInsporEmpNo: loginEmpNo };
+								  document.body.querySelector('input[name=crInsporEmpNo]').focus();
+								  return false;
+								}
+								return true;
+							  }
+
+
+							  /* 이상재카드번호 LOV를 조회
+							  *  구:[custom].PosGetAbnlMtlCardNoList
+							  */
+							  // @action
+							  // getAbnlMtlCardNoList() {
+							  //   console.log('getAbnlMtlCardNoList');
+							  //
+							  //   const selectedDate = this.searchParams.selectedDate;
+							  //   const params = {
+							  //     operFlag: this._securityData.operFlag,
+							  //     facOpCdN: this.searchParams.selectedOpCdData,
+							  //     mtlNo: this.searchParams.pMtlNo4Query,
+							  //     jdgTp: this.searchParams.jdgTp,
+							  //     dateFrom: selectedDate !== '&' ? this.searchParams.selectedDate[0] : '',
+							  //     dateTo: selectedDate !== '&' ? this.searchParams.selectedDate[1] : '',
+							  //   };
+							  //
+							  //   return this.repository.getAbnlMtlCardNoList(params)
+							  //     .then((abnlCardNoListResult) => {
+							  //       this._abnlCardNoListResult = abnlCardNoListResult;
+							  //
+							  //       let cardNoList = [];
+							  //       abnlCardNoListResult.map((data, i) => {
+							  //         cardNoList = cardNoList.concat({ key: i, text: data.cardNo, value: data.cardNo });
+							  //       });
+							  //       this._cardNoLov = cardNoList;
+							  //
+							  //       if (abnlCardNoListResult.length > 0) {
+							  //         //cardNo setting
+							  //         this.searchParams = { ...this.searchParams, cardNo: abnlCardNoListResult[0].cardNo };
+							  //
+							  //         if (this.searchParams.mtlNo !== '') {
+							  //           console.log('Card NO LOV 조회일경우');
+							  //           this.searchParams = {
+							  //             ...this.searchParams,
+							  //             mtlNo: abnlCardNoListResult[0].mtlNo,
+							  //             facOpCdN: abnlCardNoListResult[0].facOpCdN,
+							  //             crAbnorOcrDate: abnlCardNoListResult[0].crAbnorOcrDate,
+							  //           };
+							  //         }
+							  //       }
+							  //     });
+							  // }
+							}
+
+							export default ViewRegisterAbnormalMaterialCardStore;
+							
+View--Standard MobX:
+							
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+
+							import React, { Component } from 'react';
+							import { Button, ControlLine } from '@mes/mes-ui-react';
+							import { observer } from 'mobx-react';
+							import { mesAutobind } from '@mes/mes-shared';
+							import ButtonM2n0009016 from '../../common/render/ButtonM2n0009016';
+							import ButtonM2n0009058 from '../../common/render/ButtonM2n0009058';
+							import ButtonM2n0009057 from '../../common/render/ButtonM2n0009057';
+
+							@mesAutobind
+							@observer
+							class ButtonView extends Component {
+							  render() {
+
+								/* 함수 */
+								const { onBtnRegister, onBtnDelete, setSearchParam, findAllRowData, optionsCrEucCngBadF } = this.props; //new
+								const { searchParams, abnomalCardInfo, securityData } = this.props;
+
+								const nsFkey = securityData ? securityData.nsFkey : '';
+								const newFlag = searchParams.newFlag;
+								const confirmFlag1 = searchParams.confirmFlag1;
+								const confirmFlag2 = searchParams.confirmFlag2;
+								const steelGroup = abnomalCardInfo ? abnomalCardInfo.steelGroup : '';
+								const avAcCd = searchParams.avAcCd;
+
+								// 이상재 판정
+								const selectedRows = [];
+								if(abnomalCardInfo) {
+								  selectedRows.push(abnomalCardInfo);
+								}
+
+								return (
+								  <ControlLine
+									leftItems={[
+									  <ButtonM2n0009016
+										//카드작성
+										searchParams={searchParams}
+										securityData={securityData}
+										setViewRegisterCardSearchParam={setSearchParam}
+										findAllRowData={findAllRowData}
+									  />,
+									  newFlag && (
+										<Button
+										  content="등록"
+										  onClick={onBtnRegister}
+										/>
+									  ),
+									  (!newFlag && nsFkey === 'm2n0000046_f002'? // 20201019 판정전일때만 삭제 가능
+										<Button
+										  content="삭제"
+										  onClick={onBtnDelete}
+										/>: ""
+									  ),
+									  // <Button content="SDD 실적" />,
+									  // <Button content="기술해석Data" />,
+									  (!newFlag && (confirmFlag1 || confirmFlag2)) && (
+										(steelGroup === 'S') ? (
+										  // 이상재판정
+										  // openJdgPopup
+										  <ButtonM2n0009058 //STS강
+											// mtlNo={searchParams.mtlNo}
+											// crAbnorOcrDate={searchParams.crAbnorOcrDate}
+											facOpCdN={searchParams.selectedOpCdData}
+											operFlag={securityData.operFlag}
+											// orderHeadLineNo={searchParams.orderHeadLineNo}
+											findAllRowData={findAllRowData}
+											securityData={securityData}
+											selectedRows={selectedRows}
+											selectedFacData={searchParams.selectedFacData}
+											optionsCrEucCngBadF={optionsCrEucCngBadF}
+										  />) : (
+											<ButtonM2n0009057 //탄소강
+											  operFlag={securityData.operFlag}
+											  facOpCdN={searchParams.selectedOpCdData}
+											  selectedFacData={searchParams.selectedFacData}
+											  securityData={securityData}
+											  selectedRows={selectedRows}
+											  findAllRowData={findAllRowData}
+											  optionsCrEucCngBadF={optionsCrEucCngBadF}
+											  // mtlNo={searchParams.mtlNo}
+											  // crAbnorOcrDate={searchParams.crAbnorOcrDate}
+											  // orderHeadLineNo={searchParams.orderHeadLineNo}
+											/>)
+									  ),
+									]}
+									rightItems={[
+									  // <Button content="엑셀 다운로드" />,
+									]}
+								  />
+								);
+							  }
+							}
+
+							export default ButtonView;
+
+
+
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+
+							import React, { Component } from 'react';
+							import { toJS } from 'mobx';
+							import { DatePicker, Input, Label, SearchBox, Select } from '@mes/mes-ui-react';
+							import { observer } from 'mobx-react';
+							import { mesAutobind } from '@mes/mes-shared';
+
+							@mesAutobind
+							@observer
+							class SearchView extends Component {
+							  static defaultProps = {
+								jdgTpSelectOptions: [
+								  { value: 'ALL', text: '전체' },
+								  { value: 'N', text: '판정전' },
+								  { value: 'Y', text: '판정후' },
+								  { value: 'I', text: '전달용' },
+								],
+							  };
+
+							  render() {
+								/* 변수 */
+								const {
+								  facData, reSetOpCdData, searchParams, cardNoLov,
+								  abnlCardNoListResult,
+								} = this.props;
+
+								/* 함수 */
+								const {
+								  onChangeFacLov, onChangeOpCdLov, findAllRowData, onChangeDate,
+								  onChangeInputData, onChangeAbnomalCard, onChangeSearchData,
+								} = this.props;
+
+								return (
+								  <SearchBox onSearch={findAllRowData}>
+									<SearchBox.Fields>
+									  <SearchBox.Field>
+										<Label content="공장" />
+										<Select
+										  options={facData}
+										  value={searchParams.selectedFacData}
+										  onChange={onChangeFacLov}
+										  placeholder="선택하세요"
+										/>
+									  </SearchBox.Field>
+									  <SearchBox.Field>
+										<Label content="공정" />
+										<Select
+										  options={reSetOpCdData}
+										  value={searchParams.selectedOpCdData}
+										  onChange={onChangeOpCdLov}
+										  placeholder="선택하세요"
+										/>
+									  </SearchBox.Field>
+									  <SearchBox.Field>
+										<Label content="판정" />
+										<Select
+										  name="jdgTp"
+										  options={this.props.jdgTpSelectOptions}
+										  value={searchParams.jdgTp}
+										  onChange={onChangeSearchData}
+										/>
+									  </SearchBox.Field>
+									  <SearchBox.Field className={searchParams.jdgTp === 'N' ? 'hide' : ''}>
+										<Label content="발생일" />
+										<DatePicker
+										  period
+										  value={toJS(searchParams.selectedDate)}
+										  onChange={date => onChangeDate(date, 'selectedDate')}
+										>
+										  <Input
+											icon="calendar alternate outline"
+											className="datepicker input-period"
+											placeholder="YYYY.MM.DD ~ YYYY.MM.DD"
+										  />
+										</DatePicker>
+									  </SearchBox.Field>
+									  <SearchBox.Field>
+										<Label content="재료번호" />
+										<Input
+										  name="pMtlNo4Query"
+										  onChange={onChangeSearchData}
+										  value={searchParams.pMtlNo4Query}
+										  case="Upper"
+										  // size="14"
+										  maxLength="13"
+										/>
+									  </SearchBox.Field>
+									  <SearchBox.Field>
+										<Label content="이상재카드 NO" />
+										{abnlCardNoListResult ? (
+										  <Select
+											name="cardNo"
+											width={170}
+											value={searchParams.cardNo}
+											options={cardNoLov}
+											onChange={onChangeAbnomalCard}
+										  />
+										) : (
+										  <Select
+											name="cardNo"
+											width={170}
+											options={cardNoLov}
+										  />
+										)}
+									  </SearchBox.Field>
+									</SearchBox.Fields>
+								  </SearchBox>
+								);
+							  }
+							}
+
+							export default SearchView;
+
+
+
+
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+
+							import React, { Component } from 'react';
+							import { observer } from 'mobx-react';
+							import { Popup } from '@mes/mes-ui-react';
+							import { mesAutobind } from '@mes/mes-shared';
+							import moment from 'moment';
+							import ALink from '../../common/render/ALink';
+
+							@mesAutobind
+							@observer
+							class TableView extends Component {
+							  render() {
+								const { abnomalCardInfo, searchParams } = this.props;
+
+								// 코일이력조회 화면
+								let screenId = 'm2n0000087';
+								let screenTitle = '냉연 코일이력정보조회';
+								const opCds = ['153', '1F1', '351', '3F1', '156', '1F2', '157', '1F3', '124'];
+								if (searchParams.worksCode === 'K' && opCds.includes(searchParams.iFacOpCdN)) { // 산세 공장인경우
+								  screenId = 'm2nd010092';
+								  screenTitle = '산세 코일이력정보조회';
+								}
+
+								return (
+								  <div className="table-row fixed">
+									<table className="ui table center">
+									  <colgroup>
+										<col style={{ width: '7.5%' }} />
+										<col />
+										<col />
+										<col style={{ width: '6.5%' }} />
+										<col />
+										<col />
+										<col />
+										<col />
+										<col />
+										<col />
+										<col />
+										<col style={{ width: '7%' }} />
+										<col />
+										<col />
+										<col />
+										<col />
+									  </colgroup>
+									  {
+
+									  }
+									  <tbody>
+										<tr>
+										  <th>재료번호</th>
+										  <th>소재두께</th>
+										  <th>소재폭</th>
+										  <th>소재길이</th>
+										  <th>처리량</th>
+										  <th>제품두께</th>
+										  <th>제품폭</th>
+										  <th>생산량</th>
+										  <th>작업일시</th>
+										  <th>근무조</th>
+										  <th>이상원인</th>
+										  <th>조치코드</th>
+										  <th>차공정</th>
+										  <th>Tracking Code</th>
+										  <th>저장위치</th>
+										  <th>계획공정</th>
+										</tr>
+										<tr>
+										  <td>{ALink({
+											value: abnomalCardInfo ? abnomalCardInfo.mtlNo || '' : '',
+											screenId: screenId, // 코일이력정보조회 화면 ID (냉연/산세)
+											screenTitle: screenTitle,
+											parameters: '&mtlNo=' + (abnomalCardInfo ? abnomalCardInfo.mtlNo || '' : ''),
+										  })}
+										  </td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.crClMatThk ? abnomalCardInfo.crClMatThk.toFixed(3) :'' : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.crClMatW ? abnomalCardInfo.crClMatW.toFixed(1) : '' : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.crClMatLen : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.crMatPrcQt : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.crThk ? abnomalCardInfo.crThk.toFixed(3): '' : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.crWth ? abnomalCardInfo.crWth.toFixed(1): '' : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.crNetActualWgt : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.opDnDt !== undefined? moment(abnomalCardInfo.opDnDt).format('YYMMDD HH:mm') :  moment(abnomalCardInfo.crAbnorOcrDate).format('YYMMDD HH:mm'): "" }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.opSft : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.avOcrCauCd : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.avAcCd : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.nextFacOpCdN : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.trackingCode : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.streLocCd : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.planPassFacOpCdN : ''}</td>
+										</tr>
+										<tr>
+										  <th>Orderline No</th>
+										  <th>주문두께</th>
+										  <th>주문폭</th>
+										  <th>내경</th>
+										  <th>재질기호</th>
+										  <th>표면사상</th>
+										  <th>조질도</th>
+										  <th>포장범위</th>
+										  <th>용도</th>
+										  <th>후처리</th>
+										  <th>도유</th>
+										  <th>SLEEVE</th>
+										  <th>EDGE</th>
+										  <th>표면등급</th>
+										  <th>형상등급</th>
+										  <th>통과공정</th>
+										</tr>
+										<tr>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.orderHeadLineNo : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.orderThick ? abnomalCardInfo.orderThick.toFixed(3) : '' : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.orderWidth ? abnomalCardInfo.orderWidth.toFixed(1) : '' : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.orderInnerDiameter : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.poscoProdGrdN : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.surfaceFinishCd : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.tempGrade : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.prodStdPackTol : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.orderUsageCdN : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.postTreatmentMethodCdN : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.oilingMethodCd : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.sleeveInsertFlag : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.crIndiDesignEdge : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.surfaceGrd : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.shapeGrd : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.passFacOpCdN : ''}</td>
+										</tr>
+										<tr>
+										  <th>SLAB NO</th>
+										  <th>품명</th>
+										  <th>포장방법</th>
+										  <th>Hot Coil No</th>
+										  <th>열연일자</th>
+										  <th>열연중량</th>
+										  <th>출강목표</th>
+										  <th>STS평점</th>
+										  <th>평탄</th>
+										  <th>보증</th>
+										  <th>전략제품</th>
+										  <th>이상발생 일시</th>
+										  <th>고객사</th>
+										  <th>잔여공정</th>
+										  <th>소둔차수</th>
+										  <th>등록횟수</th>
+										</tr>
+										<tr>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.slabNo : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.productNameCode : ''}</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.packingType : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.hotCoilNo : '' }</td>
+										  <td>{abnomalCardInfo ? moment(abnomalCardInfo.hrRollDate).format('YYMMDD') : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.hrClWgt : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.smSteelGrdN : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.stsSurAvp : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.stsFlatdSvyV : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.stsGuaranteeSurfaceFlag : '' }</td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.strProductClsCd : '' }</td>
+										  <td>{abnomalCardInfo ? moment(abnomalCardInfo.crAbnorOcrDate).format('YYMMDD HH:mm') : '' }</td>
+										  <td>
+											<Popup
+											  trigger={<span className="tooltipTxt">{abnomalCardInfo ? abnomalCardInfo.customerNumber : '' }</span>}
+											  hoverable
+											  content={abnomalCardInfo ? abnomalCardInfo.endUserName : '' }
+											/>
+										  </td>
+										  <td>{abnomalCardInfo ? abnomalCardInfo.remFacOpCdN : '' }</td>
+										  <td />
+										  <td />
+										</tr>
+									  </tbody>
+									</table>
+								  </div>
+								);
+							  }
+							}
+
+							export default TableView;
+
+
+
+							/* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+
+							import React, { Component } from 'react';
+							import { Input, Select } from '@mes/mes-ui-react';
+							import { observer } from 'mobx-react';
+							import { mesAutobind } from '@mes/mes-shared';
+							import moment from 'moment';
+
+							@mesAutobind
+							@observer
+							class TableView extends Component {
+							  static defaultProps = {
+								selectOptionsExist: [
+								  { value: '', text: '　' },
+								  { value: 'Y', text: '있음' },
+								  { value: 'N', text: '없음' },
+								],
+								optionsLenDirDefOcrShpTp: [
+								  { value: '', text: '　' },
+								  { value: 'T', text: 'TOP' },
+								  { value: 'M', text: 'MIDDLE' },
+								  { value: 'B', text: 'BOTTOM' },
+								  { value: 'A', text: '전장' },
+								  { value: 'R', text: '산발적' },
+								],
+								optionsWDirtDefOcrLocTp: [
+								  { value: '', text: '　' },
+								  { value: 'W', text: 'W/S' },
+								  { value: 'C', text: 'CENTER' },
+								  { value: 'D', text: 'D/S' },
+								  { value: 'A', text: '판전면적' },
+								],
+								optionsDifSurTp: [
+								  { value: '', text: '　' },
+								  { value: 'F', text: '전면' },
+								  { value: 'B', text: '이면' },
+								  { value: 'A', text: '전,이면 모두' },
+								  { value: 'S', text: '측면' },
+								],
+								optionsDefCorF: [
+								  { value: '', text: '　' },
+								  { value: 'A', text: '흑색' },
+								  { value: 'B', text: '갈색' },
+								  { value: 'C', text: '청색' },
+								  { value: 'D', text: '황색' },
+								  { value: 'E', text: '백색' },
+								  { value: 'F', text: '적색' },
+								  { value: 'G', text: '유백색' },
+								  { value: 'H', text: '기타' },
+								],
+								optionsDefFigF: [
+								  { value: '', text: '　' },
+								  { value: '5', text: '극심' },
+								  { value: '4', text: '심함' },
+								  { value: '3', text: '약함' },
+								  { value: '2', text: '흔적' },
+								  { value: '1', text: '촉감없음' },
+								],
+								optionsShpBadWDirtLocTp: [
+								  { value: '', text: '　' },
+								  { value: 'W', text: 'W/S' },
+								  { value: 'C', text: 'CENTER' },
+								  { value: 'D', text: 'D/S' },
+								  { value: 'Q', text: 'Q/B' },
+								],
+								optionsIncongruentProdFetchLocTp: [
+								  { value: '', text: '　' },
+								  { value: 'E', text: '입측' },
+								  { value: 'D', text: '출측' },
+								],
+								optionsIncongruentProdFetchLocTp2: [
+								  { value: '', text: '　' },
+								  { value: 'E', text: '입측' },
+								  { value: 'D', text: '출측' },
+								  { value: 'X', text: '미포장' },
+								  { value: 'Y', text: '포장완료' },
+								],
+							  };
+
+							  render() {
+								const { abnomalCardInfo, searchParams, showItemLov, optionsCrEucCngBadF } = this.props; // 변수
+								const { onChangeInputData, onChangeInputNumberData, chkInsertEmpNo } = this.props; // 함수
+								const preserveFlag = searchParams.preserveFlag;
+								const newFlag = searchParams.newFlag;
+
+								// 발생공정 getCrDefOcrOpCdLov
+								let defOcrOpCdLov = [];
+								const opCds = ['153', '1F1', '351', '3F1', '156', '1F2', '157', '1F3', '124'];
+								// console.log("발생공정세팅 전 공장구분::",searchParams);
+								if (searchParams.worksCode === 'K' && opCds.includes(searchParams.iFacOpCdN)) {
+								  defOcrOpCdLov = showItemLov.hrDefOcrOpCdLov;
+								} else {
+								  defOcrOpCdLov = showItemLov.crDefOcrOpCdLov;
+								}
+
+								let crEucCngBadFShowFlag = false;
+								// 조회할 재료의 공장공정코드가 2P1,2V1,2V2,221 일때 냉연공정재변경불가여부를 표출
+								if (abnomalCardInfo && ["2P1","2V1","2V2","221"].includes(abnomalCardInfo.facOpCdN)) {
+								  crEucCngBadFShowFlag = true;
+								}
+								return (
+								  <div className="table-row fixed">
+									<table className="ui table center">
+									  <tbody>
+										<tr>
+										  <th className="red">결함코드</th>
+										  <th className="red" title="이상재발생 원인재공 공정을 의미">발생공정</th>
+										  <th className="red" title="이상재카드 카드작성 공정을 의미">검사LINE</th>
+										  <th className="red">검사자직번</th>
+										  <th>작성일시</th>
+										  <th className="red">근무조</th>
+										  <th>조치코드</th>
+										  <th />
+										</tr>
+										{(preserveFlag || newFlag) ? (
+										  <tr>
+											<td>
+											  {/* 결함코드 */}
+											  <Input
+												type="text"
+												name="crDefCd"
+												case="Upper"
+												value={searchParams.crDefCd ? searchParams.crDefCd : '' }
+												// size="8"
+												maxLength="2"
+												onChange={onChangeInputData}
+											  />
+											</td>
+											<td>
+											  {/* 발생공정 */}
+											  <Select
+												placeholder="select"
+												name="crDefOcrOpCd"
+												onChange={onChangeInputData}
+												options={defOcrOpCdLov}
+												value={searchParams.crDefOcrOpCd ? searchParams.crDefOcrOpCd : '' }
+											  />
+											</td>
+											<td>
+											  <Input
+												type="text"
+												name="iFacOpCdN"
+												case="Upper"
+												value={searchParams.iFacOpCdN ? searchParams.iFacOpCdN : ''}
+												onChange={onChangeInputData}
+												  // size="8"
+												maxLength="3"
+											  />
+											</td>
+											<td>
+											  <Input
+												type="text"
+												name="crInsporEmpNo"
+												case="Upper"
+												value={searchParams.crInsporEmpNo ? searchParams.crInsporEmpNo : ''}
+												onChange={onChangeInputData}
+												onBlur={chkInsertEmpNo}
+												  // size="8"
+												maxLength="6"
+											  />
+											</td>
+											<td>
+											  {moment().format('YYYY-MM-DD HH:mm:ss')}
+											</td>
+											<td>
+											  <Input
+												type="text"
+												name="opSft"
+												case="Upper"
+												value={searchParams.opSft ? searchParams.opSft : ''}
+												onChange={onChangeInputData}
+												// size="6"
+												maxLength="2"
+											  />
+											</td>
+											<td>
+											  {abnomalCardInfo ? abnomalCardInfo.avAcCd : ''}
+											</td>
+											<td />
+										  </tr>) : (
+											<tr>
+											  <td>
+												{searchParams.crDefCd}
+											  </td>
+											  <td>
+												{/* 발생공정 */}
+												{abnomalCardInfo ? abnomalCardInfo.crDefOcrOpCd : ''}
+											  </td>
+											  <td>
+												{/*//TODO check*/}
+												{abnomalCardInfo ? abnomalCardInfo.facOpCdN : ''}
+											  </td>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.crInsporEmpNo : ''}
+											  </td>
+											  <td>
+												{abnomalCardInfo ? moment(abnomalCardInfo.otOrdPrdRsitDt).format('YYYY-MM-DD HH:mm:ss') : ' '}
+											  </td>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.opSft : ''}
+											  </td>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.avAcCd : ''}
+											  </td>
+											  <td />
+											</tr>
+										)}
+
+
+										<tr>
+										  <th>발생정도</th>
+										  <th>발생위치</th>
+										  <th>발생부위</th>
+										  <th>PITCH</th>
+										  <th>발생개소</th>
+										  <th>크기</th>
+										  <th>박리</th>
+										  <th>색상</th>
+										</tr>
+										{(preserveFlag || newFlag) ? (
+										  <tr>
+											<td>
+											  <Select
+												placeholder="select"
+												name="lenDirDefOcrShpTp"
+												value={searchParams.lenDirDefOcrShpTp}
+												options={this.props.optionsLenDirDefOcrShpTp}
+												onChange={onChangeInputData}
+												width="60%"
+											  />
+											  <Input
+												type="text"
+												name="lenDirDefOcrQt"
+												value={searchParams.lenDirDefOcrQt ? searchParams.lenDirDefOcrQt : ''}
+												onChange={onChangeInputNumberData}
+												// size="1"
+												maxLength="2"
+												width="20%"
+											  />
+											  Ton
+											</td>
+											<td>
+											  <Select
+												placeholder="select"
+												name="wDirtDefOcrLocTp"
+												value={searchParams.wDirtDefOcrLocTp}
+												options={this.props.optionsWDirtDefOcrLocTp}
+												onChange={onChangeInputData}
+												width="60%"
+											  />
+											  <Input
+												type="text"
+												name="wDirtDefOcrDetailLoc"
+												value={searchParams.wDirtDefOcrDetailLoc ? searchParams.wDirtDefOcrDetailLoc : ''}
+												onChange={onChangeInputNumberData}
+												// size="5"
+												maxLength="5"
+												width="20%"
+											  />
+											  ㎜
+											</td>
+											<td>
+											  <Select
+												placeholder="select"
+												name="difSurTp"
+												value={searchParams.difSurTp}
+												options={this.props.optionsDifSurTp}
+												onChange={onChangeInputData}
+											  />
+											</td>
+											<td>
+											  <Input
+												type="text"
+												name="defOcrPitch"
+												value={searchParams.defOcrPitch}
+												onChange={onChangeInputNumberData}
+											  />
+											</td>
+											<td>
+											  1M:
+											  <Input
+												type="text"
+												className="pxw-50"
+												name="defOcrNum"
+												value={searchParams.defOcrNum}
+												onChange={onChangeInputNumberData}
+											  />
+											  개소
+											</td>
+											<td>
+											  직경:
+											  <Input
+												type="text"
+												className="pxw-50"
+												name="defOcrSize"
+												value={searchParams.defOcrSize}
+												onChange={onChangeInputNumberData}
+											  />
+											  ㎜
+											</td>
+											<td>
+											  <Select
+												placeholder="select"
+												name="defExfoliaF"
+												value={searchParams.defExfoliaF}
+												options={this.props.selectOptionsExist}
+												onChange={onChangeInputData}
+											  />
+											</td>
+											<td>
+											  <Select
+												placeholder="select"
+												name="defCorF"
+												value={searchParams.defCorF}
+												options={this.props.optionsDefCorF}
+												onChange={onChangeInputData}
+											  />
+											</td>
+										  </tr>) : (
+											<tr>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.lenDirDefOcrShpTp : ''}
+												{abnomalCardInfo ? abnomalCardInfo.lenDirDefOcrQt : '' }
+											  Ton
+											  </td>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.lenDirDefOcrShpTp : ''}
+												{abnomalCardInfo ? abnomalCardInfo.wDirtDefOcrDetailLoc : ''}
+											  ㎜
+											  </td>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.difSurTp : ''}
+											  </td>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.defOcrPitch : ''}
+											  </td>
+											  <td>
+											  1M:
+												{abnomalCardInfo ? abnomalCardInfo.defOcrNum : ''}
+											  개소
+											  </td>
+											  <td>
+											  직경:
+												{abnomalCardInfo ? abnomalCardInfo.defOcrSize : ''}
+											  ㎜
+											  </td>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.defExfoliaF : ''}
+											  </td>
+											  <td>
+												{abnomalCardInfo ? abnomalCardInfo.defCorF : ''}
+											  </td>
+											</tr>
+										)}
+										<tr>
+										  <th>촉감</th>
+										  <th>형상</th>
+										  <th colSpan="4">형상정도</th>
+										  <th>Trimming 유무</th>
+										  <th>도유</th>
+										</tr>
+										{(preserveFlag || newFlag) ? (
+										  <tr>
+											<td>
+											  <Select
+												placeholder="select"
+												name="defFigF"
+												value={searchParams.defFigF}
+												options={this.props.optionsDefFigF}
+												onChange={onChangeInputData}
+											  />
+											</td>
+											<td>
+											  <Select
+												placeholder="select"
+												name="shpBadWDirtLocTp"
+												value={searchParams.shpBadWDirtLocTp}
+												options={this.props.optionsShpBadWDirtLocTp}
+												onChange={onChangeInputData}
+											  />
+											</td>
+											<td>
+											  Pitch :
+											  <Input
+												type="text"
+												className="pxw-50"
+												name="shpBadWaveMseV"
+												value={searchParams.shpBadWaveMseV}
+												onChange={onChangeInputNumberData}
+												// size="5"
+												maxLength="5"
+											  />
+											  ㎜
+											</td>
+											<td>
+											  Height :
+											  <Input
+												type="text"
+												name="shpBadWaveHgtMseV"
+												value={searchParams.shpBadWaveHgtMseV}
+												onChange={onChangeInputNumberData}
+												className="pxw-50"
+												// size="5"
+												maxLength="5"
+											  />
+											  ㎜
+											</td>
+											<td>
+											  급준도 :
+											  <Input
+												type="text"
+												className="pxw-50"
+												name="shpBadSteepMseV"
+												value={searchParams.shpBadSteepMseV}
+												onChange={onChangeInputData}
+												// size="5"
+												maxLength="5"
+											  />
+											  %
+											</td>
+											<td>
+											  Telescope :
+											  <Input
+												type="text"
+												className="pxw-50"
+												name="tscpeMseV"
+												value={searchParams.tscpeMseV}
+												onChange={onChangeInputNumberData}
+												// size="5"
+												maxLength="5"
+											  />
+											  ㎜
+											</td>
+											<td>
+											  <Select
+												placeholder="select"
+												name="incongruentProdSdtrmF"
+												value={searchParams.incongruentProdSdtrmF}
+												options={this.props.selectOptionsExist}
+												onChange={onChangeInputData}
+											  />
+											</td>
+											<td>
+											  <Select
+												placeholder="select"
+												name="incongruentProdOilF"
+												value={searchParams.incongruentProdOilF}
+												options={this.props.selectOptionsExist}
+												onChange={onChangeInputData}
+											  />
+											</td>
+										  </tr>
+										) : (
+										  <tr>
+											<td>
+											  {abnomalCardInfo ? abnomalCardInfo.defFigF : ''}
+											</td>
+											<td>
+											  {abnomalCardInfo ? abnomalCardInfo.shpBadWDirtLocTp : ''}
+											</td>
+											<td>
+											  Pitch :
+											  {abnomalCardInfo ? abnomalCardInfo.shpBadWaveMseV : ''}
+											  ㎜
+											</td>
+											<td>
+											  Height :
+											  {abnomalCardInfo ? abnomalCardInfo.shpBadWaveHgtMseV : ''}
+											  ㎜
+											</td>
+											<td>
+											  급준도 :
+											  {abnomalCardInfo ? abnomalCardInfo.shpBadSteepMseV : ''}
+											  %
+											</td>
+											<td>
+											  Telescope :
+											  {abnomalCardInfo ? abnomalCardInfo.tscpeMseV : ''}
+											  ㎜
+											</td>
+											<td>
+											  {abnomalCardInfo ? abnomalCardInfo.incongruentProdSdtrmF : ''}
+											</td>
+											<td>
+											  {abnomalCardInfo ? abnomalCardInfo.incongruentProdOilF : ''}
+											</td>
+										  </tr>
+										)}
+
+										<tr>
+										  {crEucCngBadFShowFlag ? (
+											<th>공정변경불가</th>
+											) : ( 
+											  <th />
+											)
+										  }
+										  <th />
+										  <th />
+										  <th />
+										  <th />
+										  <th>불량폭측정</th>
+										  <th>인출위치</th>
+										  <th>실제중량</th>
+										</tr>
+										{(preserveFlag || newFlag) ? (
+										  <tr>
+											<td>
+											  {(crEucCngBadFShowFlag && abnomalCardInfo) ? abnomalCardInfo.crEucCngBadF : ''}
+											</td>
+											<td />
+											<td />
+											<td />
+											<td />
+											<td>
+											  <Input
+												type="text"
+												name="shpBadWthMseV"
+												value={searchParams.shpBadWthMseV}
+												onChange={onChangeInputData}
+												// size="6"
+												maxLength={5}
+											  />
+											</td>
+											<td>
+											  {searchParams.nextFacOpCdIsPacking === true ? (
+												<Select
+												  placeholder="select"
+												  name="incongruentProdFetchLocTp2"
+												  value={searchParams.incongruentProdFetchLocTp2}
+												  options={this.props.optionsIncongruentProdFetchLocTp2}
+												  onChange={onChangeInputData}
+												/>
+											  ) : (
+												<Select
+												  placeholder="select"
+												  name="incongruentProdFetchLocTp"
+												  value={searchParams.incongruentProdFetchLocTp}
+												  options={this.props.optionsIncongruentProdFetchLocTp}
+												  onChange={onChangeInputData}
+												/>
+											  )
+											  }
+											</td>
+											<td>
+											  <Input
+												type="text"
+												name="crNetTheoWgt"
+												value={searchParams.crNetTheoWgt}
+												onChange={onChangeInputNumberData}
+												// size="6"
+												maxLength="5"
+											  />
+											</td>
+										  </tr>
+										) : (
+										  <tr>
+											<td>
+											  {(crEucCngBadFShowFlag && abnomalCardInfo) ? abnomalCardInfo.crEucCngBadF : ''}
+											</td>
+											<td />
+											<td />
+											<td />
+											<td />
+											<td>
+											  {abnomalCardInfo ? abnomalCardInfo.shpBadWthMseV : ''}
+											</td>
+											<td>
+											  {abnomalCardInfo ? abnomalCardInfo.incongruentProdFetchLocTp : ''}
+											</td>
+											<td>
+											  {abnomalCardInfo ? abnomalCardInfo.crNetTheoWgt : ''}
+											</td>
+										  </tr>
+										)}
+									  </tbody>
+									</table>
+								  </div>
+								);
+							  }
+							}
+
+							export default TableView;
+
+
+
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+
+							import React, { Component } from 'react';
+							import { TextArea } from '@mes/mes-ui-react';
+							import { observer } from 'mobx-react';
+							import { mesAutobind } from '@mes/mes-shared';
+
+							@mesAutobind
+							@observer
+							class TableView extends Component {
+							  render() {
+
+								const { searchParams, abnomalCardInfo } = this.props;
+								const { onChangeInputData } = this.props;
+
+								return (
+								  <div className="table-row fixed">
+									<table className="ui table center">
+									  <thead>
+										<tr>
+										  <th>검사자의견</th>
+										</tr>
+									  </thead>
+									  <tbody>
+										<tr>
+										  <td>
+											<TextArea.Count limit={400} limitDisabled={false}>
+											  {(searchParams.newFlag) ? (
+												<TextArea
+												  rows={5}
+												  style={{ height: '169px' }}
+												  name="incongruentInsporOpinion"
+												  value={searchParams.incongruentInsporOpinion}
+												  onChange={onChangeInputData}
+												/>
+											  ) : (
+												<TextArea
+												  rows={5}
+												  style={{ height: '169px' }}
+												  name="incongruentInsporOpinion"
+												  value={abnomalCardInfo ? abnomalCardInfo.incongruentInsporOpinion : ''}
+												  disabled
+												/>
+											  )}
+											</TextArea.Count>
+										  </td>
+										</tr>
+										{/*<tr>*/}
+										{/*  <td>*/}
+										{/*    <TextArea*/}
+										{/*      rows={5}*/}
+										{/*      style={{ height: '167px' }}*/}
+										{/*      value={searchParams.examResult ? searchParams.examResult : ''}*/}
+										{/*      disabled*/}
+										{/*    />*/}
+										{/*  </td>*/}
+										{/*</tr>*/}
+									  </tbody>
+									</table>
+								  </div>
+								);
+							  }
+							}
+
+							export default TableView;
+
+
+
+
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+
+							import React, { Component } from 'react';
+							import { observer } from 'mobx-react';
+							import { mesAutobind } from '@mes/mes-shared';
+							import { TextArea } from '@mes/mes-ui-react';
+							import { JudgeTd } from '../render/m2n000046Utils';
+
+							@mesAutobind
+							@observer
+							class TableView extends Component {
+
+							  render() {
+								const { abnomalCardInfo } = this.props;
+
+								return (
+								  <div className="table-row fixed">
+									<table className="ui table center">
+									  <colgroup>
+										<col style={{ width: '200px' }} />
+										<col />
+										<col />
+									  </colgroup>
+									  <tbody>
+									  <tr>
+										<th colSpan="3">판정 및 지시</th>
+									  </tr>
+									  <tr>
+										<th>품질담당</th>
+										<td>
+										  <JudgeTd
+											avAcCd={abnomalCardInfo ? abnomalCardInfo.avAcCd : ''}
+											abnrMatJdgTp={abnomalCardInfo ? abnomalCardInfo.abnrMatJdgTp3 : ''}
+											incongruentProdCardJdgDt={abnomalCardInfo ? abnomalCardInfo.incongruentProdCardJdgDt3 : ''}
+											abnrMatJdgManNm={abnomalCardInfo ? abnomalCardInfo.abnrMatJdgManNm3 : ''}
+										  />
+										</td>
+										<td>
+										  <TextArea
+											rows={3}
+											// cols={64}
+											name="incongruentInsporOpinion"
+											value={abnomalCardInfo ? (abnomalCardInfo.incongruentOpinionInstruc3 === undefined ? '' : abnomalCardInfo.incongruentOpinionInstruc3) : ''}
+											readOnly
+										  />
+										</td>
+									  </tr>
+									  <tr>
+										<th>파트장</th>
+										<td>
+										  <JudgeTd
+											avAcCd={abnomalCardInfo ? abnomalCardInfo.avAcCd : ''}
+											abnrMatJdgTp={abnomalCardInfo ? abnomalCardInfo.abnrMatJdgTp2 : ''}
+											incongruentProdCardJdgDt={abnomalCardInfo ? abnomalCardInfo.incongruentProdCardJdgDt2 : ''}
+											abnrMatJdgManNm={abnomalCardInfo ? abnomalCardInfo.abnrMatJdgManNm2 : ''}
+										  />
+										</td>
+										<td>
+										  <TextArea
+											rows={3}
+											// cols={64}
+											name="incongruentInsporOpinion"
+											value={abnomalCardInfo ? (abnomalCardInfo.incongruentOpinionInstruc2 === undefined ? '' : abnomalCardInfo.incongruentOpinionInstruc2) : ''}
+											readOnly
+										  />
+										</td>
+									  </tr>
+									  <tr>
+										<th>주임</th>
+										<td>
+										  <JudgeTd
+											avAcCd={abnomalCardInfo ? abnomalCardInfo.avAcCd : ''}
+											abnrMatJdgTp={abnomalCardInfo ? abnomalCardInfo.abnrMatJdgTp : ''}
+											incongruentProdCardJdgDt={abnomalCardInfo ? abnomalCardInfo.incongruentProdCardJdgDt : ''}
+											abnrMatJdgManNm={abnomalCardInfo ? abnomalCardInfo.abnrMatJdgManNm : ''}
+										  />
+										</td>
+										<td>
+										  <TextArea
+											rows={3}
+											// cols={64}
+											name="incongruentInsporOpinion"
+											value={abnomalCardInfo ? (abnomalCardInfo.incongruentOpinionInstruc === undefined ? '' : abnomalCardInfo.incongruentOpinionInstruc) : ''}
+											readOnly
+										  />
+										</td>
+									  </tr>
+									  </tbody>
+									</table>
+								  </div>
+								);
+							  }
+							}
+
+							export default TableView;
+
+
+
+
+							/*================================================================================
+							* @화면ID(명): m2n0000046(냉연 이상재카드 조회 및 등록)
+							* Change history
+							* @수정 날짜;SR_NO;수정자;수정내용
+							* @2005-01-26;12970;;source code comment수정
+							* @2005-09-02;23261;;검사Line에러체크
+							* @2006-03-21;30509;;loadApplet사용
+							* @2006-09-06;33474;;if (checkRetry()) { 추가
+							* @2007-02-09;47695;;화면Message Master적용
+							* @2007-07-18;SCR0013512;;결함6 추가
+							* @2008-07-16;WO0271626;;주문의 전략제품 부분 추가.
+							* @2009-04-10;WO0534096;;3전기강판 추가 (반제품실적처리)
+							* @2010-08-26;WO1817303;;전사제품품종관리체계관리개선 관련 수정
+							* @2011-04-12;WO;;광양4POL설비신설전산화 관련 수정
+							* @2012-02-19;WO2383128;;포CGL설비신설전산화개발관련 수정 url추가 goSMGPage()
+							* @2012-05-04;WO2454043;;윈도우7적용관련 화면수정
+							* @2012-09-04;WO2567101;;결함발생공장공정 OperFlag체크
+							* @2016-04-26;WO3477753;로그인직번 CHECK
+							* @2016-06-28;포항CGL전장보증프로젝트;;PO판정을 위해 외관판정pop 호출시 주문번호 Param 추가
+							* @2016-04-26;;;검사LINE 고강도강 공정추가
+							* @2018-10-11;SR20180901842;;임가공사(한양철강,대림철강)단미제품 이상재 관리
+							* @2019-02-21;SR20190100671;;Win10 업그레이드 MES 화면 수정
+							* @2019-06-17;00000;류재욱;MES3.0 React 최초생성
+							==================================================================================*/
+
+							import React, { Component } from 'react';
+							import { TextArea } from '@mes/mes-ui-react';
+							import { observer } from 'mobx-react';
+							import { mesAutobind } from '@mes/mes-shared';
+
+							@mesAutobind
+							@observer
+							class TableView extends Component {
+							  render() {
+
+								const { searchParams, abnomalCardInfo } = this.props;
+								const { onChangeInputData } = this.props;
+
+								return (
+								  <div className="table-row fixed">
+									<table className="ui table center">
+									  {/*<thead>*/}
+									  {/*  <tr>*/}
+									  {/*    <th>검사자의견</th>*/}
+									  {/*  </tr>*/}
+									  {/*</thead>*/}
+									  <tbody>
+										{/*<tr>*/}
+										{/*  <td>*/}
+										{/*    <TextArea.Count limit={400} limitDisabled={false}>*/}
+										{/*      {(searchParams.newFlag) ? (*/}
+										{/*        <TextArea*/}
+										{/*          rows={5}*/}
+										{/*          style={{ height: '167px' }}*/}
+										{/*          name="incongruentInsporOpinion"*/}
+										{/*          value={searchParams.incongruentInsporOpinion}*/}
+										{/*          onChange={onChangeInputData}*/}
+										{/*        />*/}
+										{/*      ) : (*/}
+										{/*        <TextArea*/}
+										{/*          rows={5}*/}
+										{/*          style={{ height: '167px' }}*/}
+										{/*          name="incongruentInsporOpinion"*/}
+										{/*          value={abnomalCardInfo ? abnomalCardInfo.incongruentInsporOpinion : ''}*/}
+										{/*          disabled*/}
+										{/*        />*/}
+										{/*      )}*/}
+										{/*    </TextArea.Count>*/}
+										{/*  </td>*/}
+										{/*</tr>*/}
+										<tr>
+										  <td>
+											<TextArea
+											  rows={5}
+											  style={{ height: '200px' }}
+											  value={searchParams.examResult ? searchParams.examResult : ''}
+											  disabled
+											/>
+										  </td>
+										</tr>
+									  </tbody>
+									</table>
+								  </div>
+								);
+							  }
+							}
+
+							export default TableView;

@@ -1,0 +1,9 @@
+Route--React Router:
+
+		Nói một cách đơn giản, Route cho phép bạn ánh xạ vị trí ứng dụng của mình với các thành phần (component) React khác nhau.
+		
+		<Route path="/dashboard" element={<Dashboard />} />
+		
+		<Route path="/" element={<Home />} />
+		<Route path="/about" element={<About />} />
+		<Route path="/settings" element={<Settings />} />

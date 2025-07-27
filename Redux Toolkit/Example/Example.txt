@@ -1,0 +1,44 @@
+Ví dụ 1:
+
+	Tạo một dự án ReactJS mới bằng cách sử dụng create-react-app hoặc bất kỳ công cụ khác để tạo dự án.
+					
+	Tạo một store Redux trong ứng dụng của bạn bằng cách sử dụng configureStore() từ Redux Toolkit:
+
+		import { configureStore } from '@reduxjs/toolkit';
+		const store = configureStore({
+		  reducer: {
+			// Đây là nơi bạn định nghĩa các reducer của bạn.
+			// Ví dụ: todoReducer: todoReducer
+		  }
+		});
+						
+	Kết nối ứng dụng của bạn với store Redux bằng cách sử dụng provider của React-Redux:
+
+		import <a href="https://nodemy.vn/thu-vien-carousel-duoc-su-dung-de-tao-cac-slideshow-react/">React</a> from 'react';
+		import ReactDOM from 'react-dom';
+		import { Provider } from 'react-redux';
+		import store from './store'; // Import store từ bước 3
+		ReactDOM.render(
+		  <Provider store={store}>
+			<App />
+		  </Provider>,
+		  document.getElementById('root')
+		);
+						
+	Tạo reducers và actions bằng cách sử dụng các util của Redux Toolkit như createSlice, createAsyncThunk,… Ví dụ:
+
+		import { createSlice } from '@reduxjs/toolkit';
+		const todoSlice = createSlice({
+		  name: 'todos',
+		  initialState: [],
+		  reducers: {
+			addTodo: (state, action) => {
+			  state.push(action.payload);
+			},
+			removeTodo: (state, action) => {
+			  return state.filter((<a href="https://nodemy.vn/tao-ung-dung-todo-voi-usestate-trong-react-hook/">todo</a>) => todo.id !== action.payload);
+			},
+		  },
+		});
+		export const { addTodo, removeTodo } = todoSlice.actions;
+		export default todoSlice.reducer;

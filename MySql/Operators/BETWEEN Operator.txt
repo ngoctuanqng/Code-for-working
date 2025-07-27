@@ -1,0 +1,32 @@
+BETWEEN Operator--MySQL:
+
+		The BETWEEN operator selects values within a given range. The values can be numbers, text, or dates.
+		The BETWEEN operator is inclusive: begin and end values are included.
+
+		SELECT 
+			order_id,
+			order_amount,
+			order_date
+		FROM 
+			orders
+		WHERE 
+			order_amount BETWEEN 100 AND 500;
+
+		SELECT 
+			employee_id,
+			first_name,
+			last_name,
+			job_title
+		FROM 
+			employees
+		WHERE 
+			job_title BETWEEN 'A%' AND 'M%';
+
+		SELECT 
+			appointment_id,
+			appointment_date,
+			client_name
+		FROM 
+			appointments
+		WHERE 
+			appointment_date BETWEEN '2024-01-01' AND '2024-01-31';

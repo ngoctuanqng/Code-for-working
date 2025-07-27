@@ -1,0 +1,46 @@
+BarChart--MUI:
+		<BarChart
+			colors={["#228ce2", "#53bb58", "#d11b85"]}
+			xAxis={[
+			  {
+				scaleType: "band",
+				data: [row?.m00Codes030?.cdvMeaning !== undefined ? row?.m00Codes030?.cdvMeaning : cdV],
+				tickFontSize: 18,
+			  },
+			]}
+			yAxis={[
+			  {
+				label: "Number of Tasks",
+				labelStyle: {
+				  fontSize: 18,
+				},
+				tickLabelStyle: {
+				  fontSize: 14,
+				},
+			  },
+			]}
+			series={[
+			  { data: [totalTask], label: "Total" },
+			  { data: [totalRemainTasks], label: "Remain" },
+			  { data: [totalDelayedTasks], label: "Delayed" },
+			]}
+			width={500}
+			height={400}
+			margin={{ left: 130, top: 50 }}
+			sx={{
+			  [`.${axisClasses.left} .${axisClasses.label}`]: {
+				transform: "translate(-15px, 0)",
+			  },
+			}}
+			slotProps={{
+			  legend: {
+				direction: "row",
+				position: {
+				  vertical: "top",
+				  horizontal: { padding: 50 },
+				},
+				label: { padding: 50 },
+				padding: 0,
+			  },
+			}}
+		/>

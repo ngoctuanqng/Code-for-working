@@ -1,0 +1,14 @@
+Server Rendering--React Router:
+
+		Nếu kết xuất máy chủ là một khái niệm mới đối với bạn, điều quan trọng là phải nắm được bức tranh toàn cảnh về
+		cách tất cả các phần của kết xuất máy chủ khớp với nhau trước khi đi sâu vào chi tiết.
+		
+				Người dùng nhập URL của bạn vào trình duyệt web của họ và nhấn enter
+				
+				Máy chủ của bạn thấy có một yêu cầu GET
+				
+				Máy chủ kết xuất ứng dụng React của bạn thành một chuỗi HTML, bao bọc nó bên trong tài liệu HTML
+				chuẩn (DOCTYPE và tất cả) và gửi lại toàn bộ nội dung dưới dạng phản hồi
+				
+		Trình duyệt thấy rằng nó có một tài liệu HTML trở lại từ máy chủ và công cụ kết xuất của nó sẽ hoạt động để hiển thị trang
+		Sau khi hoàn tất, trang có thể xem được và trình duyệt bắt đầu tải xuống bất kỳ

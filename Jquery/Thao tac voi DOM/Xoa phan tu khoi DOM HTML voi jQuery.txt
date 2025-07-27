@@ -1,0 +1,60 @@
+Xóa phần tử khỏi DOM HTML với jQuery--Jquery
+
+	Loại bỏ phần tử với jQuery
+	
+		Trong jQuery có vài phương thức để loại bỏ phần tử trong DOM như: .empty(), .remove(), .detach()
+		
+			.empty() : phương thức này loại bỏ tất cả các phần tử con của phần tử chọn được.
+			.remove() : loại bỏ các phần tử chọn được.
+			.detach() : tương tự như .remove() nhưng toàn bộ dữ liệu jQuery liên kết vẫn được giữ
+			nguyên. Điều này có ích nếu muốn sử dụng lại phần tử đó như sẽ chèn vào vị trí khác.
+	
+	Ví dụ .detach()
+		  .appendTo() : chèn phần tử đang chọn vào một phần tử khác chỉ ra trong tham số
+	
+		<style>
+			#container1 p{
+				background-color: #b92c28;
+				color: white;
+				padding: 10px;
+				animation-duration: 3s;
+				-webkit-animation-name: keyframes1;
+				-moz-animation-name: keyframes1;
+				-o-animation-name: keyframes1;
+				animation-name: keyframes1;
+			}
+			@keyframes keyframes1 {
+				0%  {opacity: 0;}
+				100% {opacity: 1;}
+			}
+		</style>
+		<div id="container1">
+			<p><strong>Phần tử P</strong> được append và detach</p>
+		</div>
+		<button id="button1">appendTo / detach</button>
+		<script>
+			var pvidu1;
+			$("#button1").click(function () {
+				if ( pvidu1 ) {
+					pvidu1.appendTo( "#container1" );
+					pvidu1 = null;
+				} else {
+					pvidu1 = $( "#container1 p" ).detach();
+				}
+			});
+		</script>
+		
+	Ví dụ .empty(), .remove
+	
+		Ví dụ sau loại bỏ toàn phần các phần tử con của <p> trong trang:
+		
+		<button onclick="emptyp()">Loại bỏ phần tử con của &lt;p&gt;</button>
+		<button onclick="removep()">Loại bỏ các phần tử &lt;p&gt;</button>
+		<script>
+			function emptyp() {
+				$( "p,pre" ).empty();
+			}
+			function removep() {
+				$( "p,pre" ).remove();
+			}
+		</script>		

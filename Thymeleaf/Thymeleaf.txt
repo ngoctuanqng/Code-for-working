@@ -1,0 +1,408 @@
+Thymeleaf---:
+	Add Thymeleaf to Maven POM file--Thymeleaf:
+														<dependency>
+															<groupId>org.springframework.boot</groupId>
+															<artifactId>spring-boot-starter-thymeleaf</artifactId>
+														</dependency>
+														
+	Spring Boot - Spring MVC with Thymeleaf and CSS--Thymeleaf:							<link rel="stylesheet" th:href="@{/css/demo.css}" />
+	
+	Spring Boot will search following directories for static resources--Thymeleaf::
+	
+														1. /META-INF/resources
+														2. /resources
+														3. /static
+														4. /public
+	Thymeleaf XML namespace:							<html xmlns:th="http://www.thymeleaf.org">
+	Add Employees--Thymeleaf:
+		Add Employee:
+			Add Employee button for list-employees.html:
+													<a th:href="@{/employees/showFormForAdd}"
+														class="btn btn-primary btn-sm mb-3">
+														Add Employee
+													</a>
+			Create HTML form for new employee:	
+													<form action="#" th:action="@{/employees/save}" th:object="${employee}" method="POST">
+														<input type="text" th:field="*{firstName}" placeholder="First name" class="form-control mb-4 w-25">
+														...
+														<button type="submit" class="btn btn-info col-2">Save</button>
+													</form>
+			Process form data to save employee:	
+													@Controller
+													@RequestMapping("/employees")
+													public class EmployeeController {
+														private EmployeeService employeeService;
+														public EmployeeController(EmployeeService theEmployeeService) {
+															employeeService = theEmployeeService;
+														}
+														@PostMapping("/save")
+														public String saveEmployee(@ModelAttribute("employee") Employee theEmployee) {																								
+															employeeService.save(theEmployee); // save the employee																							   
+															return "redirect:/employees/list"; // use a redirect to prevent duplicate submissions
+														}
+														…
+													}
+		Controller code to show form:	
+													@GetMapping("/showFormForAdd")
+													public String showFormForAdd(Model theModel) {																							
+														Employee theEmployee = new Employee(); // create model attribute to bind form data
+														theModel.addAttribute("employee", theEmployee);
+														return "employees/employee-form";
+													}
+	Update Employee--Thymeleaf:												
+		Update button:	
+													<tr th:each="tempEmployee : ${employees}">
+													…
+														<td>
+															<a th:href="@{/employees/showFormForUpdate(employeeId=${tempEmployee.id})}" // Appends to URL ?employeeId=xxx
+																class="btn btn-info btn-sm">
+																Update
+														</a>
+													</td>
+													</tr>
+		Pre-populate the form:	
+													@GetMapping("/showFormForUpdate")
+													public String showFormForUpdate(@RequestParam("employeeId") int theId,
+																											Model theModel) {
+														// get the employee from the service
+														Employee theEmployee = employeeService.findById(theId);
+														// set employee as a model attribute to pre-populate the form
+														theModel.addAttribute("employee", theEmployee);
+														// send over to our form
+														return "employees/employee-form";
+													}
+													
+													<form action="#" th:action="@{/employees/save}" th:object="${employee}" method="POST"> // th:action là @{/employees/save},
+																																		   // nghĩa là form sẽ được gửi đến URL "/employees/save" khi được submit.
+																																		   // th:object xác định đối tượng mô hình (model object) mà form sẽ sử
+																																		   // dụng để binding dữ liệu.
+																																		   // th:field được sử dụng để đặt giá trị của thuộc tính name và value của
+																																		   // trường input dựa trên thuộc tính id của đối tượng "employee".
+														<!-- Add hidden form field to handle update -->								
+														<input type="hidden" th:field="*{id}" />
+														<input type="text" th:field="*{firstName}"
+															class="form-control mb-4 w-25" placeholder="First name">
+														...
+														<button type="submit" class="btn btn-info col-2">Save</button>
+													</form>
+	Delete Employee--Thymeleaf:
+		“Delete” button/link on page:
+													<tr th:each="tempEmployee : ${employees}">
+													…
+														<td>
+															<a th:href="@{/employees/delete(employeeId=${tempEmployee.id})}"
+															 class="btn btn-danger btn-sm"
+															 onclick="if (!(confirm('Are you sure you want to delete this employee?'))) return   false"
+															>
+																Delete
+															</a>
+														</td>
+													</tr>
+		Add controller code for “Delete”:
+													@Controller
+													@RequestMapping("/employees")
+													public class EmployeeController {
+													…
+														@GetMapping("/delete")
+														public String delete(@RequestParam("employeeId") int theId) {																			
+															employeeService.deleteById(theId); // delete the employee																			
+															return "redirect:/employees/list"; // redirect to /employees/list
+														}
+														…
+													}
+	Thymeleaf Security support--Thymeleaf:
+													<dependency>
+														<groupId>org.thymeleaf.extras</groupId>
+														<artifactId>thymeleaf-extras-springsecurity6</artifactId>
+													</dependency>
+													
+	Spring MVC Security - Custom Login Form--Thymeleaf:																					
+		Modify Spring Security Configuration to reference custom login form:				
+																@Bean
+																public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+																	http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated())
+																		.formLogin(form -> form.loginPage("/showMyLoginPage")
+																							   .loginProcessingUrl("/authenticateTheUser")
+																							   .permitAll()
+																	); 
+																	return http.build();
+																}
+		Develop a Controller to show the custom login form:
+																@Controller
+																public class LoginController {
+																	@GetMapping("/showMyLoginPage")
+																	public String showMyLoginPage() {
+																		return "plain-login"; // We need to create this file src/main/resources/templates/plain-login.html
+																	}
+																}
+		Create custom login form:
+																<form action="#" th:action="@{/authenticateTheUser}" method="POST"> // Send data to login processing URL: /authenticateTheUser
+																																	// Must POST the data
+																																	// The @ symbol: Context Path is same thing as Context Root
+																	<p>
+																		User name: <input type="text" name="username" />
+																	</p>
+																	<p>
+																		Password: <input type="password" name="password" />
+																	</p>
+																	<input type="submit" value="Login" />
+																</form>																																												
+			
+	Các loại biểu thức--Thymeleaf:
+											${...}:				biểu thức thay giá trị của biến vào template
+											*{...}:				biểu thức thay thuộc tính của biến vào template. Hay dùng với form post
+											#{...}:				message expression, biểu thức thay chuỗi đa ngôn ngữ từ file resource.
+											@{...}:				link expression, biểu thức liên kết
+											~{...}:				fragement expression, biểu thức mảnh
+											th:action           Location to send form data
+											th:object           Reference to model attribute
+											th:field            Bind input field to a property on model attribute
+	Fragment--Thymeleaf:
+		Cú pháp để mô tả vị trí của một Fragment thuộc một Template nào đó:				~{/path-to-template/template-name :: selector}
+		Nếu bạn muốn mô tả vị trí của Fragment thuộc Template hiện tại:					~{:: selector}
+																						~{this :: selector}
+		Lựa chọn fragment theo tên:														~{templatename: fragmentname}  (th:fragment)
+		
+																						~{/fragments/my-template::my-fragment1} // lựa chọn theo tên của fragment
+		Lựa chọn fragment theo tên của thẻ:												
+																						~{templatename: tagname}  (Tag Name)
+		
+																						~{/fragments/my-template::link} // lựa chọn thẻ link
+																						
+																						~{/fragments/my-template::head/script} // lựa chọn thẻ script nằm trong thẻ head
+		Lựa chọn fragment theo giá trị của thuộc tính (attribute) ID của thẻ:			~{templatename: #id}   (ID)
+		
+																						~{/fragments/my-template::#my-id1} // lựa chọn thẻ có id tên là my-id1
+		Lựa chọn fragment theo Css Class:												
+																						~{templatename: .classname},~{templatename: tagname.classname}   (Css Class)
+		
+																						~{/fragments/my-template::p.my-class} // lựa chọn thẻ p có class tên là my-class
+		Lựa chọn tất cả trong Template:													~{templatename}  (Everything)
+		
+																						~{/fragments/my-template} // lựa chọn tất cả các thẻ trong /fragments/my-template.html
+		Fragment với các tham số:
+			Tham số tường minh:															
+																						<div th:fragment="person (firstName, lastName)" class="box">
+																							<p>First Name: <span th:utext="${firstName}"></span></p>
+																							<p>Last Name: <span th:utext="${lastName}"></span></p>
+																							<p>Full Name: <span th:utext="${firstName} + ' '+ ${lastName}"></span></p>
+																						</div>
+																						
+																						<div th:replace="~{fragments/my-template2 :: person('Donald', 'Trump') }"></div>
+																						<div th:replace="~{fragments/my-template2 :: person( firstName='Donald', lastName= 'Trump') }"></div>
+																						<div th:replace="~{fragments/my-template2 :: person( ${u.firstName}, ${u.lastName}) }"></div>
+																						<div th:replace="~{fragments/my-template2 :: person( firstName=${u.firstName}, lastName= ${u.lastName}) }"></div>
+			Tham số không tường minh:													
+																						<!-- Fragment with implicit parameters. -->
+																						<div th:fragment="greeting" class="box">
+																							<p>Hello
+																							   <span th:utext="${title}"></span>
+																							   <span th:utext="${name} ?: 'There'"></span>
+																							</p>
+																						</div>
+														
+																						<div th:replace="~{fragments/my-template2 :: greeting(title='Mr.', name = 'Tom') }"></div>       
+																						<div th:replace="~{fragments/my-template2 :: greeting }"></div>
+																						
+		Các ví dụ khác:																	~{fragments/my-template :: #tagId/text() }
+																						~{fragments/my-template :: fragmentName/text() }
+																						~{fragments/my-template :: tagName/text() }
+
+	th:insert, th:replace, th:include--Thymeleaf:					
+																	<!DOCTYPE HTML>
+																	<html xmlns:th="http://www.thymeleaf.org">
+																	<head>
+																	<meta charset="UTF-8" />
+																	<title th:replace = "~{fragments/my-template :: title}">Title</title> // th:replace sẽ thay thế thẻ mục tiêu bởi Fragment.
+																	<th:block th:insert="~{fragments/my-template :: link}"></th:block>
+																	<th:block th:insert="~{fragments/my-template :: head/script}"></th:block>
+																	</head>
+																	<body>
+																	<h1>My Page</h1>
+																	<p>Some Content of My Page</p>
+																	<div th:insert="~{fragments/my-template :: my-fragment1}"></div> // th:insert sẽ chèn Fragment vào thành con của thẻ mục
+																																		// tiêu (Target tag).
+																	<div th:insert="~{fragments/my-template :: my-fragment2}"></div>
+																	<div th:insert="~{fragments/my-template :: #my-id1}"></div>
+																	<div th:insert="~{fragments/my-template :: p.my-class }"></div>
+																	</body>
+																	</html>
+	th:assert--Thymeleaf:								
+														<div th:fragment="employee (firstName, lastName)" class="box"
+															th:assert= "${!#strings.isEmpty(firstName)}, ${!#strings.isEmpty(lastName)}"> // Nếu tất cả các biểu thức được đánh giá là true (đúng) sẽ không có vấn đề gì xảy ra
+																																		  // nếu có 1 biểu thức bị đánh giá là false (sai) một ngoại lệ sẽ được ném ra																						
+															<p>First Name: <span th:utext="${firstName}"></span></p>
+															<p>Last Name: <span th:utext="${lastName}"></span></p>
+															<p>Full Name: <span th:utext="${firstName} + ' '+ ${lastName}"></span></p>
+														</div>
+	Đổ dữ liệu sử dụng ${...}, th:text và th:utext--Thymeleaf:				
+																			@GetMapping("/text")
+																			public String demoText(Model model) {
+																				Person tom = new Person("Tom", "USA", "1976-12-01", "male");
+																				model.addAttribute("person", tom);
+																				model.addAttribute("message", "<h2>Display <span style='color:red'>HTML</span> inside</h2>");
+																				return "text";
+																			}															
+
+																			<div th:text="${person.name + ' : ' + person.nationality}"></div> // th:text đổ text thuần không thẻ HTML vào view template
+																																			  // "${person.name + ' : ' + person.nationality}" biểu thức cộng 2 hai biến
+																			<div th:text="${person.name} + ' : ' + ${person.nationality}"></div>
+																			<div th:text="|${person.name}  :  ${person.nationality}|"></div> // Cú pháp thay thế biến. Chú ý hai ký tự pipe | ở hai đầu
+																			<div th:utext="${message}"></div> // th:utext đổ text có thẻ HTML, CSS vào view template
+																			<div th:text="${person}"></div> // xuất chuỗi chứa thẻ HTML, CSS. Xuất ra cả person.toString()
+	Link expression, biểu thức đường dẫn--Thymeleaf:						
+																@GetMapping("/link")
+																public String linkExpression(Model model) {
+																	model.addAttribute("dynamiclink", "products");
+																	return "link";
+																}
+																
+																<a th:href="@{/about}">Abosolute Link</a><br> // <a href="/about">Abosolute Link</a><br>
+																<a th:href="@{~/topic/thymeleaf}">Relative link 1</a><br> // <a href="/topic/thymeleaf">Relative link 1</a><br>
+																<a th:href="@{topic/thymeleaf}">Relative link 2</a><br> // <a href="topic/thymeleaf">Relative link 2</a><br>
+																<a th:href="@{/about(foo='bar',tom='jerry')}">Query string parameters</a><br> // <a href="/about?foo=bar&amp;tom=jerry">Query string parameters</a><br>
+																<a th:href="|/${dynamiclink}|">dynamic link 1</a><br> // <a href="/products">dynamic link 1</a><br>
+																<a th:href="@{${dynamiclink}}">dynamic link 2</a><br> // <a href="products">dynamic link 2</a><br>
+																<a th:href="@{/page/(id=${dynamiclink})}">dynamic link 3</a><br> // <a href="/page/?id=products">dynamic link 3</a><br>
+	Điều kiện th:if, th:unless--Thymeleaf:
+																<td>
+																	<span th:if="${person.gender == 'female'}">‍♀️</span>
+																	<span th:unless="${person.gender == 'female'}">‍♂️</span>
+																</td>
+	Switch th:switch và th:case--Thymeleaf:
+																<td th:switch="${user.role}">
+																	<span th:case="admin">Quản lý hệ thống</span>
+																	<span th:case="editor">Duyệt bài</span>
+																	<span th:case="author">Tác giả</span>
+																	<span th:case="user">Người dùng</span>
+																</td>
+	Đổ dữ liệu List Box, Check Box, Radio Box--Thymeleaf:
+																@GetMapping("/travel")
+																public String showTravelForm(Model model) {
+																	model.addAttribute("countries", repo.getCountries());
+																	model.addAttribute("travelTypes", TravelType.values());
+																	model.addAttribute("travelRequest", new TravelRequest());
+																	return "travel";
+																}
+		Hiển thị List Box:
+																<label for="countries">Nationality</label>
+																<select name="nationality" id="nationality">
+																	<option
+																	th:each="country:${countries}"
+																	th:text="${country.name}"
+																	th:value="${country.code}"
+																	th:selected="${travelRequest.nationality==country.code}">China</option>
+																</select>
+		Hiển thị Check Box:
+																<label for="visitedCountries">Tick countries you have visited</label><br>
+																<span th:each="country:${countries}">
+																	<input type="checkbox" name="visitedCountries"
+																	th:value="${country.code}"
+																	th:checked="${#lists.contains(travelRequest.visitedCountries, country.code)}">
+																	<label th:text="${country.name}" for="visitedCountries"></label><br>
+																</span>
+		Hiển thị Radio Box:
+																<label for="travelType">Choose one travel type</label><br>
+																<span th:each="travel_type:${travelTypes}">
+																	<input type="radio" name="travelType"
+																	th:value="${travel_type}"
+																	th:checked="${travelRequest.travelType.value==travel_type.value}">
+																	<label th:text="${travel_type.value}" for="travelType"></label><br>
+																</span>
+	Hiển thị Form và gửi Form lên server: th:action, th:object, th:field--Thymeleaf:
+								<form action="#" th:action="@{/bmi}" th:object="${bmiRequest}" method="post"> // th:action viết biểu thức đường dẫn mà Form sẽ gửi lên server.
+																											  // Nó khác thuộc tính action vốn có của Form ở chỗ, bạn có thể viết biểu thức, biến, so sánh, điều kiện...
+																											  // để động hoá đường dẫn.
+																											  // th:object khai báo đối tượng chứa dữ liệu các trường để điền vào form.
+									<input type="text" placeholder="Your name" th:field="*{name}"/><br><br> // th:field lấy dữ liệu trong từng thuộc tính của đối tượng đổ vào một trường text.
+									<input type="text" placeholder="Your email" th:field="*{email}"/><br><br>
+									<input type="text" placeholder="Your height" th:field="*{height}"/> (m)<br><br>
+									<input type="text" placeholder="Your weight" th:field="*{weight}"/> (kg)<br><br>
+									<button type="submit">Calculate BMI</button>
+								</form>
+
+								@PostMapping("/path")
+								public String handleForm(@ModelAttribute Request request, BindingResult bindingResult, Model model) {
+									if (! bindingResult.hasErrors()) {
+										//Logic xử lý nếu không có lỗi
+										//Ghi hoặc cập nhật vào CSDL
+									}
+									model.addAttribute("key", formObject); //formObject có thể là chính request nếu chúng ta muốn hiển thị lại
+									model.addAttribute("foo", valuesForListBox); //đổ dữ liệu vào Listbox
+									model.addAttribute("bar", valuesForCheckBox); //đổ dữ liệu vào Checkbox
+								}
+	th:block--Thymeleaf:
+								<ul>
+									<th:block th:each="travel_type : ${travelTypes}" th:switch="${travel_type.value}"> // Nó hữu ích khi chúng ta muốn thực hiện logic loop, condition ở cấp độ thẻ HTML chứ không ở cấp độ
+																													   // thuộc tính trong thẻ. Ví dụ ở file thblock.html, nhờ có th:block, chúng ta đặt được điều khiển
+																													   // vòng lặp th:each và th:switch ra ngoài thẻ li code trong sáng hơn nhiều
+										<li th:case="Premium">
+											<span th:text="${travel_type.value}">Premium</span>
+											<input type="checkbox" name="Premium" th:value="jet"><label>Private Jet</label>
+											<input type="checkbox" name="Premium" th:value="champaign"><label>Champaign</label>
+										</li>
+										<li th:case="Luxury">
+											<span th:text="${travel_type.value}">Luxury</span>
+											<input type="checkbox" name="Luxury" th:value="swimmingpool"><label>Swimming Pool</label>
+											<input type="checkbox" name="Luxury" th:value="taxi"><label>Airport taxi</label>
+										</li>
+										<li th:case="*">
+											<span th:text="${travel_type.value}">Other</span>
+										</li>
+									</th:block>
+								</ul>
+	Cú pháp bật tắt thuộc tính theo biểu thức--Thymeleaf:
+																	th:async       		th:autofocus    th:autoplay
+																	th:checked    		th:controls    	th:declare
+																	th:default    		th:defer    	th:disabled
+																	th:formnovalidate   th:hidden    	th:ismap
+																	th:loop    			th:multiple    	th:novalidate
+																	th:nowrap    		th:open    		th:pubdate
+																	th:readonly    		th:required    	th:reversed
+																	th:scoped    		th:seamless    	th:selected
+	Login Form Error Message--Thymeleaf:
+		Append an error parameter: ?error							http://localhost:8080/myapp/showMyLoginPage?error // When login fails, by default Spring Security will … Send user back to your login page
+		Modify custom login form:
+																	<form …>
+																		<div th:if="${param.error}"> // http://localhost:8080/myapp/showMyLoginPage?error
+																			<i>Sorry! You entered invalid username/password.</i>
+																		</div>
+																		User name: <input type="text" name="username" />
+																		Password: <input type="password" name="password" />
+																	</form>
+	Logout--Thymeleaf:
+		Add logout support to Spring Security Configuration:
+																	@Bean
+																	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+																	  ...
+																	 .formLogin(form -> form.loginPage("/showMyLoginPage")
+																							.loginProcessingUrl("/authenticateTheUser")
+																							.permitAll()
+																	 )
+																	 .logout(logout -> logout.permitAll());
+																	 return http.build();
+																	}
+		Add logout button to home page:
+																	<form action="#" th:action="@{/logout}" method="POST">
+																		<input type="submit" value="Logout" />
+																	</form>
+	Display User ID and Roles--Thymeleaf:
+		Display User ID:											User: <span sec:authentication="principal.username"></span>															
+		Display User Roles:											Role(s): <span sec:authentication="principal.authorities"></span>
+	Custom Access Denied Page--Thymeleaf:
+																	@Bean
+																	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+																		http.authorizeHttpRequests(configurer -> configurer.requestMatchers(“/").hasRole("EMPLOYEE"))
+																			 .exceptionHandling(configurer -> configurer.accessDeniedPage("/access-denied")
+																		);
+																		…
+																	}
+	Display Content Based on Roles--Thymeleaf:
+																	<div sec:authorize="hasRole('MANAGER')">
+																		<p>
+																			<a th:href="@{/leaders}">
+																				Leadership Meeting
+																			</a>
+																			 (Only for Manager peeps)
+																		</p>
+																	</div>

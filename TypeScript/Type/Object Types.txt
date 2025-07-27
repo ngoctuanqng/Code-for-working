@@ -1,0 +1,42 @@
+Object Types--Typescript:
+
+	TypeScript has a specific syntax for typing objects--Object Types Typescript:
+	
+		// Try playing around with modifying properties and adding ones to see what happens
+		const car: { type: string, model: string, year: number } = {
+		  type: "Toyota",
+		  model: "Corolla",
+		  year: 2009
+		};
+		console.log(car);
+		
+		Object types like this can also be written separately, and even be reused.
+	
+	Type Inference--Object Types Typescript:
+	
+		TypeScript can infer the types of properties based on their values.
+			
+			const car = {
+			  type: "Toyota",
+			};
+			car.type = "Ford"; // no error
+			car.type = 2; // Error: Type 'number' is not assignable to type 'string'.
+			console.log(car);
+	
+	Optional Properties--Object Types Typescript:
+	
+		Optional properties are properties that don't have to be defined in the object definition.
+		
+		Example without an optional property
+			
+			const car: { type: string, mileage: number } = { // Error: Property 'mileage' is missing intype '{ type: string; }' but required in type '{ type: string; mileage: number; }'.
+			  type: "Toyota",
+			};
+			car.mileage = 2000;
+				Example with an optional property
+					// no error on optional property, remove it and see what happens
+			const car: { type: string, mileage?: number } = {
+			  type: "Toyota"
+			};
+			car.mileage = 2000;
+			console.log(car);	
