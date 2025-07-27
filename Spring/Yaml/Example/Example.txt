@@ -1,0 +1,186 @@
+# =============================
+# SERVER CONFIGURATION
+# =============================
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+
+# =============================
+# DATASOURCE (MySQL / MariaDB)
+# =============================
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/myapp?useSSL=false&serverTimezone=UTC
+    username: root
+    password: your_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # ===========================
+  # JPA / Hibernate
+  # ===========================
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update   # create | update | validate | none
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+  # ===========================
+  # Jackson (JSON Serialization)
+  # ===========================
+  jackson:
+    serialization:
+      indent_output: true
+    default-property-inclusion: non_null
+
+  # ===========================
+  # Thymeleaf (nếu dùng frontend template)
+  # ===========================
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+
+  # ===========================
+  # Multipart (file upload)
+  # ===========================
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+      enabled: true
+      file-size-threshold: 2KB
+      location: /tmp
+
+  # ===========================
+  # Mail config
+  # ===========================
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your_email@gmail.com
+    password: your_email_password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+# =============================
+# LOGGING
+# =============================
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    com.yourcompany: DEBUG
+  file:
+    name: logs/springboot-app.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# =============================
+# SPRING SECURITY (nếu dùng)
+# =============================
+spring:
+  security:
+    user:
+      name: admin
+      password: admin123
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: your-client-id
+            client-secret: your-client-secret
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            scope:
+              - email
+              - profile
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+
+# =============================
+# CORS / CSRF (nếu cấu hình tùy chỉnh)
+# =============================
+# custom:
+#   cors:
+#     allowed-origins: http://localhost:3000
+#     allowed-methods: GET, POST, PUT, DELETE
+#     allowed-headers: "*"
+#     allow-credentials: true
+
+# =============================
+# CUSTOM APP CONFIG
+# =============================
+app:
+  name: My Full Spring Boot App
+  description: Full example with many options
+  upload-dir: ./uploads
+  feature-toggle:
+    email-enabled: true
+    file-upload-enabled: true
+    audit-log: false
+
+# =============================
+# ACTUATOR (Monitoring endpoints)
+# =============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# =============================
+# SCHEDULING (nếu có dùng @Scheduled)
+# =============================
+spring:
+  task:
+    scheduling:
+      pool:
+        size: 5
+
+# =============================
+# CACHE (Spring Cache)
+# =============================
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
+
+# =============================
+# PROFILE CONFIG
+# =============================
+spring:
+  profiles:
+    active: dev
+
