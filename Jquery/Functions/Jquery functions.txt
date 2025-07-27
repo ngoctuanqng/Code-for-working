@@ -1,0 +1,1349 @@
+--- addClass()
+
+	.addClass(): thêm class cho thành phần.
+	
+	Cấu trúc
+		
+		.addClass(tênclass)
+		
+			$('div').addClass('test');
+			
+			Html viết:
+			
+				<!DOCTYPE HTML>
+				<html>
+				<head>
+				<meta charset="utf-8">
+				<title>Tiêu đề</title>
+				<script src="https://code.jquery.com/jquery-latest.js"></script>
+				<style>
+				.test {
+					background-color: blue;
+				}
+				</style>
+				<script>
+				$(function(){
+					$('div').addClass('test');
+				});
+				</script>
+				</head>
+
+				<body>
+				<div>Thành phần div</div>
+				</body>
+				</html>
+				Thành phần div đã được thêm class="test".
+			
+			So sánh code HTML trước và sau khi có jQuery:
+				
+				Trước khi có jQuery
+					
+					<div>Thành phần div</div>
+				
+				Sau khi có jQuery
+					
+					<div class="test">Thành phần div</div>
+		
+		.addClass(tênclass01 tênclass02)
+			
+			$('div').addClass('test01 test02');
+			
+			Html viết:
+				
+				<!DOCTYPE HTML>
+				<html>
+				<head>
+				<meta charset="utf-8">
+				<title>Tiêu đề</title>
+				<script src="https://code.jquery.com/jquery-latest.js"></script>
+				<style>
+				.test {
+					background-color: blue;
+				}
+				.bdrDiv {
+					border: 3px solid yellow;
+				}
+				</style>
+				<script>
+				$(function(){
+					$('div').addClass('test bdrDiv');
+				});
+				</script>
+				</head>
+				<body>
+				<div>Thành phần div</div>
+				</body>
+				</html>
+				
+				Thành phần div đã được thêm class="test bdrDiv".
+
+			So sánh code HTML trước và sau khi có jQuery:
+			
+				Trước khi có jQuery
+					
+					<div>Thành phần div</div>
+				
+				Sau khi có jQuery
+				
+					<div class="test bdrDiv">Thành phần div</div>
+					
+		.addClass(function(index){...})
+			
+			$('ul li').addClass(function(index){
+				return "list-" + index;
+			});
+			
+			Html viết:
+				
+				<!DOCTYPE HTML>
+				<html>
+				<head>
+				<meta charset="utf-8">
+				<title>Tiêu đề</title>
+				<script src="https://code.jquery.com/jquery-latest.js"></script>
+				<style>
+				.list-2 {
+					background-color: blue;
+				}
+				</style>
+				<script>
+				$(function(){
+					$('ul li').addClass(function(index){
+						return "list-" + index;
+					});
+				});
+				</script>
+				</head>
+				<body>
+				<ul>
+				<li>Thành phần li 0</li>
+				<li>Thành phần li 1</li>
+				<li>Thành phần li 2</li>
+				<li>Thành phần li 3</li>
+				<li>Thành phần li 4</li>
+				</ul>
+				</body>
+				</html>
+				
+				Tất cả các thành phần li đã thêm class theo thứ tự
+
+			So sánh code HTML trước và sau khi có jQuery:
+				
+				Trước khi có jQuery
+					
+					<ul>
+					  <li>Thành phần li 0</li>
+					  <li>Thành phần li 1</li>
+					  <li>Thành phần li 2</li>
+					  <li>Thành phần li 3</li>
+					  <li>Thành phần li 4</li>
+					</ul>
+				
+				Sau khi có jQuery
+					
+					<ul>
+					  <li class="list-0">Thành phần li 0</li>
+					  <li class="list-1">Thành phần li 1</li>
+					  <li class="list-2">Thành phần li 2</li>
+					  <li class="list-3">Thành phần li 3</li>
+					  <li class="list-4">Thành phần li 4</li>
+					</ul>
+		
+		.addClass(function(index, class_đã_có){...})
+			
+			$('ul li').addClass(function(index, current){
+				var newClass;
+				if(current == "blue") {
+					newClass = "red";
+				}
+				return newClass;
+			});
+			
+			Html viết:
+				
+				<!DOCTYPE HTML>
+				<html>
+				<head>
+				<meta charset="utf-8">
+				<title>Tiêu đề</title>
+				<script src="https://code.jquery.com/jquery-latest.js"></script>
+				<style>
+				li {
+					background-color: blue;
+				}
+				li.bdrRed {
+					border: 3px dashed red;
+				}
+				</style>
+				<script>
+				$(function(){
+					$('ul li').addClass(function(index, current){
+						var newClass;
+						if(current == "blue") {
+							newClass = "bdrRed";
+						}
+						return newClass;
+					});
+				});
+				</script>
+				</head>
+				<body>
+				<ul>
+				<li>Thành phần li 0</li>
+				<li>Thành phần li 1</li>
+				<li>Thành phần li 2</li>
+				<li class="blue">Thành phần li 3</li>
+				<li>Thành phần li 4</li>
+				</ul>
+				</body>
+				</html>
+				
+				Thành phần li có class="blue" đã được thêm class bdrRed.
+
+			So sánh code HTML trước và sau khi có jQuery:
+				
+				Trước khi có jQuery
+					
+					<ul>
+					  <li>Thành phần li 0</li>
+					  <li>Thành phần li 1</li>
+					  <li>Thành phần li 2</li>
+					  <li class="blue">Thành phần li 3</li>
+					  <li>Thành phần li 4</li>
+					</ul>
+				
+				Sau khi có jQuery
+					
+					<ul>
+					  <li>Thành phần li 0</li>
+					  <li>Thành phần li 1</li>
+					  <li>Thành phần li 2</li>
+					  <li class="blue bdrRed">Thành phần li 3</li>
+					  <li>Thành phần li 4</li>
+					</ul>
+
+--- after()
+
+		The after() method is an inbuilt function in jQuery which is used to insert content,
+		specified by the parameter for each selected element in the set of matched elements.
+
+		$(selector).after(A);
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery after()</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="title">Sản phẩm nổi bật</p>
+
+		<script>
+		  $('#title').after('<p><strong>Giảm giá 50%!</strong></p>');
+		</script>
+
+		</body>
+		</html>
+
+
+--- append()
+
+		The append() method in jQuery is used to insert some content at the end of the selected elements.
+
+		$(selector).append( content, function(index, html) )
+		content: It is a required
+		function(index, html): It is an optional parameter
+
+		$(document).ready(function() {
+			$("#appendButton").click(function() {
+				$("#myList").append("<li>Item mới</li>");
+			});
+		});
+		Khi người dùng nhấn vào button, một phần tử <li> mới với nội dung "Item mới" sẽ được thêm vào cuối
+		danh sách <ul> có ID là myList.
+
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery append Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<div id="content">
+		  <p>Đoạn văn ban đầu.</p>
+		</div>
+
+		<button id="appendBtn">Thêm nội dung</button>
+
+		<script>
+		  $('#appendBtn').click(function() {
+			$('#content').append('<p>Đoạn văn được thêm bằng jQuery!</p>');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- appendTo()
+
+		The appendTo() method is an inbuilt method in jQuery that is used to insert HTML element at the end
+		of the selected element. 
+
+		$(content).appendTo(selector)
+
+
+		--- attr()	- The attr() method in jQuery is used to set or return the attributes and values of the
+		selected elements. 
+		- attr() dùng để lấy hoặc thay đổi thuộc tính (attribute) của một phần tử HTML, như id, class, src, href, v.v.
+		- prop() dùng để lấy hoặc thay đổi thuộc tính (property) của một phần tử DOM, như checked, selected, disabled, v.v.
+		- Phương thức val() trong jQuery thường được sử dụng để lấy hoặc thay đổi giá trị của các trường nhập
+		liệu (input fields), như input, textarea, hoặc select.
+
+		To return the value of an attribute:
+		$(selector).attr(attribute)
+
+		To set the attribute and value:
+		$(selector).attr(attribute, value)
+
+		To set attribute and value using a function:
+		$(selector).attr(attribute, function(index, currentvalue))
+
+		To set multiple attributes and values:
+		$(selector).attr({attribute:value, attribute:value, ...})
+
+		$(document).ready(function() {
+			$("#getAttrButton").click(function() {
+				var hrefValue = $("#myLink").attr("href");
+				$("#output").text("Giá trị của href là: " + hrefValue);
+			});
+		});
+		Khi người dùng nhấn button, giá trị của thuộc tính href của thẻ <a> sẽ được hiển thị trong thẻ <p> có ID
+		là output.
+
+		$(document).ready(function() {
+			$("#setAttrButton").click(function() {
+				// Đổi ảnh mới
+				$("#myImage").attr("src", "new-image.jpg");
+				// Thay đổi mô tả của ảnh
+				$("#myImage").attr("alt", "Hình ảnh mới");
+			});
+		});
+		Khi người dùng nhấn button, phương thức attr() sẽ thay đổi giá trị của thuộc tính src và alt của thẻ <img>. Hình
+		ảnh hiển thị sẽ thay đổi và mô tả mới cũng được cập nhật.
+
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery appendTo() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<h3>Danh sách công việc</h3>
+		<ul id="taskList">
+		  <li>Học jQuery</li>
+		</ul>
+
+		<button id="addTaskBtn">Thêm công việc</button>
+
+		<script>
+		  $('#addTaskBtn').click(function() {
+			// Tạo phần tử mới và thêm vào danh sách bằng appendTo()
+			$('<li>Ôn lại appendTo()</li>').appendTo('#taskList');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- before()
+
+		The before() Method in jQuery is used to add the content before the selected element. 
+
+		$(selector).before( content, function(index))
+		function(index): It is an optional parameter
+		clone()	- The clone() method is an inbuilt method in jQuery that is used to make a copy of selected elements
+		including its child nodes, text, and attributes.
+
+		$(selector).clone(true|false)
+		  Parameters: This method accepts an optional parameter that could be either true or false specifying whether
+		  the event handler should be copied or not. 
+
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery before() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="target">Đây là đoạn văn gốc.</p>
+		<button id="btnBefore">Chèn trước đoạn văn</button>
+
+		<script>
+		  $('#btnBefore').click(function() {
+			$('#target').before('<p>Đoạn văn được thêm bằng .before()</p>');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+--- empty()
+
+		The empty() method is an inbuilt method in jQuery that is used to remove all child nodes and their content for
+		the selected elements.
+
+		$(selector).empty()
+
+		$(document).ready(function() {
+			$("#emptyButton").click(function() {
+				$("#content").empty();
+			});
+		});
+		Khi người dùng nhấn button, toàn bộ nội dung bên trong phần tử div (tiêu đề và đoạn văn bản) sẽ bị xóa, nhưng
+		phần tử div sẽ vẫn tồn tại trong DOM.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery empty() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<div id="box">
+		  <p>Đây là nội dung bên trong div.</p>
+		  <p>Và một đoạn nữa.</p>
+		</div>
+
+		<button id="clearBtn">Xóa nội dung</button>
+
+		<script>
+		  $('#clearBtn').click(function() {
+			$('#box').empty();
+		  });
+		</script>
+
+		</body>
+		</html>
+
+--- hasClass()
+
+		The hasClass() is an inbuilt method in jQuery which check whether the elements with the specified class name
+		exist or not.
+
+		$(selector).hasClass(className);
+
+		$(document).ready(function() {
+			$("#checkClassButton").click(function() {
+				if ($("#myParagraph").hasClass("highlight")) {
+					alert("Đoạn văn có lớp 'highlight'.");
+				} else {
+					alert("Đoạn văn không có lớp 'highlight'.");
+				}
+			});
+		});
+		Khi người dùng nhấn button, một thông báo sẽ xuất hiện xác nhận rằng đoạn văn có lớp highlight. Nếu lớp này bị xóa
+		hoặc không tồn tại, thông báo sẽ phản ánh điều đó.
+
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery hasClass() Example</title>
+		  <style>
+			.active {
+			  color: red;
+			  font-weight: bold;
+			}
+		  </style>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="status" class="active">Trạng thái: Đang hoạt động</p>
+		<button id="checkBtn">Kiểm tra class</button>
+
+		<script>
+		  $('#checkBtn').click(function() {
+			if ($('#status').hasClass('active')) {
+			  alert('Phần tử có class "active".');
+			} else {
+			  alert('Phần tử KHÔNG có class "active".');
+			}
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- html()
+
+		The html() Method in jQuery is used to set or return the innerHTML content of the selected element. 
+
+		<div id="demo"><b>Xin chào</b> bạn!</div>
+
+		let content = $("#demo").html(); // content = "<b>Xin chào</b> bạn!"
+
+		$("#demo").html("<i>Chào bạn</i>"); // Kết quả: <div id="demo"><i>Chào bạn</i></div>
+
+		let content = $("#demo").text(); // content = "Xin chào bạn!"
+
+		$("#demo").text("<i>Chào bạn</i>"); // Kết quả: <div id="demo">&lt;i&gt;Chào bạn&lt;/i&gt;</div>
+		// (hiển thị ra như văn bản, không áp dụng định dạng thẻ `<i>`)
+
+
+		It returns the content of the first matched element.
+		$(selector).html()
+
+		It sets the content of the matched element.
+		$(selector).html(content)
+
+		It sets the content using a function.
+		$(selector).html(function(index, currentcontent))
+
+		$(document).ready(function() {
+			$("#getHtmlButton").click(function() {
+				var htmlContent = $("#content").html();
+				$("#result").text("Nội dung HTML là: " + htmlContent);
+			});
+		});
+		Khi người dùng nhấn button, phương thức html() sẽ lấy toàn bộ nội dung HTML bên trong thẻ div có ID content và hiển
+		thị nó trong thẻ <p> có ID result.
+
+		$(document).ready(function() {
+			$("#setHtmlButton").click(function() {
+				$("#content").html("<h3>Tiêu đề mới</h3><p>Nội dung mới đã được thay đổi.</p>");
+			});
+		});
+		Khi người dùng nhấn button, phương thức html() sẽ thay thế toàn bộ nội dung bên trong phần tử div có ID content bằng
+		nội dung HTML mới, bao gồm tiêu đề và đoạn văn bản mới.
+
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery html() Example - GET</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<div id="content">
+		  <p><strong>Xin chào</strong>, đây là nội dung HTML.</p>
+		</div>
+
+		<button id="getBtn">Lấy nội dung</button>
+
+		<script>
+		  $('#getBtn').click(function() {
+			const html = $('#content').html();
+			alert('Nội dung HTML là: ' + html);
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- insertAfter()
+
+		jQuery insertAfter() method is used to insert some HTML content after a specified element. The HTML content will be
+		inserted after each occurrence of the specified element.
+
+		$('content_to_be_inserted').insertAfter(target)
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery insertAfter() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="main">Đây là đoạn chính.</p>
+		<button id="insertBtn">Chèn sau đoạn chính</button>
+
+		<script>
+		  $('#insertBtn').click(function() {
+			$('<p>Đây là đoạn được chèn bằng insertAfter()</p>').insertAfter('#main');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- insertBefore()
+
+		The insertBefore() is an inbuilt method in jQuery that is used to insert some HTML content before a specified element. The
+		HTML content will be inserted before each occurrence of the specified element.
+
+		$(content).insertBefore(target)
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery insertBefore() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="main">Đây là đoạn văn chính.</p>
+		<button id="insertBtn">Chèn trước đoạn chính</button>
+
+		<script>
+		  $('#insertBtn').click(function() {
+			$('<p>Đây là đoạn được chèn bằng insertBefore()</p>').insertBefore('#main');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- prepend()
+
+		The prepend() method is an inbuilt method in jQuery that is used to insert specified content at the beginning of the
+		selected element.
+
+		$(selector).prepend(content, function)
+		content: It is a required parameter
+		function: It is an optional parameter
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery prepend() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<div id="box">
+		  <p>Đây là nội dung gốc.</p>
+		</div>
+
+		<button id="btnPrepend">Thêm nội dung đầu div</button>
+
+		<script>
+		  $('#btnPrepend').click(function() {
+			$('#box').prepend('<p>🌟 Nội dung mới được thêm vào đầu</p>');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- prependTo()
+
+		The prependTo() method is an inbuilt method in jQuery that is used to insert HTML elements or some content at the
+		beginning of the selected element.
+
+		$(content).prepend(selector)
+		content: It is a required parameter
+		selector: It is a required parameter
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery prependTo() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<div id="content">
+		  <p>Nội dung cũ.</p>
+		</div>
+
+		<button id="btn">Chèn vào đầu</button>
+
+		<script>
+		  $('#btn').click(function() {
+			$('<p>🔼 Nội dung mới</p>').prependTo('#content');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- prop()
+
+		The prop() is an inbuilt method in jQuery that is used to set or return properties and values for the selected
+		elements. When this method is used to return the property value, it returns the value of the FIRST matched element
+		and when this method is used to set property values, it sets one or more properties for the selected elements.
+
+		$(selector).prop(para1, para2)
+		para1: It specifies the property.
+		para2: It specifies the value of the property in case of set.
+
+		$(document).ready(function() {
+			$("#checkPropButton").click(function() {
+				var isChecked = $("#myCheckbox").prop("checked");
+				if (isChecked) {
+					$("#result").text("Checkbox đang được chọn.");
+				} else {
+					$("#result").text("Checkbox chưa được chọn.");
+				}
+			});
+		});
+		Khi người dùng nhấn vào button, phương thức prop() sẽ kiểm tra thuộc tính checked của checkbox có ID myCheckbox. Nếu
+		checkbox được chọn, nó sẽ hiển thị thông báo "Checkbox đang được chọn", ngược lại sẽ hiển thị "Checkbox chưa được chọn".
+
+		$(document).ready(function() {
+			$("#enableButton").click(function() {
+				$("#submitButton").prop("disabled", false);
+			});
+		});
+		Ban đầu, nút "Submit" bị vô hiệu hóa (disabled). Khi người dùng nhấn vào button, phương thức prop() sẽ đặt thuộc tính
+		disabled của nút "Submit" thành false, và nút "Submit" sẽ được kích hoạt trở lại.
+
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery prop() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<label><input type="checkbox" id="agree"> Tôi đồng ý</label>
+		<button id="checkBtn">Kiểm tra</button>
+
+		<script>
+		  $('#checkBtn').click(function() {
+			if ($('#agree').prop('checked')) {
+			  alert('Bạn đã đồng ý!');
+			} else {
+			  alert('Bạn chưa đồng ý!');
+			}
+		  });
+		</script>
+
+		</body>
+		</html>
+
+--- remove()
+
+		The remove() method in JQuery is used to remove all the selected elements including all the text. This method also
+		remove data and all the events of the selected elements.
+
+		$(selector).remove()
+
+		- Output will be all the elements of the paragraph get deleted.
+
+		$(document).ready(function() {
+			$("#removeButton").click(function() {
+				$("#content").remove();
+			});
+		});
+		Khi người dùng nhấn button, phương thức remove() sẽ xóa hoàn toàn phần tử div và tất cả nội dung bên trong nó khỏi DOM.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery remove() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="message">Đây là đoạn văn sẽ bị xóa.</p>
+		<button id="removeBtn">Xóa đoạn văn</button>
+
+		<script>
+		  $('#removeBtn').click(function() {
+			$('#message').remove();
+		  });
+		</script>
+
+		</body>
+		</html>
+
+--- removeAttr()
+
+		jQuery removeAttr() method is an inbuilt method in jQuery that is used to remove one or more attributes from the
+		selected elements.
+
+		$(selector).removeAttr(attribute)
+
+		$(document).ready(function() {
+			$("#removeAttrButton").click(function() {
+				$("#myInput").removeAttr("disabled");
+			});
+		});
+		Khi người dùng nhấn vào button, phương thức removeAttr() sẽ xóa thuộc tính disabled khỏi phần tử input, cho phép
+		người dùng nhập liệu vào ô này.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery removeAttr() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<button id="myButton" disabled>Không bấm được</button>
+		<br><br>
+		<button id="enableBtn">Bật lại nút</button>
+
+		<script>
+		  $('#enableBtn').click(function() {
+			$('#myButton').removeAttr('disabled');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+--- removeClass()
+
+		The removeClass() method is an inbuilt method in jQuery that is used to remove one or more class names from the
+		selected element.
+
+		$(selector).removeClass(class_name, function(index, current_class_name))
+		class_name: It is an optional parameter
+		F  unction: It is an optional parameter
+
+		$(document).ready(function() {
+			$("#removeClassButton").click(function() {
+				$("#myParagraph").removeClass("highlight");
+			});
+		});
+		Khi người dùng nhấn button, phương thức removeClass() sẽ xóa lớp highlight, làm cho nền của đoạn văn không còn màu
+		vàng nữa, nhưng lớp underline vẫn được giữ lại.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery removeClass() Example</title>
+		  <style>
+			.highlight {
+			  background-color: yellow;
+			  font-weight: bold;
+			}
+		  </style>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="myText" class="highlight">Đây là đoạn văn nổi bật.</p>
+		<button id="removeClassBtn">Xóa class 'highlight'</button>
+
+		<script>
+		  $('#removeClassBtn').click(function() {
+			$('#myText').removeClass('highlight');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- removeProp()
+
+		The removeProp() method is an inbuilt method in jQuery that is used to remove the property set by the prop()
+		method. The prop() method is used to add a property to a selected element.
+
+		$(selector).removeProp(property)
+
+		$(document).ready(function() {
+			$("#removePropButton").click(function() {
+				$("#myCheckbox").prop("checked", false); // Bỏ chọn checkbox
+				$("#myCheckbox").removeProp("checked");  // Xóa thuộc tính checked
+			});
+		});
+		Khi người dùng nhấn button, phương thức prop("checked", false) sẽ bỏ chọn checkbox, đồng thời removeProp("checked")
+		sẽ xóa thuộc tính checked khỏi checkbox.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery removeProp() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<label><input type="checkbox" id="myCheckbox" checked> Tôi đồng ý</label>
+		<br><br>
+		<button id="removePropBtn">Xóa prop "checked"</button>
+
+		<script>
+		  $('#removePropBtn').click(function() {
+			$('#myCheckbox').removeProp('checked');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- replaceAll()
+
+		The replaceAll() method is an inbuilt method in jQuery that is used to replace selected elements with new HTML elements.
+
+		$(content).replaceAll(selector)
+
+
+		--- replaceWith()	The replaceWith() method is an inbuilt method in jQuery which is used to replace the selected
+		element with the new one.
+
+		$(selector).replaceWith(content, function)
+		content: It is required parameter
+		para2: It is an optional parameter
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery replaceAll() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p>Đây là đoạn văn 1</p>
+		<p>Đây là đoạn văn 2</p>
+		<p>Đây là đoạn văn 3</p>
+
+		<button id="replaceBtn">Thay bằng tiêu đề</button>
+
+		<script>
+		  $('#replaceBtn').click(function() {
+			$('<h2>Đã thay thế!</h2>').replaceAll('p');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- text()
+
+		This method is used to set or return the text content of the element. While setting the content, it overwrites the
+		content of all the matched elements. The returned content of text method() is used to return the text content of
+		all matched elements.
+
+		$(selector).text()
+
+		$(document).ready(function() {
+			$("#getTextButton").click(function() {
+				var textContent = $("#myParagraph").text();
+				$("#result").text("Nội dung văn bản là: " + textContent);
+			});
+		});
+		Khi người dùng nhấn button, phương thức text() sẽ lấy nội dung văn bản của thẻ p có ID myParagraph và hiển thị nó
+		trong thẻ <p> có ID result.
+
+		$(document).ready(function() {
+			$("#setTextButton").click(function() {
+				$("#myParagraph").text("Nội dung văn bản đã được thay đổi.");
+			});
+		});
+		Khi người dùng nhấn nút button, phương thức text() sẽ thay thế nội dung văn bản hiện tại của thẻ p có ID myParagraph
+		bằng văn bản mới "Nội dung văn bản đã được thay đổi".
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery text() - Lấy nội dung</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="myPara">Xin chào, đây là đoạn văn!</p>
+		<button id="getTextBtn">Lấy nội dung</button>
+
+		<script>
+		  $('#getTextBtn').click(function() {
+			let content = $('#myPara').text();
+			alert('Nội dung là: ' + content);
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- toggleClass()
+
+		The toggleClass() method is an inbuilt method in jQuery that is used to toggle or change the class attached to the
+		selected element.
+
+		$(selector).toggleClass(class, function, switch)
+		class: It is the required parameter
+		function: It is an optional parameter
+		switch: It is an optional parameter
+
+		$(document).ready(function() {
+			$("#toggleClassButton").click(function() {
+				$("#myParagraph").toggleClass("highlight");
+			});
+		});
+		Khi người dùng nhấn button, phương thức toggleClass() sẽ kiểm tra lớp highlight. Nếu lớp đó không có, nó sẽ được thêm
+		vào, và nếu nó có, lớp đó sẽ bị xóa.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery toggleClass() Example</title>
+		  <style>
+			.highlight {
+			  background-color: yellow;
+			  font-weight: bold;
+			}
+		  </style>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<p id="myText">Nhấn vào nút để đổi màu đoạn văn này.</p>
+		<button id="toggleBtn">Bật/tắt class</button>
+
+		<script>
+		  $('#toggleBtn').click(function() {
+			$('#myText').toggleClass('highlight');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- val()
+
+		The val() method is an inbuilt method in jQuery that is used to return or set the value of attributes for the selected
+		elements. This method applies to the HTML form elements.
+
+		$(selector).val()
+		$(selector).val(value)
+		$(selector).val(function(index,current_value))
+
+		$(document).ready(function() {
+			$("#setValueButton").click(function() {
+				$("#myInput").val("Nguyễn Văn A");
+			});
+		});
+		Khi người dùng nhấn button, phương thức val() sẽ thay đổi giá trị trong ô nhập liệu thành "Nguyễn Văn A". Người dùng sẽ
+		thấy ô nhập liệu tự động điền sẵn tên này.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery val() - Lấy giá trị</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<input type="text" id="username" value="Người dùng">
+		<button id="getValueBtn">Lấy tên</button>
+
+		<script>
+		  $('#getValueBtn').click(function() {
+			const name = $('#username').val();
+			alert('Tên người dùng: ' + name);
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- find()
+
+		Trong jQuery, phương thức find() là một chức năng mạnh mẽ cho phép bạn tìm kiếm và chọn các phần tử trong tập hợp các phần
+		tử được khớp hiện tại.
+		- Phương thức find() trong jQuery được sử dụng để tìm tất cả các phần tử con (descendants) của một phần tử dựa trên bộ chọn
+		(selector) mà bạn chỉ định. find() truy xuất toàn bộ cây DOM bên trong phần tử cha được chọn và tìm kiếm các phần tử con phù hợp
+		với bộ chọn.
+		- Phương thức find() trong jQuery nhận một chuỗi bộ chọn làm đối số, có thể là bất kỳ bộ chọn CSS hợp lệ hoặc một đối tượng
+		jQuery. Nó sau đó sẽ tìm kiếm và trả về một đối tượng jQuery mới chứa tất cả các phần tử được khớp là con cháu của tập hợp các
+		phần tử hiện tại.
+
+		$('selector').find('descendant_selector');
+		$(document).ready(function() {
+
+			$("#findButton").click(function() {
+				var childParagraph = $("#parent").find(".child p").text();
+				$("#result").text("Nội dung đoạn văn trong div con: " + childParagraph);
+			});
+		});
+		Khi người dùng nhấn button, phương thức find() sẽ tìm kiếm các phần tử p bên trong phần tử div có class child và lấy nội dung
+		văn bản của đoạn văn đó.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery find() Example</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<div id="container">
+		  <p>Đây là một đoạn văn <span>có một span</span></p>
+		  <p>Và đây là <span>span thứ hai</span></p>
+		</div>
+
+		<button id="highlightBtn">Tô màu tất cả span</button>
+
+		<script>
+		  $('#highlightBtn').click(function() {
+			$('#container').find('span').css('background-color', 'yellow');
+		  });
+		</script>
+
+		</body>
+		</html>
+
+
+--- data()
+
+		Trong jQuery, phương thức data() là một phương thức rất hữu ích để lưu trữ và truy xuất dữ liệu tùy chỉnh gắn liền với các
+		phần tử DOM.
+		- Được sử dụng để lưu trữ và truy xuất dữ liệu tùy chỉnh gắn với các phần tử HTML mà không can thiệp vào các thuộc tính HTML
+		thực tế. Dữ liệu này thường được lưu trữ trong các thuộc tính data-* của HTML5 (ví dụ: data-name, data-id).
+
+		// Lưu trữ dữ liệu
+		$('selector').data('key', value);
+
+		// Truy xuất dữ liệu
+		$('selector').data('key');
+
+		<div id="my-element" data-color="blue" data-size="24"></div>
+		// Truy xuất dữ liệu từ thuộc tính data-*
+		var color = $('#my-element').data('color'); // 'blue'
+		var size = $('#my-element').data('size'); // '24'
+
+		$(document).ready(function() {
+			$("#setDataButton").click(function() {
+				$("#myElement").data("name", "Trần Thị B");  // Thiết lập dữ liệu
+				$("#myElement").data("age", 25);              // Thiết lập tuổi
+			});
+		});
+		Khi người dùng nhấn button, phương thức data() sẽ thêm hoặc cập nhật dữ liệu name và age cho phần tử div có ID myElement.
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery data()</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		</head>
+		<body>
+
+		<div id="user" data-id="101" data-role="admin">Người dùng</div>
+
+		<button id="getDataBtn">Lấy dữ liệu</button>
+
+		<script>
+		  $('#getDataBtn').click(function() {
+			let id = $('#user').data('id');
+			let role = $('#user').
+
+
+--- next()
+
+		Trong jQuery, phương thức next() cho phép bạn truy cập phần tử tiếp theo (ở cùng cấp) của một phần tử đã cho.
+
+		// Lấy phần tử tiếp theo của phần tử đầu tiên
+		var nextElement = $('selector').first().next();
+
+		// Lấy phần tử tiếp theo của tất cả các phần tử phù hợp
+		$('selector').next();
+
+		// Lấy phần tử tiếp theo chỉ nếu nó khớp với bộ lọc
+		$('selector').next('filter');
+
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <title>jQuery next()</title>
+		  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		  <style>
+			.highlight { background-color: yellow; }
+		  </style>
+		</head>
+		<body>
+
+		<p class="item">Đoạn 1</p>
+		<p class="item">Đoạn 2</p>
+		<p class="item">Đoạn 3</p>
+
+		<button id="btn">Tô màu phần tử kế tiếp của đoạn 1</button>
+
+		<script>
+		  $('#btn').click(function() {
+			$('.item').first().next().addClass('highlight');
+		  });
+		</script>
+
+		</body>
+		</html>
+		
+--- each()
+
+		jQuery .each() là gì?
+		
+			- jQuery each function được sử dụng để lặp qua từng phần tử của jQuery object.
+			- jQuery object là 1 object chứa 1 hoặc nhiều phần tử DOM và dùng để giao tiếp với tất cả jQuery functions. Nó rất có
+			ích cho thao tác với nhiều phần tử DOM, lặp qua nhiều array và thuộc tính của object. Thêm
+			vào đó, jQuery cung cấp 1 helper function có cùng tên và dùng để gọi mà không cần phải chọn hay tạo phần tử DOM trước đó.
+		
+		jQuery .each() cú pháp
+		
+			Ví dụ dưới đây chọn tất cả thẻ div trên trang web và in ra số thứ tự và id của chúng. Kết quả in ra có thể là: “div0:header”,
+			“div1:body”, “div2:footer”. Ví dụ này sử dụng jQuery each() function như 1 function tiện ích.
+				
+				// DOM ELEMENTS
+				$('div').each(function (index, value) {
+				  console.log('div' + index + ':' + $(this).attr('id'));
+				});
+			
+			Ví dụ tiếp theo sẽ cho ta thấy cách sử dụng của function tiệc ích này. Trong trường hợp object lặp được truyền vào như tham
+			số thứ nhất. Trong ví dụ 1 cho ta thấy cách lặp qua 1 mảng:
+				
+				// ARRAYS
+				var arr = [
+				   'one',
+				   'two',
+				   'three',
+				   'four',
+				   'five'
+				];
+				$.each(arr, function (index, value) {
+				  console.log(value);
+
+				  // Will stop running after "three"
+				  return (value !== 'three');
+				});
+				// Outputs: one two three
+				
+			Trong ví dụ cuối này sẽ cho ta thấy cách lặp qua thuộc tính của 1 object:
+				
+				// OBJECTS
+				var obj = {
+				   one: 1,
+				   two: 2,
+				   three: 3,
+				   four: 4,
+				   five: 5
+				};
+				$.each(obj, function (index, value) {
+				  console.log(value);
+				});
+				// Outputs: 1 2 3 4 5
+				
+		Basic jQuery.each() function example
+		
+			Hãy xem each() giúp chúng ta thế nào khi kết hợp với 1 jQuery object. Ví dụ đầu tiên chọn tất cả thẻ a trên trang và in ra
+			thuộc tính href của chúng.
+				
+				// DOM ELEMENTS
+				$('a').each(function (index, value){
+				  console.log($(this).attr('href'));
+				});
+					Ví dụ thứ 2 in tất cả giá trị href trên trang web (giả sử chỉ giao thức HTTP)
+						$('a').each(function (index, value){
+				  var link = $(this).attr('href');
+
+				  if (link.indexOf('http://') === 0) {
+					console.log(link);
+				  }
+				});
+				
+				<a href="http://www.jquery4u.com">JQUERY4U</a>
+				<a href="http://www.phpscripts4u.com">PHP4U</a>
+				<a href="http://www.blogoola.com">BLOGOOLA</a>
+					
+				http://jquery4u.com
+				http://www.phpscripts4u.com
+				http://www.blogoola.com
+				
+			Chúng ta cần để ý là các phần tử DOM từ 1 jQuery object cần phải được bọc lại khi sử dụng bên trong jQuery each(). Lí do
+			là jQuery thực tế là 1 vỏ bọc xung quanh 1 array của các phần tử DOM. Khi sử dụng jQuery each() mảng này sẽ được lặp qua
+			giống như cách lặp qua 1 array truyền thống. Vì điều này, chúng ta không lấy các phần tử đã được bọc ở bên ngoài.
+		
+		jQuery.each() Array Example
+		
+			Hãy xem 1 array truyền thống có thể được xử lý.
+				
+				var numbers = [1, 2, 3, 4, 5, 6];
+				$.each(numbers , function (index, value){
+				  console.log(index + ':' + value);
+				});
+				
+			Ví dụ trên sẽ in ra: 0:1, 1:2, 2:3, 3:4, 4:5, and 5:6.Ví dụ trên sẽ in ra: 0:1, 1:2, 2:3, 3:4, 4:5, and 5:6.
+			Không có gì đặc biệt ở đây. Thuộc tính số thứ tự của array, chúng ta có các số từ 0 đến N - 1, N là số các phần tử trong array.
+		
+		jQuery.each() JSON Example
+		
+			Chúng ta có thể có cấu trúc dữ liệu phức tạp hơn, như là arrays trong arrays, objects trong objects, arrays trong objects, hoặc
+			objects trong arrays. Hãy xem làm thế nào each() có thể giúp chúng ta trong những trường hợp này.
+				
+				var json = [
+				 { 'red': '#f00' },
+				 { 'green': '#0f0' },
+				 { 'blue': '#00f' }
+				];
+
+				$.each(json, function () {
+				   $.each(this, function (name, value) {
+					  console.log(name + '=' + value);
+				   });
+				});
+
+			Ví dụ này in ra: red=#f00, green=#0f0, blue=#00f.
+			
+			Chúng ta xử lý dữ liệu lồng nhau với cách gọi each() lồng nhau. Vòng gọi ở ngoài xử lý array ở biến JSON, vòng gọi ở trong xử lý
+			objects. Trong ví dụ này mỗi object có 1 key, mặc dù vậy, có thể gán bao
+			nhiều key tùy ý.
+		
+		jQuery.each() Class Example
+		
+			Ví dụ này cho thấy làm thế nào để lặp qua mỗi phần tử có class là productDescription như HTML bên dưới.
+				
+				<div class="productDescription">Red</div>
+				<div>Pink</div>
+				<div class="productDescription">Orange</div>
+				<div class="generalDescription">Teal</div>
+				<div class="productDescription">Green</div>
+				
+			Chúng ta sử dụng each() helper thay cho each() method của selector $('.productDescription').
+			
+				$.each($('.productDescription'), function (index, value) {
+				  console.log(index + ':' + $(value).text());
+				});
+				
+			Trong trường hợp này kết quả in ra là: 0:Red, 1:Orange, 2:Green.
+			Chúng ta không cần phải kèm theo index và value. Có 1 vài tham số trên phần tử DOM mà chúng ta đang lặp qua có thể giúp tìm ra. Xa
+			hơn, trong ví dụ này chúng ta cũng có thể sử dụng nhiều method tiện ích
+			hơn. Chúng ta có thể viết như thế này:
+				
+				$('.productDescription').each(function () {
+				  console.log($(this).text());
+				});
+				
+				Red
+				Orange
+				Green
+				
+				1 lần nữa, chúng ta cần bọc phần tử DOM trong 1 jQuery instance. Chúng ta sử dụng text() method để lấy text của phần tử ra.
+		
+		jQuery .each() Delay Example
+		
+			Trong ví dụ tiếp theo, khi user click vào phần tử có ID là 5demo tất cả các item sẽ được gán thành orange ngay lập tức. Sau 1 khoảng
+			thời gian phụ thuộc vào index (0, 200, 400, … milliseconds) chúng ta sẽ fade out phần tử.
+				
+				$('#5demo').bind('click', function (e) {
+				  $('li').each(function (index) {
+					$(this).css('background-color', 'orange')
+						  .delay(index * 200)
+						  .fadeOut(1500);
+				  });
+				  e.preventDefault();
+				});
