@@ -58,7 +58,7 @@ Security--SPRING:
 															
 			- UserDetailsService: Có quyền truy cập vào password của user (trường hợp mặc định):
 			
-				erDetailsService có một số implement phổ biến:
+				UserDetailsService có một số implement phổ biến:
 				
 				JdbcUserDetailsManager:
 				
