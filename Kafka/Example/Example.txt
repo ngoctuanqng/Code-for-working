@@ -101,6 +101,9 @@
 				Trả về trạng thái UP, DOWN cho màn hình health check (ex: /actuator/health).
 
 		⚒️ 5. Kafka Producer Config
+
+				ProducerFactory là interface do Spring Kafka cung cấp để tạo ra Kafka Producer instance, dùng để gửi message (produce message)
+				lên Kafka. Nó là phần “bên gửi” của Kafka — tương tự như KafkaTemplate nhưng ở cấp thấp hơn. Tạo ra producer để KafkaTemplate dùng
 		
 				@Bean(name = "kafkaTemplate2")
 				public KafkaTemplate<String, String> kafkaTemplate2(...)
