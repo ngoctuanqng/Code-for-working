@@ -1,223 +1,357 @@
-package com.poscodx.odc.ampro015.config.kafka.listeners;
-import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
-import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaHandler;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
-import java.util.Date;
-import java.util.concurrent.TimeoutException;
-@Component
-@KafkaListener(id = "multiGroup1", topics = "amface", groupId = "deep-fake", autoStartup = "false")
-public class MultiTypeKafkaListener {
-	@Autowired
-	ServiceLifecycle serviceLifecycle;
-	@KafkaHandler
-	public void handleUserFaceRequest(DeepFaceInfoRequest userFaceRequest) throws TimeoutException {
-		try {
-			System.out.println("User face received UserFaceRequest 1 (user-face): " + userFaceRequest);
-		} catch (Exception e) {
-			System.out.println("Handle kafka's message error: " + e.getMessage());
+--- Tong quan ve code ben duoi:
+
+		🧩 1. MultiTypeKafkaListener – Consumer chính
+		
+				Đây là class được dùng để lắng nghe Kafka topic "amface" trong group "deep-fake".
+
+				🔹 Annotation:
+				@KafkaListener(id = "multiGroup1", topics = "amface", groupId = "deep-fake", autoStartup = "false")
+				
+					topics = "amface": Lắng nghe các message được gửi đến topic này.
+
+					groupId = "deep-fake": Mỗi group xử lý message độc lập (cùng 1 message không được gửi cho 2 consumer cùng group).
+
+					autoStartup = false: Listener chưa chạy ngay khi ứng dụng khởi động – bạn có thể bật/tắt động nếu cần.
+
+				@KafkaHandler – xử lý message theo loại dữ liệu
+				
+					1.1. Hàm nhận đúng object DeepFaceInfoRequest
+					@KafkaHandler
+					public void handleUserFaceRequest(DeepFaceInfoRequest userFaceRequest)
+					Kafka tự động deserialize JSON → DeepFaceInfoRequest (nếu message đúng định dạng).
+
+					Bạn có thể xử lý sâu tại đây: gọi service AI, lưu DB, log, ...
+
+					1.2. Hàm xử lý chuỗi JSON thủ công
+					@KafkaHandler
+					public void handleUserFaceRequest2(String userFaceRequest)
+					Nếu Kafka gửi message dưới dạng chuỗi, hàm này xử lý.
+
+					Dùng ObjectMapper để tự parse chuỗi thành object.
+
+					Gọi hàm:
+
+					notificationService.createOrUpdateWorkingTime(request);
+					→ Có thể là xử lý "giờ vào - ra", xác định fake hay không.
+
+					Sau đó đẩy thông tin lên WebSocket để các client (giao diện) hiển thị:
+
+					template.convertAndSend("/topic/check-face-time", request);
+					
+					1.3. Hàm mặc định khi không khớp kiểu dữ liệu
+					@KafkaHandler
+					public void unknown(ConsumerRecord<String, Object> record)
+					Nếu message gửi lên không phải String, cũng không phải DeepFaceInfoRequest → vào đây.
+
+					In log để dev biết có gì đó sai.
+
+		🛠 2. ProductProducer – Kafka Producer
+		
+				Class này chịu trách nhiệm gửi message lên Kafka.
+				
+				KafkaTemplate là thành phần chính để gửi dữ liệu (message) đến Kafka topic.
+
+				@Autowired
+				private KafkaTemplate<String, String> kafkaTemplate2;
+				@Autowired
+				private KafkaTemplate<String, DeepFaceInfoRequest> kafkaTemplate;
+				Hàm gửi chuỗi:
+				public void sendToKafka(String message) {
+				  kafkaTemplate2.send("deepfake", message);
+				}
+				Hàm gửi object:
+				public void sendToKafkaJson(DeepFaceInfoRequest message) {
+				  kafkaTemplate.send("deepfake", message);
+				}
+				👉 Gửi lên topic "deepfake".
+
+		⚙️ 3. Kafka Consumer Config
+		
+				ConcurrentKafkaListenerContainerFactory là factory (nhà máy) tạo ra container listener để
+				xử lý các message Kafka gửi đến trong Spring Boot. Nói đơn giản: Nó cấu hình cách Spring Boot
+				sẽ nhận và xử lý message Kafka thông qua @KafkaListener.
+		
+				@Bean
+				public ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> deepFakeKafkaListenerContainerFactory2()
+				Cấu hình một listener cho topic dạng object JSON:
+
+				Deserializer sẽ dùng JsonDeserializer để đọc và parse ra DeepFaceInfoRequest.
+
+				Phải khai báo class rõ ràng để Jackson biết deserialize.
+
+		🧪 4. Kafka Health Check
+		
+				KafkaHealthIndicator là thành phần của Spring Boot Actuator dùng để kiểm tra tình trạng kết nối của ứng dụng với Kafka.
+		
+				@Component("kafka_indicator")
+				public class KafkaHealthIndicator implements HealthIndicator
+				
+				Spring Boot Actuator sẽ gọi hàm:
+
+				public Health health() {
+					AdminClient adminClient = AdminClient.create(props);
+					DescribeClusterResult clusterResult = adminClient.describeCluster();
+					...
+				}
+				Mục đích: kiểm tra Kafka có hoạt động không (ping cluster ID, broker list).
+
+				Trả về trạng thái UP, DOWN cho màn hình health check (ex: /actuator/health).
+
+		⚒️ 5. Kafka Producer Config
+		
+				@Bean(name = "kafkaTemplate2")
+				public KafkaTemplate<String, String> kafkaTemplate2(...)
+				Tạo 2 producer:
+
+				Một producer gửi message dạng String.
+
+				Một producer gửi message dạng DeepFaceInfoRequest.
+
+				Dùng JsonSerializer để Kafka tự động biến object thành JSON trước khi gửi.
+
+		🧾 6. Kafka Topic Config
+		
+				KafkaAdmin là bean do Spring Kafka cung cấp để giúp bạn tạo và quản lý các topic Kafka ngay khi ứng
+				dụng khởi động, mà không cần dùng lệnh CLI hoặc tool ngoài.
+		
+				@Bean
+				public KafkaAdmin kafkaAdmin()
+				@Bean
+				public NewTopic topic()
+				Tự động tạo topic "deepfake" (nếu chưa tồn tại).
+
+				Có thể config: số partition, replication,...
+
+
+
+
+
+--- MultiTypeKafkaListener.java
+
+
+		package com.poscodx.odc.ampro015.config.kafka.listeners;
+		import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
+		import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
+		import org.apache.commons.lang3.time.DateUtils;
+		import org.apache.kafka.clients.consumer.ConsumerRecord;
+		import org.springframework.beans.factory.annotation.Autowired;
+		import org.springframework.kafka.annotation.KafkaHandler;
+		import org.springframework.kafka.annotation.KafkaListener;
+		import org.springframework.stereotype.Component;
+		import java.util.Date;
+		import java.util.concurrent.TimeoutException;
+		@Component
+		@KafkaListener(id = "multiGroup1", topics = "amface", groupId = "deep-fake", autoStartup = "false")
+		public class MultiTypeKafkaListener {
+			@Autowired
+			ServiceLifecycle serviceLifecycle;
+			@KafkaHandler
+			public void handleUserFaceRequest(DeepFaceInfoRequest userFaceRequest) throws TimeoutException {
+				try {
+					System.out.println("User face received UserFaceRequest 1 (user-face): " + userFaceRequest);
+				} catch (Exception e) {
+					System.out.println("Handle kafka's message error: " + e.getMessage());
+				}
+			}
+			@KafkaHandler
+			public void handleUserFaceRequest2(String userFaceRequest) throws TimeoutException {
+				try {
+					System.out.println("User face received String 2 (user-face): " + userFaceRequest);
+					DeepFaceInfoRequest receiver = DeepFaceInfoRequest.fromJson(userFaceRequest);
+					System.out.println("User face received String 2 (Oject): " + receiver);
+					serviceLifecycle.requestLevel2WorkingTimeService().createOrUpdateWorkingTime(serviceLifecycle, receiver.getId(), receiver.getAccessTime());
+					serviceLifecycle.requestLevel2Service().sendCheckFaceTimeNotification(receiver, "/topic/check-face-time");
+				} catch (Exception e) {
+					System.out.println("Handle kafka's message error: " + e.getMessage());
+				}
+			}
+			@KafkaHandler
+			public void unknown(ConsumerRecord<String, Object> record) throws TimeoutException {
+				try {
+					System.out.println("User face received Object 2 (user-face): " + record.value());
+				} catch (Exception e) {
+					System.out.println("Handle kafka's message error: " + e.getMessage());
+				}
+			}
 		}
-	}
-	@KafkaHandler
-	public void handleUserFaceRequest2(String userFaceRequest) throws TimeoutException {
-		try {
-			System.out.println("User face received String 2 (user-face): " + userFaceRequest);
-			DeepFaceInfoRequest receiver = DeepFaceInfoRequest.fromJson(userFaceRequest);
-//            String dateInString = receiver.getAccessTime().replace("T", " ");
-//            Date checkTime = DateUtils.parseDate(dateInString, new String[] { "yyyy-MM-dd HH:mm:ss", "dd/MM-yyyy" });
-//            receiver.setAccessTimeToDate(checkTime);
-			System.out.println("User face received String 2 (Oject): " + receiver);
-			serviceLifecycle.requestLevel2WorkingTimeService().createOrUpdateWorkingTime(serviceLifecycle, receiver.getId(), receiver.getAccessTime());
-			serviceLifecycle.requestLevel2Service().sendCheckFaceTimeNotification(receiver, "/topic/check-face-time");
-		} catch (Exception e) {
-			System.out.println("Handle kafka's message error: " + e.getMessage());
+		
+--- ProductProducer.java
+
+		package com.poscodx.odc.ampro015.config.kafka.producers;
+		import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
+		import lombok.NoArgsConstructor;
+		import lombok.extern.slf4j.Slf4j;
+		import org.springframework.beans.factory.annotation.Autowired;
+		import org.springframework.kafka.core.KafkaTemplate;
+		import org.springframework.stereotype.Component;
+		@Slf4j
+		@NoArgsConstructor
+		@Component
+		public class ProductProducer {
+			final String topic = "deepfake";
+			@Autowired
+			private KafkaTemplate<String, DeepFaceInfoRequest> kafkaTemplate;
+			@Autowired
+			private KafkaTemplate<String, String> kafkaTemplate2;
+			public void sendMessage(String message) {
+				kafkaTemplate2.send(topic, message);
+				log.info("Send message String: {}", message);
+			}
+			public void sendMessage(DeepFaceInfoRequest message) {
+				kafkaTemplate.send(topic, message);
+				log.info("Send message UserFaceRequest: {}", message);
+			}
 		}
-	}
-	@KafkaHandler
-	public void unknown(ConsumerRecord<String, Object> record) throws TimeoutException {
-		try {
-			System.out.println("User face received Object 2 (user-face): " + record.value());
-		} catch (Exception e) {
-			System.out.println("Handle kafka's message error: " + e.getMessage());
+		
+--- KafkaConsumerConfig.java		
+
+		package com.poscodx.odc.ampro015.config.kafka;
+		import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
+		import lombok.extern.slf4j.Slf4j;
+		import org.apache.kafka.clients.consumer.ConsumerConfig;
+		import org.apache.kafka.common.serialization.StringDeserializer;
+		import org.springframework.beans.factory.annotation.Value;
+		import org.springframework.context.annotation.Bean;
+		import org.springframework.context.annotation.Configuration;
+		import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+		import org.springframework.kafka.core.ConsumerFactory;
+		import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+		import org.springframework.kafka.support.serializer.JsonDeserializer;
+		import java.util.HashMap;
+		import java.util.Map;
+		@Slf4j
+		@Configuration
+		public class KafkaConsumerConfig {
+			@Value(value = "${spring.kafka.bootstrap-servers}")
+			private String bootstrapAddress;
+			public ConsumerFactory<String, String> consumerFactory(String groupId) {
+				Map<String, Object> props = new HashMap<>();
+				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+				props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+				props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+				props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+				props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "20971520");
+				props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "20971520");
+				return new DefaultKafkaConsumerFactory<>(props);
+			}
+			public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(String groupId) {
+				ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+				factory.setConsumerFactory(consumerFactory(groupId));
+				return factory;
+			}
+			@Bean
+			public ConcurrentKafkaListenerContainerFactory<String, String> deepFakeKafkaListenerContainerFactory() {
+				return kafkaListenerContainerFactory("deep-fake");
+			}
+			public ConsumerFactory<String, DeepFaceInfoRequest> consumerFactory2(String groupId) {
+				Map<String, Object> props = new HashMap<>();
+				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+				props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+				return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(DeepFaceInfoRequest.class));
+			}
+			@Bean
+			public ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> deepFakeeKafkaListenerContainerFactory2() {
+				ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
+				factory.setConsumerFactory(consumerFactory2("deep-fake"));
+				return factory;
+			}
 		}
-	}
-}
 
-package com.poscodx.odc.ampro015.config.kafka.producers;
-import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
-@Slf4j
-@NoArgsConstructor
-@Component
-public class ProductProducer {
-	final String topic = "deepfake";
-	@Autowired
-	private KafkaTemplate<String, DeepFaceInfoRequest> kafkaTemplate;
-	@Autowired
-	private KafkaTemplate<String, String> kafkaTemplate2;
-//    @Autowired
-//    private KafkaTemplate<String, Object> multiTypeKafkaTemplate;
-	public void sendMessage(String message) {
-		kafkaTemplate2.send(topic, message);
-		log.info("Send message String: {}", message);
-	}
-	public void sendMessage(DeepFaceInfoRequest message) {
-		kafkaTemplate.send(topic, message);
-		log.info("Send message UserFaceRequest: {}", message);
-	}
-}
+--- KafkaHealthIndicator.java
 
-package com.poscodx.odc.ampro015.config.kafka;
-import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import java.util.HashMap;
-import java.util.Map;
-@Slf4j
-@Configuration
-public class KafkaConsumerConfig {
-	@Value(value = "${spring.kafka.bootstrap-servers}")
-	private String bootstrapAddress;
-	public ConsumerFactory<String, String> consumerFactory(String groupId) {
-		Map<String, Object> props = new HashMap<>();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "20971520");
-		props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "20971520");
-		return new DefaultKafkaConsumerFactory<>(props);
-	}
-	public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(String groupId) {
-		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(consumerFactory(groupId));
-		return factory;
-	}
-	@Bean
-	public ConcurrentKafkaListenerContainerFactory<String, String> deepFakeKafkaListenerContainerFactory() {
-		return kafkaListenerContainerFactory("deep-fake");
-	}
-	public ConsumerFactory<String, DeepFaceInfoRequest> consumerFactory2(String groupId) {
-		Map<String, Object> props = new HashMap<>();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-		return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(DeepFaceInfoRequest.class));
-	}
-	@Bean
-	public ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> deepFakeeKafkaListenerContainerFactory2() {
-		ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(consumerFactory2("deep-fake"));
-		return factory;
-	}
-}
-
-package com.poscodx.odc.ampro015.config.kafka;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.ListTopicsOptions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.kafka.core.KafkaAdmin;
-import org.springframework.stereotype.Component;
-import java.util.concurrent.TimeUnit;
-@Component("kafka_indicator")
-@Slf4j
-public class KafkaHealthIndicator implements HealthIndicator {
-	@Autowired
-	private KafkaAdmin kafkaAdmin;
-	@Override
-	public Health health() {
-		try (AdminClient client = AdminClient.create(kafkaAdmin.getConfig())) {
-			client.listTopics(new ListTopicsOptions().timeoutMs(1000)).listings().get(10, TimeUnit.SECONDS);
-			return Health.up().build();
-		} catch (Exception e) {
-			return Health.down().withException(e).build();
+		package com.poscodx.odc.ampro015.config.kafka;
+		import lombok.extern.slf4j.Slf4j;
+		import org.apache.kafka.clients.admin.AdminClient;
+		import org.apache.kafka.clients.admin.ListTopicsOptions;
+		import org.springframework.beans.factory.annotation.Autowired;
+		import org.springframework.boot.actuate.health.Health;
+		import org.springframework.boot.actuate.health.HealthIndicator;
+		import org.springframework.kafka.core.KafkaAdmin;
+		import org.springframework.stereotype.Component;
+		import java.util.concurrent.TimeUnit;
+		@Component("kafka_indicator")
+		@Slf4j
+		public class KafkaHealthIndicator implements HealthIndicator {
+			@Autowired
+			private KafkaAdmin kafkaAdmin;
+			@Override
+			public Health health() {
+				try (AdminClient client = AdminClient.create(kafkaAdmin.getConfig())) {
+					client.listTopics(new ListTopicsOptions().timeoutMs(1000)).listings().get(10, TimeUnit.SECONDS);
+					return Health.up().build();
+				} catch (Exception e) {
+					return Health.down().withException(e).build();
+				}
+			}
 		}
-	}
-}
 
-package com.poscodx.odc.ampro015.config.kafka;
-import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonSerializer;
-import java.util.HashMap;
-import java.util.Map;
-@Configuration
-public class
-KafkaProducerConfig {
-	@Value(value = "${spring.kafka.bootstrap-servers}")
-	private String bootstrapAddress;
-	@Bean
-	public ProducerFactory<String, String> producerFactory() {
-		Map<String, Object> configProps = new HashMap<>();
-		configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-		configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-		configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-		configProps.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "20971520");
-//        configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG,4000);
-//        configProps.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,6000);
+--- KafkaProducerConfig.java
 
-		return new DefaultKafkaProducerFactory<>(configProps);
-	}
-	@Bean
-	public KafkaTemplate<String, String> kafkaTemplate() {
-		return new KafkaTemplate<>(producerFactory());
-	}
-	@Bean
-	public ProducerFactory<String, DeepFaceInfoRequest> userFaceProducerFactory() {
-		Map<String, Object> configProps = new HashMap<>();
-		configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-		configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-		configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-		return new DefaultKafkaProducerFactory<>(configProps);
-	}
-	@Bean
-	public KafkaTemplate<String, DeepFaceInfoRequest> userFaceKafkaTemplate() {
-		return new KafkaTemplate<>(userFaceProducerFactory());
-	}
-}
+		package com.poscodx.odc.ampro015.config.kafka;
+		import com.poscdx.odc.ampro015.domain.entity.payload.request.DeepFaceInfoRequest;
+		import org.apache.kafka.clients.producer.ProducerConfig;
+		import org.apache.kafka.common.serialization.StringSerializer;
+		import org.springframework.beans.factory.annotation.Value;
+		import org.springframework.context.annotation.Bean;
+		import org.springframework.context.annotation.Configuration;
+		import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+		import org.springframework.kafka.core.KafkaTemplate;
+		import org.springframework.kafka.core.ProducerFactory;
+		import org.springframework.kafka.support.serializer.JsonSerializer;
+		import java.util.HashMap;
+		import java.util.Map;
+		@Configuration
+		public class
+		KafkaProducerConfig {
+			@Value(value = "${spring.kafka.bootstrap-servers}")
+			private String bootstrapAddress;
+			@Bean
+			public ProducerFactory<String, String> producerFactory() {
+				Map<String, Object> configProps = new HashMap<>();
+				configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+				configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+				configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+				configProps.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "20971520");
 
-package com.poscodx.odc.ampro015.config.kafka;
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.NewTopic;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.KafkaAdmin;
-import java.util.HashMap;
-import java.util.Map;
-@Configuration
-public class KafkaTopicConfig {
-	@Value(value = "${spring.kafka.bootstrap-servers}")
-	private String bootstrapAddress;
-	@Bean
-	public KafkaAdmin kafkaAdmin() {
-		Map<String, Object> configs = new HashMap<>();
-		configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-		return new KafkaAdmin(configs);
-	}
-}			
+				return new DefaultKafkaProducerFactory<>(configProps);
+			}
+			@Bean
+			public KafkaTemplate<String, String> kafkaTemplate() {
+				return new KafkaTemplate<>(producerFactory());
+			}
+			@Bean
+			public ProducerFactory<String, DeepFaceInfoRequest> userFaceProducerFactory() {
+				Map<String, Object> configProps = new HashMap<>();
+				configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+				configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+				configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+				return new DefaultKafkaProducerFactory<>(configProps);
+			}
+			@Bean
+			public KafkaTemplate<String, DeepFaceInfoRequest> userFaceKafkaTemplate() {
+				return new KafkaTemplate<>(userFaceProducerFactory());
+			}
+		}
+
+--- KafkaTopicConfig.java
+
+		package com.poscodx.odc.ampro015.config.kafka;
+		import org.apache.kafka.clients.admin.AdminClientConfig;
+		import org.apache.kafka.clients.admin.NewTopic;
+		import org.springframework.beans.factory.annotation.Value;
+		import org.springframework.context.annotation.Bean;
+		import org.springframework.context.annotation.Configuration;
+		import org.springframework.kafka.core.KafkaAdmin;
+		import java.util.HashMap;
+		import java.util.Map;
+		@Configuration
+		public class KafkaTopicConfig {
+			@Value(value = "${spring.kafka.bootstrap-servers}")
+			private String bootstrapAddress;
+			@Bean
+			public KafkaAdmin kafkaAdmin() {
+				Map<String, Object> configs = new HashMap<>();
+				configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+				return new KafkaAdmin(configs);
+			}
+		}			
