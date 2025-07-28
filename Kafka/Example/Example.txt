@@ -107,6 +107,25 @@
 
 				ProducerConfig là một lớp tiện ích (utility class) trong Spring Kafka / Kafka client Java, chứa các hằng số cấu hình dành cho
 				Kafka Producer. Khi bạn cấu hình một Kafka Producer, bạn sẽ dùng các key từ ProducerConfig để truyền vào Map<String, Object>.
+					- ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress:
+						Chỉ định danh sách các Kafka broker mà Producer sẽ kết nối để gửi message.
+						bootstrapAddress là một biến chứa chuỗi địa chỉ, ví dụ: "localhost:9092" hoặc "kafka1:9092,kafka2:9092"
+					- ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class:
+						Chỉ định serializer (bộ mã hóa) dùng cho key của message.
+						Ở đây dùng StringSerializer, nghĩa là key sẽ được serialize thành chuỗi UTF-8 để Kafka hiểu được.
+						Bạn cũng có thể dùng LongSerializer, IntegerSerializer, hoặc JsonSerializer nếu muốn.
+					- ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class:
+						Chỉ định serializer dùng cho value của message.
+						Ở đây cũng dùng StringSerializer, tức value là chuỗi văn bản.
+						Nếu bạn muốn gửi object, bạn có thể dùng JsonSerializer.class.
+					- ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "20971520":
+						Thiết lập kích thước tối đa (bytes) cho 1 request gửi đến Kafka.
+						Mặc định Kafka chỉ cho gửi tối đa 1MB (1048576 bytes).						
+						Ở đây bạn tăng lên 20MB (20971520 bytes) để có thể gửi message lớn hơn.						
+						Nếu không set mà gửi message lớn, sẽ bị lỗi RecordTooLargeException.
+
+				DefaultKafkaProducerFactory là class mặc định trong Spring Kafka dùng để tạo ra Kafka Producer instances dựa trên cấu hình bạn cung
+				cấp. Nó là implementation của interface ProducerFactory<K, V>.
 		
 				@Bean(name = "kafkaTemplate2")
 				public KafkaTemplate<String, String> kafkaTemplate2(...)
