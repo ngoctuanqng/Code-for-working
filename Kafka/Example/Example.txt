@@ -73,6 +73,32 @@
 				ConcurrentKafkaListenerContainerFactory là factory (nhà máy) tạo ra container listener để
 				xử lý các message Kafka gửi đến trong Spring Boot. Nói đơn giản: Nó cấu hình cách Spring Boot
 				sẽ nhận và xử lý message Kafka thông qua @KafkaListener.
+
+				ConsumerFactory<K, V> là interface trong Spring Kafka dùng để tạo Kafka Consumer cho việc đọc message từ Kafka
+				topic. Nó là đối xứng với ProducerFactory – nhưng dành cho phía consumer.
+					- ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress:
+						Địa chỉ Kafka broker để consumer kết nối đến (VD: "localhost:9092").
+						Đây là điểm khởi đầu để Kafka Consumer kết nối vào cụm Kafka.
+					- ConsumerConfig.GROUP_ID_CONFIG, groupId:
+						ID của consumer group mà consumer này thuộc về.
+						Kafka sử dụng group ID để quản lý offset và cân bằng tải giữa các consumer trong group.
+					- ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class:
+						Chỉ định lớp dùng để deserialize key của message từ Kafka.
+						Key là kiểu String, nên dùng StringDeserializer.
+					- ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class:
+						Chỉ định lớp để deserialize value của message.
+						Value cũng là kiểu String.
+					- ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "20971520":
+						20971520 byte = 20MB
+						Số byte tối đa consumer được phép fetch từ 1 partition duy nhất trong 1 lần yêu cầu.						
+						Nếu message lớn, tăng giá trị này để tránh lỗi record too large.
+					- ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "20971520":
+						20971520 byte = 20MB
+						Mô tả: Tổng số byte tối đa mà Kafka broker sẽ gửi về cho consumer trong 1 lần fetch, tính tổng cả các partition.						
+						Ý nghĩa: Nếu bạn có nhiều partition được assign cùng lúc, giá trị này là giới hạn chung.
+
+				DefaultKafkaConsumerFactory là implementation mặc định của ConsumerFactory trong Spring Kafka, dùng để tạo ra các Kafka Consumer (người tiêu thụ)
+				với cấu hình bạn cung cấp.
 		
 				@Bean
 				public ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> deepFakeKafkaListenerContainerFactory2()
