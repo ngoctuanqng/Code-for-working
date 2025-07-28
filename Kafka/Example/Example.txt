@@ -103,7 +103,10 @@
 		⚒️ 5. Kafka Producer Config
 
 				ProducerFactory là interface do Spring Kafka cung cấp để tạo ra Kafka Producer instance, dùng để gửi message (produce message)
-				lên Kafka. Nó là phần “bên gửi” của Kafka — tương tự như KafkaTemplate nhưng ở cấp thấp hơn. Tạo ra producer để KafkaTemplate dùng
+				lên Kafka. Nó là phần “bên gửi” của Kafka — tương tự như KafkaTemplate nhưng ở cấp thấp hơn. Tạo ra producer để KafkaTemplate dùng.
+
+				ProducerConfig là một lớp tiện ích (utility class) trong Spring Kafka / Kafka client Java, chứa các hằng số cấu hình dành cho
+				Kafka Producer. Khi bạn cấu hình một Kafka Producer, bạn sẽ dùng các key từ ProducerConfig để truyền vào Map<String, Object>.
 		
 				@Bean(name = "kafkaTemplate2")
 				public KafkaTemplate<String, String> kafkaTemplate2(...)
