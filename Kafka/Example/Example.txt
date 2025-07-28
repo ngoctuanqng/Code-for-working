@@ -175,6 +175,13 @@
 		
 				KafkaAdmin là bean do Spring Kafka cung cấp để giúp bạn tạo và quản lý các topic Kafka ngay khi ứng
 				dụng khởi động, mà không cần dùng lệnh CLI hoặc tool ngoài.
+
+				AdminClientConfig trong Apache Kafka là một class chứa các key cấu hình dùng cho AdminClient, một API dùng
+				để thao tác quản trị Kafka cluster thông qua Java code (tạo topic, xóa topic, danh sách broker, thay đổi partition, v.v.
+					- AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG:
+						Đây là hằng số key cấu hình được Kafka cung cấp sẵn.
+						Nó đại diện cho chuỗi "bootstrap.servers", dùng để cấu hình địa chỉ các Kafka broker ban đầu mà client (ở đây là AdminClient) cần kết nối tới.
+						Khi một client (producer, consumer, admin) khởi tạo, nó cần biết ít nhất một broker để có thể kết nối và khám phá toàn bộ cluster.
 		
 				@Bean
 				public KafkaAdmin kafkaAdmin()
