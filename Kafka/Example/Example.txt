@@ -4,6 +4,9 @@
 		
 				Đây là class được dùng để lắng nghe Kafka topic "amface" trong group "deep-fake".
 
+				@KafkaListener là annotation trong Spring Kafka dùng để đánh dấu một method sẽ nhận và xử lý message từ Kafka topic một cách tự động.
+				Tóm gọn: Nó là "consumer listener" – khi Kafka có message mới, Spring tự động gọi method có @KafkaListener.
+
 				🔹 Annotation:
 				@KafkaListener(id = "multiGroup1", topics = "amface", groupId = "deep-fake", autoStartup = "false")
 				
