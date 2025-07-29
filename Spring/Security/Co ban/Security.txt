@@ -58,7 +58,7 @@ Security--SPRING:
 															
 			- UserDetailsService: Có quyền truy cập vào password của user (trường hợp mặc định):
 			
-				UserDetailsService có một số implement phổ biến:
+			    UserDetailsService có một số implement phổ biến:
 				
 				JdbcUserDetailsManager:
 				
@@ -90,6 +90,7 @@ Security--SPRING:
 						Chỉ định một UserDetailsService. Bạn có thể triển khai UserDetailsService một cách tùy chọn hoặc sử dụng
 						một trong các implement do Spring Security cung cấp như JdbcUserDetailsManager, InMemoryUserDetailsManager
 						hoặc triển khai tùy chỉnh.
+
 						Chỉ định một PasswordEncoder.
 						
 			- Hãy tưởng tượng bạn có một bảng database nơi bạn lưu trữ user của mình. Nó có một vài cột, nhưng quan trọng nhất
