@@ -373,8 +373,7 @@ Security--SPRING:
 				Quy trình làm việc AuthenticationProvider đầy đủ: HTTP Basic Authentication:
 					
 						- Extract tổ hợp username / password từ HTTP Basic Authentication Header trong một bộ lọc. Bạn không phải làm bất
-						cứ điều gì để thực hiện việc đó cả, nó sẽ tự diễn ra đằng
-						sau tấm màn che.
+						cứ điều gì để thực hiện việc đó cả, nó sẽ tự diễn ra đằng sau tấm màn che.
 						- Gọi AuthenticationProvider của bạn (ví dụ: AtlassianCrowdAuthenticationProvider) bằng username và password đó để bạn
 						tự thực hiện authentication (ví dụ: gọi REST).
 						- Không có quá trình hash password hoặc gì đó tương tự đang diễn ra, vì về cơ bản bạn đang ủy quyền cho bên thứ ba thực
@@ -383,48 +382,57 @@ Security--SPRING:
 		Chú ý--Security:
 		
 			OAuth2--security chú ý:
-									OAuth2 là một giao thức ủy quyền mạnh mẽ được sử dụng rộng rãi cho việc xác thực và ủy quyền trong ứng dụng web và di động. Với OAuth2, người dùng có thể cho phép ứng dụng
-									của bạn truy cập vào tài nguyên của họ mà không cần chia sẻ mật khẩu. Thay vào đó, ứng dụng yêu cầu một mã truy cập (access token) từ máy chủ ủy quyền (authorization
-									server) sau khi người dùng đã xác thực thành công.
+			
+					OAuth2 là một giao thức ủy quyền mạnh mẽ được sử dụng rộng rãi cho việc xác thực và ủy quyền trong ứng dụng web và di
+					động. Với OAuth2, người dùng có thể cho phép ứng dụng của bạn truy cập vào tài nguyên của họ mà không cần chia sẻ mật
+					khẩu. Thay vào đó, ứng dụng yêu cầu một mã truy cập (access token) từ máy chủ ủy quyền (authorization server) sau khi người
+					dùng đã xác thực thành công.
 													
 			Đăng nhập bằng Google / Twitter / v.v.
 			(OpenID)--security chú ý:
 			
-									Đăng nhập bằng các dịch vụ lớn như Google, Twitter, Facebook,... cung cấp một cách thuận tiện và an toàn để người dùng xác thực trong ứng dụng của bạn. Thay vì tạo và quản
-									lý tài khoản riêng, người dùng có thể sử dụng tài khoản của họ trên các dịch vụ này để đăng nhập vào ứng dụng của bạn. OpenID là một chuẩn phổ biến cho phương thức này.
+					Đăng nhập bằng các dịch vụ lớn như Google, Twitter, Facebook,... cung cấp một cách thuận tiện và an toàn để người dùng
+					xác thực trong ứng dụng của bạn. Thay vì tạo và quản lý tài khoản riêng, người dùng có thể sử dụng tài khoản của họ
+					trên các dịch vụ này để đăng nhập vào ứng dụng của bạn. OpenID là một chuẩn phổ biến cho phương thức này.
 													
 			JSON Web Tokens (JWT)--security chú ý:
 			
-								- JWT là một phương tiện truyền thông được sử dụng để truyền dữ liệu giữa các bên một cách an toàn và kiểm soát tính xác thực. JWT thường được sử dụng trong các cơ chế xác
-								thực stateless như OAuth2. Khi người dùng xác thực thành công, máy chủ sẽ tạo ra một JWT chứa thông tin về quyền truy cập và gửi nó lại cho ứng dụng của bạn. Ứng dụng có
-								thể sử dụng JWT này để xác thực và ủy quyền người dùng trong các yêu cầu tiếp theo mà không cần phải lưu trữ trạng thái xác thực ở phía máy chủ.
-								- Authentication là phần không thể thiếu trong bất kỳ hệ thống nào. Phương pháp authentication đơn giản và hay được sử dụng trong các ứng dụng web đó là user gửi thông tin
-								username và password lên server. Sau khi server chứng thực thành công sẽ tạo ra một chuỗi session_id và lưu vào session hay database ở phía server. Sau đó, gửi session_id
-								này về client và được client lưu trên cookie. Nhưng với các ứng dụng trên mobile và các ứng dụng web SPA (Single Page Application) thì cần có cơ chế authentication tốt hơn
-								khi mà chúng ta phải thiết kế các RESTful api (stateless) thì server không thể đảm nhiệm việc lưu trạng thái phiên làm việc của user. Một trong những phương pháp tốt để
-								giải quyết vấn đề này là sử dụng JSON Web Token (JWT).
-								- Khi một máy chủ nhận được JWT, nó có thể đảm bảo dữ liệu mà nó chứa có thể được tin cậy bởi vì nó đã được xác thực với chữ ký đã được lưu trữ. Không yếu tố trung gian nào
-								có thể sửa đổi JWT sau khi nó được gửi.
+					- JWT là một phương tiện truyền thông được sử dụng để truyền dữ liệu giữa các bên một cách an toàn và kiểm soát tính xác
+					thực. JWT thường được sử dụng trong các cơ chế xác thực stateless như OAuth2. Khi người dùng xác thực thành công, máy
+					chủ sẽ tạo ra một JWT chứa thông tin về quyền truy cập và gửi nó lại cho ứng dụng của bạn. Ứng dụng có thể sử dụng JWT
+					này để xác thực và ủy quyền người dùng trong các yêu cầu tiếp theo mà không cần phải lưu trữ trạng thái xác thực ở phía máy chủ.
+					
+					- Authentication là phần không thể thiếu trong bất kỳ hệ thống nào. Phương pháp authentication đơn giản và hay được sử dụng
+					trong các ứng dụng web đó là user gửi thông tin username và password lên server. Sau khi server chứng thực thành công sẽ tạo
+					ra một chuỗi session_id và lưu vào session hay database ở phía server. Sau đó, gửi session_id này về client và được client lưu
+					trên cookie. Nhưng với các ứng dụng trên mobile và các ứng dụng web SPA (Single Page Application) thì cần có cơ chế authentication
+					tốt hơn khi mà chúng ta phải thiết kế các RESTful api (stateless) thì server không thể đảm nhiệm việc lưu trạng thái phiên làm việc
+					của user. Một trong những phương pháp tốt để giải quyết vấn đề này là sử dụng JSON Web Token (JWT).
+					
+					- Khi một máy chủ nhận được JWT, nó có thể đảm bảo dữ liệu mà nó chứa có thể được tin cậy bởi vì nó đã được xác thực với chữ ký
+					đã được lưu trữ. Không yếu tố trung gian nào có thể sửa đổi JWT sau khi nó được gửi.
 													
 				Bảo mật cao--JWT:
 				
-								JWT hỗ trợ chữ ký số để đảm bảo tính toàn vẹn và xác thực của dữ liệu. Điều này giúp ngăn chặn sửa đổi thông tin và xác định rõ ràng nguồn gốc của dữ liệu.
+					JWT hỗ trợ chữ ký số để đảm bảo tính toàn vẹn và xác thực của dữ liệu. Điều này giúp ngăn chặn sửa đổi thông tin và xác định rõ
+					ràng nguồn gốc của dữ liệu.
 													
 				JWT đảm bảo quyền sở hữu dữ
 				liệu nhưng không mã hóa--JWT:
 				
-								- JWT được sử dụng để truyền thông tin giữa các bên một cách an toàn và kiểm soát. Tuy nhiên, điểm quan trọng cần lưu ý là JWT không mã hóa dữ liệu trong nó. Thay vào đó, nó
-								ký và tuần tự hóa dữ liệu dưới dạng JSON. Điều này có nghĩa là bất kỳ ai có được JWT đều có thể giải mã và xem dữ liệu trong nó.
-								- Do tính không mã hóa của dữ liệu trong JWT, nó cần được truyền đi trong môi trường an toàn để đảm bảo bảo mật. HTTPS (HTTP Secure) cung cấp một kênh truyền dữ liệu an
-								toàn bằng cách mã hóa dữ liệu trước khi truyền đi, điều này ngăn chặn bất kỳ kẻ tấn công nào cũng không thể đọc hoặc thay đổi dữ liệu trong quá trình truyền đi. Do đó, việc
-								sử dụng JWT cùng với HTTPS là quan trọng để đảm bảo an toàn cho thông tin trong JWT.
+					- JWT được sử dụng để truyền thông tin giữa các bên một cách an toàn và kiểm soát. Tuy nhiên, điểm quan trọng cần lưu ý là JWT không
+					mã hóa dữ liệu trong nó. Thay vào đó, nó ký và tuần tự hóa dữ liệu dưới dạng JSON. Điều này có nghĩa là bất kỳ ai có được JWT đều có
+					thể giải mã và xem dữ liệu trong nó.
+					- Do tính không mã hóa của dữ liệu trong JWT, nó cần được truyền đi trong môi trường an toàn để đảm bảo bảo mật. HTTPS (HTTP Secure)
+					cung cấp một kênh truyền dữ liệu an toàn bằng cách mã hóa dữ liệu trước khi truyền đi, điều này ngăn chặn bất kỳ kẻ tấn công nào
+					cũng không thể đọc hoặc thay đổi dữ liệu trong quá trình truyền đi. Do đó, việc sử dụng JWT cùng với HTTPS là quan trọng để đảm bảo an toàn cho thông tin trong JWT.
 													
 				Gọn nhẹ (compact)--JWT:
 				
-								JWT có thể được truyền đi thông qua URL, hoặc qua giao thức POST, hay gán vào bên trong phần HTTP Header. Kích thước nhỏ hơn ứng với công việc truyền tải sẽ nhanh hơn. Dưới
-								đây là cách thức truyền token vào trong HTTP Header sử dụng Bearer Schema:
-								
-									Authorization: Bearer <token>
+					JWT có thể được truyền đi thông qua URL, hoặc qua giao thức POST, hay gán vào bên trong phần HTTP Header. Kích thước nhỏ hơn ứng với
+					công việc truyền tải sẽ nhanh hơn. Dưới đây là cách thức truyền token vào trong HTTP Header sử dụng Bearer Schema:
+					
+						Authorization: Bearer <token>
 														
 				Tự đóng gói (self-contained)--JWT:
 				
@@ -433,135 +441,160 @@ Security--SPRING:
 				Các thành phần của JSON Web
 				Token (JWT)--JWT:
 				
-								Chi tiết hơn xem tại https://en.wikipedia.org/wiki/JSON_Web_Token#Standard_fields
+					Chi tiết hơn xem tại https://en.wikipedia.org/wiki/JSON_Web_Token#Standard_fields
+					
+					Header:
+					
+								Đây là nơi chứa thông tin mà được dùng để trả lời cho câu hỏi: “Mã JWT được tính toán như thế nào?”
+								Gồm 2 phần: type của token, giá tri là JWT, và phương thức mã hóa (HMAC SHA256 hay RSA).
+								JSON object này sau đó được mã hóa Base64URL.
 								
-								Header:
+								{
+								  "typ": "JWT",  // “typ” (viết tắt của type) là kiểu Token, ở đây chính là JWT.
+								  "alg": "HS256" // “alg” (viết tắt của algorithm) là thuật toán băm tạo ra chữ ký cho Token, ở ví dụ
+												 // trên HS256 là thuật toán có tên HMAC-SHA256, một thuật
+												 // toán băm sử dụng khóa bí mật (Secret Key) để tính toán tạo ra chữ ký.
+								}
 								
-											Đây là nơi chứa thông tin mà được dùng để trả lời cho câu hỏi: “Mã JWT được tính toán như thế nào?”
-											Gồm 2 phần: type của token, giá tri là JWT, và phương thức mã hóa (HMAC SHA256 hay RSA).
-											JSON object này sau đó được mã hóa Base64URL.
-											
-											{
-											  "typ": "JWT",  // “typ” (viết tắt của type) là kiểu Token, ở đây chính là JWT.
-											  "alg": "HS256" // “alg” (viết tắt của algorithm) là thuật toán băm tạo ra chữ ký cho Token, ở ví dụ trên HS256 là thuật toán có tên HMAC-SHA256, một thuật
-															 // toán băm sử dụng khóa bí mật (Secret Key) để tính toán tạo ra chữ ký.
-											}
-											
-								Payload:
+					Payload:
+					
+								Đây là nơi chứa những dữ liệu mà chúng ta muốn lưu lại trong JWT.
 								
-											Đây là nơi chứa những dữ liệu mà chúng ta muốn lưu lại trong JWT.
-											
-											{
-											  "userId": "7j79y-kdjr8n4h-5jd8-5k39-cfk8ghr9wu",
-											  "username": "trungquandev17",
-											  "occupation": "Full stack web developer",
-											  // standard fields
-											  "iss": "Trung Quan, author of blog: https://trungquandev.com", // “iss” viết tắt của Issuer là thông tin người tạo ra Token (không phải user đâu nhé, mà nó
-																											 // chính là tên cái hệ thống backend của các bạn chẳng hạn)
-											  "iat": 1568456819, // “iat” viết tắt của Issued at, là nhãn thời gian lúc mà cái token được tạo.
-											  "exp": 1568460419 // “exp” viết tắt của Expiration time, xác định thời gian hết hạn của Token
-											}
-											
-								SIGNATURE:
+								{
+								  "userId": "7j79y-kdjr8n4h-5jd8-5k39-cfk8ghr9wu",
+								  "username": "trungquandev17",
+								  "occupation": "Full stack web developer",
+								  // standard fields
+								  "iss": "Trung Quan, author of blog: https://trungquandev.com", // “iss” viết tắt của Issuer là thông tin người tạo
+																								 // ra Token (không phải user đâu nhé, mà nó
+																								 // chính là tên cái hệ thống backend của các bạn chẳng hạn)
+								  "iat": 1568456819, // “iat” viết tắt của Issued at, là nhãn thời gian lúc mà cái token được tạo.
+								  "exp": 1568460419 // “exp” viết tắt của Expiration time, xác định thời gian hết hạn của Token
+								}
 								
-											- Đầu tiên, chúng ta sẽ Encode (chuyển đổi) 2 cái Header và Playload ở trên theo kiểu Base64URL Encoder, và nối 2 chuỗi nhận được lại (cách nhau bởi
-											dấu chấm “.”)rồi gán nó vào một biến là data.
-											- Tiếp theo sẽ Hash (băm) cái data đó bằng “alg”, chính thuật toán tạo chữ ký mà chúng ta đã định nghĩa ở trên Header (HS256 – HMAC-SHA256) kèm với một chuỗi bí
-											mật secret (chuỗi secret này sẽ được đặt tùy vào lập trình viên của mỗi dự án và đảm bảo không được để lộ chuỗi này ra ngoài, có thể đưa vào biến môi trường ENV.)
-											- Sau khi băm xong ở trên thì thực hiện Encode tiếp một lần nữa cái dữ liệu băm đó dưới dạng Base64URL Encode, và chúng ta sẽ thu được chữ ký “Signature”.
-											
-											const headerEncode = base64urlEncode(header); // ví dụ kết quả: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
-											const payloadEncode = base64urlEncode(payload); // ví dụ kết quả: eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ
-											const data = headerEncode + "." + payloadEncode;
-											const hashedData = Hash(data, secret);
-											const signature = base64urlEncode(hashedData);  // ví dụ kết quả: xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM
-											// cuối cùng thì mã JWT theo đúng cấu trúc header.payload.signature sẽ trông như sau:
-											const JWT = headerEncode + "." + payloadEncode + "." + signature;
-											// Kết quả: 
-											"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ.xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM"
+					SIGNATURE:
+					
+								- Đầu tiên, chúng ta sẽ Encode (chuyển đổi) 2 cái Header và Playload ở trên theo kiểu Base64URL Encoder, và nối 2
+								chuỗi nhận được lại (cách nhau bởi dấu chấm “.”)rồi gán nó vào một biến là data.
+								
+								- Tiếp theo sẽ Hash (băm) cái data đó bằng “alg”, chính thuật toán tạo chữ ký mà chúng ta đã định nghĩa ở trên
+								Header (HS256 – HMAC-SHA256) kèm với một chuỗi bí mật secret (chuỗi secret này sẽ được đặt tùy vào lập trình viên
+								của mỗi dự án và đảm bảo không được để lộ chuỗi này ra ngoài, có thể đưa vào biến môi trường ENV.)
+								
+								- Sau khi băm xong ở trên thì thực hiện Encode tiếp một lần nữa cái dữ liệu băm đó dưới dạng Base64URL
+								Encode, và chúng ta sẽ thu được chữ ký “Signature”.
+								
+								const headerEncode = base64urlEncode(header); // ví dụ kết quả: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+								const payloadEncode = base64urlEncode(payload); // ví dụ kết quả: eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ
+								const data = headerEncode + "." + payloadEncode;
+								const hashedData = Hash(data, secret);
+								const signature = base64urlEncode(hashedData);  // ví dụ kết quả: xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM
+								// cuối cùng thì mã JWT theo đúng cấu trúc header.payload.signature sẽ trông như sau:
+								const JWT = headerEncode + "." + payloadEncode + "." + signature;
+								// Kết quả: 
+								"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ.xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM"
 																
-				JWT bảo vệ dữ liệu của chúng
-				ta bằng cách nào--JWT:
+				JWT bảo vệ dữ liệu của chúng ta bằng cách nào--JWT:
 				
-								- JWT không bảo vệ dữ liệu của bạn.
-								- Mục đích quan trọng mà các bạn cần phải nắm được là JWT nó không ẩn, không làm mờ, không che giấu dữ liệu gì cả, mà nó được sử dụng để chứng minh rằng dữ liệu được tạo
-								ra bởi một nguồn xác thực.
-								- Các bạn có thể nhìn lại ở các bước xử lý Header, Payload, Signature trên kia, dữ liệu chỉ được Encoded và Hash (Signed) chứ không phải Encrypted.
-								- Lưu ý: mình phải giữ nguyên mấy từ trên bằng tiếng anh bởi vì Encoded và Encrypted dịch ra tiếng việt đều là “Mã hóa” nhưng bản chất ý nghĩa của chúng hoàn toàn
-								khác nhau.
+					- JWT không bảo vệ dữ liệu của bạn.
+					- Mục đích quan trọng mà các bạn cần phải nắm được là JWT nó không ẩn, không làm mờ, không che giấu dữ liệu gì cả, mà
+					nó được sử dụng để chứng minh rằng dữ liệu được tạo ra bởi một nguồn xác thực.
+					- Các bạn có thể nhìn lại ở các bước xử lý Header, Payload, Signature trên kia, dữ liệu chỉ được Encoded
+					và Hash (Signed) chứ không phải Encrypted.
+					- Lưu ý: mình phải giữ nguyên mấy từ trên bằng tiếng anh bởi vì Encoded và Encrypted dịch ra tiếng việt đều
+					là “Mã hóa” nhưng bản chất ý nghĩa của chúng hoàn toàn khác nhau.
 													
-				Nếu một kẻ tấn công ở giữa
-				(Man-in-the-middle) bắt được gói
-				tin có chứa mã JWT rồi họ decode
-				ra và lấy được thông tin của user
-				thì sao--JWT:
+				Nếu một kẻ tấn công ở giữa tin có chứa mã JWT rồi họ decode ra và lấy được thông tin của user thì sao--JWT:
 				
-								Đúng, điều đó là có thể, vậy nên hãy luôn luôn đảm bảo rằng ứng dụng của các bạn chắc chắn phải có giao thức mã hóa đường truyền HTTPS nhé.
+					Đúng, điều đó là có thể, vậy nên hãy luôn luôn đảm bảo rằng ứng dụng của các bạn chắc chắn phải có giao
+					thức mã hóa đường truyền HTTPS nhé.
 													
-				Server xác thực mã JWT gửi lên
-				từ client ra sao--JWT:
+				Server xác thực mã JWT gửi lên từ client ra sao--JWT:
 				
-								- Trong phần 3 trên kia các bạn hãy nhìn lại cho mình đó là khi tạo mã JWT, chúng ta có sử dụng tới một chuỗi bí mật “Secret” trong bước tạo chữ ký (signature).
-								- Chuỗi “Secret” này là unique cho ứng dụng và phải được ưu tiên lưu trữ bảo mật cẩn thận ở phía server.
-								- Khi nhận được mã Token gửi lên từ phía client, Server sẽ lấy phần Signature (chữ ký) bên trong mã token đó, và verify (kiểm tra ) xem chữ ký nhận được có đúng chính
-								xác là được HASH (băm) bởi cùng một thuật toán và chuỗi “Secret” như trên hay không.
-								- Và cuối cùng, rõ ràng, nếu chữ ký của client gửi lên khớp với chữ ký được tạo ra từ máy chủ, thì JWT đó là hợp lệ, ngược lại thì không, và người lập trình API phía
-								Backend như chúng ta sẽ tùy vào từng trường hợp mà response về cho client một cách hợp lý.
+					- Trong phần 3 trên kia các bạn hãy nhìn lại cho mình đó là khi tạo mã JWT, chúng ta có sử dụng tới một chuỗi bí
+					mật “Secret” trong bước tạo chữ ký (signature).
+					- Chuỗi “Secret” này là unique cho ứng dụng và phải được ưu tiên lưu trữ bảo mật cẩn thận ở phía server.
+					- Khi nhận được mã Token gửi lên từ phía client, Server sẽ lấy phần Signature (chữ ký) bên trong mã token đó, và
+					verify (kiểm tra ) xem chữ ký nhận được có đúng chính xác là được HASH (băm) bởi cùng một thuật toán và
+					chuỗi “Secret” như trên hay không.
+					- Và cuối cùng, rõ ràng, nếu chữ ký của client gửi lên khớp với chữ ký được tạo ra từ máy chủ, thì JWT đó là
+					hợp lệ, ngược lại thì không, và người lập trình API phía Backend như chúng ta sẽ tùy vào từng trường hợp mà response
+					về cho client một cách hợp lý.
 													
 			In-memory--security chú ý:
 			
-								- Thông tin người dùng được lưu trữ trong bộ nhớ RAM của ứng dụng thay vì lưu trữ trong một cơ sở dữ liệu hoặc một nguồn dữ liệu khác. Điều này có nghĩa là dữ liệu
-								người dùng chỉ tồn tại trong thời gian mà ứng dụng đang chạy, và sẽ bị xóa khi ứng dụng được tắt hoặc khởi động lại.
-								- Tuy nhiên, cần lưu ý rằng việc lưu trữ thông tin người dùng trong bộ nhớ có nhược điểm là dữ liệu sẽ bị mất khi ứng dụng bị tắt hoặc khởi động lại, và không phù hợp
-								cho các ứng dụng có nhu cầu lưu trữ thông tin người dùng lâu dài hoặc có lưu lượng truy cập lớn. Trong các trường hợp đó, việc sử dụng một cơ sở dữ liệu hoặc một
-								nguồn dữ liệu khác là lựa chọn phù hợp hơn.
-								- Việc lưu trữ thông tin người dùng trong bộ nhớ có thể là một giải pháp thuận tiện trong các trường hợp sau:
-								
-									Ứng dụng nhỏ và đơn giản:	
-									
-																	Trong các ứng dụng nhỏ và đơn giản, việc lưu trữ thông tin người dùng trong bộ nhớ có thể đủ để đáp ứng nhu cầu của ứng dụng mà không
-																	cần phải sử dụng một cơ sở dữ liệu riêng biệt.
-																	
-									Phát triển và kiểm thử:
-									
-																	Trong quá trình phát triển và kiểm thử ứng dụng, việc sử dụng InMemoryUserDetailsManager có thể là một cách thuận tiện để quản lý thông
-																	tin người dùng mà không cần cấu hình và kết nối đến một cơ sở dữ liệu.
-																	
-									Môi trường thử nghiệm và demo:
-									
-																	Trong một số trường hợp, việc triển khai ứng dụng trong môi trường thử nghiệm hoặc demo có thể sử dụng InMemoryUserDetailsManager để đơn
-																	giản hóa quá trình triển khai và giảm thiểu chi phí vận hành.
+					- Thông tin người dùng được lưu trữ trong bộ nhớ RAM của ứng dụng thay vì lưu trữ trong một cơ sở dữ liệu hoặc một
+					nguồn dữ liệu khác. Điều này có nghĩa là dữ liệu người dùng chỉ tồn tại trong thời gian mà ứng dụng đang chạy, và
+					sẽ bị xóa khi ứng dụng được tắt hoặc khởi động lại.
+					
+					- Tuy nhiên, cần lưu ý rằng việc lưu trữ thông tin người dùng trong bộ nhớ có nhược điểm là dữ liệu sẽ bị mất khi
+					ứng dụng bị tắt hoặc khởi động lại, và không phù hợp cho các ứng dụng có nhu cầu lưu trữ thông tin người dùng lâu
+					dài hoặc có lưu lượng truy cập lớn. Trong các trường hợp đó, việc sử dụng một cơ sở dữ liệu hoặc một
+					nguồn dữ liệu khác là lựa chọn phù hợp hơn.
+					
+					- Việc lưu trữ thông tin người dùng trong bộ nhớ có thể là một giải pháp thuận tiện trong các trường hợp sau:
+					
+						Ứng dụng nhỏ và đơn giản:	
+						
+							Trong các ứng dụng nhỏ và đơn giản, việc lưu trữ thông tin người dùng trong bộ nhớ có thể đủ để đáp
+							ứng nhu cầu của ứng dụng mà không cần phải sử dụng một cơ sở dữ liệu riêng biệt.
+														
+						Phát triển và kiểm thử:
+						
+							Trong quá trình phát triển và kiểm thử ứng dụng, việc sử dụng InMemoryUserDetailsManager có
+							thể là một cách thuận tiện để quản lý thông tin người dùng mà không cần cấu hình và kết nối
+							đến một cơ sở dữ liệu.
+														
+						Môi trường thử nghiệm và demo:
+						
+							Trong một số trường hợp, việc triển khai ứng dụng trong môi trường thử nghiệm hoặc demo có thể
+							sử dụng InMemoryUserDetailsManager để đơn giản hóa quá trình triển khai và giảm thiểu chi phí vận hành.
 			
 			UserDetailService interface--security chú ý:
 			
-								- UserDetailService là một interface có duy nhất một mẫu phương thức UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
-								- Trong ứng dụng Spring Boot, chỉ cần một Component hay Bean nào đó implements interface UserDetailService thì trong quá trình xác thực, phương thức
-								UserDetails loadUserByUsername(String username) throws UsernameNotFoundException; của Component hay Bean đó sẽ được gọi ra khi cần tìm kiếm user theo user name. Bản chất
-								của cơ chế này là Auto Injection, khi quét (component scan) và nạp các Component hay Bean vào Application Context, Spring Boot đã biết được rõ, component nào dùng để tìm
-								kiếm user theo user name thông qua kiểu Interface bạn không cần phải cấu hình gì thêm. Nếu có nhiều hơn một Component implements interface UserDetailService thì sao? Khi
-								đó bạn có thể dùng annotation @Primary hay @Order để ưu tiên component bạn muốn sử dụng.
-								- Khi một yêu cầu đăng nhập (authentication request) đến, Spring Security cần tìm chi tiết của người dùng (tên người dùng, mật khẩu, vai trò, quyền, v.v.) để kiểm tra tính
-								hợp lệ của thông tin đăng nhập. Để thực hiện việc này, Spring Security sử dụng UserDetailsService để tìm kiếm thông tin người dùng từ một nguồn dữ liệu (ví dụ: cơ sở dữ
-								liệu, hệ thống LDAP, dịch vụ web, v.v.).
-								- Interface UserDetailService dùng để tìm kiếm người dùng theo user name. Cần phải có khi bạn muốn quản lý người dùng đăng nhập
+						- UserDetailService là một interface có duy nhất một mẫu phương thức
+						UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+						
+						- Trong ứng dụng Spring Boot, chỉ cần một Component hay Bean nào đó implements interface
+						UserDetailService thì trong quá trình xác thực, phương thức
+						UserDetails loadUserByUsername(String username) throws UsernameNotFoundException; của Component hay Bean đó sẽ được
+						gọi ra khi cần tìm kiếm user theo user name. Bản chất của cơ chế này là Auto Injection, khi quét (component scan) và
+						nạp các Component hay Bean vào Application Context, Spring Boot đã biết được rõ, component nào dùng để tìm kiếm user
+						theo user name thông qua kiểu Interface bạn không cần phải cấu hình gì thêm. Nếu có nhiều hơn một Component implements
+						interface UserDetailService thì sao? Khi đó bạn có thể dùng annotation @Primary hay @Order để ưu tiên component bạn muốn sử dụng.
+						
+						- Khi một yêu cầu đăng nhập (authentication request) đến, Spring Security cần tìm chi tiết của người dùng
+						(tên người dùng, mật khẩu, vai trò, quyền, v.v.) để kiểm tra tính hợp lệ của thông tin đăng nhập. Để thực hiện việc
+						này, Spring Security sử dụng UserDetailsService để tìm kiếm thông tin người dùng từ một nguồn dữ liệu (ví dụ: cơ sở dữ liệu,
+						hệ thống LDAP, dịch vụ web, v.v.).
+						
+						- Interface UserDetailService dùng để tìm kiếm người dùng theo user name. Cần phải có khi bạn muốn quản lý người dùng đăng nhập
 			
 			UserDetails interface--security chú ý:
 			
-								- Lớp x cài đặt interface UserDetails của Spring Security và biểu diễn một đối tượng người dùng trong ứng dụng. Lớp này sẽ lưu thông tin về xác thực (username và password)
-								và thông tin về phân quyền (list authorities) và lần lượt cài đặt các phương thức của interface UserDetails. Trong đó có một số phương thức chúng ta cần để ý đến là
-								getUsername(), getPassword(), và getAuthorities().
-								- UserDetails là một interface cốt lõi của Spring Security. Nó đại diện cho một principal nhưng theo một cách mở rộng và cụ thể hơn. Vậy UserDetails cung cấp cho ta những
-								thông tin gì? UserDetails bao gồm các method sau:
-									- getAuthorities(): trả về danh sách các quyền của người dùng
-									- getPassword(): trả về password đã dùng trong qúa trình xác thực
-									- getUsername(): trả về username đã dùng trong qúa trình xác thực
-									- isAccountNonExpired(): trả về true nếu tài khoản của người dùng chưa hết hạn
-									- isAccountNonLocked(): trả về true nếu người dùng chưa bị khóa
-									- isCredentialsNonExpired(): trả về true nếu chứng thực (mật khẩu) của người dùng chưa hết hạn
-									- isEnabled(): trả về true nếu người dùng đã được kích hoạt
-								- Chúng ta có thể thấy UserDetails mới chỉ cung cấp các phương thức để truy cập các thông tin cơ bản của người dùng. Để mở rộng thêm các thông tin, chúng ta sẽ tạo một lớp
-								CustomUserDetails implements org.springframework.security.userdetails.UserDetails (tên lớp là tùy ý, bạn đặt tên thế nào cũng được).
-								- UserDetails là một giao diện mô tả thông tin chi tiết về một người dùng được sử dụng để thực hiện xác thực và ủy quyền trong ứng dụng web.
+						- Lớp x cài đặt interface UserDetails của Spring Security và biểu diễn một đối tượng người dùng trong ứng dụng. Lớp này sẽ
+						lưu thông tin về xác thực (username và password) thông tin về phân quyền (list authorities) và lần lượt cài đặt các
+						phương thức của interface UserDetails. Trong đó có một số phương thức chúng ta cần để ý đến là getUsername(), getPassword(),
+						và getAuthorities().
+						
+						- UserDetails là một interface cốt lõi của Spring Security. Nó đại diện cho một principal nhưng theo một cách mở rộng
+						và cụ thể hơn. Vậy UserDetails cung cấp cho ta những
+						thông tin gì? UserDetails bao gồm các method sau:
+						
+							- getAuthorities(): trả về danh sách các quyền của người dùng
+							- getPassword(): trả về password đã dùng trong qúa trình xác thực
+							- getUsername(): trả về username đã dùng trong qúa trình xác thực
+							- isAccountNonExpired(): trả về true nếu tài khoản của người dùng chưa hết hạn
+							- isAccountNonLocked(): trả về true nếu người dùng chưa bị khóa
+							- isCredentialsNonExpired(): trả về true nếu chứng thực (mật khẩu) của người dùng chưa hết hạn
+							- isEnabled(): trả về true nếu người dùng đã được kích hoạt
+							
+						- Chúng ta có thể thấy UserDetails mới chỉ cung cấp các phương thức để truy cập các thông tin cơ bản của người
+						dùng. Để mở rộng thêm các thông tin, chúng ta sẽ tạo một lớp CustomUserDetails implements org.springframework.security.userdetails.UserDetails
+						(tên lớp là tùy ý, bạn đặt tên thế nào cũng được).
+						
+						- UserDetails là một giao diện mô tả thông tin chi tiết về một người dùng được sử dụng để thực hiện xác thực và ủy
+						quyền trong ứng dụng web.
 			
 			SecurityContext & SecurityContextHolder--security chú ý:
 			
@@ -571,33 +604,48 @@ Security--SPRING:
 				
 					getContext(): 						
 					
-																Trả về context hiện tại của bảo mật. Context bao gồm thông tin về người dùng hiện tại và các quyền truy cập.	
+								Trả về context hiện tại của bảo mật. Context bao gồm thông tin về người dùng hiện tại và các quyền truy cập.	
+								
+								Authentication authentication = SecurityContextHolder.getContext().getAuthentication();																									
+								Authentication authentication =  .authenticate(
+															new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
+								SecurityContextHolder.getContext().setAuthentication(authentication);
+					
+					setContext(SecurityContext context): 
+					
+								Đặt context bảo mật mới. Thường không được sử dụng trực tiếp, mà thay vào đó sử dụng các phương thức trên
+								SecurityContextHolder.																								
+					
+					clearContext(): 					
+					
+								Xóa context bảo mật hiện tại khỏi SecurityContextHolder. Thường được gọi khi bạn muốn xóa thông tin xác
+								thực của người dùng sau khi họ đã thoát ra khỏi ứng dụng hoặc sau một phiên làm việc.																									
+					
+					createEmptyContext(): 	
+					
+								Tạo một context bảo mật mới mà không có người dùng nào được xác thực																					
+					
+					MODE_THREADLOCAL: 		
+					
+								Chế độ mặc định của SecurityContextHolder, nơi context bảo mật được lưu trữ trên một biến
+								ThreadLocal. Điều này đảm bảo rằng mỗi luồng (thread) trong ứng dụng có thể duy trì một context
+								bảo mật riêng biệt.																							
+					
+					MODE_INHERITABLETHREADLOCAL: 
+					
+								Chế độ tương tự như MODE_THREADLOCAL, nhưng cho phép các luồng con (sub-threads) kế thừa
+								context bảo mật từ luồng cha (parent thread).																							
+					
+					MODE_GLOBAL: 	
+					
+								Chế độ lưu trữ context bảo mật trên một biến static global. Điều này có thể gây ra các vấn đề
+								về đồng bộ hóa trong các môi trường đa luồng và không được khuyến khích sử dụng.
 																
-																Authentication authentication = SecurityContextHolder.getContext().getAuthentication();																									
-																Authentication authentication =  .authenticate(
-																							new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
-																SecurityContextHolder.getContext().setAuthentication(authentication);
-					setContext(SecurityContext context): 																									
-																Đặt context bảo mật mới. Thường không được sử dụng trực tiếp, mà thay vào đó sử dụng các phương thức trên
-																SecurityContextHolder.																								
-					clearContext(): 							
-																Xóa context bảo mật hiện tại khỏi SecurityContextHolder. Thường được gọi khi bạn muốn xóa thông tin xác thực của người dùng
-																sau khi họ đã thoát ra khỏi ứng dụng hoặc sau một phiên làm việc.																									
-					createEmptyContext(): 						
-																Tạo một context bảo mật mới mà không có người dùng nào được xác thực																					
-					MODE_THREADLOCAL: 							
-																Chế độ mặc định của SecurityContextHolder, nơi context bảo mật được lưu trữ trên một biến ThreadLocal. Điều này đảm bảo rằng
-																mỗi luồng (thread) trong ứng dụng có thể duy trì một context bảo mật riêng biệt.																							
-					MODE_INHERITABLETHREADLOCAL: 				
-																Chế độ tương tự như MODE_THREADLOCAL, nhưng cho phép các luồng con (sub-threads) kế thừa context bảo mật từ luồng cha
-																(parent thread).																							
-					MODE_GLOBAL: 								
-																Chế độ lưu trữ context bảo mật trên một biến static global. Điều này có thể gây ra các vấn đề về đồng bộ hóa trong các môi
-																trường đa luồng và không được khuyến khích sử dụng.
-																
-				- Chúng ta sẽ không truy cập trực tiếp vào SecurityContext, thay vào đó sẽ sử dụng lớp SecurityContextHolder. Lớp này lưu trữ security context hiện tại của ứng dụng,
-				bao gồm chi tiết của principal đang tương tác với ứng dụng. Spring Security sẽ dùng một đối tượng Authentication để biểu diễn thông tin này. Đoạn code dưới đây sẽ
-				giúp chúng ta lấy được username của principal đã được xác thực (username ở đây ta nên hiểu là username trong cặp username – password mà người dùng nhập vào khi đăng nhập):
+				- Chúng ta sẽ không truy cập trực tiếp vào SecurityContext, thay vào đó sẽ sử dụng lớp
+				SecurityContextHolder. Lớp này lưu trữ security context hiện tại của ứng dụng, bao gồm chi tiết của principal đang
+				tương tác với ứng dụng. Spring Security sẽ dùng một đối tượng Authentication để biểu diễn thông tin này. Đoạn code
+				dưới đây sẽ giúp chúng ta lấy được username của principal đã được xác thực (username ở đây ta nên hiểu là
+				username trong cặp username – password mà người dùng nhập vào khi đăng nhập):
 				
 				Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 				if (principal instanceof UserDetails) {
