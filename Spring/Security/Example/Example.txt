@@ -1,5 +1,6 @@
 
 --- AuthTokenFilter.java
+
         package com.poscodx.odc.ampro015.config.jwt;
         
         import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
