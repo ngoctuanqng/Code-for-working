@@ -287,43 +287,51 @@ Security--SPRING:
 								}
 							}																						
 													
-						Quy trình làm việc
-						đầy đủ của UserDetails:
+						Quy trình làm việc đầy đủ của UserDetails:
 						
-						HTTP Basic Authentication
-						
-												Bây giờ, hãy quay trở lại HTTP Basic Authentication của bạn, bạn đang bảo mật ứng dụng của mình bằng Spring Security và Basic
-												Auth. Đây là những gì sẽ diễn ra khi bạn chỉ định một UserDetailsService và cố gắng login:
-													Extract tổ hợp username/password từ HTTP Basic Authentication header trong một bộ lọc. Bạn không phải làm bất cứ điều gì cả, nó sẽ
-													tự diễn ra đằng sau tấm màn che.
-													Gọi MyDatabaseUserDetailsService của bạn để tải user tương ứng từ database, được bao bọc dưới dạng đối tượng UserDetails, làm lộ
-													hashed password của user.
-													Lấy password được extract từ HTTP Basic Auth header, tự động băm nó và so sánh nó với hashed password từ object UserDetails của bạn.
-													Nếu cả hai khớp, user sẽ được authenticate thành công.
+							HTTP Basic Authentication
+							
+									Bây giờ, hãy quay trở lại HTTP Basic Authentication của bạn, bạn đang bảo mật ứng dụng của mình bằng Spring
+									Security và Basic Auth. Đây là những gì sẽ diễn ra khi bạn chỉ định một UserDetailsService và cố gắng login:
+									
+										Extract tổ hợp username/password từ HTTP Basic Authentication header trong một bộ lọc. Bạn không phải làm bất cứ điều gì cả, nó sẽ
+										tự diễn ra đằng sau tấm màn che.
+										
+										Gọi MyDatabaseUserDetailsService của bạn để tải user tương ứng từ database, được bao bọc dưới dạng đối tượng UserDetails, làm lộ
+										hashed password của user.
+										
+										Lấy password được extract từ HTTP Basic Auth header, tự động băm nó và so sánh nó với hashed password từ object UserDetails của bạn.
+										
+										Nếu cả hai khớp, user sẽ được authenticate thành công.
 													
-				Một PasswordEncoder:
+							Một PasswordEncoder:
 				
-												Spring Security không thể đoán một cách kỳ diệu thuật toán băm password ưa thích của bạn. Đó là lý do tại sao bạn cần chỉ định một @Bean
-												khác, một PasswordEncoder. Giả sử nếu bạn muốn sử dụng chức năng hashed password kiểu BCrypt (mặc định của Spring Security) cho tất cả
-												các password của mình , bạn sẽ chỉ định @Bean này trong SecurityConfig:
-													@Bean
-													public BCryptPasswordEncoder bCryptPasswordEncoder() {
-														return new BCryptPasswordEncoder();
-													}
-													
-												Điều gì sẽ xảy ra nếu bạn có nhiều thuật toán băm password, vì bạn có một số user cũ có password được lưu trữ bằng MD5 (đừng làm điều
-												này) và những user mới hơn với Bcrypt hoặc thậm chí là thuật toán thứ ba như SHA-256? Vậy thì bạn sẽ sử dụng bộ mã hóa sau:
-													@Bean
-													public PasswordEncoder passwordEncoder() {
-														return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-													}
-													
-												Bộ mã hóa này hoạt động như thế nào? Nó sẽ xem xét hashed password của UserDetail (đến từ bảng database của bạn chẳng hạn), bây giờ
-												phải bắt đầu với một <em style="box-sizing:border-box">{prefix}</em>. Prefix (tiền tố) đó, chính là phương pháp hash của bạn!
-												Spring Security sẽ:
-													Đọc các password đó và loại bỏ tiền tố ({bcrypt} hoặc {sha256}).
-													Tùy thuộc vào giá trị tiền tố, hãy sử dụng PasswordEncoder cho chính xác (tức là BCryptEncoder hoặc SHA256Encoder)
-																							Băm password thô với PasswordEncoder đó và so sánh với password đã lưu trữ.
+									Spring Security không thể đoán một cách kỳ diệu thuật toán băm password ưa thích của bạn. Đó là lý do tại sao bạn cần chỉ định một @Bean
+									khác, một PasswordEncoder. Giả sử nếu bạn muốn sử dụng chức năng hashed password kiểu BCrypt (mặc định của Spring Security) cho tất cả
+									các password của mình , bạn sẽ chỉ định @Bean này trong SecurityConfig:
+									
+										@Bean
+										public BCryptPasswordEncoder bCryptPasswordEncoder() {
+											return new BCryptPasswordEncoder();
+										}
+										
+									Điều gì sẽ xảy ra nếu bạn có nhiều thuật toán băm password, vì bạn có một số user cũ có password được lưu trữ bằng MD5 (đừng làm điều
+									này) và những user mới hơn với Bcrypt hoặc thậm chí là thuật toán thứ ba như SHA-256? Vậy thì bạn sẽ sử dụng bộ mã hóa sau:
+									
+										@Bean
+										public PasswordEncoder passwordEncoder() {
+											return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+										}
+										
+									Bộ mã hóa này hoạt động như thế nào? Nó sẽ xem xét hashed password của UserDetail (đến từ bảng database của bạn chẳng hạn), bây giờ
+									phải bắt đầu với một <em style="box-sizing:border-box">{prefix}</em>. Prefix (tiền tố) đó, chính là phương pháp hash của bạn!
+									Spring Security sẽ:
+									
+										Đọc các password đó và loại bỏ tiền tố ({bcrypt} hoặc {sha256}).
+										
+										Tùy thuộc vào giá trị tiền tố, hãy sử dụng PasswordEncoder cho chính xác (tức là BCryptEncoder hoặc SHA256Encoder)
+										
+										Băm password thô với PasswordEncoder đó và so sánh với password đã lưu trữ.
 			
 			AuthenticationProvider: Không có quyền truy cập vào password của user(trường hợp Ít phổ biến hơn):
 			
@@ -364,10 +372,13 @@ Security--SPRING:
 						
 				Quy trình làm việc AuthenticationProvider đầy đủ: HTTP Basic Authentication:
 					
-									- Extract tổ hợp username / password từ HTTP Basic Authentication Header trong một bộ lọc. Bạn không phải làm bất cứ điều gì để thực hiện việc đó cả, nó sẽ tự diễn ra đằng
-									sau tấm màn che.
-									- Gọi AuthenticationProvider của bạn (ví dụ: AtlassianCrowdAuthenticationProvider) bằng username và password đó để bạn tự thực hiện authentication (ví dụ: gọi REST).
-									- Không có quá trình hash password hoặc gì đó tương tự đang diễn ra, vì về cơ bản bạn đang ủy quyền cho bên thứ ba thực hiện kiểm tra username / password thực tế.
+						- Extract tổ hợp username / password từ HTTP Basic Authentication Header trong một bộ lọc. Bạn không phải làm bất
+						cứ điều gì để thực hiện việc đó cả, nó sẽ tự diễn ra đằng
+						sau tấm màn che.
+						- Gọi AuthenticationProvider của bạn (ví dụ: AtlassianCrowdAuthenticationProvider) bằng username và password đó để bạn
+						tự thực hiện authentication (ví dụ: gọi REST).
+						- Không có quá trình hash password hoặc gì đó tương tự đang diễn ra, vì về cơ bản bạn đang ủy quyền cho bên thứ ba thực
+						hiện kiểm tra username / password thực tế.
 													
 		Chú ý--Security:
 		
