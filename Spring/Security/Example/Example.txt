@@ -1,965 +1,969 @@
-package com.poscodx.odc.ampro015.config.jwt;
 
-import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
-import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-@Component
-public class AuthTokenFilter extends OncePerRequestFilter {
-  @Autowired
-  private JwtUtils jwtUtils;
-
-  @Autowired
-  private ServiceLifecycle serviceLifecycle;
-
-  @Autowired
-  private EmployeeDetailsServiceImpl employeeDetailsService;
-
-//  private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
-
-  @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-    String jwt = parseJwt(request);
-    if(serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwt).isEmpty()){//check token in blacklist
-      if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-//          String username = jwtUtils.getUserNameFromJwtToken(jwt);
-        String id = jwtUtils.getUserIdFromJwtToken(jwt);
-
-//          UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        UserDetails userDetails = employeeDetailsService.loadUserById(id);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-      }
-    }
-
-    filterChain.doFilter(request, response);
-  }
-
-  private String parseJwt(HttpServletRequest request) {
-    String headerAuth = request.getHeader("Authorization");
-
-    if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-      return headerAuth.substring(7);
-    }
-
-    return null;
-  }
-}
-
-
-
-package com.poscodx.odc.ampro015.config.jwt;
-
-import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
-import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-@Component
-public class AuthTokenFilter extends OncePerRequestFilter {
-  @Autowired
-  private JwtUtils jwtUtils;
-
-  @Autowired
-  private ServiceLifecycle serviceLifecycle;
-
-  @Autowired
-  private EmployeeDetailsServiceImpl employeeDetailsService;
-
-//  private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
-
-  @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-    String jwt = parseJwt(request);
-    if(serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwt).isEmpty()){//check token in blacklist
-      if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-//          String username = jwtUtils.getUserNameFromJwtToken(jwt);
-        String id = jwtUtils.getUserIdFromJwtToken(jwt);
-
-//          UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        UserDetails userDetails = employeeDetailsService.loadUserById(id);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-      }
-    }
-
-    filterChain.doFilter(request, response);
-  }
-
-  private String parseJwt(HttpServletRequest request) {
-    String headerAuth = request.getHeader("Authorization");
-
-    if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-      return headerAuth.substring(7);
-    }
-
-    return null;
-  }
-}
-
-
-
-
-
-
-
-
-package com.poscodx.odc.ampro015.config.jwt;
-
-import com.poscodx.odc.ampro015.config.services.EmployeeDetailsImpl;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
-
-import java.security.Key;
-import java.util.Date;
-
-@Component
-public class JwtUtils {
-
-  @Value("${bezkoder.app.jwtSecret}")
-  private String jwtSecret;
-
-  @Value("${bezkoder.app.jwtExpirationMs}")
-  private int jwtExpirationMs;
-
-  public String generateJwtToken(Authentication authentication) {
-
-    EmployeeDetailsImpl userPrincipal = (EmployeeDetailsImpl) authentication.getPrincipal();
-
-    return Jwts.builder()
-//        .setSubject((userPrincipal.getUsername()))
-        .setSubject((userPrincipal.getId()))
-        .setIssuedAt(new Date())
-        .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-        .signWith(key(), SignatureAlgorithm.HS256)
-        .compact();
-  }
-  
-  private Key key() {
-    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
-  }
-
-  public String getUserNameFromJwtToken(String token) {
-    return Jwts.parserBuilder().setSigningKey(key()).build()
-               .parseClaimsJws(token).getBody().getSubject();
-  }
-
-  public String getUserIdFromJwtToken(String token) {
-    return Jwts.parserBuilder().setSigningKey(key()).build()
-            .parseClaimsJws(token).getBody().getSubject();
-  }
-
-  public boolean validateJwtToken(String authToken) {
-    try {
-      Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
-      return true;
-    } catch (MalformedJwtException e) {
-      System.out.println("Invalid JWT token: {}" + e.getMessage());
-    } catch (ExpiredJwtException e) {
-      System.out.println("JWT token is expired: {}" + e.getMessage());
-    } catch (UnsupportedJwtException e) {
-      System.out.println("JWT token is unsupported: {}" + e.getMessage());
-    } catch (IllegalArgumentException e) {
-      System.out.println("JWT claims string is empty: {}" +  e.getMessage());
-    }
-
-    return false;
-  }
-}
-
-
-
-
-
-
-
-package com.poscodx.odc.ampro015.config.provider;
-
-import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-
-@Component
-@RequiredArgsConstructor
-public class CustomAuthenticationProvider implements AuthenticationProvider {
-    private final EmployeeDetailsServiceImpl employeeDetailsService;
-    private final PasswordEncoder encoder;
-    @Override
-    public Authentication authenticate(Authentication authentication)
-            throws AuthenticationException {
-
-        String id = authentication.getPrincipal().toString();
-        String password = authentication.getCredentials().toString();
-
-        UserDetails currentUser = employeeDetailsService.loadUserById(id);
-        if (currentUser == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        // Example: validating credentials
-        if (!encoder.matches(password, currentUser.getPassword())) {
-            throw new UsernameNotFoundException("Invalid credentials");
-        }
-
-        // Create a fully authenticated Authentication object
-        return new UsernamePasswordAuthenticationToken(currentUser, password, currentUser.getAuthorities());
-    }
-
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return authentication.equals(UsernamePasswordAuthenticationToken.class);
-    }
-}
-
-
-
-
-package com.poscodx.odc.ampro015.config.services;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.poscdx.odc.ampro015.domain.entity.M00Employee;
-import lombok.Data;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.*;
-
-@Data
-public class EmployeeDetailsImpl implements UserDetails {
-
-    private static final long serialVersionUID = 1L;
-
-    private String id;
-
-    private String username;
-
-    private String avatar;
-
-    private String email;
-
-    private List<String> role;
-
-    private Map <String, List<String>> permissionMap;
-
-  @JsonIgnore
-  private String password;
-
-  private Collection<? extends GrantedAuthority> authorities;
-
-    public EmployeeDetailsImpl(String id, String username, String email, String avatar, String password, List<String> role,
-                               Collection<? extends GrantedAuthority> authorities, Map <String, List<String>> permissionMap) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.avatar = avatar;
-        this.password = password;
-        this.role = role;
-        this.authorities = authorities;
-        this.permissionMap = permissionMap;
-    }
-
-    public static EmployeeDetailsImpl build(M00Employee user, List<String> listRoles, List<Map<String, String>> listPermission) {
-
-        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        Map <String, List<String>> permissionMap = new HashMap<>();
-        List<String> permissionList;
-        for (Map<String, String> map : listPermission) {
-            Set<String> set = map.keySet();
-            for (String key : set) {
-                authorities.add(new SimpleGrantedAuthority(map.get(key)));
-                permissionList = permissionMap.get(key) == null ? new ArrayList<>() : permissionMap.get(key);
-                if (!permissionList.contains(map.get(key))) permissionList.add(map.get(key));
-                permissionMap.put(key, permissionList);
+--- AuthTokenFilter.java
+
+        package com.poscodx.odc.ampro015.config.jwt;
+        
+        import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
+        import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
+        import org.springframework.beans.factory.annotation.Autowired;
+        import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+        import org.springframework.security.core.context.SecurityContextHolder;
+        import org.springframework.security.core.userdetails.UserDetails;
+        import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+        import org.springframework.stereotype.Component;
+        import org.springframework.util.StringUtils;
+        import org.springframework.web.filter.OncePerRequestFilter;
+        
+        import javax.servlet.FilterChain;
+        import javax.servlet.ServletException;
+        import javax.servlet.http.HttpServletRequest;
+        import javax.servlet.http.HttpServletResponse;
+        import java.io.IOException;
+        
+        @Component
+        public class AuthTokenFilter extends OncePerRequestFilter {
+          @Autowired
+          private JwtUtils jwtUtils;
+        
+          @Autowired
+          private ServiceLifecycle serviceLifecycle;
+        
+          @Autowired
+          private EmployeeDetailsServiceImpl employeeDetailsService;
+        
+        //  private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
+        
+          @Override
+          protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+            String jwt = parseJwt(request);
+            if(serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwt).isEmpty()){//check token in blacklist
+              if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+        //          String username = jwtUtils.getUserNameFromJwtToken(jwt);
+                String id = jwtUtils.getUserIdFromJwtToken(jwt);
+        
+        //          UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = employeeDetailsService.loadUserById(id);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+              }
             }
+        
+            filterChain.doFilter(request, response);
+          }
+        
+          private String parseJwt(HttpServletRequest request) {
+            String headerAuth = request.getHeader("Authorization");
+        
+            if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+              return headerAuth.substring(7);
+            }
+        
+            return null;
+          }
         }
+        
+        
+    --- AuthTokenFilter.java    
 
-        return new EmployeeDetailsImpl(
-                user.getEmpId(),
-                user.getName(),
-                user.getMail(),
-                user.getAvatar(),
-                user.getPassword(),
-                listRoles,
-                authorities,
-                permissionMap);
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
+        package com.poscodx.odc.ampro015.config.jwt;
+        
+        import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
+        import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
+        import org.springframework.beans.factory.annotation.Autowired;
+        import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+        import org.springframework.security.core.context.SecurityContextHolder;
+        import org.springframework.security.core.userdetails.UserDetails;
+        import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+        import org.springframework.stereotype.Component;
+        import org.springframework.util.StringUtils;
+        import org.springframework.web.filter.OncePerRequestFilter;
+        
+        import javax.servlet.FilterChain;
+        import javax.servlet.ServletException;
+        import javax.servlet.http.HttpServletRequest;
+        import javax.servlet.http.HttpServletResponse;
+        import java.io.IOException;
+        
+        @Component
+        public class AuthTokenFilter extends OncePerRequestFilter {
+          @Autowired
+          private JwtUtils jwtUtils;
+        
+          @Autowired
+          private ServiceLifecycle serviceLifecycle;
+        
+          @Autowired
+          private EmployeeDetailsServiceImpl employeeDetailsService;
+        
+        //  private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
+        
+          @Override
+          protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+            String jwt = parseJwt(request);
+            if(serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwt).isEmpty()){//check token in blacklist
+              if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+        //          String username = jwtUtils.getUserNameFromJwtToken(jwt);
+                String id = jwtUtils.getUserIdFromJwtToken(jwt);
+        
+        //          UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = employeeDetailsService.loadUserById(id);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+              }
+            }
+        
+            filterChain.doFilter(request, response);
+          }
+        
+          private String parseJwt(HttpServletRequest request) {
+            String headerAuth = request.getHeader("Authorization");
+        
+            if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+              return headerAuth.substring(7);
+            }
+        
+            return null;
+          }
+        }
+        
+        
+        
+        
+        
+        
+--- JwtUtils.java        
+        
+        package com.poscodx.odc.ampro015.config.jwt;
+        
+        import com.poscodx.odc.ampro015.config.services.EmployeeDetailsImpl;
+        import io.jsonwebtoken.*;
+        import io.jsonwebtoken.io.Decoders;
+        import io.jsonwebtoken.security.Keys;
+        import org.springframework.beans.factory.annotation.Value;
+        import org.springframework.security.core.Authentication;
+        import org.springframework.stereotype.Component;
+        
+        import java.security.Key;
+        import java.util.Date;
+        
+        @Component
+        public class JwtUtils {
+        
+          @Value("${bezkoder.app.jwtSecret}")
+          private String jwtSecret;
+        
+          @Value("${bezkoder.app.jwtExpirationMs}")
+          private int jwtExpirationMs;
+        
+          public String generateJwtToken(Authentication authentication) {
+        
+            EmployeeDetailsImpl userPrincipal = (EmployeeDetailsImpl) authentication.getPrincipal();
+        
+            return Jwts.builder()
+        //        .setSubject((userPrincipal.getUsername()))
+                .setSubject((userPrincipal.getId()))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key(), SignatureAlgorithm.HS256)
+                .compact();
+          }
+          
+          private Key key() {
+            return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+          }
+        
+          public String getUserNameFromJwtToken(String token) {
+            return Jwts.parserBuilder().setSigningKey(key()).build()
+                       .parseClaimsJws(token).getBody().getSubject();
+          }
+        
+          public String getUserIdFromJwtToken(String token) {
+            return Jwts.parserBuilder().setSigningKey(key()).build()
+                    .parseClaimsJws(token).getBody().getSubject();
+          }
+        
+          public boolean validateJwtToken(String authToken) {
+            try {
+              Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
+              return true;
+            } catch (MalformedJwtException e) {
+              System.out.println("Invalid JWT token: {}" + e.getMessage());
+            } catch (ExpiredJwtException e) {
+              System.out.println("JWT token is expired: {}" + e.getMessage());
+            } catch (UnsupportedJwtException e) {
+              System.out.println("JWT token is unsupported: {}" + e.getMessage());
+            } catch (IllegalArgumentException e) {
+              System.out.println("JWT claims string is empty: {}" +  e.getMessage());
+            }
+        
             return false;
-        EmployeeDetailsImpl user = (EmployeeDetailsImpl) o;
-        return Objects.equals(id, user.id);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-package com.poscodx.odc.ampro015.config.services;
-
-import com.netflix.discovery.converters.Auto;
-import com.poscdx.odc.ampro015.domain.entity.M00Employee;
-import com.poscdx.odc.ampro015.domain.entity.Pme00RoleUser;
-import com.poscdx.odc.ampro015.domain.entity.Pme00Setting;
-import com.poscdx.odc.ampro015.domain.entity.SettingMedia;
-import com.poscdx.odc.ampro015.domain.spec.Pme00SettingService;
-import com.poscdx.odc.ampro015.domain.utils.Utils;
-import com.poscodx.odc.ampro015.store.Pme00RoleUserJpaStore;
-import com.poscodx.odc.ampro015.store.jpo.M00EmployeeJpo;
-import com.poscodx.odc.ampro015.store.jpo.Pme00PerRoleJpo;
-import com.poscodx.odc.ampro015.store.jpo.Pme00PermissionJpo;
-import com.poscodx.odc.ampro015.store.jpo.Pme00SettingJpo;
-import com.poscodx.odc.ampro015.store.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-@Service
-public class EmployeeDetailsServiceImpl implements UserDetailsService {
-
-    @Autowired
-    M00EmployeeRepository employeeRepository;
-    @Autowired
-    Pme00RoleRepository roleRepository;
-    @Autowired
-    Pme00PerRoleRepository perRoleRepository;
-    @Autowired
-    Pme00PermissionRepository permissionRepository;
-    @Autowired
-    Pme00RoleUserJpaStore pme00RoleUserJpaStore;
-    @Autowired
-    Pme00SettingService pme00SettingService;
-
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        M00EmployeeJpo user = employeeRepository.findByName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with UserName: " + username));
-        M00Employee employee = user.toDomain();
-        SettingMedia settingMedia = pme00SettingService.getMediaSetting();
-        if (settingMedia != null) {
-            employee.setAvatar(Utils.setFilePath(settingMedia, employee.getAvatar(), Utils.UPLOAD_SERVICE_EMPLOYEE));
+          }
         }
-        //List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findRoleUserByEmpId(user.getEmpId());
-        List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findByEmployeeId(user.getEmpId());
-        List<String> listRoles = new ArrayList<>();
-        for (Pme00RoleUser roleUser : roles) {
-            roleRepository.findById(roleUser.getRoleId()).ifPresent(pme00RoleJpo -> listRoles.add(pme00RoleJpo.getName()));
-        }
-        String roleName = "ROLE_STAFF";
-        if (!roles.isEmpty()) {
-            // roleName = role.get().getName().name();
-            //roleName = role.get().getName();
-        }
-        return EmployeeDetailsImpl.build(employee, null, null);
-    }
-
-    @Transactional
-    public UserDetails loadUserById(String id) throws RuntimeException {
-        M00EmployeeJpo user = employeeRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with Id: " + id));
-        M00Employee employee = user.toDomain();
-        SettingMedia settingMedia = pme00SettingService.getMediaSetting();
-        if (settingMedia != null) {
-            employee.setAvatar(Utils.setFilePath(settingMedia, employee.getAvatar(), Utils.UPLOAD_SERVICE_EMPLOYEE));
-        }
-
-        //List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findRoleUserByEmpId(user.getEmpId());
-        List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findByEmployeeId(user.getEmpId());
-        List<String> listRoles = new ArrayList<>();
-        for (Pme00RoleUser roleUser : roles) {
-            roleRepository.findById(roleUser.getRoleId()).ifPresent(pme00RoleJpo -> listRoles.add(pme00RoleJpo.getName()));
-        }
-        // Optional<Pme00RoleJpo> role = roleRepository.findByName(user.getRole());
-
-        if (!roles.isEmpty()) {
-            // List<Integer> perIds =
-            // perRoleRepository.findByRoleId(user.getRole()).stream().map(Pme00PerRoleJpo::getPermissionId).collect(Collectors.toList());
-            // Set<String> perName = perIds.stream().map(i ->
-            // Objects.requireNonNull(permissionRepository.findById(i).orElse(null)).getName()).collect(Collectors.toSet());
-            // return EmployeeDetailsImpl.build(user, perName);
-            List<Map<String, String>> listPermission = new ArrayList<>();
-            for (Pme00RoleUser roleUser : roles) {
-                List<Integer> perIds = perRoleRepository.findByRoleId(roleUser.getRoleId()).stream()
-                        .map(Pme00PerRoleJpo::getPermissionId).collect(Collectors.toList());
-                perIds.forEach(permissionId -> {
-                    Optional<Pme00PermissionJpo> permission = permissionRepository.findById(permissionId);
-                    if (permission.isPresent()) {
-                        //perName.add(permission.get().getName());
-                        Map<String, String> per = new HashMap<>();
-                        per.put(permission.get().getGroup(), permission.get().getName());
-                        listPermission.add(per);
-                    }
-                });
-            }
-            return EmployeeDetailsImpl.build(employee, listRoles, listPermission);
-        }
-        return new EmployeeDetailsImpl(user.getEmpId(), user.getName(), user.getMail(), user.getAvatar(), user.getPassword(), listRoles, null, null);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-package com.poscodx.odc.ampro015.config;
-
-import com.poscodx.odc.ampro015.config.exceptionhandler.AuthEntryPoint;
-import com.poscodx.odc.ampro015.config.jwt.AuthTokenFilter;
-import com.poscodx.odc.ampro015.config.provider.CustomAuthenticationProvider;
-import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import org.apache.commons.codec.digest.Md5Crypt;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.math.BigInteger;
-
-@Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-// (securedEnabled = true,
-// jsr250Enabled = true,
-// prePostEnabled = true) // by default
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private AuthTokenFilter authTokenFilter;
-    @Autowired
-    private EmployeeDetailsServiceImpl employeeDetailsService;
-    @Autowired
-    private AuthEntryPoint unauthorizedHandler;
-    @Autowired
-    private CustomAuthenticationProvider authenticationProvider;
-
-    // Details omitted for brevity
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new PasswordEncoder() {
+        
+        
+        
+        
+        
+--- CustomAuthenticationProvider.java        
+        
+        package com.poscodx.odc.ampro015.config.provider;
+        
+        import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
+        import lombok.RequiredArgsConstructor;
+        import org.springframework.security.authentication.AuthenticationProvider;
+        import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+        import org.springframework.security.core.Authentication;
+        import org.springframework.security.core.AuthenticationException;
+        import org.springframework.security.core.userdetails.UserDetails;
+        import org.springframework.security.core.userdetails.UsernameNotFoundException;
+        import org.springframework.security.crypto.password.PasswordEncoder;
+        import org.springframework.stereotype.Component;
+        
+        @Component
+        @RequiredArgsConstructor
+        public class CustomAuthenticationProvider implements AuthenticationProvider {
+            private final EmployeeDetailsServiceImpl employeeDetailsService;
+            private final PasswordEncoder encoder;
             @Override
-            public String encode(CharSequence rawPassword) {
-                try {
-                    MessageDigest md = MessageDigest.getInstance("MD5");
-                    byte[] messageDigest = md.digest(rawPassword.toString().getBytes());
-                    BigInteger number = new BigInteger(1, messageDigest);
-                    String hashtext = number.toString(16);
-                    while (hashtext.length() < 32) {
-                        hashtext = "0" + hashtext;
-                    }
-                    return hashtext;
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
+            public Authentication authenticate(Authentication authentication)
+                    throws AuthenticationException {
+        
+                String id = authentication.getPrincipal().toString();
+                String password = authentication.getCredentials().toString();
+        
+                UserDetails currentUser = employeeDetailsService.loadUserById(id);
+                if (currentUser == null) {
+                    throw new UsernameNotFoundException("User not found");
                 }
+                // Example: validating credentials
+                if (!encoder.matches(password, currentUser.getPassword())) {
+                    throw new UsernameNotFoundException("Invalid credentials");
+                }
+        
+                // Create a fully authenticated Authentication object
+                return new UsernamePasswordAuthenticationToken(currentUser, password, currentUser.getAuthorities());
             }
-
+        
             @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                return encode(rawPassword).equals(encodedPassword);
+            public boolean supports(Class<?> authentication) {
+                return authentication.equals(UsernamePasswordAuthenticationToken.class);
             }
-        };
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth)
-            throws Exception {
-        auth.authenticationProvider(authenticationProvider)
-                .userDetailsService(employeeDetailsService)
-                .passwordEncoder(passwordEncoder());
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        // Enable CORS and disable CSRF
-        http = http.cors().and().csrf().disable();
-
-        // Set session management to stateless
-        http = http
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and();
-
-        // Set unauthorized requests exception handler
-        http = http
-                .exceptionHandling()
-                .authenticationEntryPoint(
-                        unauthorizedHandler
-                )
-                .and();
-
-        // Set permissions on endpoints
-        http.authorizeRequests()
-                // Our public endpoints
-                .antMatchers(HttpMethod.POST, "/author/signup").permitAll()
-                .antMatchers(HttpMethod.POST, "/author/signin").permitAll()
-                .antMatchers(HttpMethod.POST, "/author/logout").permitAll()
-//                .antMatchers(HttpMethod.GET, "/images/**").permitAll()
-//                .antMatchers(HttpMethod.GET, "/user-management/**").permitAll()
-//
-//                .antMatchers(HttpMethod.GET, "**/dashboard.do").permitAll()
-//                .antMatchers(HttpMethod.POST, "**/dashboard.do").permitAll()
-//                .antMatchers(HttpMethod.GET, "**/dashboard.do/**").permitAll()
-//                .antMatchers(HttpMethod.POST, "**/dashboard.do/**").permitAll()
-//                // .antMatchers(HttpMethod.GET, "**/asset-view.do/**").permitAll()
-//                .antMatchers(HttpMethod.GET, "**/asset/view-asset/**").permitAll()
-//                .antMatchers(HttpMethod.POST, "**/asset/view-asset/**").permitAll()
-//                .antMatchers(HttpMethod.GET, "/level2/**").permitAll()
-//                .antMatchers(HttpMethod.POST, "/level2/**").permitAll()
-                .anyRequest().permitAll();
-//                .anyRequest().authenticated();
-        // Add JWT token filter
-        http.addFilterBefore(
-                authTokenFilter,
-                UsernamePasswordAuthenticationFilter.class
-        );
-
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-package com.poscodx.odc.ampro015.rest;
-
-import com.poscdx.odc.ampro015.domain.entity.LogoutAccessToken;
-import com.poscdx.odc.ampro015.domain.entity.M00Employee;
-import com.poscdx.odc.ampro015.domain.entity.Pme00PasswordToken;
-import com.poscdx.odc.ampro015.domain.entity.SettingEmailSender;
-import com.poscdx.odc.ampro015.domain.entity.payload.request.ForgotPasswordRequest;
-import com.poscdx.odc.ampro015.domain.entity.payload.request.LoginRequest;
-import com.poscdx.odc.ampro015.domain.entity.payload.request.ResetPasswordRequest;
-import com.poscdx.odc.ampro015.domain.entity.payload.response.*;
-import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
-import com.poscdx.odc.ampro015.domain.utils.Utils;
-import com.posco.reuse.common.logging.PosLogWriterIF;
-import com.posco.reuse.common.logging.PosLogger;
-import com.poscodx.odc.ampro015.MailConfig;
-import com.poscodx.odc.ampro015.config.jwt.JwtUtils;
-import com.poscodx.odc.ampro015.config.services.EmployeeDetailsImpl;
-import com.poscoict.base.share.util.json.JsonUtil;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.stream.Collectors;
-
-//@CrossOrigin(origins = "*", maxAge = 3600)
-@CrossOrigin(origins = "*")
-//@CrossOrigin(origins = "${cross.origins}")
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/author")
-public class AuthResource {
-
-    private final AuthenticationManager authenticationManager;
-    private final ServiceLifecycle serviceLifecycle;
-    private final PasswordEncoder encoder;
-    private final JwtUtils jwtUtils;
-    private final MailConfig mailConfig;
-
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody M00Employee signUpRequest) {
-        return (ResponseEntity<?>) ResponseEntity.ok();
-    }
-
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword())); // call load user from db based on CustomAuthenticationProvider implements AuthenticationProvider 
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-
-        //EmployeeDetailsImpl userDetails1 = (EmployeeDetailsImpl) authentication.getPrincipal();
-        EmployeeDetailsImpl userDetails = (EmployeeDetailsImpl) authentication.getPrincipal();
-
-   List<String> permissions1 = userDetails.getAuthorities().stream()
-           .map(GrantedAuthority::getAuthority)
-           .collect(Collectors.toList());
-
-        LoginUserInfo userInfo = LoginUserInfo.builder()
-                .id(userDetails.getId())
-                .username(userDetails.getUsername())
-                .email(userDetails.getEmail())
-                .listRole(userDetails.getRole())
-                .avatar(userDetails.getAvatar())
-                .build();
-
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userInfo, userDetails.getPermissionMap()));
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        String jwtToken = parseJwt(request);
-        System.out.println("jwt token: " + jwtToken);
-        if (jwtToken == null || jwtToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Not logged in yet!");
-        } else {
-            if (serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwtToken).isEmpty()) {
-                //Save logout access token to blacklist
-                LogoutAccessToken token = LogoutAccessToken.builder()
-                        .token(jwtToken)
-                        .status(1) //blacklist token
+        }
+        
+        
+--- EmployeeDetailsImpl.java        
+        
+        package com.poscodx.odc.ampro015.config.services;
+        
+        import com.fasterxml.jackson.annotation.JsonIgnore;
+        import com.poscdx.odc.ampro015.domain.entity.M00Employee;
+        import lombok.Data;
+        import org.springframework.security.core.GrantedAuthority;
+        import org.springframework.security.core.authority.SimpleGrantedAuthority;
+        import org.springframework.security.core.userdetails.UserDetails;
+        
+        import java.util.*;
+        
+        @Data
+        public class EmployeeDetailsImpl implements UserDetails {
+        
+            private static final long serialVersionUID = 1L;
+        
+            private String id;
+        
+            private String username;
+        
+            private String avatar;
+        
+            private String email;
+        
+            private List<String> role;
+        
+            private Map <String, List<String>> permissionMap;
+        
+          @JsonIgnore
+          private String password;
+        
+          private Collection<? extends GrantedAuthority> authorities;
+        
+            public EmployeeDetailsImpl(String id, String username, String email, String avatar, String password, List<String> role,
+                                       Collection<? extends GrantedAuthority> authorities, Map <String, List<String>> permissionMap) {
+                this.id = id;
+                this.username = username;
+                this.email = email;
+                this.avatar = avatar;
+                this.password = password;
+                this.role = role;
+                this.authorities = authorities;
+                this.permissionMap = permissionMap;
+            }
+        
+            public static EmployeeDetailsImpl build(M00Employee user, List<String> listRoles, List<Map<String, String>> listPermission) {
+        
+                Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+                Map <String, List<String>> permissionMap = new HashMap<>();
+                List<String> permissionList;
+                for (Map<String, String> map : listPermission) {
+                    Set<String> set = map.keySet();
+                    for (String key : set) {
+                        authorities.add(new SimpleGrantedAuthority(map.get(key)));
+                        permissionList = permissionMap.get(key) == null ? new ArrayList<>() : permissionMap.get(key);
+                        if (!permissionList.contains(map.get(key))) permissionList.add(map.get(key));
+                        permissionMap.put(key, permissionList);
+                    }
+                }
+        
+                return new EmployeeDetailsImpl(
+                        user.getEmpId(),
+                        user.getName(),
+                        user.getMail(),
+                        user.getAvatar(),
+                        user.getPassword(),
+                        listRoles,
+                        authorities,
+                        permissionMap);
+            }
+        
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return authorities;
+            }
+        
+            @Override
+            public String getPassword() {
+                return password;
+            }
+        
+            @Override
+            public String getUsername() {
+                return username;
+            }
+        
+            @Override
+            public boolean isAccountNonExpired() {
+                return true;
+            }
+        
+            @Override
+            public boolean isAccountNonLocked() {
+                return true;
+            }
+        
+            @Override
+            public boolean isCredentialsNonExpired() {
+                return true;
+            }
+        
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+        
+            @Override
+            public boolean equals(Object o) {
+                if (this == o)
+                    return true;
+                if (o == null || getClass() != o.getClass())
+                    return false;
+                EmployeeDetailsImpl user = (EmployeeDetailsImpl) o;
+                return Objects.equals(id, user.id);
+            }
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+--- EmployeeDetailsServiceImpl.java        
+        
+        
+        package com.poscodx.odc.ampro015.config.services;
+        
+        import com.netflix.discovery.converters.Auto;
+        import com.poscdx.odc.ampro015.domain.entity.M00Employee;
+        import com.poscdx.odc.ampro015.domain.entity.Pme00RoleUser;
+        import com.poscdx.odc.ampro015.domain.entity.Pme00Setting;
+        import com.poscdx.odc.ampro015.domain.entity.SettingMedia;
+        import com.poscdx.odc.ampro015.domain.spec.Pme00SettingService;
+        import com.poscdx.odc.ampro015.domain.utils.Utils;
+        import com.poscodx.odc.ampro015.store.Pme00RoleUserJpaStore;
+        import com.poscodx.odc.ampro015.store.jpo.M00EmployeeJpo;
+        import com.poscodx.odc.ampro015.store.jpo.Pme00PerRoleJpo;
+        import com.poscodx.odc.ampro015.store.jpo.Pme00PermissionJpo;
+        import com.poscodx.odc.ampro015.store.jpo.Pme00SettingJpo;
+        import com.poscodx.odc.ampro015.store.repository.*;
+        import org.springframework.beans.factory.annotation.Autowired;
+        import org.springframework.security.core.userdetails.UserDetails;
+        import org.springframework.security.core.userdetails.UserDetailsService;
+        import org.springframework.security.core.userdetails.UsernameNotFoundException;
+        import org.springframework.stereotype.Service;
+        import org.springframework.transaction.annotation.Transactional;
+        
+        import java.util.*;
+        import java.util.stream.Collectors;
+        
+        @Service
+        public class EmployeeDetailsServiceImpl implements UserDetailsService {
+        
+            @Autowired
+            M00EmployeeRepository employeeRepository;
+            @Autowired
+            Pme00RoleRepository roleRepository;
+            @Autowired
+            Pme00PerRoleRepository perRoleRepository;
+            @Autowired
+            Pme00PermissionRepository permissionRepository;
+            @Autowired
+            Pme00RoleUserJpaStore pme00RoleUserJpaStore;
+            @Autowired
+            Pme00SettingService pme00SettingService;
+        
+            @Override
+            @Transactional
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                M00EmployeeJpo user = employeeRepository.findByName(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("User Not Found with UserName: " + username));
+                M00Employee employee = user.toDomain();
+                SettingMedia settingMedia = pme00SettingService.getMediaSetting();
+                if (settingMedia != null) {
+                    employee.setAvatar(Utils.setFilePath(settingMedia, employee.getAvatar(), Utils.UPLOAD_SERVICE_EMPLOYEE));
+                }
+                //List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findRoleUserByEmpId(user.getEmpId());
+                List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findByEmployeeId(user.getEmpId());
+                List<String> listRoles = new ArrayList<>();
+                for (Pme00RoleUser roleUser : roles) {
+                    roleRepository.findById(roleUser.getRoleId()).ifPresent(pme00RoleJpo -> listRoles.add(pme00RoleJpo.getName()));
+                }
+                String roleName = "ROLE_STAFF";
+                if (!roles.isEmpty()) {
+                    // roleName = role.get().getName().name();
+                    //roleName = role.get().getName();
+                }
+                return EmployeeDetailsImpl.build(employee, null, null);
+            }
+        
+            @Transactional
+            public UserDetails loadUserById(String id) throws RuntimeException {
+                M00EmployeeJpo user = employeeRepository.findById(id)
+                        .orElseThrow(() -> new UsernameNotFoundException("User Not Found with Id: " + id));
+                M00Employee employee = user.toDomain();
+                SettingMedia settingMedia = pme00SettingService.getMediaSetting();
+                if (settingMedia != null) {
+                    employee.setAvatar(Utils.setFilePath(settingMedia, employee.getAvatar(), Utils.UPLOAD_SERVICE_EMPLOYEE));
+                }
+        
+                //List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findRoleUserByEmpId(user.getEmpId());
+                List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findByEmployeeId(user.getEmpId());
+                List<String> listRoles = new ArrayList<>();
+                for (Pme00RoleUser roleUser : roles) {
+                    roleRepository.findById(roleUser.getRoleId()).ifPresent(pme00RoleJpo -> listRoles.add(pme00RoleJpo.getName()));
+                }
+                // Optional<Pme00RoleJpo> role = roleRepository.findByName(user.getRole());
+        
+                if (!roles.isEmpty()) {
+                    // List<Integer> perIds =
+                    // perRoleRepository.findByRoleId(user.getRole()).stream().map(Pme00PerRoleJpo::getPermissionId).collect(Collectors.toList());
+                    // Set<String> perName = perIds.stream().map(i ->
+                    // Objects.requireNonNull(permissionRepository.findById(i).orElse(null)).getName()).collect(Collectors.toSet());
+                    // return EmployeeDetailsImpl.build(user, perName);
+                    List<Map<String, String>> listPermission = new ArrayList<>();
+                    for (Pme00RoleUser roleUser : roles) {
+                        List<Integer> perIds = perRoleRepository.findByRoleId(roleUser.getRoleId()).stream()
+                                .map(Pme00PerRoleJpo::getPermissionId).collect(Collectors.toList());
+                        perIds.forEach(permissionId -> {
+                            Optional<Pme00PermissionJpo> permission = permissionRepository.findById(permissionId);
+                            if (permission.isPresent()) {
+                                //perName.add(permission.get().getName());
+                                Map<String, String> per = new HashMap<>();
+                                per.put(permission.get().getGroup(), permission.get().getName());
+                                listPermission.add(per);
+                            }
+                        });
+                    }
+                    return EmployeeDetailsImpl.build(employee, listRoles, listPermission);
+                }
+                return new EmployeeDetailsImpl(user.getEmpId(), user.getName(), user.getMail(), user.getAvatar(), user.getPassword(), listRoles, null, null);
+            }
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+--- WebSecurityConfig.java        
+        
+        
+        package com.poscodx.odc.ampro015.config;
+        
+        import com.poscodx.odc.ampro015.config.exceptionhandler.AuthEntryPoint;
+        import com.poscodx.odc.ampro015.config.jwt.AuthTokenFilter;
+        import com.poscodx.odc.ampro015.config.provider.CustomAuthenticationProvider;
+        import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
+        import java.security.MessageDigest;
+        import java.security.NoSuchAlgorithmException;
+        import org.apache.commons.codec.digest.Md5Crypt;
+        import org.springframework.beans.factory.annotation.Autowired;
+        import org.springframework.context.annotation.Bean;
+        import org.springframework.context.annotation.Configuration;
+        import org.springframework.http.HttpMethod;
+        import org.springframework.security.authentication.AuthenticationManager;
+        import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+        import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+        import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+        import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+        import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+        import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+        import org.springframework.security.config.http.SessionCreationPolicy;
+        import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+        import org.springframework.security.crypto.password.PasswordEncoder;
+        import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+        import org.springframework.context.annotation.Bean;
+        import org.springframework.context.annotation.Configuration;
+        import org.springframework.security.crypto.password.PasswordEncoder;
+        import java.security.MessageDigest;
+        import java.security.NoSuchAlgorithmException;
+        import java.math.BigInteger;
+        
+        @Configuration
+        @EnableWebSecurity
+        @EnableGlobalMethodSecurity(prePostEnabled = true)
+        // (securedEnabled = true,
+        // jsr250Enabled = true,
+        // prePostEnabled = true) // by default
+        public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+            @Autowired
+            private AuthTokenFilter authTokenFilter;
+            @Autowired
+            private EmployeeDetailsServiceImpl employeeDetailsService;
+            @Autowired
+            private AuthEntryPoint unauthorizedHandler;
+            @Autowired
+            private CustomAuthenticationProvider authenticationProvider;
+        
+            // Details omitted for brevity
+            @Bean
+            public PasswordEncoder passwordEncoder() {
+                return new PasswordEncoder() {
+                    @Override
+                    public String encode(CharSequence rawPassword) {
+                        try {
+                            MessageDigest md = MessageDigest.getInstance("MD5");
+                            byte[] messageDigest = md.digest(rawPassword.toString().getBytes());
+                            BigInteger number = new BigInteger(1, messageDigest);
+                            String hashtext = number.toString(16);
+                            while (hashtext.length() < 32) {
+                                hashtext = "0" + hashtext;
+                            }
+                            return hashtext;
+                        } catch (NoSuchAlgorithmException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+        
+                    @Override
+                    public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                        return encode(rawPassword).equals(encodedPassword);
+                    }
+                };
+            }
+        
+            @Bean
+            public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+                return authConfig.getAuthenticationManager();
+            }
+        
+            @Override
+            protected void configure(AuthenticationManagerBuilder auth)
+                    throws Exception {
+                auth.authenticationProvider(authenticationProvider)
+                        .userDetailsService(employeeDetailsService)
+                        .passwordEncoder(passwordEncoder());
+            }
+        
+            @Override
+            protected void configure(HttpSecurity http) throws Exception {
+                // Enable CORS and disable CSRF
+                http = http.cors().and().csrf().disable();
+        
+                // Set session management to stateless
+                http = http
+                        .sessionManagement()
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .and();
+        
+                // Set unauthorized requests exception handler
+                http = http
+                        .exceptionHandling()
+                        .authenticationEntryPoint(
+                                unauthorizedHandler
+                        )
+                        .and();
+        
+                // Set permissions on endpoints
+                http.authorizeRequests()
+                        // Our public endpoints
+                        .antMatchers(HttpMethod.POST, "/author/signup").permitAll()
+                        .antMatchers(HttpMethod.POST, "/author/signin").permitAll()
+                        .antMatchers(HttpMethod.POST, "/author/logout").permitAll()
+        //                .antMatchers(HttpMethod.GET, "/images/**").permitAll()
+        //                .antMatchers(HttpMethod.GET, "/user-management/**").permitAll()
+        //
+        //                .antMatchers(HttpMethod.GET, "**/dashboard.do").permitAll()
+        //                .antMatchers(HttpMethod.POST, "**/dashboard.do").permitAll()
+        //                .antMatchers(HttpMethod.GET, "**/dashboard.do/**").permitAll()
+        //                .antMatchers(HttpMethod.POST, "**/dashboard.do/**").permitAll()
+        //                // .antMatchers(HttpMethod.GET, "**/asset-view.do/**").permitAll()
+        //                .antMatchers(HttpMethod.GET, "**/asset/view-asset/**").permitAll()
+        //                .antMatchers(HttpMethod.POST, "**/asset/view-asset/**").permitAll()
+        //                .antMatchers(HttpMethod.GET, "/level2/**").permitAll()
+        //                .antMatchers(HttpMethod.POST, "/level2/**").permitAll()
+                        .anyRequest().permitAll();
+        //                .anyRequest().authenticated();
+                // Add JWT token filter
+                http.addFilterBefore(
+                        authTokenFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
+        
+            }
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+--- AuthResource.java        
+        
+        
+        package com.poscodx.odc.ampro015.rest;
+        
+        import com.poscdx.odc.ampro015.domain.entity.LogoutAccessToken;
+        import com.poscdx.odc.ampro015.domain.entity.M00Employee;
+        import com.poscdx.odc.ampro015.domain.entity.Pme00PasswordToken;
+        import com.poscdx.odc.ampro015.domain.entity.SettingEmailSender;
+        import com.poscdx.odc.ampro015.domain.entity.payload.request.ForgotPasswordRequest;
+        import com.poscdx.odc.ampro015.domain.entity.payload.request.LoginRequest;
+        import com.poscdx.odc.ampro015.domain.entity.payload.request.ResetPasswordRequest;
+        import com.poscdx.odc.ampro015.domain.entity.payload.response.*;
+        import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
+        import com.poscdx.odc.ampro015.domain.utils.Utils;
+        import com.posco.reuse.common.logging.PosLogWriterIF;
+        import com.posco.reuse.common.logging.PosLogger;
+        import com.poscodx.odc.ampro015.MailConfig;
+        import com.poscodx.odc.ampro015.config.jwt.JwtUtils;
+        import com.poscodx.odc.ampro015.config.services.EmployeeDetailsImpl;
+        import com.poscoict.base.share.util.json.JsonUtil;
+        import lombok.RequiredArgsConstructor;
+        import org.apache.commons.codec.digest.DigestUtils;
+        import org.jetbrains.annotations.NotNull;
+        import org.springframework.http.HttpStatus;
+        import org.springframework.http.ResponseEntity;
+        import org.springframework.security.authentication.AuthenticationManager;
+        import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+        import org.springframework.security.core.Authentication;
+        import org.springframework.security.core.GrantedAuthority;
+        import org.springframework.security.core.context.SecurityContextHolder;
+        import org.springframework.security.crypto.password.PasswordEncoder;
+        import org.springframework.util.ResourceUtils;
+        import org.springframework.util.StringUtils;
+        import org.springframework.web.bind.annotation.*;
+        
+        import javax.servlet.http.HttpServletRequest;
+        import javax.validation.Valid;
+        import java.io.IOException;
+        import java.nio.file.Files;
+        import java.util.*;
+        import java.util.stream.Collectors;
+        
+        //@CrossOrigin(origins = "*", maxAge = 3600)
+        @CrossOrigin(origins = "*")
+        //@CrossOrigin(origins = "${cross.origins}")
+        @RestController
+        @RequiredArgsConstructor
+        @RequestMapping("/author")
+        public class AuthResource {
+        
+            private final AuthenticationManager authenticationManager;
+            private final ServiceLifecycle serviceLifecycle;
+            private final PasswordEncoder encoder;
+            private final JwtUtils jwtUtils;
+            private final MailConfig mailConfig;
+        
+            @PostMapping("/signup")
+            public ResponseEntity<?> registerUser(@Valid @RequestBody M00Employee signUpRequest) {
+                return (ResponseEntity<?>) ResponseEntity.ok();
+            }
+        
+            @PostMapping("/signin")
+            public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword())); // call load user from db based on CustomAuthenticationProvider implements AuthenticationProvider 
+        
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                String jwt = jwtUtils.generateJwtToken(authentication);
+        
+                //EmployeeDetailsImpl userDetails1 = (EmployeeDetailsImpl) authentication.getPrincipal();
+                EmployeeDetailsImpl userDetails = (EmployeeDetailsImpl) authentication.getPrincipal();
+        
+           List<String> permissions1 = userDetails.getAuthorities().stream()
+                   .map(GrantedAuthority::getAuthority)
+                   .collect(Collectors.toList());
+        
+                LoginUserInfo userInfo = LoginUserInfo.builder()
+                        .id(userDetails.getId())
+                        .username(userDetails.getUsername())
+                        .email(userDetails.getEmail())
+                        .listRole(userDetails.getRole())
+                        .avatar(userDetails.getAvatar())
                         .build();
-                serviceLifecycle.requestLogoutAccessTokenService().register(token);
+        
+                return ResponseEntity.ok(new JwtResponse(jwt,
+                        userInfo, userDetails.getPermissionMap()));
             }
-            return ResponseEntity.ok().body("Logout successfully!");
-        }
-    }
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> ForgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
-        M00Employee employee = serviceLifecycle.requestM00EmployeeService().getEmployeeByEmail(forgotPasswordRequest.getEmail());
-        if(employee == null){
-            ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
-            forgotPasswordResponse.setError(true);
-            forgotPasswordResponse.setMessage("Email is not exists on system. Please check again!");
-            return ResponseEntity.ok(forgotPasswordResponse);
-        }else{
-
-            SettingEmailSender settingEmailSender = serviceLifecycle.requestPme00SettingService().getEmailSenderSetting();
-            if(settingEmailSender==null){
-                ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
-                forgotPasswordResponse.setError(true);
-                forgotPasswordResponse.setMessage("Have Error when send email. Please contact with administrator");
-                PosLogger.developerLog(PosLogWriterIF.ERROR,"CMS Can not get email sender setting", this);
-                return ResponseEntity.ok(forgotPasswordResponse);
-            }
-
-            UUID uuid = UUID. randomUUID();
-            Pme00PasswordToken pme00PasswordToken = getPme00PasswordToken(employee, uuid);
-            String resetHtmlTemplate = LoadTemplate();
-            Utils.MAIL_SMTP_SERVER = settingEmailSender.getHost();
-            Utils.MAIL_SMTP_SERVER_PORT = settingEmailSender.getPort();
-            Utils.MAIL_SMTP_EMAIL_ID = settingEmailSender.getSenderID();
-            Utils.MAIL_SMTP_EMAIL_ID_ALIAS = settingEmailSender.getSenderName();
-            Utils.MAIL_SMTP_EMAIL_USERNAME = settingEmailSender.getUsername();
-            Utils.MAIL_SMTP_EMAIL_PASSWORD = settingEmailSender.getPassword();
-            Utils.MAIL_FRONT_END_URL = mailConfig.getFrontEndUrl();
-
-            Map<String, String> map = new HashMap<String, String>();
-            map.put("url", mailConfig.getFrontEndUrl());
-            map.put("token",uuid.toString());
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                resetHtmlTemplate = resetHtmlTemplate.replace("${" + entry.getKey() + "}", entry.getValue());
-            }
-            if(serviceLifecycle.requestLevel2Service().sendMail(employee.getMail(),mailConfig.getSubject(),resetHtmlTemplate)){
-                serviceLifecycle.requestPasswordService().register(pme00PasswordToken);
-                ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
-                forgotPasswordResponse.setError(false);
-                forgotPasswordResponse.setMessage("Please check email to process next step");
-                return ResponseEntity.ok(forgotPasswordResponse);
-            }else {
-                ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
-                forgotPasswordResponse.setError(true);
-                forgotPasswordResponse.setMessage("Have Error when send email. Please contact with administrator");
-                return ResponseEntity.ok(forgotPasswordResponse);
-            }
-        }
-    }
-    @CrossOrigin
-    @GetMapping("/reset-password/{token}")
-    public ResponseEntity<?> ResetPasswordGetToken(@PathVariable("token") String token) {
-        //String s = LoadTemplate();
-
-        ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
-        Pme00PasswordToken pme00PasswordToken = serviceLifecycle.requestPasswordService().FindPasswordTokenByToken(token);
-        if(pme00PasswordToken==null){
-            resetPasswordResponse.setError(true);
-            resetPasswordResponse.setMessage("Token is not exists on system. Please check again!");
-            return ResponseEntity.ok(resetPasswordResponse);
-        }else {
-            if(pme00PasswordToken.IsExpired()){
-                resetPasswordResponse.setError(true);
-                resetPasswordResponse.setMessage("Token is expired!");
-            }else{
-                resetPasswordResponse.setError(false);
-                resetPasswordResponse.setMessage("");
-                resetPasswordResponse.setEmpId(pme00PasswordToken.getEmpId());
-            }
-            return ResponseEntity.ok(resetPasswordResponse);
-        }
-    }
-    @PostMapping("/reset-password/{token}")
-    public ResponseEntity<?> ResetPassword(@Valid @PathVariable("token") String token,
-                                           @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
-        ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
-        Pme00PasswordToken pme00PasswordToken = serviceLifecycle.requestPasswordService().FindPasswordTokenByToken(token);
-
-        M00Employee m00Employee = serviceLifecycle.requestM00EmployeeService().find(pme00PasswordToken.getEmpId());
-        if (m00Employee == null) {
-            resetPasswordResponse.setError(true);
-            resetPasswordResponse.setMessage("Token is not exists on system. Please check again!");
-            return ResponseEntity.ok(resetPasswordResponse);
-        } else {
-            if (pme00PasswordToken.IsExpired()) {
-                resetPasswordResponse.setError(true);
-                resetPasswordResponse.setMessage("Token is expired!");
-            } else {
-                if(!resetPasswordRequest.getPassword().equals(resetPasswordRequest.getConfirmPassword())){
-                    resetPasswordResponse.setError(true);
-                    resetPasswordResponse.setMessage("Password is not match!");
-                }else {
-                    String passwordToMd5Hex = DigestUtils
-                            .md5Hex(resetPasswordRequest.getPassword());
-                    m00Employee.setPassword(passwordToMd5Hex);
-                    M00Employee updateM00Employee = serviceLifecycle.requestM00EmployeeService().modify(m00Employee);
-
-                    resetPasswordResponse.setError(false);
-                    resetPasswordResponse.setMessage("Password is changed! You can login again, now!");
+        
+            @PostMapping("/logout")
+            public ResponseEntity<?> logout(HttpServletRequest request) {
+                String jwtToken = parseJwt(request);
+                System.out.println("jwt token: " + jwtToken);
+                if (jwtToken == null || jwtToken.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Not logged in yet!");
+                } else {
+                    if (serviceLifecycle.requestLogoutAccessTokenService().findByToken(jwtToken).isEmpty()) {
+                        //Save logout access token to blacklist
+                        LogoutAccessToken token = LogoutAccessToken.builder()
+                                .token(jwtToken)
+                                .status(1) //blacklist token
+                                .build();
+                        serviceLifecycle.requestLogoutAccessTokenService().register(token);
+                    }
+                    return ResponseEntity.ok().body("Logout successfully!");
                 }
             }
-            return ResponseEntity.ok(resetPasswordResponse);
+        
+            @PostMapping("/forgot-password")
+            public ResponseEntity<?> ForgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+                M00Employee employee = serviceLifecycle.requestM00EmployeeService().getEmployeeByEmail(forgotPasswordRequest.getEmail());
+                if(employee == null){
+                    ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
+                    forgotPasswordResponse.setError(true);
+                    forgotPasswordResponse.setMessage("Email is not exists on system. Please check again!");
+                    return ResponseEntity.ok(forgotPasswordResponse);
+                }else{
+        
+                    SettingEmailSender settingEmailSender = serviceLifecycle.requestPme00SettingService().getEmailSenderSetting();
+                    if(settingEmailSender==null){
+                        ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
+                        forgotPasswordResponse.setError(true);
+                        forgotPasswordResponse.setMessage("Have Error when send email. Please contact with administrator");
+                        PosLogger.developerLog(PosLogWriterIF.ERROR,"CMS Can not get email sender setting", this);
+                        return ResponseEntity.ok(forgotPasswordResponse);
+                    }
+        
+                    UUID uuid = UUID. randomUUID();
+                    Pme00PasswordToken pme00PasswordToken = getPme00PasswordToken(employee, uuid);
+                    String resetHtmlTemplate = LoadTemplate();
+                    Utils.MAIL_SMTP_SERVER = settingEmailSender.getHost();
+                    Utils.MAIL_SMTP_SERVER_PORT = settingEmailSender.getPort();
+                    Utils.MAIL_SMTP_EMAIL_ID = settingEmailSender.getSenderID();
+                    Utils.MAIL_SMTP_EMAIL_ID_ALIAS = settingEmailSender.getSenderName();
+                    Utils.MAIL_SMTP_EMAIL_USERNAME = settingEmailSender.getUsername();
+                    Utils.MAIL_SMTP_EMAIL_PASSWORD = settingEmailSender.getPassword();
+                    Utils.MAIL_FRONT_END_URL = mailConfig.getFrontEndUrl();
+        
+                    Map<String, String> map = new HashMap<String, String>();
+                    map.put("url", mailConfig.getFrontEndUrl());
+                    map.put("token",uuid.toString());
+                    for (Map.Entry<String, String> entry : map.entrySet()) {
+                        resetHtmlTemplate = resetHtmlTemplate.replace("${" + entry.getKey() + "}", entry.getValue());
+                    }
+                    if(serviceLifecycle.requestLevel2Service().sendMail(employee.getMail(),mailConfig.getSubject(),resetHtmlTemplate)){
+                        serviceLifecycle.requestPasswordService().register(pme00PasswordToken);
+                        ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
+                        forgotPasswordResponse.setError(false);
+                        forgotPasswordResponse.setMessage("Please check email to process next step");
+                        return ResponseEntity.ok(forgotPasswordResponse);
+                    }else {
+                        ForgotPasswordResponse forgotPasswordResponse = new ForgotPasswordResponse();
+                        forgotPasswordResponse.setError(true);
+                        forgotPasswordResponse.setMessage("Have Error when send email. Please contact with administrator");
+                        return ResponseEntity.ok(forgotPasswordResponse);
+                    }
+                }
+            }
+            @CrossOrigin
+            @GetMapping("/reset-password/{token}")
+            public ResponseEntity<?> ResetPasswordGetToken(@PathVariable("token") String token) {
+                //String s = LoadTemplate();
+        
+                ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
+                Pme00PasswordToken pme00PasswordToken = serviceLifecycle.requestPasswordService().FindPasswordTokenByToken(token);
+                if(pme00PasswordToken==null){
+                    resetPasswordResponse.setError(true);
+                    resetPasswordResponse.setMessage("Token is not exists on system. Please check again!");
+                    return ResponseEntity.ok(resetPasswordResponse);
+                }else {
+                    if(pme00PasswordToken.IsExpired()){
+                        resetPasswordResponse.setError(true);
+                        resetPasswordResponse.setMessage("Token is expired!");
+                    }else{
+                        resetPasswordResponse.setError(false);
+                        resetPasswordResponse.setMessage("");
+                        resetPasswordResponse.setEmpId(pme00PasswordToken.getEmpId());
+                    }
+                    return ResponseEntity.ok(resetPasswordResponse);
+                }
+            }
+            @PostMapping("/reset-password/{token}")
+            public ResponseEntity<?> ResetPassword(@Valid @PathVariable("token") String token,
+                                                   @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+                ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
+                Pme00PasswordToken pme00PasswordToken = serviceLifecycle.requestPasswordService().FindPasswordTokenByToken(token);
+        
+                M00Employee m00Employee = serviceLifecycle.requestM00EmployeeService().find(pme00PasswordToken.getEmpId());
+                if (m00Employee == null) {
+                    resetPasswordResponse.setError(true);
+                    resetPasswordResponse.setMessage("Token is not exists on system. Please check again!");
+                    return ResponseEntity.ok(resetPasswordResponse);
+                } else {
+                    if (pme00PasswordToken.IsExpired()) {
+                        resetPasswordResponse.setError(true);
+                        resetPasswordResponse.setMessage("Token is expired!");
+                    } else {
+                        if(!resetPasswordRequest.getPassword().equals(resetPasswordRequest.getConfirmPassword())){
+                            resetPasswordResponse.setError(true);
+                            resetPasswordResponse.setMessage("Password is not match!");
+                        }else {
+                            String passwordToMd5Hex = DigestUtils
+                                    .md5Hex(resetPasswordRequest.getPassword());
+                            m00Employee.setPassword(passwordToMd5Hex);
+                            M00Employee updateM00Employee = serviceLifecycle.requestM00EmployeeService().modify(m00Employee);
+        
+                            resetPasswordResponse.setError(false);
+                            resetPasswordResponse.setMessage("Password is changed! You can login again, now!");
+                        }
+                    }
+                    return ResponseEntity.ok(resetPasswordResponse);
+                }
+        
+            }
+        
+            @NotNull
+            private static Pme00PasswordToken getPme00PasswordToken(M00Employee employee, UUID uuid) {
+                Pme00PasswordToken pme00PasswordToken=new Pme00PasswordToken();
+                pme00PasswordToken.setEmpId(employee.getEmpId());
+                pme00PasswordToken.setToken(uuid.toString());
+                pme00PasswordToken.setCreateAt(new Date());
+                pme00PasswordToken.setCreateBy("0");
+                pme00PasswordToken.setUpdateAt(new Date());
+                pme00PasswordToken.setUpdateBy("0");
+                long currentTimeInMillis = System.currentTimeMillis();
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(currentTimeInMillis);
+                calendar.add(Calendar.HOUR, Utils.MAX_EXPIRE_TOKEN);
+                pme00PasswordToken.setExpire(calendar.getTimeInMillis());
+                return pme00PasswordToken;
+            }
+        
+            private String LoadTemplate() {
+                try {
+                    return new String(Files.readAllBytes(ResourceUtils.getFile("classpath:password-reset.html").toPath()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+        
+                }
+                return "";
+            }
+            private String parseJwt(HttpServletRequest request) {
+                String headerAuth = request.getHeader("Authorization");
+                System.out.println("Authorization: " + headerAuth);
+        
+                if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+                    return headerAuth.substring(7);
+                }
+        
+                return null;
+            }
         }
-
-    }
-
-    @NotNull
-    private static Pme00PasswordToken getPme00PasswordToken(M00Employee employee, UUID uuid) {
-        Pme00PasswordToken pme00PasswordToken=new Pme00PasswordToken();
-        pme00PasswordToken.setEmpId(employee.getEmpId());
-        pme00PasswordToken.setToken(uuid.toString());
-        pme00PasswordToken.setCreateAt(new Date());
-        pme00PasswordToken.setCreateBy("0");
-        pme00PasswordToken.setUpdateAt(new Date());
-        pme00PasswordToken.setUpdateBy("0");
-        long currentTimeInMillis = System.currentTimeMillis();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(currentTimeInMillis);
-        calendar.add(Calendar.HOUR, Utils.MAX_EXPIRE_TOKEN);
-        pme00PasswordToken.setExpire(calendar.getTimeInMillis());
-        return pme00PasswordToken;
-    }
-
-    private String LoadTemplate() {
-        try {
-            return new String(Files.readAllBytes(ResourceUtils.getFile("classpath:password-reset.html").toPath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        package com.poscodx.odc.ampro015.config.exceptionhandler;
+        
+        import com.fasterxml.jackson.databind.ObjectMapper;
+        import org.springframework.http.MediaType;
+        import org.springframework.security.core.AuthenticationException;
+        import org.springframework.security.web.AuthenticationEntryPoint;
+        import org.springframework.stereotype.Component;
+        
+        import javax.servlet.ServletException;
+        import javax.servlet.http.HttpServletRequest;
+        import javax.servlet.http.HttpServletResponse;
+        import java.io.IOException;
+        import java.util.LinkedHashMap;
+        import java.util.Map;
+        
+        @Component
+        public class AuthEntryPoint implements AuthenticationEntryPoint {
+        
+        //  private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
+        
+          @Override
+          public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        //    logger.error("Unauthorized error: {}", authException.getMessage());
+        
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        
+            final Map<String, Object> body = new LinkedHashMap<>();;
+            body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+            body.put("error", "Unauthorized");
+            body.put("message", authException.getMessage());
+            body.put("path", request.getServletPath());
+        
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(response.getOutputStream(), body);
+          }
         }
-        return "";
-    }
-    private String parseJwt(HttpServletRequest request) {
-        String headerAuth = request.getHeader("Authorization");
-        System.out.println("Authorization: " + headerAuth);
-
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7);
-        }
-
-        return null;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-package com.poscodx.odc.ampro015.config.exceptionhandler;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-@Component
-public class AuthEntryPoint implements AuthenticationEntryPoint {
-
-//  private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
-
-  @Override
-  public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-//    logger.error("Unauthorized error: {}", authException.getMessage());
-
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-    final Map<String, Object> body = new LinkedHashMap<>();;
-    body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-    body.put("error", "Unauthorized");
-    body.put("message", authException.getMessage());
-    body.put("path", request.getServletPath());
-
-    final ObjectMapper mapper = new ObjectMapper();
-    mapper.writeValue(response.getOutputStream(), body);
-  }
-}
