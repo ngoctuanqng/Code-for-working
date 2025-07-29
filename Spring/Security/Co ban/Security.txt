@@ -101,189 +101,190 @@ Security--SPRING:
 				
 				UserDetailsService:
 				
-										- Một UserDetailsService để load UserDetails qua username của user. Lưu ý rằng method chỉ nhận một tham số: username (không phải password).
-										- Interface UserDetails có các method để lấy (hashed) password và một method để lấy username.
-										- UserDetails thậm chí còn có nhiều method hơn, chẳng hạn như account đang hoạt động hay bị chặn, thông tin đăng nhập đã hết hạn hay user
-										được cấp phép gì - nhưng chúng ta sẽ không đề cập đến ở đây.
-										- Vì vậy, bạn có thể tự implement các interface này, giống như chúng ta đã làm ở trên, hoặc là sử dụng các interface hiện có mà Spring
-										Security cung cấp.
-										
-										// Ví dụ sử dụng sẵn implement của UserDetailsService
-										import org.springframework.context.annotation.Bean;
-										import org.springframework.context.annotation.Configuration;
-										import org.springframework.security.authentication.AuthenticationManager;
-										import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-										import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-										import org.springframework.security.core.userdetails.UserDetailsService;
-										import org.springframework.security.core.userdetails.User;
-										import org.springframework.security.core.userdetails.UserDetails;
-										import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-										import org.springframework.security.crypto.password.PasswordEncoder;
-										import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-										@Configuration
-										public class SecurityConfig {
-											@Bean
-											public UserDetailsService userDetailsService() {
-												UserDetails user = User.builder()
-																	   .username("user")
-																	   .password(passwordEncoder().encode("password"))
-																	   .roles("USER")
-																	   .build();
-												UserDetails admin = User.builder()
-																	    .username("admin")
-																	    .password(passwordEncoder().encode("admin"))
-																	    .roles("ADMIN")
-																	    .build();
-												return new InMemoryUserDetailsManager(user, admin);
-											}
-											@Bean
-											public PasswordEncoder passwordEncoder() {
-												return new BCryptPasswordEncoder();
-											}
-											@Bean
-											public DaoAuthenticationProvider authenticationProvider() {
-												DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-												authProvider.setUserDetailsService(userDetailsService());
-												authProvider.setPasswordEncoder(passwordEncoder());
-												return authProvider;
-											}
-										}																					
-										
-										// Ví dụ về custom implement của UserDetailsService
-										@Bean
-										public UserDetailsService userDetailsService() {
-											return new MyDatabaseUserDetailsService(); // (1)
-										}
-										public class MyDatabaseUserDetailsService implements UserDetailsService {
-												UserDetails loadUserByUsername(String username) throws UsernameNotFoundException { // (1)
-												 // 1. Load the user from the users table by username. If not found, throw UsernameNotFoundException.
-												 // 2. Convert/wrap the user to a UserDetails object and return it.
-												return someUserDetails;
-											}
-										}
-										public interface UserDetails extends Serializable { // (2)
-											String getUsername();
-											String getPassword();
-											// <3> more methods:
-											// isAccountNonExpired,isAccountNonLocked,
-											// isCredentialsNonExpired,isEnabled
-										}		
-										
-						Các Implementation
-						sẵn có:
+						- Một UserDetailsService để load UserDetails qua username của user. Lưu ý rằng method chỉ nhận một
+						tham số: username (không phải password).
+						- Interface UserDetails có các method để lấy (hashed) password và một method để lấy username.
+						- UserDetails thậm chí còn có nhiều method hơn, chẳng hạn như account đang hoạt động hay bị chặn, thông tin
+						đăng nhập đã hết hạn hay user
+						được cấp phép gì - nhưng chúng ta sẽ không đề cập đến ở đây.
+						- Vì vậy, bạn có thể tự implement các interface này, giống như chúng ta đã làm ở trên, hoặc là sử dụng các
+						interface hiện có mà Spring Security cung cấp.
 						
-												Một lưu ý nhỏ: Bạn luôn có thể tự mình triển khai các interface UserDetailsService và UserDetails.
-												Tuy nhiên, bạn cũng có thể thay thế bằng các implementations có sẵn của Spring Security mà bạn có thể sử dụng
-												/configure/extend/override.
-												
-												- JdbcUserDetailsManager:
-													Là một UserDetailsService dựa trên JDBC (database). Bạn có thể cấu hình nó để khớp với cấu trúc bảng/cột user của mình
-													
-													import org.springframework.beans.factory.annotation.Autowired;
-													import org.springframework.context.annotation.Bean;
-													import org.springframework.context.annotation.Configuration;
-													import org.springframework.jdbc.datasource.DriverManagerDataSource;
-													import org.springframework.security.core.userdetails.jdbc.JdbcUserDetailsManager;
-													import javax.sql.DataSource;
-													@Configuration
-													public class SecurityConfig {
-														@Bean
-														public DataSource dataSource() { // cấu hình một DataSource để kết nối đến cơ sở dữ liệu MySQL.
-															DriverManagerDataSource dataSource = new DriverManagerDataSource();
-															dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-															dataSource.setUrl("jdbc:mysql://localhost:3306/mydatabase");
-															dataSource.setUsername("username");
-															dataSource.setPassword("password");
-															return dataSource;
-														}
-														@Bean
-														public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) { // tạo một đối tượng JdbcUserDetailsManager, cấu
-																																	  // hình nó để sử dụng DataSource đã được cấu hình
-																																	  // trước đó.
-															JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager();
-															userDetailsManager.setDataSource(dataSource);
-															return userDetailsManager;
-														}
-													}
-													import org.springframework.beans.factory.annotation.Autowired;
-													import org.springframework.security.core.userdetails.UserDetails;
-													import org.springframework.security.core.userdetails.UserDetailsService;
-													import org.springframework.stereotype.Service;
-													@Service
-													public class CustomUserDetailsService implements UserDetailsService {
-														@Autowired
-														private JdbcUserDetailsManager jdbcUserDetailsManager; // sử dụng JdbcUserDetailsManager để tìm kiếm thông tin người dùng khi họ
-																											   // đăng nhập
-														@Override
-														public UserDetails loadUserByUsername(String username) { // tải chi tiết người dùng dựa trên tên đăng nhập.
-															return jdbcUserDetailsManager.loadUserByUsername(username);
-														}
-													}
+						// Ví dụ sử dụng sẵn implement của UserDetailsService
+						import org.springframework.context.annotation.Bean;
+						import org.springframework.context.annotation.Configuration;
+						import org.springframework.security.authentication.AuthenticationManager;
+						import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+						import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+						import org.springframework.security.core.userdetails.UserDetailsService;
+						import org.springframework.security.core.userdetails.User;
+						import org.springframework.security.core.userdetails.UserDetails;
+						import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+						import org.springframework.security.crypto.password.PasswordEncoder;
+						import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+						@Configuration
+						public class SecurityConfig {
+							@Bean
+							public UserDetailsService userDetailsService() {
+								UserDetails user = User.builder()
+													   .username("user")
+													   .password(passwordEncoder().encode("password"))
+													   .roles("USER")
+													   .build();
+								UserDetails admin = User.builder()
+													    .username("admin")
+													    .password(passwordEncoder().encode("admin"))
+													    .roles("ADMIN")
+													    .build();
+								return new InMemoryUserDetailsManager(user, admin);
+							}
+							@Bean
+							public PasswordEncoder passwordEncoder() {
+								return new BCryptPasswordEncoder();
+							}
+							@Bean
+							public DaoAuthenticationProvider authenticationProvider() {
+								DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+								authProvider.setUserDetailsService(userDetailsService());
+								authProvider.setPasswordEncoder(passwordEncoder());
+								return authProvider;
+							}
+						}																					
+						
+						// Ví dụ về custom implement của UserDetailsService
+						@Bean
+						public UserDetailsService userDetailsService() {
+							return new MyDatabaseUserDetailsService(); // (1)
+						}
+						public class MyDatabaseUserDetailsService implements UserDetailsService {
+								UserDetails loadUserByUsername(String username) throws UsernameNotFoundException { // (1)
+								 // 1. Load the user from the users table by username. If not found, throw UsernameNotFoundException.
+								 // 2. Convert/wrap the user to a UserDetails object and return it.
+								return someUserDetails;
+							}
+						}
+						public interface UserDetails extends Serializable { // (2)
+							String getUsername();
+							String getPassword();
+							// <3> more methods:
+							// isAccountNonExpired,isAccountNonLocked,
+							// isCredentialsNonExpired,isEnabled
+						}		
+										
+					Các Implementation sẵn có:
+						
+						Một lưu ý nhỏ: Bạn luôn có thể tự mình triển khai các interface UserDetailsService và UserDetails.
+						Tuy nhiên, bạn cũng có thể thay thế bằng các implementations có sẵn của Spring Security mà bạn có thể sử dụng
+						/configure/extend/override.
+						
+						- JdbcUserDetailsManager:
+							Là một UserDetailsService dựa trên JDBC (database). Bạn có thể cấu hình nó để khớp với cấu trúc bảng/cột user của mình
+							
+							import org.springframework.beans.factory.annotation.Autowired;
+							import org.springframework.context.annotation.Bean;
+							import org.springframework.context.annotation.Configuration;
+							import org.springframework.jdbc.datasource.DriverManagerDataSource;
+							import org.springframework.security.core.userdetails.jdbc.JdbcUserDetailsManager;
+							import javax.sql.DataSource;
+							@Configuration
+							public class SecurityConfig {
+								@Bean
+								public DataSource dataSource() { // cấu hình một DataSource để kết nối đến cơ sở dữ liệu MySQL.
+									DriverManagerDataSource dataSource = new DriverManagerDataSource();
+									dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+									dataSource.setUrl("jdbc:mysql://localhost:3306/mydatabase");
+									dataSource.setUsername("username");
+									dataSource.setPassword("password");
+									return dataSource;
+								}
+								@Bean
+								public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) { // tạo một đối tượng JdbcUserDetailsManager, cấu
+																											  // hình nó để sử dụng DataSource đã được cấu hình
+																											  // trước đó.
+									JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager();
+									userDetailsManager.setDataSource(dataSource);
+									return userDetailsManager;
+								}
+							}
+							import org.springframework.beans.factory.annotation.Autowired;
+							import org.springframework.security.core.userdetails.UserDetails;
+							import org.springframework.security.core.userdetails.UserDetailsService;
+							import org.springframework.stereotype.Service;
+							@Service
+							public class CustomUserDetailsService implements UserDetailsService {
+								@Autowired
+								private JdbcUserDetailsManager jdbcUserDetailsManager; // sử dụng JdbcUserDetailsManager để tìm kiếm thông tin người dùng khi họ
+																					   // đăng nhập
+								@Override
+								public UserDetails loadUserByUsername(String username) { // tải chi tiết người dùng dựa trên tên đăng nhập.
+									return jdbcUserDetailsManager.loadUserByUsername(username);
+								}
+							}
 
-												- InMemoryUserDetailsManager:
-												
-													Giữ tất cả các chi tiết user in-memory và rất tốt cho việc test.
-													
-													import org.springframework.context.annotation.Bean;
-													import org.springframework.context.annotation.Configuration;
-													import org.springframework.security.authentication.AuthenticationManager;
-													import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-													import org.springframework.security.core.userdetails.User;
-													import org.springframework.security.core.userdetails.UserDetails;
-													import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-													@Configuration
-													public class SecurityConfig {
-														@Bean
-														public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-															UserDetails user = User.withDefaultPasswordEncoder()
-																	.username("user")
-																	.password("password")
-																	.roles("USER")
-																	.build();
-															UserDetails admin = User.withDefaultPasswordEncoder()
-																	.username("admin")
-																	.password("admin")
-																	.roles("ADMIN")
-																	.build();
+						- InMemoryUserDetailsManager:
+						
+							Giữ tất cả các chi tiết user in-memory và rất tốt cho việc test.
+							
+							import org.springframework.context.annotation.Bean;
+							import org.springframework.context.annotation.Configuration;
+							import org.springframework.security.authentication.AuthenticationManager;
+							import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+							import org.springframework.security.core.userdetails.User;
+							import org.springframework.security.core.userdetails.UserDetails;
+							import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+							@Configuration
+							public class SecurityConfig {
+								@Bean
+								public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
+									UserDetails user = User.withDefaultPasswordEncoder()
+											.username("user")
+											.password("password")
+											.roles("USER")
+											.build();
+									UserDetails admin = User.withDefaultPasswordEncoder()
+											.username("admin")
+											.password("admin")
+											.roles("ADMIN")
+											.build();
 
-															return new InMemoryUserDetailsManager(user, admin);
-														}
-														@Bean
-														public AuthenticationManager authenticationManager(InMemoryUserDetailsManager inMemoryUserDetailsManager) throws Exception {
-															return new AuthenticationManagerBuilder(inMemoryUserDetailsManager).build();
-														}
-													}
+									return new InMemoryUserDetailsManager(user, admin);
+								}
+								@Bean
+								public AuthenticationManager authenticationManager(InMemoryUserDetailsManager inMemoryUserDetailsManager) throws Exception {
+									return new AuthenticationManagerBuilder(inMemoryUserDetailsManager).build();
+								}
+							}
 
-												- org.springframework.security.core.userdetail.User:
-													Là một implementation UserDetails mặc định, hợp lý mà bạn có thể sử dụng. Điều đó có nghĩa là có khả năng ánh xạ/sao chép
-													giữa các entity/ bảng database của bạn và class User này. Ngoài ra, bạn có thể chỉ cần làm cho các entity của mình implement
-													interface UserDetails.
-													
-													import org.springframework.context.annotation.Bean;
-													import org.springframework.context.annotation.Configuration;
-													import org.springframework.security.core.userdetails.UserDetails;
-													import org.springframework.security.core.userdetails.User;
-													import org.springframework.security.core.userdetails.UserDetailsService;
-													import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-													@Configuration
-													public class SecurityConfig {
-														@Bean
-														public UserDetailsService userDetailsService() {
-															UserDetails user = User.builder() // User.builder() cho phép bạn cung cấp các thuộc tính như username, password và roles để
-																							  // xác định các chi tiết của người dùng.
-																	.username("user")
-																	.password("password")
-																	.roles("USER")
-																	.build();
-															UserDetails admin = User.builder()
-																	.username("admin")
-																	.password("admin")
-																	.roles("ADMIN")
-																	.build();
+						- org.springframework.security.core.userdetail.User:
+							Là một implementation UserDetails mặc định, hợp lý mà bạn có thể sử dụng. Điều đó có nghĩa là có khả năng ánh xạ/sao chép
+							giữa các entity/ bảng database của bạn và class User này. Ngoài ra, bạn có thể chỉ cần làm cho các entity của mình implement
+							interface UserDetails.
+							
+							import org.springframework.context.annotation.Bean;
+							import org.springframework.context.annotation.Configuration;
+							import org.springframework.security.core.userdetails.UserDetails;
+							import org.springframework.security.core.userdetails.User;
+							import org.springframework.security.core.userdetails.UserDetailsService;
+							import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+							@Configuration
+							public class SecurityConfig {
+								@Bean
+								public UserDetailsService userDetailsService() {
+									UserDetails user = User.builder() // User.builder() cho phép bạn cung cấp các thuộc tính như username, password và roles để
+																	  // xác định các chi tiết của người dùng.
+											.username("user")
+											.password("password")
+											.roles("USER")
+											.build();
+									UserDetails admin = User.builder()
+											.username("admin")
+											.password("admin")
+											.roles("ADMIN")
+											.build();
 
-															return new InMemoryUserDetailsManager(user, admin); // cung cấp chi tiết người dùng được cấu hình trong bộ nhớ.
-														}
-													}																						
+									return new InMemoryUserDetailsManager(user, admin); // cung cấp chi tiết người dùng được cấu hình trong bộ nhớ.
+								}
+							}																						
 													
 						Quy trình làm việc
 						đầy đủ của UserDetails:
@@ -322,12 +323,11 @@ Security--SPRING:
 													Đọc các password đó và loại bỏ tiền tố ({bcrypt} hoặc {sha256}).
 													Tùy thuộc vào giá trị tiền tố, hãy sử dụng PasswordEncoder cho chính xác (tức là BCryptEncoder hoặc SHA256Encoder)
 																							Băm password thô với PasswordEncoder đó và so sánh với password đã lưu trữ.
-			AuthenticationProvider: Không có
-			quyền truy cập vào password của
-			user(trường hợp Ít phổ biến hơn):
 			
-						- Bây giờ, hãy tưởng tượng rằng bạn đang sử dụng Atlassian Crowd để quản lý danh tính. Điều đó có nghĩa là tất cả user và password của bạn cho tất cả các ứng dụng được lưu
-						trữ trong Atlassian Crowd và không còn trong bảng database của bạn nữa.
+			AuthenticationProvider: Không có quyền truy cập vào password của user(trường hợp Ít phổ biến hơn):
+			
+						- Bây giờ, hãy tưởng tượng rằng bạn đang sử dụng Atlassian Crowd để quản lý danh tính. Điều đó có nghĩa là tất cả user và
+						password của bạn cho tất cả các ứng dụng được lưu trữ trong Atlassian Crowd và không còn trong bảng database của bạn nữa.
 						- Điều này có hai hàm ý:
 							Bạn không có password user trong ứng dụng của mình nữa, vì bạn không thể yêu cầu Crowd cung cấp cho bạn những password đó.
 							Tuy nhiên, bạn có một API REST mà bạn có thể đăng nhập bằng username và password của mình. (Một POST request đến điểm cuối
@@ -354,12 +354,12 @@ Security--SPRING:
 								}
 									// other method ignored
 							}
-						- So với method UserDetails load (), nơi bạn chỉ có quyền truy cập vào username, giờ đây bạn đã có quyền truy cập để authenticate hoàn chỉnh, thường chứa username
-						và password.
+						- So với method UserDetails load (), nơi bạn chỉ có quyền truy cập vào username, giờ đây bạn đã có quyền truy cập để authenticate
+						hoàn chỉnh, thường chứa username và password.
 						- Bạn có thể làm bất cứ điều gì bạn muốn để authenticate user, như gọi một REST-service chẳng hạn.
 						- Nếu authenticate không thành công, bạn cần phải throw ra một exception.
-						- Nếu authenticate thành công, bạn cần return một UsernamePasswordAuthenticationToken được khởi tạo đầy đủ. Nó là một implementation của interface Authentication
-						và cần phải đặt trường được authenticate thành true (mà constructor được sử dụng ở trên sẽ tự động đặt).
+						- Nếu authenticate thành công, bạn cần return một UsernamePasswordAuthenticationToken được khởi tạo đầy đủ. Nó là một implementation
+						của interface Authentication và cần phải đặt trường được authenticate thành true (mà constructor được sử dụng ở trên sẽ tự động đặt).
 						
 				Quy trình làm việc AuthenticationProvider đầy đủ: HTTP Basic Authentication:
 					
