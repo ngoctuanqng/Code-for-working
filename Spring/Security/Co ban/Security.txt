@@ -19,6 +19,9 @@ FLOW HOẠT ĐỘNG CỦA SPRING SECURITY:
 
 			Nếu là JWT: xử lý qua BearerTokenAuthenticationFilter hoặc custom JwtFilter.
 			
+			Chú ý: Bạn thường không tạo thủ công AuthenticationManager, thay vào đó, Spring Security cung
+			cấp một cách tự động (tạo bean sẵn) để cấu hình nó trong quá trình thiết lập bảo mật.
+			
 			Xử lý:
 			
 				Tạo một Authentication (chưa xác thực).
