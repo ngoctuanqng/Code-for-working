@@ -1,3 +1,86 @@
+FLOW HOẠT ĐỘNG CỦA SPRING SECURITY:
+
+	- Client gửi HTTP request:
+	
+			GET /api/profile
+			Authorization: Bearer eyJhbGciOiJIUz...
+			
+	- Chuỗi Filter bắt đầu xử lý (SecurityFilterChain):
+	
+			SecurityContextPersistenceFilter	Tải/lưu SecurityContext
+			AuthenticationFilter (tùy loại)		Xử lý login hoặc token
+			ExceptionTranslationFilter			Bắt exception và xử lý redirect/lỗi
+			FilterSecurityInterceptor			Kiểm tra quyền (authorization)
+			...
+			
+	- Xác thực người dùng (Authentication):
+	
+			Nếu là form login: xử lý qua UsernamePasswordAuthenticationFilter.
+
+			Nếu là JWT: xử lý qua BearerTokenAuthenticationFilter hoặc custom JwtFilter.
+			
+			Xử lý:
+			
+				Tạo một Authentication (chưa xác thực).
+				
+					Authentication unauthenticated = new UsernamePasswordAuthenticationToken(username, password);
+
+				Gọi Authentication authenticated = authenticationManager.authenticate(unauthenticated);
+				
+					Giao cho AuthenticationProvider xử lý:
+
+					So sánh password, tìm user trong database, kiểm tra trạng thái, v.v.
+
+					Nếu hợp lệ → trả lại một Authentication đã xác thực
+
+				Nếu hợp lệ, trả về Authentication đã xác thực.
+	
+	- Lưu thông tin xác thực:
+	
+			Sau khi xác thực thành công:
+			
+				SecurityContextHolder.getContext().setAuthentication(authenticatedUser);
+	
+			Thông tin này sẽ tồn tại xuyên suốt request đó (và có thể lưu session nếu stateful).
+	
+			SecurityContextHolder hoạt động dựa trên ThreadLocal, sau mỗi request, giá trị trong SecurityContextHolder sẽ bị xóa.
+	
+	- Ủy quyền (Authorization):
+	
+			Kiểm tra quyền của user (dựa trên SecurityContextHolder.getContext().getAuthentication()).
+
+			So sánh với metadata từ @PreAuthorize, @Secured, hoặc cấu hình trong HttpSecurity.
+	
+			Thực hiện ở FilterSecurityInterceptor hoặc annotation như:
+			
+				@PreAuthorize("hasRole('ADMIN')")
+
+			Dựa vào quyền (GrantedAuthority) có trong Authentication.
+			
+	- ExceptionTranslationFilter:
+	
+		Nếu có exception như AccessDeniedException hoặc AuthenticationException, filter này sẽ:
+
+		Chuyển hướng tới login page nếu chưa xác thực
+
+		Trả về lỗi 403 nếu đã xác thực nhưng không đủ quyền
+	
+	- Controller xử lý logic:
+	
+			Nếu đã qua xác thực và có quyền, request được đẩy đến controller.
+
+			Có thể lấy user hiện tại bằng:
+	
+				Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+				String username = auth.getName();
+
+	- Response trả về & kết thúc request:
+	
+			SecurityContextPersistenceFilter lưu lại context (nếu dùng session).
+
+			SecurityContextHolder.clearContext() dọn dẹp dữ liệu cuối request.
+	
+
 Security--SPRING:
 
 	Spring Boot REST API Security--Security:
