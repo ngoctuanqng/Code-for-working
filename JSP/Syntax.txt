@@ -1,0 +1,409 @@
+Elements of JSP
+	The Scriptlet
+		A scriptlet can contain any number of JAVA language statements, variable or method declarations, or expressions that
+		are valid in the page scripting language.
+		
+			<% code fragment %>
+			
+		You can write the XML equivalent of the above syntax as follows
+		
+			<jsp:scriptlet>
+			   code fragment
+			</jsp:scriptlet>
+			
+		Any text, HTML tags, or JSP elements you write must be outside the scriptlet. Following is the simple and first example for JSP
+		
+			<html>
+			   <head><title>Hello World</title></head>
+			   
+			   <body>
+				  Hello World!<br/>
+				  <%
+					 out.println("Your IP address is " + request.getRemoteAddr());
+				  %>
+			   </body>
+			</html>
+			
+	JSP Declarations
+	
+		A declaration declares one or more variables or methods that you can use in Java code later in the JSP file. You must
+		declare the variable or method before you use it in the JSP file.
+		
+		Following is the syntax for JSP Declarations
+		
+			<%! declaration; [ declaration; ]+ ... %>
+			
+		You can write the XML equivalent of the above syntax as follows
+		
+			<jsp:declaration>
+			   code fragment
+			</jsp:declaration>
+			
+		Following is an example for JSP Declarations
+		
+			<%! int i = 0; %> 
+			<%! int a, b, c; %> 
+			<%! Circle a = new Circle(2.0); %>
+			
+	JSP Expression
+	
+		A JSP expression element contains a scripting language expression that is evaluated, converted to a String,
+		and inserted where the expression appears in the JSP file.
+
+		Because the value of an expression is converted to a String, you can use an expression within a line of
+		text, whether or not it is tagged with HTML, in a JSP file.
+
+		The expression element can contain any expression that is valid according to the Java Language Specification
+		but you cannot use a semicolon to end an expression.
+		
+		Following is the syntax of JSP Expression
+		
+			<%= expression %>
+			
+		You can write the XML equivalent of the above syntax as follows
+			<jsp:expression>
+			   expression
+			</jsp:expression>
+			
+		Following example shows a JSP Expression
+		
+			<html> 
+			   <head><title>A Comment Test</title></head> 
+			   
+			   <body>
+				  <p>Today's date: <%= (new java.util.Date()).toLocaleString()%></p>
+			   </body> 
+			</html>
+				Today's date: 11-Sep-2010 21:24:25
+				
+	JSP Comments
+	
+		JSP comment marks text or statements that the JSP container should ignore. A JSP comment is useful when
+		you want to hide or "comment out", a part of your JSP page.
+		
+		Following is the syntax of the JSP comments
+		
+			<%-- This is JSP comment --%>
+			
+		Following example shows the JSP Comments
+		
+			<html> 
+			   <head><title>A Comment Test</title></head> 
+			   
+			   <body> 
+				  <h2>A Test of Comments</h2> 
+				  <%-- This comment will not be visible in the page source --%> 
+			   </body> 
+			</html>
+			
+			A Test of Comments
+			
+		There are a small number of special constructs you can use in various cases to insert comments or characters
+		that would otherwise be treated specially. Here's a summary
+		
+		JSP Comment: <%-- comment --%>
+			
+			JSP comment không xuất hiện ở client-side.
+			
+			<%-- Đây là một comment JSP. Nó sẽ không xuất hiện trong HTML khi render --%>
+			<p>Nội dung sẽ hiển thị ra trình duyệt</p>
+			
+		HTML Comment: <!-- comment -->
+		
+			HTML comment vẫn xuất hiện trong mã nguồn trình duyệt (View page source).
+			
+			<!-- Đây là một comment HTML. Trình duyệt sẽ thấy nhưng không hiển thị -->
+			<p>Nội dung khác</p>
+			
+		Literal <\%: Hiển thị ký tự <% trong HTML
+		
+			Trong JSP, bạn không thể trực tiếp viết <% vì nó sẽ được hiểu là code block.
+			
+			<p>Hiển thị chuỗi: &lt;\%</p>
+			
+		Literal %\>: Hiển thị %> trong HTML
+			
+			Tương tự lý do ở trên.
+			
+			<p>Hiển thị chuỗi: %\&gt;</p>
+			
+		Escaped Single Quote \' trong attribute
+		
+			Chuỗi 'It's a book' có ' được escape để không phá vỡ attribute.
+			
+			<input type='text' value='It\'s a book'>
+			
+		Escaped Double Quote \" trong attribute
+			Tương tự, " trong chuỗi cần escape để không kết thúc thuộc tính HTML.
+			
+			<input type="text" value="He said: \"Hello\"">
+			
+	JSP Directives
+		
+		A JSP directive affects the overall structure of the servlet class. It usually has the following form
+			
+			<%@ directive attribute="value" %>
+		
+		There are three types of directive tag
+		
+		Ví dụ
+			
+			<%@ page ... %> — Khai báo thuộc tính cho trang JSP
+				
+				<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>Page Directive Example</title>
+				</head>
+				<body>
+					<h3>Ví dụ về page directive</h3>
+					<%
+						out.println("Hello from JSP page!");
+					%>
+				</body>
+				</html>
+			
+			<%@ include file="..." %> — Chèn file tĩnh trong giai đoạn dịch
+			
+				<%@ page contentType="text/html; charset=UTF-8" %>
+				<%@ include file="header.jsp" %>
+
+				<html>
+				<body>
+					<h2>Nội dung chính ở đây</h2>
+				</body>
+				</html>
+				
+				Nội dung của header.jsp sẽ được copy vào file main.jsp khi dịch JSP.
+				
+			<%@ taglib ... %> — Dùng thư viện thẻ tùy chỉnh (JSTL hoặc custom tag)
+			
+				<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+				<%@ page contentType="text/html; charset=UTF-8" %>
+
+				<html>
+				<body>
+					<h3>Ví dụ dùng JSTL</h3>
+
+					<c:forEach var="i" begin="1" end="3">
+						<p>Số: ${i}</p>
+					</c:forEach>
+				</body>
+				</html>
+				
+				
+	JSP Actions
+		JSP actions use constructs in XML syntax to control the behavior of the servlet engine. You can dynamically
+		insert a file, reuse JavaBeans components, forward the user to another page, or generate HTML for the Java plugin.
+		
+		There is only one syntax for the Action element, as it conforms to the XML standard
+		
+			<jsp:action_name attribute="value" />
+			
+		Action elements are basically predefined functions. Following table lists out the available JSP Actions
+		
+		Ví dụ
+			
+			<jsp:include> – Include file khi request
+				<jsp:include page="header.jsp" />
+				
+				Nó chèn nội dung của file header.jsp vào vị trí đó tại thời điểm request (runtime).
+				
+			<jsp:useBean> – Tạo hoặc tìm JavaBean
+			
+				<jsp:useBean id="user" class="com.example.User" scope="session" />
+					
+				JSP sẽ tìm trong session một attribute có tên là "user".
+				Nếu đã có: nó sử dụng lại đối tượng đó.
+				Nếu chưa có: nó sẽ tạo mới một instance từ class com.example.User, lưu vào session, và gán cho biến user.
+				
+			<jsp:setProperty> – Gán giá trị thuộc tính cho bean
+				
+				<jsp:setProperty name="user" property="username" value="ngocnhuan" />
+					
+				Tìm biến user đã được khai báo trước đó bằng <jsp:useBean ... />.
+				Gọi setter tương ứng với thuộc tính username, tức là: user.setUsername("ngocnhuan");
+			
+			<jsp:getProperty> – Hiển thị thuộc tính của bean
+				
+				<p>Xin chào: <jsp:getProperty name="user" property="username" /></p>
+					
+				Tìm bean có id="user" đã được khai báo
+				Gọi getter tương ứng: user.getUsername()
+				
+			<jsp:forward> – Chuyển hướng request sang trang khác
+			
+				<jsp:forward page="login.jsp" />
+				
+			<jsp:plugin> – Chèn plugin Java (ít dùng hiện nay)
+				
+				<jsp:plugin type="applet" code="MyApplet.class" width="300" height="200">
+					<jsp:params>
+						<jsp:param name="username" value="ngocnhuan" />
+					</jsp:params>
+				</jsp:plugin>
+				
+				<object classid="java:MyApplet.class" width="300" height="200" codetype="application/java">
+					<param name="username" value="ngocnhuan">
+					<comment>
+						<embed type="application/java" width="300" height="200" pluginspage="http://java.sun.com/products/plugin/">
+							<param name="username" value="ngocnhuan">
+						</embed>
+					</comment>
+				</object>
+				
+			<jsp:element> – Tạo phần tử XML động
+				
+				<jsp:element name="note">
+					Nội dung của phần tử note
+				</jsp:element>
+				
+				<note>...</note>
+			
+			<jsp:attribute> – Gán thuộc tính động cho thẻ XML
+			
+				<jsp:element name="note">
+					<jsp:attribute name="type">reminder</jsp:attribute>
+					Nội dung bên trong
+				</jsp:element>
+								<note type="reminder">...</note>
+						<jsp:body> – Chỉ định phần nội dung (body) động cho thẻ
+							<jsp:element name="note">
+					<jsp:attribute name="type">reminder</jsp:attribute>
+
+					<jsp:body>
+						Nội dung này nằm trong body của note
+					</jsp:body>
+				</jsp:element>
+				
+				<note type="reminder">Nội dung này nằm trong body của note</note>
+				
+			<jsp:text> – Đảm bảo chèn văn bản thuần (không bị escape hay nhầm lẫn với thẻ XML)
+				
+				<jsp:element name="message">
+					<jsp:body>
+						<jsp:text>Chào bạn, đây là thông điệp!</jsp:text>
+					</jsp:body>
+				</jsp:element>
+				
+				<message>Chào bạn, đây là thông điệp!</message>
+				
+	JSP Implicit Objects
+	
+		JSP supports nine automatically defined variables, which are also called implicit objects. These variables are
+	
+	Control-Flow Statements
+	
+		You can use all the APIs and building blocks of Java in your JSP programming including decision-making statements, loops, etc.
+	
+	Decision-Making Statements
+	
+		The if...else block starts out like an ordinary Scriptlet, but the Scriptlet is closed at each line with HTML text included
+		between the Scriptlet tags.
+			
+			<%! int day = 3; %> 
+			<html> 
+			   <head><title>IF...ELSE Example</title></head> 
+			   
+			   <body>
+				  <% if (day == 1 || day == 7) { %>
+					 <p> Today is weekend</p>
+				  <% } else { %>
+					 <p> Today is not weekend</p>
+				  <% } %>
+			   </body> 
+			</html>
+			
+			Today is not weekend
+			
+		Now look at the following switch...case block which has been written a bit differentlty using out.println() and inside Scriptletas
+			
+			<%! int day = 3; %> 
+			<html> 
+			   <head><title>SWITCH...CASE Example</title></head> 
+			   
+			   <body>
+				  <% 
+					 switch(day) {
+						case 0:
+						   out.println("It\'s Sunday.");
+						   break;
+						case 1:
+						   out.println("It\'s Monday.");
+						   break;
+						case 2:
+						   out.println("It\'s Tuesday.");
+						   break;
+						case 3:
+						   out.println("It\'s Wednesday.");
+						   break;
+						case 4:
+						   out.println("It\'s Thursday.");
+						   break;
+						case 5:
+						   out.println("It\'s Friday.");
+						   break;
+						default:
+						   out.println("It's Saturday.");
+					 }
+				  %>
+			   </body> 
+			</html>
+			
+			It's Wednesday.
+			
+	Loop Statements
+		
+		You can also use three basic types of looping blocks in Java: for, while, and dowhile blocks in your JSP programming.
+			<%! int fontSize; %> 
+			<html> 
+			   <head><title>FOR LOOP Example</title></head> 
+			   
+			   <body>
+				  <%for ( fontSize = 1; fontSize <= 3; fontSize++){ %>
+					 <font color = "green" size = "<%= fontSize %>">
+						JSP Tutorial
+				  </font><br />
+				  <%}%>
+			   </body> 
+			</html>
+			
+			JSP Tutorial
+			JSP Tutorial
+			JSP Tutorial
+			
+			<%! int fontSize; %> 
+			<html> 
+			   <head><title>WHILE LOOP Example</title></head> 
+			   
+			   <body>
+				  <%while ( fontSize <= 3){ %>
+					 <font color = "green" size = "<%= fontSize %>">
+						JSP Tutorial
+					 </font><br />
+					 <%fontSize++;%>
+				  <%}%>
+			   </body> 
+			</html>
+			
+			JSP Tutorial		
+			JSP Tutorial
+			JSP Tutorial
+			
+	JSP Operators
+		JSP supports all the logical and arithmetic operators supported by Java. Following table lists out all the operators
+		with the highest precedence appear at the top of the table, those with the lowest appear at the bottom.
+		
+		Within an expression, higher precedence operators will be evaluated first.
+		
+	JSP Literals
+	
+		The JSP expression language defines the following literals
+		
+			Boolean − true and false
+			Integer − as in Java
+			Floating point − as in Java
+			String − with single and double quotes; " is escaped as \", ' is escaped as \', and \ is escaped as \\.
+			Null − null
