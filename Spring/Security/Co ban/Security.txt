@@ -1,3 +1,80 @@
+Ví dụ về quy trình code security:
+
+	- Tạo 1 hàm implement AuthenticationProvider để overide phương thức
+	public Authentication authenticate(Authentication authentication), nếu xác thực thành công thì phương thức này
+	trả về Authentication để AuthenticaManager (Spring tự tạo bean sẵn cho AuthenticaManager) sử dụng
+	
+	- Tạo 1 phương thức implement UserDetails để tạo dữ liệu tương ứng với 1 user thực tế
+	
+	- Tạo 1 phương thức implement UserDetailsService để truy vấn xuống database để tạo 1 đối tượng
+	UserDetails thông qua việc overide phương thức public UserDetails loadUserByUsername(String username)
+	
+	- Ngoài ra có thể tạo:
+	
+		+ Phương thức extends OncePerRequestFilter để mỗi lần request sẽ qua phương thức này 1 lần
+		qua việc overide protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+		FilterChain filterChain) throws ServletException, IOException
+		
+		+ Phương thức implement AuthenticationEntryPoint là một interface dùng để xử lý khi người dùng chưa
+		xác thực (unauthenticated) mà vẫn cố truy cập vào một tài nguyên cần xác thực thông qua overide hàm
+		public void commence(HttpServletRequest request, HttpServletResponse response,
+		AuthenticationException authException) throws IOException, ServletException
+		
+	- Chú ý:
+	
+		Spring Security không tự động "liên kết" các @Bean như UserDetailsService, PasswordEncoder,
+		AuthenticationProvider lại với nhau nếu bạn không cấu hình cụ thể.
+		
+		Do đó, lúc chạy sẽ xảy ra lỗi: "No UserDetailsService configured" hoặc password không khớp dù đúng.
+		
+		Cách sai:
+		
+			@Bean
+			public PasswordEncoder passwordEncoder() {
+				return new BCryptPasswordEncoder();
+			}
+
+			@Bean
+			public UserDetailsService userDetailsService() {
+				return new MyUserDetailsService();
+			}
+
+			@Bean
+			public DaoAuthenticationProvider authenticationProvider() {
+				DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+				return provider; // ❌ không gán userDetailsService và passwordEncoder
+			}
+			
+		Cách đúng:
+		
+			@Bean
+			public DaoAuthenticationProvider authenticationProvider() {
+				DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+				provider.setUserDetailsService(userDetailsService());      // ✅ bắt buộc
+				provider.setPasswordEncoder(passwordEncoder());            // ✅ bắt buộc
+				return provider;
+			}
+			
+			Hoặc, nếu bạn dùng cấu hình kiểu mới (SecurityFilterChain), bạn phải làm tương tự:
+			
+			@Bean
+			public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+				return http.getSharedObject(AuthenticationManagerBuilder.class)
+						.authenticationProvider(authenticationProvider())
+						.build();
+			}
+			
+			Hoặc trong WebSecurityConfigurerAdapter (cũ):
+			
+			@Override
+			protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+				auth.authenticationProvider(authenticationProvider)
+					.userDetailsService(employeeDetailsService)
+					.passwordEncoder(passwordEncoder());
+			}
+
+
+
 FLOW HOẠT ĐỘNG CỦA SPRING SECURITY:
 
 	- Client gửi HTTP request:
@@ -1872,6 +1949,8 @@ Security--SPRING:
 								
 	Another--Security:
 	
+				AuthTokenFilter.java:
+	
 					package com.poscodx.odc.ampro015.config.jwt;
 					import com.poscdx.odc.ampro015.domain.lifecycle.ServiceLifecycle;
 					import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
@@ -1922,7 +2001,9 @@ Security--SPRING:
 						return null;
 					  }
 					}
-					
+				
+				JwtUtils.java
+				
 					package com.poscodx.odc.ampro015.config.jwt;
 					import com.poscodx.odc.ampro015.config.services.EmployeeDetailsImpl;
 					import io.jsonwebtoken.*;
@@ -1975,7 +2056,9 @@ Security--SPRING:
 						return false;
 					  }
 					}
-					
+				
+				CustomAuthenticationProvider.java
+				
 					package com.poscodx.odc.ampro015.config.provider;
 					import com.poscodx.odc.ampro015.config.services.EmployeeDetailsServiceImpl;
 					import lombok.RequiredArgsConstructor;
@@ -2013,7 +2096,9 @@ Security--SPRING:
 							return authentication.equals(UsernamePasswordAuthenticationToken.class);
 						}
 					}
-					
+				
+				EmployeeDetailsImpl.java
+				
 					package com.poscodx.odc.ampro015.config.services;
 					import com.fasterxml.jackson.annotation.JsonIgnore;
 					import com.poscdx.odc.ampro015.domain.entity.M00Employee;
@@ -2031,9 +2116,10 @@ Security--SPRING:
 						private String email;
 						private List<String> role;
 						private Map <String, List<String>> permissionMap;
-					  @JsonIgnore
-					  private String password;
-					  private Collection<? extends GrantedAuthority> authorities;
+					    @JsonIgnore
+					    private String password;
+					    private Collection<? extends GrantedAuthority> authorities;
+						
 						public EmployeeDetailsImpl(String id, String username, String email, String avatar, String password, List<String> role,
 												   Collection<? extends GrantedAuthority> authorities, Map <String, List<String>> permissionMap) {
 							this.id = id;
@@ -2107,6 +2193,8 @@ Security--SPRING:
 						}
 					}
 					
+				EmployeeDetailsServiceImpl.java
+					
 					package com.poscodx.odc.ampro015.config.services;
 					import com.netflix.discovery.converters.Auto;
 					import com.poscdx.odc.ampro015.domain.entity.M00Employee;
@@ -2153,17 +2241,12 @@ Security--SPRING:
 							if (settingMedia != null) {
 								employee.setAvatar(Utils.setFilePath(settingMedia, employee.getAvatar(), Utils.UPLOAD_SERVICE_EMPLOYEE));
 							}
-							//List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findRoleUserByEmpId(user.getEmpId());
 							List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findByEmployeeId(user.getEmpId());
 							List<String> listRoles = new ArrayList<>();
 							for (Pme00RoleUser roleUser : roles) {
 								roleRepository.findById(roleUser.getRoleId()).ifPresent(pme00RoleJpo -> listRoles.add(pme00RoleJpo.getName()));
 							}
 							String roleName = "ROLE_STAFF";
-							if (!roles.isEmpty()) {
-								// roleName = role.get().getName().name();
-								//roleName = role.get().getName();
-							}
 							return EmployeeDetailsImpl.build(employee, null, null);
 						}
 						@Transactional
@@ -2175,13 +2258,11 @@ Security--SPRING:
 							if (settingMedia != null) {
 								employee.setAvatar(Utils.setFilePath(settingMedia, employee.getAvatar(), Utils.UPLOAD_SERVICE_EMPLOYEE));
 							}
-							//List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findRoleUserByEmpId(user.getEmpId());
 							List<Pme00RoleUser> roles = pme00RoleUserJpaStore.findByEmployeeId(user.getEmpId());
 							List<String> listRoles = new ArrayList<>();
 							for (Pme00RoleUser roleUser : roles) {
 								roleRepository.findById(roleUser.getRoleId()).ifPresent(pme00RoleJpo -> listRoles.add(pme00RoleJpo.getName()));
 							}
-							// Optional<Pme00RoleJpo> role = roleRepository.findByName(user.getRole());
 							if (!roles.isEmpty()) {
 								List<Map<String, String>> listPermission = new ArrayList<>();
 								for (Pme00RoleUser roleUser : roles) {
@@ -2190,7 +2271,6 @@ Security--SPRING:
 									perIds.forEach(permissionId -> {
 										Optional<Pme00PermissionJpo> permission = permissionRepository.findById(permissionId);
 										if (permission.isPresent()) {
-											//perName.add(permission.get().getName());
 											Map<String, String> per = new HashMap<>();
 											per.put(permission.get().getGroup(), permission.get().getName());
 											listPermission.add(per);
@@ -2202,6 +2282,8 @@ Security--SPRING:
 							return new EmployeeDetailsImpl(user.getEmpId(), user.getName(), user.getMail(), user.getAvatar(), user.getPassword(), listRoles, null, null);
 						}
 					}
+					
+				WebSecurityConfig.java
 					
 					package com.poscodx.odc.ampro015.config;
 					import com.poscodx.odc.ampro015.config.exceptionhandler.AuthEntryPoint;
@@ -2310,6 +2392,8 @@ Security--SPRING:
 							);
 						}
 					}
+					
+				AuthEntryPoint.java
 														
 					package com.poscodx.odc.ampro015.config.exceptionhandler;
 					import com.fasterxml.jackson.databind.ObjectMapper;
