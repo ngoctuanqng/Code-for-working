@@ -1,15 +1,27 @@
 	Map--JAVA:				
-							Map: Lưu trữ các cặp key/value, key của các phần tử này là duy nhất. SortedMap: Là một dạng riêng của Map interface, trong đó key được sắp xếp theo thứ tự tăng dần.
-							HashMap: Extends AbstractMap để sử dụng bảng băm. HashMap là một phần trong java collections. Nó cung cấp triển khai cơ bản của Map interface. Được sử dụng để lưu trữ dữ
-									 liệu theo cặp key-value. Để truy cập một giá trị, ta phải biết key của nó.
-							TreeMap: Extends AbstractMap để sử dụng tree. TreeMap được sử dụng để triển khai Map interface và NavigableMap. TreeMap sắp xếp các phần tử theo thứ tự tự nhiên dựa vào key
-							         hoặc bởi Comparator được cung cấp tại thời điểm map được tạo, tùy vào constructor nào được sử dụng
+							Map: Lưu trữ các cặp key/value, key của các phần tử này là duy nhất. SortedMap: Là một dạng riêng
+							của Map interface, trong đó key được sắp xếp theo thứ tự tăng dần.
+							
+							HashMap: Extends AbstractMap để sử dụng bảng băm. HashMap là một phần trong java collections. Nó
+							cung cấp triển khai cơ bản của Map interface. Được sử dụng để lưu trữ dữ liệu theo cặp
+							key-value. Để truy cập một giá trị, ta phải biết key của nó.
+							
+							TreeMap: Extends AbstractMap để sử dụng tree. TreeMap được sử dụng để triển khai Map
+							interface và NavigableMap. TreeMap sắp xếp các phần tử theo thứ tự tự nhiên dựa vào key
+							hoặc bởi Comparator được cung cấp tại thời điểm map được tạo, tùy vào constructor nào được sử dụng
+							
 							WeakHashMap: Extends AbstractMap để sử dụng bảng băm với các khóa yếu.
-							LinkedHashMap: Extends HashMap, cho phép lặp lại thứ tự chèn. LinkedHashMap cũng tương tự HashMap nhưng nó được bổ sung tính năng là duy trì thứ tự chèn vào map. HashMap có
-							               lợi thế là chèn, tìm kiếm và xóa nhanh chóng nhưng nó không bao giờ duy trì thứ tự chèn. Khi muốn duy trì thứ tự chèn ta có thể sử dụng LinkedHashMap
+							
+							LinkedHashMap: Extends HashMap, cho phép lặp lại thứ tự chèn. LinkedHashMap cũng tương tự HashMap
+							nhưng nó được bổ sung tính năng là duy trì thứ tự chèn vào map. HashMap có lợi thế là chèn, tìm
+							kiếm và xóa nhanh chóng nhưng nó không bao giờ duy trì thứ tự chèn. Khi muốn duy trì thứ tự chèn
+							ta có thể sử dụng LinkedHashMap
+							
 							IdentityHashMap: Extends AbstractMap
-							Map.Entry interface: Entry là một interface con của Map. Vì vậy, chúng ta có thể truy cập nó bằng tên Map.Entry. Nó cung cấp các phương thức để truy xuất key và value
-							Map từ Java khi chuyển qua Javascript sẽ ở dạng object.
+							
+							Map.Entry interface: Entry là một interface con của Map. Vì vậy, chúng ta có thể truy cập nó
+							bằng tên Map.Entry. Nó cung cấp các phương thức để truy xuất key và value Map từ Java khi chuyển
+							qua Javascript sẽ ở dạng object.
 							
 							Map<String, Integer> map = new HashMap<>();
 							map.put("A", 1);
@@ -19,7 +31,8 @@
 		
 							- keySet và entrySet sẽ hoàn lại 1 Set
 							- values sẽ hoàn lại 1 Collection
-							- Trong Java, "entry" thường được sử dụng để đề cập đến một cặp khóa-giá trị trong một cấu trúc dữ liệu như một Map. Một "entry" trong Java thường đại diện cho một phần tử trong một Map, nơi mỗi
+							- Trong Java, "entry" thường được sử dụng để đề cập đến một cặp khóa-giá trị trong một cấu trúc dữ
+							liệu như một Map. Một "entry" trong Java thường đại diện cho một phần tử trong một Map, nơi mỗi
 							phần tử được lưu trữ dưới dạng một cặp khóa-giá trị.
 		
 							Map<String, Integer> map1 = new HashMap<>();
@@ -133,9 +146,11 @@
 								System.out.println(entry.getKey() + " - " +entry.getValue());
 							}
 		Note:
-							- Vấn đề là khi bạn thêm listResult2 vào listResult1, thì thực chất bạn đang thêm một tham chiếu đến đối tượng listResult2 vào listResult1. Vì vậy, tất cả các phần tử trong listResult1 sẽ cùng trỏ đến
+							- Vấn đề là khi bạn thêm listResult2 vào listResult1, thì thực chất bạn đang thêm một tham chiếu đến đối tượng listResult2
+							vào listResult1. Vì vậy, tất cả các phần tử trong listResult1 sẽ cùng trỏ đến
 							cùng một đối tượng listResult2.
-							- Khi bạn gọi phương thức clear() trên listResult2, nó sẽ xóa tất cả các cặp key-value trong đối tượng listResult2. Do listResult1 chỉ chứa các tham chiếu đến đối tượng listResult2, nên khi phương thức
+							- Khi bạn gọi phương thức clear() trên listResult2, nó sẽ xóa tất cả các cặp key-value trong đối tượng listResult2. Do
+							listResult1 chỉ chứa các tham chiếu đến đối tượng listResult2, nên khi phương thức
 							clear() được gọi, tất cả các phần tử trong listResult1 cũng sẽ thấy sự thay đổi và chứa các giá trị rỗng.
 							- serviceLifecycle thực chất là 1 đối tượng của service
 							
@@ -162,14 +177,17 @@
 									return listResult1;
 							}
 							
-							- Trong mỗi vòng lặp for, một đối tượng listResult2 mới được tạo và các giá trị được thêm vào đối tượng này. Sau đó, đối tượng listResult2 được thêm vào listResult1. Do đó, không có sự chia sẻ tham
+							- Trong mỗi vòng lặp for, một đối tượng listResult2 mới được tạo và các giá trị được thêm vào đối tượng này. Sau đó,
+							đối tượng listResult2 được thêm vào listResult1. Do đó, không có sự chia sẻ tham
 							chiếu giữa các đối tượng listResult2 được tạo trong mỗi vòng lặp.
-							- Mỗi phần tử trong listResult1 đều chứa một đối tượng listResult2 riêng biệt, chứa các giá trị khác nhau tùy thuộc vào vòng lặp hiện tại. Điều này đảm bảo không có mất tham chiếu và mỗi phần tử trong
+							- Mỗi phần tử trong listResult1 đều chứa một đối tượng listResult2 riêng biệt, chứa các giá trị khác nhau tùy thuộc
+							vào vòng lặp hiện tại. Điều này đảm bảo không có mất tham chiếu và mỗi phần tử trong
 							listResult1 đều giữ giá trị của nó.
-							- Trong mỗi vòng lặp, một đối tượng listResult2 mới được tạo bằng cách sử dụng constructor new HashMap<>(). Điều này đảm bảo mỗi đối tượng listResult2 trong từng vòng lặp đều là một đối tượng riêng
+							- Trong mỗi vòng lặp, một đối tượng listResult2 mới được tạo bằng cách sử dụng constructor new HashMap<>(). Điều này
+							đảm bảo mỗi đối tượng listResult2 trong từng vòng lặp đều là một đối tượng riêng
 							biệt, không chia sẻ tham chiếu với nhau.
-							Sau khi kết thúc vòng lặp for, listResult1 vẫn giữ giá trị của các phần tử được thêm vào từ các đối tượng listResult2 trong mỗi vòng lặp. Mất tham chiếu của biến listResult2 không ảnh hưởng đến giá
-							trị của listResult1.
+							Sau khi kết thúc vòng lặp for, listResult1 vẫn giữ giá trị của các phần tử được thêm vào từ các đối tượng listResult2
+							trong mỗi vòng lặp. Mất tham chiếu của biến listResult2 không ảnh hưởng đến giá trị của listResult1.
 							
 							listResult = this.store.getAllProjectListViewWithEmpId();
 							for (Object[] object : listResult) {
