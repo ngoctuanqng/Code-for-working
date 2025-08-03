@@ -42,7 +42,22 @@
 							List<String> list8 = new ArrayList<>(List.of("Apple", "Banana", "Orange"));
 							
 							List<String> emptyList = Collections.emptyList();
-		- add:				additionalFruits.add("Apple"); [Apple, Banana, Orange, Apple]
+		- add:				
+		
+			Hai cách dùng add() trong List:
+			
+				add(E element) — Thêm vào cuối danh sách (phổ biến nhất):
+				
+							List<String> list = new ArrayList<>();
+							list.add("Apple");
+							list.add("Banana");
+							
+				add(int index, E element) — phần tử được chèn vào vị trí chỉ định, các phần tử sau đó bị đẩy lùi.
+				
+							list.add(0, "Orange"); // thêm vào vị trí đầu tiên
+		
+							additionalFruits.add("Apple"); [Apple, Banana, Orange, Apple]
+							
 		addAll:				
 							List<String> additionalFruits = List.of("Mango", "Strawberry");
 							fruits.addAll(additionalFruits); // Thêm tất cả phần tử từ một collection. [Apple, Banana, Orange, Mango, Strawberry]
