@@ -1,0 +1,114 @@
+When we work with Java's HashMap, one common problem occurs that is dealing with missing keys. If we try to fetch a value
+for a key that does not exist, we get "null" and sometimes it may throw NullPointerException.
+
+To solve this problem, Java provides a method called getOrDefault() of the HashMap class.
+
+What is getOrDefault() in HashMap?
+	
+	This method getOrDefault(Object key, V defaultValue) retrieves the value associated with a given key if it exists
+	in the map. If the key does not exist, it returns a default value provided by the user. This is helpful when
+	we work with maps that might not always contain every possible key.
+	
+Syntax of getOrDefault() Method
+	
+	public V getOrDefault(Object key, V defaultValue)
+		V: It represents the type of the value that the map holds. It is a generic type and it will match the type of the values in the HashMap.
+		
+		key: The key whose associated value is to be returned.
+		
+		defaultValue: The value to return if the specified key is not present in the map.
+
+Example
+
+	Example 1: Retrieve the Value when the Key exists
+		// Java Program to demonstrate the working of
+		// getOrDefault() with an exisiting key
+		import java.util.HashMap;
+		import java.util.Map;
+
+		public class Geeks {
+			public static void main(String[] args)
+			{  
+				// Create a HashMap and add key-value pairs
+				Map<String, Integer> hm = new HashMap<>();
+				hm.put("Geek1", 1);
+				hm.put("Geek2", 2);
+
+				// Key "Geek1" exists, so its 
+				// associated value is returned
+				int a = hm.getOrDefault("Geek1", 0);
+				System.out.println("Value for 'Geek1': " + a);
+			}
+		}
+		
+		Value for 'Geek1': 1
+		
+	Example 2: Returning a Default Value when the Key does not exists
+		
+		// Java Program to demonstrate the working of
+		// getOrDefault() with an non-exisiting key
+		import java.util.HashMap;
+		import java.util.Map;
+
+		public class Geeks {
+			public static void main(String[] args)
+			{
+				Map<String, Integer> hm = new HashMap<>();
+				hm.put("Geek1", 1);
+				hm.put("Geek2", 2);
+
+				// Key "Geek5" does not exists so 
+				// the default value is returned
+				int a = hm.getOrDefault("Geek5", 0);
+				System.out.println("Value for 'Geek5': " + a);
+			}
+		}
+		
+		Value for 'Geek5': 0
+	Example 3: Key exists but the value is null
+	
+		// Java Program to demonstrate how to handle cases
+		// where the key exists with null value or does not exist
+		import java.util.HashMap;
+		import java.util.Map;
+
+		public class Geeks {
+			public static void main(String[] args)
+			{
+				Map<String, String> hm = new HashMap<>();
+				hm.put("Geek", null);
+
+				// Key "Geek" exists but its value is null, 
+				// so null is returned
+				String s1 = hm.getOrDefault("Geek", "default");
+				System.out.println("Value for 'Geek': " + s1);
+
+				// Key "Geek2" does not exist, so 
+				// the default value is returned
+				String s2 = hm.getOrDefault("Geek2", "default");
+				System.out.println("Value for 'Geek2': " + s2);
+			}
+		}
+		
+		Value for 'Geek': null
+		Value for 'Geek2': default
+		
+How is it better that containsKey() and get()
+	
+	The traditional way to fetch values is:
+		
+		String value;
+
+		if (map.containsKey(key)) {
+
+			value = map.get(key);
+
+		} else {
+
+			value = "default";
+
+		}
+		
+	The same thing can be done in one line with:
+		
+		String value = map.getOrDefault(key, "default");
