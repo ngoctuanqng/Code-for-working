@@ -1,0 +1,191 @@
+--- Source code:
+
+		Code phải nằm trong folder format là source.main.java
+		
+		File chính sẽ được đánh annotation là @SpringBootApplication
+		
+		package trong spring sẽ lấy từ sau src.main.java
+		
+		Trong microservices khi thêm 1 service chú ý thêm trong project struture và maven
+		
+--- Version
+
+		Khi chạy bằng Intellij thi version của java và maven sẽ theo cài đặt riêng trong Intellij
+		
+		Khi chạy lệnh cmd thì version của java và maven sẽ theo như hệ thống hoặc system variables
+		
+		Chú ý khi chạy mà gặp lỗi còn có thể là do trong file pom.xml yêu cầu version của java và
+		version này không match với các version khác mình đưa
+		
+--- Tool để chạy:
+
+		Bắt buộc: JDK + một build tool (Maven/Gradle/Ant) + web server (Tomcat embedded nếu Spring Boot).
+
+		Tùy chọn: Lombok (giảm code), JBoss (nếu cần Java EE)...
+
+		Maven:	
+
+			Loại: Build tool (công cụ quản lý build & dependency).
+
+			Vai trò trong Spring:
+
+				Quản lý thư viện (dependency management) thông qua pom.xml.
+
+				Biên dịch, đóng gói (JAR/WAR) và chạy ứng dụng.
+				
+				Quản lý dependency: tự tải và thêm các thư viện cần thiết (Spring Boot, Lombok…).
+
+				Tự động chạy quy trình build: compile → test → package → deploy.
+
+				Định nghĩa cấu hình build trong pom.xml.
+
+				Nếu không có Maven: Bạn phải biên dịch thủ công, tự tải thư viện, tự cấu hình classpath → rất tốn công.
+
+			Tình trạng: Không bắt buộc nếu dùng Gradle hoặc Ant, nhưng gần như tiêu chuẩn trong dự án Spring
+			Boot hiện nay.
+			
+		Gradle:
+
+			Loại: Build tool (tương tự Maven nhưng linh hoạt hơn).
+
+			Vai trò:
+
+				Quản lý dependency qua build.gradle.
+
+				Build nhanh hơn Maven nhờ cơ chế incremental build và caching.
+
+			Tình trạng: Thay thế Maven được. Không dùng cùng Maven trong một project.
+			
+		Ant:
+
+			Loại: Build tool cũ hơn Maven/Gradle.
+
+			Vai trò:
+
+				Cũng dùng để biên dịch, đóng gói, quản lý dependency.
+
+				Không mạnh bằng Maven/Gradle về dependency management.
+
+			Tình trạng: Ngày nay ít dùng cho Spring, chủ yếu thấy ở các dự án legacy.
+			
+		JDK (Java Development Kit):
+		
+			Loại: Bộ công cụ phát triển Java.
+
+			Vai trò:
+
+				Bắt buộc để biên dịch và chạy ứng dụng Spring (Spring Boot là Java framework). Không
+				có JDK thì không build được Spring app.
+
+				Bao gồm: Java Compiler (javac), Java Runtime (java), thư viện chuẩn.
+				
+				Bắt buộc để biên dịch và chạy ứng dụng Spring (Spring Boot là Java framework).
+
+			Tình trạng: Bắt buộc 100%. Không có JDK thì không build được Spring app.
+			
+		Lombok:
+
+			Loại: Java library hỗ trợ code generation.
+
+			Vai trò:
+
+				Giảm boilerplate code: tự tạo getter/setter, constructor, builder…
+
+				Giúp code Spring gọn hơn.
+
+			Tình trạng: Tùy chọn — không ảnh hưởng tới việc chạy ứng dụng, nhưng giúp code ngắn hơn.
+			
+		Tomcat:
+		
+			Loại: Servlet container / Web server.
+
+			Vai trò:
+
+				Chạy ứng dụng web Java (Spring MVC, Spring Boot).
+
+				Spring Boot Embedded Tomcat mặc định, nên không cần cài riêng.
+
+			Tình trạng:
+
+			Spring Boot: có sẵn Tomcat embedded → không cần cài ngoài.
+
+			Spring truyền thống: cần Tomcat hoặc server khác để deploy file WAR.
+			
+		JBoss (WildFly):
+		
+			Loại: Java EE application server.
+
+			Vai trò:
+
+				Tương tự Tomcat nhưng hỗ trợ nhiều công nghệ Java EE hơn (EJB, JMS…).
+
+				Dùng để deploy ứng dụng Spring nếu muốn chạy trên môi trường Java EE full-stack.
+
+			Tình trạng: Chỉ cần nếu deploy Spring app trong môi trường yêu cầu Java EE (ít phổ biến
+			với Spring Boot).
+			
+		JVM (Java Virtual Machine):
+		
+			Bản chất: Máy ảo Java – một chương trình mô phỏng máy tính, chuyên để chạy bytecode Java (.class).
+
+			Vai trò:
+
+				Đọc và thực thi bytecode (.class), biến nó thành lệnh máy (native code) để CPU hiểu.
+
+				Quản lý bộ nhớ (Garbage Collection).
+
+				Đảm bảo Java chạy được trên mọi hệ điều hành (Write once, run anywhere).
+
+			Không có JVM: Bạn không thể chạy được chương trình Java.
+
+			Ví dụ: Khi bạn chạy java HelloWorld, chính JVM sẽ thực thi file HelloWorld.class.			
+			
+		JRE (Java Runtime Environment):
+
+			Bản chất: Môi trường chạy Java.
+
+			Thành phần:
+
+				JVM (máy ảo để chạy bytecode).
+
+				Thư viện Java chuẩn (Java Standard Libraries, như java.util.*, java.io.*).
+
+				Một số file cấu hình và công cụ hỗ trợ chạy ứng dụng.
+
+			Vai trò:
+
+				Cung cấp tất cả những gì cần thiết để chạy ứng dụng Java, nhưng không có công cụ để biên dịch.
+
+			Ví dụ: Nếu bạn chỉ muốn chạy ứng dụng Java đã biên dịch sẵn (không viết code mới), cài JRE là đủ.
+
+		Java SE (Java Platform, Standard Edition):
+		
+			Java SE (Java Platform, Standard Edition) là phiên bản tiêu chuẩn của nền tảng Java, cung cấp đầy đủ
+			các API và công cụ cơ bản để phát triển ứng dụng Java. Đây là nền tảng cốt lõi mà mọi phiên bản Java
+			khác (như Java EE hoặc Java ME) đều dựa trên.
+			
+		Java EE (tên đầy đủ trước đây là Java Platform, Enterprise Edition, giờ đổi tên thành Jakarta EE):
+
+			Java EE (tên đầy đủ trước đây là Java Platform, Enterprise Edition, giờ đổi tên thành Jakarta EE) là
+			bộ nền tảng và tiêu chuẩn của Java dành cho ứng dụng doanh nghiệp (enterprise applications).
+
+			Nó mở rộng Java SE (Java Standard Edition) bằng cách bổ sung API, thư viện và công cụ để phát triển các
+			ứng dụng lớn, phân tán, đa tầng (multi-tier), có khả năng mở rộng cao.		
+			
+		Jakarta:
+
+			Jakarta là tên hiện tại của Java EE sau khi được chuyển giao từ Oracle cho tổ chức Eclipse Foundation vào năm 2019.
+			
+			Trước đây:
+			
+				Java EE (Java Platform, Enterprise Edition) là bộ nền tảng và API phục vụ phát triển ứng dụng doanh
+				nghiệp (enterprise apps), đặc biệt là ứng dụng web, phân tán, giao dịch lớn.
+
+				Oracle nắm bản quyền thương hiệu “Java” và “Java EE”, nhưng khi chuyển giao cho Eclipse Foundation
+				thì không cho phép dùng tên Java EE nữa, nên cộng đồng chọn tên mới: Jakarta EE.
+				
+		Jdbc:
+		ORM:
+		JPA:
+		MyBatis:
+		Hibernate:
