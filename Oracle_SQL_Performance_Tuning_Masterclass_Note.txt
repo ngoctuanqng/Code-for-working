@@ -1,0 +1,2395 @@
+--- Table sử dụng:
+
+	Index trong các table:
+	
+		hr:
+		
+			CHANNELS_PK
+			COSTS_PROD_BIX
+			COSTS_TIME_BIX
+			COUNTRIES_PK
+			CUSTOMERS_GENDER_BIX
+			CUSTOMERS_MARITAL_BIX
+			CUSTOMERS_PK
+			CUSTOMERS_YOB_BIX
+			DR#$UP_TEXT_IDX$X
+			DRC#$UP_TEXT_IDX$R
+			FW_PSC_S_MV_CHAN_BIX
+			FW_PSC_S_MV_PROMO_BIX
+			FW_PSC_S_MV_SUBCAT_BIX
+			FW_PSC_S_MV_WD_BIX
+			PRODUCTS_PK
+			PRODUCTS_PROD_CAT_IX
+			PRODUCTS_PROD_STATUS_BIX
+			PRODUCTS_PROD_SUBCAT_IX
+			PROMO_PK
+			SALES_CHANNEL_BIX
+			SALES_CUST_BIX
+			SALES_PROD_BIX
+			SALES_PROMO_BIX
+			SALES_TIME_BIX
+			SUP_TEXT_IDX
+			SYS_C006763
+			SYS_IL000007344C00006$$
+			SYS_IL000007394C00002$$
+			SYS_IOT_TOP_73443
+			SYS_IOT_TOP_73445
+			TIMES_PK
+			
+			Noi dung trong bang employees:
+			
+				EMPLOYEE_ID				Primary key of employees table.
+				FIRST_NAME				First name of the employee. A not null column.
+				LAST_NAME				Last name of the employee. A not null column.
+				EMAIL					Email id of the employee
+				PHONE_NUMBER			Phone number of the employee; includes country code and area code
+				HIRE_DATE				Date when the employee started on this job. A not null column.
+				JOB_ID					"Current job of the employee; foreign key to job_id column of the jobs table. A not null column."
+				SALARY					"Monthly salary of the employee. Must be greater than zero (enforced by constraint emp_salary_min)"
+				COMMISSION_PCT			"Commission percentage of the employee; Only employees in sales department elgible for commission percentage"
+				MANAGER_ID				"Manager id of the employee; has same domain as manager_id in departments table. Foreign key to
+										employee_id column of employees table.
+										(useful for reflexive joins and CONNECT BY query)"
+				DEPARTMENT_ID			"Department id where employee works; foreign key to department_id column of the departments table"
+			
+		ix:
+		
+			AQ$_STREAMS_QUEUE_TABLE_Y
+			SYS_C007731
+			SYS_C007732
+			SYS_C007733
+			SYS_C007734
+			SYS_IL000007344C00036$$
+			SYS_IL000007349C00028$$
+			SYS_IL000007349C00029$$
+			SYS_IOT_TOP_73724
+			SYS_IOT_TOP_73726
+			SYS_IOT_TOP_73728
+			SYS_IOT_TOP_73731
+			SYS_IOT_TOP_73733
+			SYS_IOT_TOP_73735
+			SYS_IOT_TOP_73737
+			SYS_IOT_TOP_73740
+			SYS_IOT_TOP_73742
+			
+		oe:
+		
+			CUST_ACCOUNT_MANAGER_IX
+			CUST_EMAIL_IX
+			CUST_LNAME_IX
+			CUST_UPPER_NAME_IX
+			CUSTOMERS_PK
+			INV_PRODUCT_IX
+			INVENTORY_IX
+			ITEM_ORDER_IX
+			ITEM_PRODUCT_IX
+			ORD_CUSTOMER_IX
+			ORD_ORDER_DATE_IX
+			ORD_SALES_REP_IX
+			ORDER_ITEMS_PK
+			ORDER_ITEMS_UK
+			ORDER_PK
+			PRD_DESC_PK
+			PROD_NAME_IX
+			PROD_SUPPLIER_IX
+			PRODUCT_INFORMATION_PK
+			PROMO_ID_PK
+			SYS_C007679
+			SYS_C007680
+			SYS_C007681
+			SYS_C007682
+			SYS_C007683
+			SYS_C007684
+			SYS_C007698
+			SYS_C007699
+			SYS_C007700
+			SYS_FK0000074510N00007$
+			SYS_FK0000074510N00009$
+			WAREHOUSES_PK
+			WHS_LOCATION_IX
+			
+		pm:
+		
+			ONLINEMEDIA_PK
+			PRINTMEDIA_PK
+			SYS_C007711
+			SYS_FK0000073529N00007$
+			
+		sh:
+		
+			CHANNELS_PK
+			COSTS_PROD_BIX
+			COSTS_TIME_BIX
+			COUNTRIES_PK
+			CUSTOMERS_GENDER_BIX
+			CUSTOMERS_MARITAL_BIX
+			CUSTOMERS_PK
+			CUSTOMERS_YOB_BIX
+			DR#$UP_TEXT_IDX$X
+			DRC#$UP_TEXT_IDX$R
+			FW_PSC_S_MV_CHAN_BIX
+			FW_PSC_S_MV_PROMO_BIX
+			FW_PSC_S_MV_SUBCAT_BIX
+			FW_PSC_S_MV_WD_BIX
+			PRODUCTS_PK
+			PRODUCTS_PROD_CAT_IX
+			PRODUCTS_PROD_STATUS_BIX
+			PRODUCTS_PROD_SUBCAT_IX
+			PROMO_PK
+			SALES_CHANNEL_BIX
+			SALES_CUST_BIX
+			SALES_PROD_BIX
+			SALES_PROMO_BIX
+			SALES_TIME_BIX
+			SUP_TEXT_IDX
+			SYS_C006763
+			SYS_IL000007344C00006$$
+			SYS_IL000007394C00002$$
+			SYS_IOT_TOP_73443
+			SYS_IOT_TOP_73445
+			TIMES_PK
+			
+			Noi dung trong bang sales:
+			
+				PROD_ID				FK to the products dimension table
+				CUST_ID				FK to the customers dimension table
+				TIME_ID				FK to the times dimension table
+				CHANNEL_ID			FK to the channels dimension table
+				PROMO_ID			promotion identifier, without FK constraint (intentionally) to show outer join optimization
+				QUANTITY_SOLD		product quantity sold with the transaction
+				AMOUNT_SOLD			invoiced amount to the customer
+
+
+--- Thứ tự thực thi trong explain plan:
+
+	Nguyên lý cơ bản
+
+		Trong Oracle Execution Plan, cấu trúc là cây (tree) gồm nhiều “nút” (node).
+
+			Mỗi nút đại diện cho một thao tác (operation): quét bảng, quét chỉ mục, join, sort, filter, v.v.
+
+			Dữ liệu chảy từ dưới lên: các nút con thực hiện trước, rồi kết quả được truyền lên nút cha.
+
+		👉 Do đó, thứ tự thực hiện thật sự là:
+
+			Thực hiện từ dưới lên, từ trái sang phải.
+
+	Quy tắc đọc thứ tự thực hiện
+	
+		Quy tắc											Giải thích
+		
+		Bắt đầu từ các nút “lá” (leaf)				Đây là các thao tác thấp nhất — ví dụ TABLE ACCESS, INDEX SCAN.
+		Đi lên từng cấp (parent node)					Khi các nút con hoàn thành, dữ liệu được đưa lên để thực hiện thao tác
+														ở nút cha (JOIN, SORT, FILTER, v.v.).
+		Trong cùng một cấp, đọc từ trái sang phải		Oracle thực hiện các nguồn dữ liệu bên trái trước trong phép JOIN.
+		Nút cao nhất (SELECT STATEMENT)				Đây là điểm cuối — khi tất cả dữ liệu đã được xử lý xong, kết quả được trả về.
+	
+	Ví dụ trực quan (dựa trên kế hoạch của bạn)
+	
+		SELECT STATEMENT
+		 └─ MERGE JOIN
+			 ├─ TABLE ACCESS BY INDEX ROWID (DEPARTMENTS)
+			 │   └─ INDEX FULL SCAN (DEPT_ID_PK)
+			 └─ SORT JOIN
+				 └─ TABLE ACCESS FULL (EMPLOYEES)
+
+
+		Theo quy tắc trên:
+
+			Thứ tự	Bước									Giải thích
+			
+			①	TABLE ACCESS FULL (EMPLOYEES)				Nút “lá” bên phải – đọc toàn bộ bảng nhân viên
+			②	SORT JOIN									Sắp xếp dữ liệu EMPLOYEES theo department_id
+			③	INDEX FULL SCAN (DEPT_ID_PK)				Nút “lá” bên trái – quét chỉ mục của bảng DEPARTMENTS
+			④	TABLE ACCESS BY INDEX ROWID (DEPARTMENTS)	Lấy dữ liệu thực từ DEPARTMENTS
+			⑤	MERGE JOIN									Nút cha – nối hai tập dữ liệu đã có
+			⑥	SELECT STATEMENT							Xuất kết quả
+			
+	Mẹo nhớ nhanh
+
+		🧭 Thứ tự thực hiện = Đi từ dưới lên, trái qua phải.
+
+		Nếu biểu đồ có nhiều nhánh JOIN hoặc SUBQUERY thì:
+
+			Luôn bắt đầu ở bảng gốc hoặc INDEX SCAN thấp nhất.
+
+			Sau đó đi ngược lên cho đến khi gặp JOIN / SORT / FILTER.
+
+			Khi có nhiều nhánh, Oracle thường xử lý nhánh trái trước, rồi mới sang nhánh phải.	
+
+
+
+--- Software Installations:
+
+	- Tìm hiểu:
+
+		Connection type la TNS nghia la gi trong sql developer
+		
+		Network Alias la ORCL nghia la gi trong sql developer
+		
+		Download oracle database
+	
+	Cần phải cài oracle database và sql developer
+	
+	
+
+	- Google search:
+	
+		Download vmware
+		
+		Download oracle pre-build virtual machine
+		
+		Download oracle database
+		
+		Download oracle sql developer
+		
+		
+	- SQL:
+	
+		- sql:
+		
+			Chú ý phải để đúng đường dẫn của SAMPLE_SCHEMAS
+	
+				sqlplus sys/ngoctuan99@localhost:1521/orclpdb as sysdba;
+				alter pluggable database open;
+				alter pluggable database orclpdb save state;
+				create or replace directory import_dir as 'C:\SAMPLE_SCHEMAS';
+				exit
+				impdp system/ngoctuan99@localhost:1521/orclpdb schemas=hr directory=import_dir dumpfile=EXPORTED_SAMPLE_SCHEMAS.dmp logfile=import.log remap_tablespace=EXAMPLE:USERS
+				impdp system/ngoctuan99@localhost:1521/orclpdb schemas=sh directory=import_dir dumpfile=EXPORTED_SAMPLE_SCHEMAS.dmp logfile=import.log remap_tablespace=EXAMPLE:USERS
+				impdp system/ngoctuan99@localhost:1521/orclpdb schemas=oe directory=import_dir dumpfile=EXPORTED_SAMPLE_SCHEMAS.dmp logfile=import.log remap_tablespace=EXAMPLE:USERS
+				impdp system/ngoctuan99@localhost:1521/orclpdb schemas=pm directory=import_dir dumpfile=EXPORTED_SAMPLE_SCHEMAS.dmp logfile=import.log remap_tablespace=EXAMPLE:USERS
+				impdp system/ngoctuan99@localhost:1521/orclpdb schemas=ix directory=import_dir dumpfile=EXPORTED_SAMPLE_SCHEMAS.dmp logfile=import.log remap_tablespace=EXAMPLE:USERS
+				sqlplus sys/ngoctuan99@localhost:1521/orclpdb as sysdba;
+				alter user hr identified by hr account unlock;
+				alter user sh identified by ngoctuan99 account unlock;
+				alter user oe identified by ngoctuan99 account unlock;
+				alter user pm identified by ngoctuan99 account unlock;
+				alter user ix identified by ngoctuan99 account unlock;
+			
+			Tổng quan mục tiêu của chuỗi lệnh
+
+				Bạn đang làm 3 việc lớn:
+
+				Mở Pluggable Database (PDB) để làm việc.
+
+				Chuẩn bị môi trường import (directory logic và file dump).
+
+				Import lại các schema mẫu (HR, SH, OE, PM, IX) vào PDB để sử dụng trong học và thực hành.
+				
+			Phân tích chi tiết từng lệnh
+			
+				Mở SQL*Plus và kết nối SYSDBA vào PDB:
+				
+					sqlplus sys/ngoctuan99@localhost:1521/orclpdb as sysdba;
+
+					Mục đích:
+
+						Kết nối đến Pluggable Database (PDB) có tên orclpdb.
+
+						Dùng tài khoản SYS (quyền SYSDBA) → quyền cao nhất, có thể thực hiện mọi thao tác hệ thống.
+
+						@localhost:1521/orclpdb: kết nối tới PDB (không phải CDB gốc).
+
+					Bản chất:
+
+						Trong kiến trúc Multitenant, Oracle có:
+
+							CDB$ROOT (container chính)
+
+							PDBs (các database con chứa schemas thật sự)
+
+						Mọi thao tác dữ liệu (như import schema) phải thực hiện trong PDB, không phải CDB.
+						
+				Mở PDB (nếu đang ở trạng thái MOUNTED):
+				
+					alter pluggable database open;
+
+					Mục đích:
+
+						Khi Oracle khởi động, PDB có thể ở trạng thái MOUNTED (đóng).
+
+						Câu lệnh này mở PDB để nó sẵn sàng cho kết nối và thao tác dữ liệu.
+
+					Nội bộ Oracle:
+
+						Khi mở PDB, Oracle mount các datafiles liên quan.
+
+						Cho phép session kết nối tới PDB đó.
+						
+					Giữ PDB tự động mở sau khi restart
+					
+						alter pluggable database orclpdb save state;
+
+						Mục đích:
+
+							Lưu lại trạng thái "OPEN" của PDB.
+
+							Khi Oracle Database khởi động lại, PDB orclpdb sẽ tự mở lại tự động.
+
+						Nếu không có lệnh này:
+
+							Sau mỗi lần restart instance, bạn phải thủ công ALTER PLUGGABLE DATABASE OPEN;
+							
+					Tạo Directory logic cho import/export:
+					
+						create or replace directory import_dir as 'C:\SAMPLE_SCHEMAS';
+
+						Mục đích:
+
+							Tạo Oracle Directory Object trỏ đến thư mục vật lý trên hệ thống chứa file .dmp.
+
+						Bản chất:
+
+							import_dir chỉ là tên logic bên trong Oracle.
+
+							Oracle không truy cập trực tiếp file system, mà chỉ qua directory object được cấp quyền.
+
+							Thư mục C:\SAMPLE_SCHEMAS phải tồn tại và người dùng Oracle có quyền đọc/ghi.
+							
+					Thoát SQL*Plus:
+					
+						exit
+
+						Mục đích:
+
+							Quay về dòng lệnh hệ điều hành (Windows CMD).
+
+							Vì công cụ import (impdp) chạy ngoài SQL*Plus.
+							
+					Import các schema mẫu (bộ Sample Schemas):
+					
+						impdp system/ngoctuan99@localhost:1521/orclpdb schemas=hr directory=import_dir dumpfile=EXPORTED_SAMPLE_SCHEMAS.dmp logfile=import.log remap_tablespace=EXAMPLE:USERS
+
+						Mục đích:
+
+							Sử dụng công cụ Data Pump Import (impdp) để nạp lại dữ liệu cho schema HR.
+
+							File nguồn là EXPORTED_SAMPLE_SCHEMAS.dmp — dump chứa tất cả schemas mẫu của Oracle.
+
+						Tham số:
+						
+							Tham số											Ý nghĩa
+							
+							system/ngoctuan99@localhost:1521/orclpdb		Kết nối user system trong PDB
+							schemas=hr										Import schema HR
+							directory=import_dir							Đường dẫn logic chứa file dump
+							dumpfile=EXPORTED_SAMPLE_SCHEMAS.dmp			File dump đã export trước đó
+							logfile=import.log								Ghi log import vào file log
+							remap_tablespace=EXAMPLE:USERS					Chuyển dữ liệu từ tablespace gốc EXAMPLE sang USERS (vì có thể
+																			PDB không có tablespace EXAMPLE)
+																			
+					Đăng nhập lại SYS để mở khóa người dùng:
+					
+						sqlplus sys/ngoctuan99@localhost:1521/orclpdb as sysdba;
+
+						Mở lại SQL*Plus để cấp quyền và mở khóa các schema mới import.
+						
+					Mở khóa và đặt mật khẩu cho các user:
+					
+						alter user hr identified by hr account unlock;
+						alter user sh identified by ngoctuan99 account unlock;
+						alter user oe identified by ngoctuan99 account unlock;
+						alter user pm identified by ngoctuan99 account unlock;
+						alter user ix identified by ngoctuan99 account unlock;
+
+						Mục đích:
+
+						Sau khi import, các user thường bị khóa (LOCKED) để bảo mật.
+
+						Lệnh này:
+
+							identified by ...: đặt lại mật khẩu.
+
+							account unlock: mở khóa tài khoản để có thể đăng nhập.
+
+						Thực tế:
+
+							Sau khi unlock, bạn có thể đăng nhập bằng ví dụ:
+
+								sqlplus hr/hr@localhost:1521/orclpdb
+								sqlplus sh/ngoctuan99@localhost:1521/orclpdb		
+		
+		
+
+	Cách để có được một cơ sở dữ liệu:
+	
+		Virtual Machine (Máy ảo):
+
+			Sử dụng một máy ảo để chạy cơ sở dữ liệu. Điều này cho phép người dùng thao tác trong một môi
+			trường được cách ly, có thể dễ dàng cấu hình và quản lý.
+		
+		Local Installation (Cài đặt cục bộ):
+
+			Cài đặt cơ sở dữ liệu trực tiếp trên máy tính cá nhân hoặc máy chủ của bạn. Đây là cách truyền
+			thống và phổ biến để sử dụng cơ sở dữ liệu, cho phép truy cập trực tiếp và tối ưu hóa hiệu suất.
+		
+		Oracle Live SQL:
+
+			Một dịch vụ trực tuyến cho phép người dùng thực hiện các truy vấn SQL mà không cần cài đặt
+			phần mềm. Thích hợp cho việc học tập và thử nghiệm nhanh chóng.
+			
+	Software Installations - Pluggable Database (PDB):
+	
+		Định nghĩa cốt lõi
+
+			Pluggable Database (PDB) là một cơ sở dữ liệu con (database con) chạy bên trong một Container Database (CDB).
+
+			Hiểu nôm na:
+
+				CDB giống như “hệ thống chính” hoặc “ngôi nhà chung”.
+
+				Mỗi PDB là “một căn hộ riêng” trong ngôi nhà đó, có dữ liệu, user, schema, tablespace riêng của nó.
+
+			Một Oracle instance (bộ nhớ, tiến trình) có thể chạy nhiều PDB cùng lúc thông qua một CDB duy nhất.
+			
+			Cấu trúc cơ bản trong kiến trúc Multitenant:
+
+				Từ Oracle 12c trở đi, ta có:
+
+					Thành phần				Viết tắt			Vai trò
+					
+					Container Database		CDB					“Thùng chứa” chính, có thể chứa nhiều PDB
+					Root container			CDB$ROOT			Chứa metadata, dữ liệu hệ thống Oracle
+					Seed PDB				PDB$SEED			Mẫu chuẩn để tạo PDB mới (read-only)
+					Pluggable Database		PDB					Database người dùng thực tế (VD: HR, SALES, APPDB, ORCLPDB, v.v.)
+					
+			Lợi ích của kiến trúc Pluggable:
+			
+				Lợi ích						Mô tả
+				
+				Dễ quản lý					Một instance quản lý nhiều PDB → ít tốn tài nguyên hơn
+				Dễ backup/restore			Có thể export/import hoặc unplug/plug từng PDB
+				Cô lập dữ liệu				Mỗi PDB hoạt động độc lập, lỗi 1 PDB không ảnh hưởng PDB khác
+				Nâng cấp dễ dàng			Có thể nâng cấp CDB mà không cần rebuild từng database
+				Triển khai nhanh			Tạo PDB mới chỉ cần clone từ PDB$SEED (rất nhanh)
+			
+			Cách hoạt động trong thực tế
+
+				Khi bạn cài Oracle 19c, bạn có thể có:
+
+					Một CDB: ORCLCDB
+
+					Một PDB mặc định: ORCLPDB
+
+					Khi bạn mở SQL*Plus và kết nối như:
+
+						sqlplus system/password@localhost:1521/orclpdb
+							
+							Bạn đang kết nối trực tiếp vào PDB (tức database con).
+							
+							Nếu không chỉ rõ /orclpdb, bạn mặc định vào CDB$ROOT.
+							
+			Các lệnh cơ bản với PDB
+			
+			Mục tiêu				Lệnh ví dụ
+			
+			Xem danh sách PDB		SHOW PDBS; hoặc SELECT name FROM v$pdbs;
+			Mở PDB					ALTER PLUGGABLE DATABASE orclpdb OPEN;
+			Đóng PDB				ALTER PLUGGABLE DATABASE orclpdb CLOSE;
+			Chuyển container		ALTER SESSION SET CONTAINER=orclpdb;
+			Tạo PDB mới				CREATE PLUGGABLE DATABASE newpdb ADMIN USER pdbadmin IDENTIFIED BY 123;
+
+
+👉 Bạn đang kết nối trực tiếp vào PDB (tức database con).
+Nếu không chỉ rõ /orclpdb, bạn mặc định vào CDB$ROOT.
+			
+	
+--- Oracle Database Architecture:
+
+	Oracle Database Architecture - Kiến trúc trong Oracle:
+	
+		Tổng quan kiến trúc (Client — Server)
+
+			Client (User process): chương trình người dùng (ví dụ SQL*Plus, ứng dụng) khởi tạo user
+			process để gửi yêu cầu tới database.
+
+			Server: khi nhận kết nối, Oracle gán server process (hoặc dispatcher/PMON trong shared server)
+			để xử lý yêu cầu của user process. Server process chịu trách nhiệm thực hiện parsing, execution,
+			fetch dữ liệu từ bộ nhớ/disk.
+
+			Mối quan hệ: user process ↔ server process (request/response). Kiến trúc client/server này tách
+			rõ phần client (giao diện) và phần xử lý DB (server).
+			
+		SGA (System Global Area) — vùng nhớ chia sẻ
+
+			SGA là vùng nhớ chung cho tất cả các server process. Ảnh biểu diễn một khối lớn gọi là SGA chứa nhiều thành phần con:
+
+			Các thành phần chính trong SGA:
+
+				Database Buffer Cache (buffer cache):
+
+					Lưu các block dữ liệu (data blocks) đã đọc từ datafiles.
+
+					Khi một truy vấn SELECT cần block, server process tìm trong buffer cache trước; nếu không
+					có, đọc từ datafile vào buffer cache.
+
+					Thực hiện dirty buffer (ghi thay đổi) cho UPDATE/INSERT → sẽ được DBWR (database writer) ghi
+					ra datafiles theo thời điểm checkpoint hoặc khi cần bộ nhớ.
+
+				Shared Pool:
+
+					Library cache: chứa parsed SQL, execution plans, cursors. Quan trọng cho việc reuse kế hoạch (soft parse).
+
+					Data dictionary cache (row cache): cache metadata (schema, quyền, thống kê).
+
+					Result cache (nếu bật): lưu kết quả truy vấn hay function để trả lại nhanh.
+
+					Shared pool càng lớn thì khả năng reuse cursor & giảm hard-parse càng tốt.
+
+				Redo Log Buffer:
+
+					Lưu thông tin redo (những thay đổi nhờ DML) trước khi ghi vào redo log files.
+
+					Khi commit, LGWR (log writer) sẽ flush redo buffer ra redo log files; việc này đảm bảo durability.
+
+				Large pool / Java pool / Streams pool:
+
+					Large pool: dùng cho backup/restore (RMAN), parallel query hoặc session memory for shared server.
+
+					Java pool: bộ nhớ cho Java VM trong Oracle.
+
+					Streams pool: dùng nếu dùng Oracle Streams cho replication.
+
+				SGA: Shared SQL area, Private SQL area (thoáng qua)
+
+					Private SQL area thực tế là trong PGA cho bind variables, runtime state (sort area) cho session.
+					
+			PGA (Program Global Area) — vùng nhớ riêng của server process:
+
+				PGA là vùng nhớ riêng cho mỗi server process (hoặc mỗi background process), không chia sẻ.
+
+				Chứa: private SQL area (runtime structures, bind variable values, sort area, hash join memory).
+
+				Cấu hình: PGA_AGGREGATE_TARGET hoặc PGA_AGGREGATE_LIMIT để giới hạn tổng PGA dùng.
+				
+			Datafiles / Redo Logs (vật lý trên disk)
+
+				Datafiles: nơi lưu thực tế dữ liệu (tables, indexes). Buffer cache chứa các block copy từ datafiles.
+
+				Redo log files (online redo logs): lưu luồng redo để recover DB khi crash. LGWR ghi từ
+				redo log buffer → redo files.
+
+				Ảnh cho thấy nhiều “đĩa” biểu diễn data + 1 cuộn cho Redo Log.
+				
+			Luồng hoạt động khi thực hiện 1 truy vấn (ví dụ UPDATE):
+
+				Tóm tắt bước-by-step:
+
+					User process gửi SQL tới Server process.
+
+					Server process kiểm tra library cache (shared pool) để xem có cursor/existing execution
+					plan (soft parse).
+
+						Nếu không có → hard parse (kiểm tra cú pháp, truy vấn optimizer, tạo execution plan) và lưu
+						vào library cache.
+
+					Server process xác định block cần đọc → kiểm tra Database Buffer Cache:
+
+						Nếu block có trong cache → đọc từ cache (fast).
+
+						Nếu không → đọc từ datafile vào buffer cache (I/O physical read).
+
+					Nếu là UPDATE/INSERT: server process thay đổi block trong buffer cache (đánh dấu dirty), tạo redo entry
+					và ghi vào Redo Log Buffer.
+
+					Khi commit: LGWR sẽ flush redo log buffer ra physical redo log file. Commit chỉ hoàn tất khi redo đã được
+					ghi (đảm bảo durability).
+
+					DBWR (database writer) sẽ ghi dirty buffers từ buffer cache ra datafiles khi:
+
+						Có checkpoint, hay buffer cache cần không gian, hoặc theo chính sách.
+
+					Trong sự cố, dùng redo + datafiles để recover.
+					
+			Các background processes (liên quan tuning & hoạt động)
+
+				Diagram không liệt kê tên tất cả, nhưng đây là những process quan trọng:
+
+					LGWR — Log Writer (ghi redo buffer → redo files).
+
+					DBWR — Database Writer (ghi dirty buffers → datafiles).
+
+					SMON — System Monitor (instance recovery).
+
+					PMON — Process Monitor (dọn session/clean up).
+
+					CKPT — Checkpoint (cập nhật headers, SCN).
+
+					ARCH — Archiver (nếu database ở ARCHIVELOG mode, copy redo logs sang archive).
+
+					MMON/MMON/ARC/RECO ... tùy tính năng.
+		
+			Hiểu rõ về parse / execute / fetch và vấn đề performance
+
+				Hard parse: optimizer tạo plan → tốn CPU, latch contention trên library cache. Giảm hard-parse bằng:
+
+					Dùng bind variables (không concat giá trị vào SQL).
+
+					Reuse cursors (cursor_sharing, FORCE chỉ dùng cẩn trọng).
+
+				Soft parse: reuse plan từ library cache → nhanh.
+
+				Sort & temp space: nếu sort lớn hơn memory (PGA), Oracle sẽ sử dụng temporary tablespace (disk) → chậm.
+				
+			Các chỉ số/Views để kiểm tra trong Oracle
+
+				Xem SGA/PGA kích thước:
+
+					SHOW PARAMETER sga_target; SHOW PARAMETER pga_aggregate_target;
+
+					SELECT * FROM V$SGA; SELECT * FROM V$SGA_DYNAMIC_COMPONENTS;
+
+				Monitor buffer cache / I/O:
+
+					SELECT * FROM V$BUFFER_POOL;
+
+					SELECT name, value FROM v$sysstat WHERE name LIKE '%physical reads%';
+
+				Library cache / SQL:
+
+					SELECT namespace, pin_sleeps, pins FROM v$librarycache;
+
+					SELECT * FROM v$sql WHERE sql_text LIKE '%...%';
+
+				Redo / log:
+
+					SELECT group#, members, archival_status FROM v$log;
+
+					SELECT * FROM v$log_history;
+
+				Wait events & AWR:
+
+					SELECT event, total_waits, time_waited FROM v$system_event ORDER BY time_waited DESC;
+
+					AWR/ASH reports (Enterprise) để tìm bottlenecks.
+					
+			Những điểm tuning quan trọng dựa trên kiến trúc này:
+
+				Kích thước SGA đúng: too small → nhiều physical reads, too big → lãng phí.
+
+					Tăng shared_pool nếu nhiều hard parses.
+
+					Tối ưu buffer cache để tăng hit ratio (reduce physical I/O).
+
+				Giảm hard parse: dùng bind variables, tránh dynamic SQL không cần thiết, cache prepared statements ở ứng dụng.
+
+				PGA đủ cho sorts/joins: tránh spill to disk (giảm temp I/O).
+
+				Redo log sizing & group count: nhỏ quá → LGWR flush nhiều → hiệu năng kém; nên có đủ size và nhóm, và dùng multiplexed members.
+
+				I/O subsystem: nếu physical reads/writes cao, cần check storage (throughput/latency).
+
+				Concurrency contention: library cache latches, buffer busy waits → cần phân tích SQL hot spots, partitioning, hoặc redesign.
+
+				Use EXPLAIN PLAN / SQL Trace: để thấy execution plan và chi phí.
+				
+			Ví dụ thực tế — chu trình truy vấn SELECT đơn giản:
+
+				Client gửi SELECT * FROM employees WHERE deptno = 10;
+
+				Server process tìm SQL trong library cache:
+
+				Nếu có: reuse plan → lookup blocks trong buffer cache.
+
+				Nếu không: hard parse → optimizer chọn plan (index scan hay full table scan).
+
+				Nếu block không có trong buffer cache → physical read từ datafile → load vào buffer cache → trả kết quả cho client.
+				
+			Lời khuyên khi đọc/áp dụng kiến trúc này
+
+				Khi debug performance: bắt đầu xem wait events (v$session_wait, AWR), Xác định xem
+				bottleneck là CPU / IO / contention / memory.
+
+				Luôn kiểm tra top SQL (V$SQL) để tìm queries gây I/O/CPU nhiều nhất và tối ưu chúng (index, rewrite, statistics).
+
+				Thực hiện phân bổ hợp lý cho SGA/PGA, và cân nhắc Automatic Memory Management (AMM/ASMM) nếu phù hợp.
+				
+			Tóm tắt ngắn (one-liner)
+
+				Ảnh mô tả: client gửi yêu cầu → server process xử lý, dùng SGA (shared pool, buffer cache, redo buffer, large/java/streams pools)
+				và PGA (private memory) để thực hiện truy vấn; thay đổi được ghi vào redo buffer trước, commit flush bằng LGWR; dirty blocks được
+				DBWR ghi ra datafiles — toàn bộ kiến trúc hướng tới đảm bảo hiệu năng (caching) và độ bền (redo + background processes).
+				
+				
+--- Execution Plans & Statistics:
+
+	- Tool -> Preference -> Database -> Autotrace/Explain plan
+
+	- Tìm hiểu:
+	
+		Cần phân biệt system statistic và optimizer statistic
+		
+		Giai thich ve explain plan, autotrace va V$SQL_PLAN
+
+	Execution Plans & Statistics - SYSTEM là một tài khoản quản trị mặc định của Oracle Database:
+	
+		Oracle có vài user mặc định khi cài DB:
+
+			SYS: superuser cấp cao nhất, sở hữu toàn bộ dictionary.
+
+			SYSTEM: user quản trị cấp cao, thường dùng để quản lý cấu hình, thống kê, tạo schema, nhưng ít quyền hơn SYS.
+			
+	- SQL:
+	
+		- sql: exec dbms_stats.gather_system_stats('Start');
+		
+			Là một lệnh quan trọng trong Oracle Database, được dùng trong quá trình thu thập thống kê hệ thống (System Statistics)
+			để giúp Oracle Optimizer tối ưu kế hoạch thực thi SQL tốt hơn.
+
+			Định nghĩa cốt lõi:
+
+				DBMS_STATS.GATHER_SYSTEM_STATS là thủ tục (procedure) thuộc package DBMS_STATS do Oracle cung cấp.
+				→ Nó dùng để thu thập thông tin về hiệu năng phần cứng của hệ thống: tốc độ CPU, tốc độ I/O, tỉ lệ chờ, v.v.
+
+				Oracle Optimizer sẽ dựa trên các thống kê này để ước lượng chi phí thực thi truy vấn (cost) chính xác hơn — từ đó
+				chọn kế hoạch tối ưu nhất.
+
+			Bản chất & cơ chế hoạt động:
+			
+			Khi bạn chạy:
+				
+				EXEC DBMS_STATS.GATHER_SYSTEM_STATS('START');
+
+				Oracle bắt đầu ghi nhận (bắt mẫu thống kê) các đặc tính hoạt động của hệ thống:
+
+					Thời gian CPU trung bình cho một thao tác.
+
+					Tốc độ đọc I/O trên đĩa.
+
+					Tỷ lệ giữa thời gian chờ I/O và CPU.
+
+					Số lượng I/O thực tế trong các truy vấn.
+
+				Cụ thể, Oracle ghi lại trong nền (background):
+
+					Mức độ sử dụng CPU.
+
+					Số block đọc được trong mỗi I/O.
+
+					Tốc độ xử lý I/O (MB/s hoặc block/s).
+
+			Khi bạn chạy tiếp:
+			
+				EXEC DBMS_STATS.GATHER_SYSTEM_STATS('STOP');
+
+				Oracle kết thúc quá trình thu thập, và ghi dữ liệu thu được vào bảng thống kê hệ thống
+				trong data dictionary (SYS.AUX_STATS$).
+
+				Optimizer sau đó sẽ sử dụng các giá trị này để đánh giá “chi phí” (cost) cho các phép join,
+				full scan, index scan... dựa vào điều kiện thực tế của hệ thống.
+
+			Các tham số khác của hàm này
+
+				Cú pháp đầy đủ:
+
+					DBMS_STATS.GATHER_SYSTEM_STATS (
+					   gathering_mode  IN  VARCHAR2 DEFAULT 'NOWORKLOAD',
+					   interval         IN  NUMBER   DEFAULT NULL,
+					   stattab          IN  VARCHAR2 DEFAULT NULL,
+					   statid           IN  VARCHAR2 DEFAULT NULL,
+					   statown          IN  VARCHAR2 DEFAULT NULL
+					);
+
+				Tham số	Ý nghĩa:
+				
+					'START'	Bắt đầu thu thập thống kê (workload statistics).
+					'STOP'	Dừng và ghi kết quả thống kê đã thu.
+					'INTERVAL'	Cho phép tự thu thập trong khoảng thời gian xác định (theo phút).
+					'NOWORKLOAD'	Thu thập nhanh mà không cần chạy truy vấn thực tế (Oracle ước lượng thông qua I/O test).
+
+			Phân biệt hai kiểu thống kê
+			
+				Kiểu thống kê				Cách chạy									Ý nghĩa
+				Workload Statistics			'START' → chạy workload thực tế → 'STOP'	Oracle quan sát truy vấn thật → chính xác hơn.
+				Noworkload Statistics		'NOWORKLOAD'								Oracle tự kiểm tra hiệu năng I/O và CPU → nhanh nhưng kém chính xác.					
+		
+		- sql: select * from sys.aux_stats$;
+		
+			Là bước quan trọng để xem kết quả mà bạn đã thu thập được bằng lệnh DBMS_STATS.GATHER_SYSTEM_STATS.
+	
+			SYS.AUX_STATS$ là một bảng hệ thống nội bộ (data dictionary table) do Oracle
+			Database quản lý.
+
+				Bảng này chứa các thống kê hệ thống (System Statistics) được thu thập
+				bởi package DBMS_STATS.
+
+				Các giá trị trong bảng này giúp Cost-Based Optimizer (CBO) ước lượng chi
+				phí CPU, I/O, tốc độ đọc đĩa, v.v.
+				
+			Khi bạn chạy:
+
+				SELECT * FROM sys.aux_stats$;
+
+				→ bạn đang xem toàn bộ dữ liệu thống kê về hiệu năng phần cứng mà Oracle lưu
+				trữ để tối ưu hóa truy vấn.
+				
+			Cấu trúc bảng SYS.AUX_STATS$
+
+				Bảng này có các cột chính như sau:
+
+					Cột	 		Kiểu dữ liệu	Ý nghĩa
+					SNAME		VARCHAR2		Tên nhóm thống kê (ví dụ: SYSSTATS_MAIN, SYSSTATS_INFO)
+					PNAME		VARCHAR2		Tên thông số cụ thể (ví dụ: CPUSPEEDNW, IOSEEKTIM)
+					PVAL1		NUMBER			Giá trị số của thống kê (ví dụ: 1700, 10, 4096, ...)
+					PVAL2		VARCHAR2		Giá trị phụ (ít dùng, đôi khi null)
+					
+			Các nhóm thống kê chính trong SYS.AUX_STATS$
+
+				Sau khi thu thập, bạn sẽ thấy 2 nhóm lớn:
+
+					Nhóm 1 — SYSSTATS_MAIN
+
+						Đây là System Statistics chính (quan trọng nhất cho Optimizer).
+
+						PNAME		Ý nghĩa											Mô tả
+						CPUSPEEDNW	Tốc độ CPU (Noworkload)							Oracle đo tốc độ CPU khi không có workload.
+						IOSEEKTIM	Thời gian tìm I/O (ms)							Mất bao lâu để “seek” đến block dữ liệu.
+						IOTFRSPEED	Tốc độ truyền I/O (bytes/ms)					Tốc độ đọc dữ liệu từ đĩa.
+						SREADTIM	Thời gian đọc đơn block							Dành cho workload-based stats.
+						MREADTIM	Thời gian đọc nhiều block (multi-block read).	
+						CPUSPEED	Tốc độ CPU (Workload-based)						Ghi nhận từ thực tế truy vấn khi chạy START/STOP.
+						MBRC		Multi Block Read Count							Số block trung bình đọc được trong một lần I/O.
+						MAXTHR		Max Throughput									Tốc độ tối đa hệ thống có thể xử lý I/O.
+						SLAVETHR	Slave Throughput								Tốc độ đọc ghi khi song song (Parallel Query).
+						
+					Nhóm 2 — SYSSTATS_INFO
+
+						Chứa thông tin meta (về thời gian thu thập, người thu thập, v.v.).
+
+						PNAME	Ý nghĩa					Ví dụ
+						STATUS	Trạng thái thống kê		‘COMPLETED’ hoặc ‘IN PROGRESS’
+						DSTART	Ngày bắt đầu thu thập	19-OCT-25
+						DSTOP	Ngày kết thúc thu thập	19-OCT-25
+						FLAGS	Thông tin nội bộ		Dùng bởi Oracle engine
+						
+			Oracle Optimizer dùng dữ liệu này như thế nào
+
+				Optimizer dựa trên system statistics để tính “cost” khi quyết định kế hoạch truy vấn.
+
+				Ví dụ:
+
+					Tình huống							Oracle sử dụng giá trị nào
+					Tính chi phí CPU					CPUSPEED hoặc CPUSPEEDNW
+					Ước lượng chi phí I/O				IOSEEKTIM, IOTFRSPEED, SREADTIM, MREADTIM
+					Tính toán hiệu năng đọc song song	MBRC, MAXTHR, SLAVETHR
+
+					→ Nhờ đó, Oracle chọn chính xác giữa Full Table Scan, Index Scan, hay Nested Loop Join.
+					
+		- sql: exec dbms_stats.gather_table_stats(ownname => 'SH', tabname => 'SALES', cascade=> true);
+		
+			Lệnh này dùng để thu thập thống kê (statistics) cho bảng SALES trong schema SH.
+			
+			Các thống kê này bao gồm:
+
+				Số lượng hàng (rows)
+
+				Số lượng block
+
+				Kích thước dữ liệu
+
+				Giá trị khác biệt (distinct) trong từng cột
+
+				Tần suất null, giá trị phổ biến (histogram)
+
+				Và nếu có cascade => true → cả thống kê cho chỉ mục (indexes) liên quan
+				cũng được thu thập.
+				
+			Những thống kê này là “nguyên liệu đầu vào” để Oracle Cost-Based Optimizer (CBO)
+			chọn kế hoạch truy vấn tốt nhất.
+			
+			Cấu trúc cú pháp chi tiết:
+			
+				DBMS_STATS.GATHER_TABLE_STATS(
+				   ownname   IN VARCHAR2,   -- Tên schema
+				   tabname   IN VARCHAR2,   -- Tên bảng
+				   partname  IN VARCHAR2 DEFAULT NULL,  -- (tuỳ chọn) thu thập riêng partition
+				   estimate_percent IN NUMBER DEFAULT NULL, -- % dữ liệu mẫu (sample)
+				   method_opt IN VARCHAR2 DEFAULT 'FOR ALL COLUMNS SIZE AUTO', -- histogram
+				   degree IN NUMBER DEFAULT NULL, -- song song
+				   cascade IN BOOLEAN DEFAULT FALSE, -- có thu thập index không
+				   no_invalidate IN BOOLEAN DEFAULT FALSE -- có invalidate cursor cũ không
+				);
+
+			Những gì Oracle thực sự làm khi chạy lệnh này:
+
+				Khi bạn chạy:
+
+					EXEC DBMS_STATS.GATHER_TABLE_STATS(ownname => 'SH', tabname => 'SALES', cascade => TRUE);
+
+				Oracle thực hiện 4 bước nội bộ sau:
+				
+					Bước 1: Đọc dữ liệu mẫu
+
+						Oracle đọc một phần hoặc toàn bộ dữ liệu từ bảng SALES (tùy thuộc
+						vào estimate_percent).
+
+						Nếu bạn không chỉ định, Oracle tự động chọn tỷ lệ mẫu thích hợp
+						(Adaptive Sampling).
+						
+					Bước 2: Tính toán thống kê bảng
+
+						Oracle lưu các thông tin như:
+
+							Thống kê			Ý nghĩa
+							
+							NUM_ROWS			Số lượng hàng (rows)
+							BLOCKS				Số lượng blocks vật lý chứa dữ liệu
+							AVG_ROW_LEN			Độ dài trung bình của mỗi hàng
+							SAMPLE_SIZE			Số lượng hàng được dùng làm mẫu
+							LAST_ANALYZED		Thời điểm thu thập cuối cùng
+
+						Tất cả được lưu trong bảng dữ liệu hệ thống:
+						
+							DBA_TABLES hoặc USER_TABLES.
+							
+					Bước 3: Thu thập thống kê cho cột (Column Stats)
+
+						Oracle quét dữ liệu từng cột để ghi nhận:
+
+							Thống kê cột			Ý nghĩa
+							
+							NUM_DISTINCT			Số lượng giá trị khác biệt
+							NUM_NULLS				Số lượng giá trị null
+							DENSITY					Tần suất xuất hiện
+							HISTOGRAM				Phân bố giá trị (nếu có)
+
+						Lưu trong DBA_TAB_COLUMNS hoặc USER_TAB_COL_STATISTICS.
+						
+					Bước 4: Thu thập thống kê cho index (do cascade => true)
+
+						Oracle tiếp tục thu thập:
+
+							Thống kê index			Ý nghĩa
+							
+							BLEVEL					Độ sâu cây B-Tree
+							LEAF_BLOCKS				Số lượng block lá
+							DISTINCT_KEYS			Số lượng giá trị khóa duy nhất
+							CLUSTERING_FACTOR		Mức độ trật tự dữ liệu (ảnh hưởng đến index scan cost)
+
+						Lưu trong DBA_INDEXES hoặc USER_INDEXES.
+						
+				Oracle Optimizer dùng thống kê này để làm gì?
+
+					CBO (Cost-Based Optimizer) dựa vào những thống kê này để chọn:
+
+						Có nên dùng Index không?
+
+						Có nên Full Table Scan không?
+
+						Có nên Hash Join, Merge Join, hay Nested Loop không?
+
+						Có nên Parallel Execution hay không?
+
+					Ví dụ:
+
+						Trước khi thu thập								Sau khi thu thập
+						
+						Oracle không biết bảng có bao nhiêu hàng 		Oracle biết rõ số hàng, phân bố dữ liệu 
+						→ có thể chọn sai kế hoạch						→ chọn kế hoạch tối ưu hơn
+						Query chạy chậm									Query chạy nhanh hơn rõ rệt
+						
+		- sql: select * from dba_tab_statistics where table_name = 'SALES';
+		
+			Là một truy vấn hệ thống rất quan trọng trong SQL Tuning và quản trị
+			Oracle Database.
+			
+			Nó cho phép bạn xem chi tiết toàn bộ thông tin thống kê (statistics) mà Oracle
+			Optimizer sử dụng cho bảng SALES.
+			
+			Mục đích của câu lệnh:
+
+				Lệnh này truy xuất thông tin thống kê (table statistics) đã được thu
+				thập bởi gói DBMS_STATS cho bảng SALES.
+
+				Nói cách khác:
+				
+					Nó cho bạn biết Oracle Optimizer biết gì về bảng SALES.
+					
+					Những thông tin này được dùng để tính cost, chọn kế hoạch
+					truy vấn (execution plan), và tối ưu hiệu năng SQL.
+					
+			Nguồn dữ liệu: DBA_TAB_STATISTICS
+
+				DBA_TAB_STATISTICS là view động trong Data Dictionary.
+				
+				Nó lưu metadata về các thống kê của tất cả các bảng trong toàn bộ
+				database (DBA-level view).
+
+				Tương tự, bạn còn có các view khác:
+
+					View					Mức truy cập			Mô tả
+					DBA_TAB_STATISTICS		DBA (tất cả user)		Thống kê của tất cả bảng trong DB
+					ALL_TAB_STATISTICS		User có quyền SELECT	Thống kê của các bảng mà user có quyền
+					USER_TAB_STATISTICS		User hiện tại			Thống kê của bảng trong schema hiện tại
+					
+			Giải thích chi tiết từng cột quan trọng trong DBA_TAB_STATISTICS:
+			
+				Cột					Ý nghĩa chi tiết
+				
+				OWNER				Schema (user) chứa bảng, ví dụ 'SH'.
+				TABLE_NAME			Tên bảng, ở đây là 'SALES'.
+				PARTITION_NAME		Nếu bảng được partition, tên partition tương ứng. Nếu không partition thì NULL.
+				OBJECT_TYPE			Loại đối tượng — TABLE, TABLE PARTITION, hoặc TABLE SUBPARTITION.
+				NUM_ROWS			Tổng số dòng (rows) trong bảng. Đây là thống kê cực kỳ quan trọng để CBO tính cost.
+				BLOCKS				Số lượng block dữ liệu mà bảng chiếm trong tablespace.
+				AVG_ROW_LEN			Chiều dài trung bình của một dòng (byte).
+				SAMPLE_SIZE			Số lượng dòng được lấy mẫu khi thu thập thống kê.
+				LAST_ANALYZED		Thời điểm thu thập thống kê gần nhất (SYSDATE tại thời điểm chạy DBMS_STATS).
+				STALE_STATS			Cho biết thống kê có lỗi thời hay không (YES hoặc NO).
+				GLOBAL_STATS		YES nếu thống kê thu thập toàn bảng; NO nếu ước lượng hoặc kế thừa từ partition.
+				USER_STATS			YES nếu người dùng chỉnh tay; NO nếu hệ thống tự thu thập.
+				NOTES				Có thể chứa ghi chú về loại thống kê (ví dụ: incremental stats, locked stats, v.v.).
+				SCOPE				Cho biết phạm vi: GLOBAL hoặc PARTITION.
+				
+			Cách Oracle sử dụng dữ liệu này:
+
+				Các giá trị trong DBA_TAB_STATISTICS được Oracle Optimizer sử dụng để:
+
+					Ước lượng cardinality (số dòng dự kiến) khi thực thi query.
+
+					Tính toán cost cho từng phương án truy vấn.
+
+					Chọn giữa Full Table Scan, Index Range Scan, Hash Join, Nested Loop, v.v.
+
+					Cập nhật tự động khi bạn dùng lệnh:
+
+						EXEC DBMS_STATS.GATHER_TABLE_STATS('SH','SALES');
+						
+			Khi nào nên xem DBA_TAB_STATISTICS:
+			
+				Trường hợp						Mục đích
+				
+				Sau khi chạy DBMS_STATS			Kiểm tra kết quả thu thập có hợp lệ không
+				Khi query chạy chậm				Xem thống kê có lỗi thời (STALE_STATS='YES') hoặc chưa có (NUM_ROWS=NULL)
+				Khi so sánh hiệu năng			So sánh thống kê cũ và mới để xem sự khác biệt
+				Khi cần tuning optimizer		Xem optimizer đang dựa vào dữ liệu gì để tính toán cost
+				
+		- cmd: sqlplus
+		
+			Lệnh sqlplus là công cụ dòng lệnh (command-line tool) của Oracle dùng để kết nối và
+			tương tác với cơ sở dữ liệu Oracle Database. Đây là client truyền thống được sử dụng
+			rất phổ biến cho quản trị viên (DBA), lập trình viên PL/SQL và người học Oracle.
+			
+			Mục đích chính của sqlplus
+
+				SQL*Plus dùng để:
+
+					Kết nối đến cơ sở dữ liệu Oracle
+
+					Thực thi các lệnh SQL (SELECT, INSERT, UPDATE, DELETE, v.v.)
+
+					Chạy các script PL/SQL (*.sql, *.pls…)
+
+					Thực hiện quản trị database (tạo user, phân quyền, thống kê, backup logic,…)
+
+					Hiển thị và kiểm tra kết quả truy vấn
+					
+			Cú pháp chung:
+			
+				sqlplus [username[/password]@[hostname:port/SERVICE_NAME]] [AS SYSDBA]
+				
+				Ví dụ 1: Kết nối thông thường
+
+					sqlplus system/oracle@localhost:1521/orclpdb
+
+				Ví dụ 2: Kết nối với quyền SYSDBA (quản trị cao nhất)
+
+					sqlplus sys/oracle@localhost:1521/orclpdb as sysdba
+
+				Ví dụ 3: Kết nối nội bộ (không cần mật khẩu nếu OS user có quyền)
+
+					sqlplus / as sysdba
+					
+			Một số ví dụ thao tác trong SQL*Plus:
+			
+				Lệnh									Chức năng
+				
+				SELECT * FROM emp;						Truy vấn dữ liệu
+				DESC employees;							Xem cấu trúc bảng
+				SHOW USER;								Hiển thị user hiện tại
+				SHOW PARAMETER db_name;					Xem tham số database
+				START script.sql hoặc @script.sql		Chạy file script
+				EXIT hoặc QUIT							Thoát SQL*Plus
+				
+			Môi trường hoạt động:
+
+				SQL*Plus có thể chạy ở:
+
+					Command Prompt (Windows)
+
+					Terminal (Linux/Unix)
+
+					Oracle SQL Developer (ở tab "SQL Worksheet" — nền tảng đồ họa)
+
+				Mặc định được cài cùng với Oracle Client hoặc Oracle Database.
+				
+		- cmd: sqlplus / as sysdba
+		- sql: alter session set container=orclpdb (da giai thich o tren)	
+		- sql: alter pluggable database open; (da giai thich o tren)
+		- sql: alter pluggable database orclpdb save state; (da giai thich o tren)
+		- sql: alter user hr identified by hr account unlock; (da giai thich o tren)	
+		- sql: SELECT username, account_status FROM dba_users WHERE username = 'HR';
+		
+			Mục đích:
+
+				Câu lệnh này kiểm tra trạng thái tài khoản người dùng HR trong Oracle Database.
+				
+				Cụ thể, nó truy vấn bảng hệ thống DBA_USERS, nơi chứa thông tin về tất cả người
+				dùng (users) trong cơ sở dữ liệu Oracle.		
+		
+		- sql: explain plan for select * from employees;
+	
+			Mục đích của lệnh:
+
+				Lệnh này không thực thi truy vấn, mà dùng để phân tích kế hoạch thực thi (execution plan)
+				mà Oracle Optimizer sẽ sử dụng khi chạy câu lệnh SQL đó.
+
+				Nói cách khác:
+
+					Nó cho bạn biết Oracle sẽ truy cập dữ liệu như thế nào — quét bảng, dùng index, nối
+					bảng (join) kiểu gì, v.v.
+
+			Giải thích từng phần:
+			
+			Thành phần						Giải thích
+			
+			EXPLAIN PLAN FOR				Bảo Oracle lưu kế hoạch thực thi (execution plan) cho câu lệnh SQL theo sau vào bảng hệ thống PLAN_TABLE.
+			SELECT * FROM employees;		Là câu lệnh SQL cần phân tích — ở đây là lấy toàn bộ dữ liệu từ bảng EMPLOYEES.
+			
+			Cơ chế hoạt động
+
+				Khi bạn chạy:
+
+					EXPLAIN PLAN FOR SELECT * FROM employees;
+
+					Oracle không chạy câu SELECT, mà chỉ:
+
+						Phân tích cú pháp (parse) câu SQL.
+
+						Dùng Cost-Based Optimizer (CBO) để xây dựng kế hoạch thực thi tối ưu.
+
+						Ghi kế hoạch này vào bảng PLAN_TABLE (một bảng đặc biệt trong schema hiện tại).
+
+			Xem kế hoạch thực thi
+
+				Sau khi chạy lệnh trên, bạn cần xem kết quả bằng:
+
+					SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+				Lệnh này hiển thị nội dung của PLAN_TABLE dưới dạng dễ đọc.						
+		
+		- sql: select * from plan_table;
+		
+			Mục đích:
+
+				Lệnh này dùng để xem toàn bộ nội dung của bảng PLAN_TABLE, là nơi Oracle lưu trữ tạm thời các
+				kế hoạch thực thi (execution plans) được tạo ra bởi lệnh:
+
+					EXPLAIN PLAN FOR <câu lệnh SQL>;
+
+				Nói ngắn gọn:
+
+					PLAN_TABLE là bảng hệ thống (system table) chứa chi tiết về cách Oracle dự định thực hiện câu SQL,
+					và lệnh SELECT * FROM plan_table; giúp xem tất cả các bản ghi kế hoạch đã được lưu trong đó.
+
+			Giải thích từng phần:
+			
+				Thành phần				Giải thích
+				
+				SELECT *				Chọn toàn bộ các cột trong bảng.
+				FROM plan_table			Lấy dữ liệu từ bảng PLAN_TABLE – nơi chứa kết quả của các lệnh EXPLAIN PLAN.
+
+			Về bảng PLAN_TABLE
+
+				PLAN_TABLE là bảng metadata đặc biệt, thường được tạo sẵn bởi script Oracle (utlxplan.sql).
+
+				Khi bạn thực hiện:
+
+					EXPLAIN PLAN FOR SELECT * FROM employees;
+
+
+				thì Oracle ghi dữ liệu vào PLAN_TABLE — ví dụ như loại thao tác (TABLE ACCESS, INDEX SCAN), thứ
+				tự thực hiện, chi phí ước tính, v.v.
+
+			Cấu trúc phổ biến của PLAN_TABLE:
+
+				Một số cột quan trọng trong PLAN_TABLE:
+
+				Cột				Ý nghĩa
+				
+				STATEMENT_ID	Mã định danh cho kế hoạch (có thể rỗng nếu không chỉ định).
+				PLAN_ID			ID của kế hoạch thực thi.
+				TIMESTAMP		Thời điểm ghi kế hoạch.
+				OPERATION		Loại thao tác (SELECT STATEMENT, TABLE ACCESS FULL, INDEX RANGE SCAN, v.v.).
+				OPTIONS	Tùy 	chọn của thao tác (ví dụ: FULL, UNIQUE, RANGE).
+				OBJECT_NAME		Tên bảng hoặc index mà thao tác áp dụng.
+				OBJECT_TYPE		Kiểu đối tượng (TABLE, INDEX, VIEW, …).
+				ID				Số thứ tự (mức) của bước trong kế hoạch.
+				PARENT_ID		Chỉ ra bước cha (để xác định thứ tự thực thi).
+				COST, CARDINALITY, BYTES	Thông tin ước lượng về chi phí, số dòng và kích thước dữ liệu.
+				
+			Khi nào dùng SELECT * FROM PLAN_TABLE:
+			
+				Dùng khi:
+
+					Bạn muốn xem dữ liệu thô (raw) mà EXPLAIN PLAN ghi ra.
+
+					Bạn muốn kiểm tra nhiều kế hoạch thực thi khác nhau nếu bạn đã chạy nhiều lệnh EXPLAIN PLAN liên tiếp.
+
+				Tuy nhiên:
+
+				Kết quả SELECT * FROM plan_table; khó đọc vì có quá nhiều cột kỹ thuật.
+				
+				Thường người ta dùng cách hiển thị đẹp hơn:
+
+					SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+					Cách này định dạng kế hoạch rõ ràng, dễ hiểu và sắp xếp theo thứ tự thực thi.
+
+		- sql: select * from table(dbms_xplan.display());
+		 
+			Mục đích
+
+				Lệnh này được dùng để hiển thị kế hoạch thực thi (execution plan) của câu SQL mà bạn
+				vừa phân tích bằng:
+
+					EXPLAIN PLAN FOR <câu_lệnh_SQL>;
+
+
+				Nói ngắn gọn:
+
+					Đây là cách đọc kế hoạch thực thi trong Oracle dưới dạng đẹp, rõ ràng và dễ hiểu, thay vì
+					xem dữ liệu thô trong PLAN_TABLE.
+
+			Giải thích từng phần
+			
+				Thành phần				Giải thích
+				DBMS_XPLAN				Là package (gói PL/SQL) do Oracle cung cấp để hiển thị các execution plan.
+				DISPLAY()				Là hàm trong gói DBMS_XPLAN — đọc dữ liệu từ bảng PLAN_TABLE và trả về kế
+										hoạch thực thi được định dạng rõ ràng.
+				TABLE()					Là hàm chuyển đổi (table function) giúp Oracle có thể trả về kết quả nhiều
+										dòng (vì DBMS_XPLAN.DISPLAY() trả về một tập hợp dòng dạng bảng).
+				SELECT * FROM ...		Lấy toàn bộ nội dung mà hàm DBMS_XPLAN.DISPLAY() trả về để hiển thị trên màn hình.
+			
+			Trình tự sử dụng chuẩn
+
+				Phân tích kế hoạch thực thi (tạo plan trong PLAN_TABLE):
+
+					EXPLAIN PLAN FOR SELECT * FROM employees;
+
+				Hiển thị kế hoạch đó:
+
+					SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+
+			Kết quả hiển thị ví dụ
+
+				Khi bạn chạy lệnh trên, kết quả có thể như sau:
+
+				------------------------------------------------------------------------------------
+				| Id | Operation          | Name       | Rows | Bytes | Cost (%CPU)| Time          |
+				------------------------------------------------------------------------------------
+				|  0 | SELECT STATEMENT   |            |  100 |  8700 |     4   (0)| 00:00:01      |
+				|  1 |  TABLE ACCESS FULL | EMPLOYEES  |  100 |  8700 |     4   (0)| 00:00:01      |
+				------------------------------------------------------------------------------------
+
+			Ý nghĩa các cột
+			
+				Cột			Ý nghĩa
+				
+				Id			Thứ tự hoặc cấp độ của bước trong kế hoạch
+				Operation	Loại thao tác mà Oracle thực hiện (SELECT, TABLE ACCESS, INDEX SCAN, …)
+				Name		Tên bảng hoặc chỉ mục (index) được dùng
+				Rows		Số lượng dòng Oracle ước lượng xử lý
+				Bytes		Kích thước dữ liệu tương ứng
+				Cost		Chi phí ước tính để thực thi bước này (Cost-Based Optimizer tính toán)
+				Time		Thời gian ước tính để hoàn tất
+			
+			Các tham số nâng cao (tùy chọn của DISPLAY())
+
+				Bạn có thể tùy chỉnh cách hiển thị bằng cách truyền tham số:
+
+					SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY(
+					   table_name => 'PLAN_TABLE',   -- tên bảng chứa kế hoạch
+					   statement_id => NULL,         -- ID kế hoạch (nếu có nhiều kế hoạch trong bảng)
+					   format => 'ALL'               -- mức độ chi tiết ('BASIC', 'TYPICAL', 'ALL')
+					));
+
+				Ví dụ:
+
+					SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY(NULL, NULL, 'ALL'));
+
+					→ Hiển thị toàn bộ thông tin chi tiết nhất.
+
+			So sánh nhanh với SELECT * FROM PLAN_TABLE;
+			
+				Tiêu chí			SELECT * FROM PLAN_TABLE				SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY())
+				Dữ liệu hiển thị	Dạng thô, nhiều cột kỹ thuật			Dạng bảng gọn gàng, dễ đọc
+				Mục đích			Kiểm tra dữ liệu raw trong PLAN_TABLE	Đọc và phân tích kế hoạch thực thi
+				Dễ hiểu				❌ Khó đọc								✅ Rất rõ ràng
+				
+		- sql: EXPLAIN PLAN SET statement_id = 'MyID' FOR SELECT * FROM employees WHERE employee_id= 100;
+		
+			Lệnh bạn hỏi là một phiên bản mở rộng của EXPLAIN PLAN, rất hay dùng khi ta muốn quản lý nhiều Execution Plan
+			cùng lúc trong bảng PLAN_TABLE.
+			
+			Cú pháp tổng quát của EXPLAIN PLAN:
+			
+				EXPLAIN PLAN 
+				  [SET STATEMENT_ID = 'some_id']
+				  [INTO table_name]
+				FOR <SQL_statement>;
+
+				Trong đó:
+
+					SET STATEMENT_ID → gán một nhãn (ID) để phân biệt kế hoạch này với các kế hoạch khác.
+
+					INTO table_name → chỉ định bảng nào để lưu plan (thường là PLAN_TABLE).
+
+					FOR <SQL> → chỉ định câu SQL bạn muốn Oracle phân tích.
+					
+			Cụ thể với ví dụ của bạn:
+			
+				EXPLAIN PLAN 
+				SET statement_id = 'MyID'
+				FOR 
+				SELECT * FROM employees WHERE employee_id = 100;
+
+				Ý nghĩa từng phần:
+				
+					Thành phần												Giải thích
+					EXPLAIN PLAN											Yêu cầu Oracle phân tích (nhưng không thực thi) câu SQL phía
+																			sau để xem Oracle dự định chạy nó như thế nào.
+					SET statement_id = 'MyID'								Đặt tên (ID) cho plan này là 'MyID' — nó sẽ được lưu trong
+																			cột STATEMENT_ID của bảng PLAN_TABLE. Dùng để phân biệt nếu
+																			bạn có nhiều kế hoạch khác nhau.
+					FOR SELECT * FROM employees WHERE employee_id = 100;	Đây là câu SQL mà bạn muốn Oracle lập kế hoạch thực thi cho.
+					
+			Kết quả Oracle làm gì phía sau?
+
+				Khi chạy lệnh trên, Oracle sẽ:
+
+					Phân tích câu SQL (SELECT * FROM employees WHERE employee_id = 100).
+
+					Tạo Execution Plan cho câu đó.
+
+					Ghi dữ liệu kế hoạch vào bảng PLAN_TABLE (mặc định trong schema hiện tại).
+
+					Gắn nhãn cho kế hoạch bằng STATEMENT_ID = 'MyID'.
+
+			Làm sao xem kết quả của kế hoạch này?
+
+				Bạn có hai cách xem lại:
+
+				🔹 Cách 1: Xem thô từ bảng PLAN_TABLE
+				
+					SELECT * FROM plan_table WHERE statement_id = 'MyID';
+
+
+					→ Oracle sẽ trả về các cột như:
+
+						STATEMENT_ID (ở đây là 'MyID')
+
+						PLAN_ID
+
+						OPERATION
+
+						OPTIONS
+
+						OBJECT_NAME
+
+						COST, CARDINALITY, DEPTH, …
+
+				🔹 Cách 2: Xem dạng đẹp bằng DBMS_XPLAN
+				
+					SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY(NULL, 'MyID', 'TYPICAL'));
+
+
+					Giải thích các tham số:
+
+						NULL: vì bạn dùng bảng PLAN_TABLE mặc định.
+
+						'MyID': là statement_id bạn đã đặt lúc EXPLAIN PLAN.
+
+						'TYPICAL': kiểu hiển thị (có thể dùng 'ALL', 'BASIC', 'SERIAL', ...).
+						
+				Tại sao cần STATEMENT_ID?
+
+					Vì PLAN_TABLE là bảng dùng chung (Oracle chỉ có một trong mỗi schema).
+					Nếu bạn chạy nhiều EXPLAIN PLAN cho các câu SQL khác nhau, mà không gán statement_id, chúng có thể đè lên nhau hoặc lẫn lộn.
+
+					→ Khi bạn gán statement_id, bạn có thể:
+
+						Phân biệt từng plan.
+
+						So sánh nhiều plan khác nhau.
+
+						Dễ xoá plan cũ:
+
+							DELETE FROM plan_table WHERE statement_id = 'MyID';
+				
+		- sql:
+			 
+			exec dbms_stats.gather_database_stats;
+			exec dbms_stats.gather_dictionary_stats;
+			exec dbms_stats.gather_schema_stats(ownname => 'SH');
+			exec dbms_stats.gather_table_stats(ownname => 'SH', tabname => 'SALES', cascade=>true);
+			select * from user_part_col_statistics;
+			select * from dba_tab_statistics where table_name = 'SALES';
+			 
+			select * from	DBA_TABLES; 
+			select * from	DBA_TAB_STATISTICS;
+			select * from                   DBA_TAB_COL_STATISTICS; 
+			select * from	DBA_INDEXES; 
+			select * from	DBA_CLUSTERS; 
+			select * from	DBA_TAB_PARTITIONS; 
+			select * from	DBA_IND_PARTITIONS; 
+			select * from	DBA_PART_COL_STATISTICS;
+			
+		- sql: set autotrace traceonly explain;
+		
+			Là một tùy chọn trong SQL*Plus hoặc SQL Developer dùng để phân tích kế hoạch thực thi (execution plan)
+			của câu lệnh SQL mà không thực sự chạy nó.
+			
+			👉 Nói cách khác: nó cho bạn xem Oracle sẽ chạy câu lệnh như thế nào, nhưng không tốn thời gian thực thi thực tế.
+
+			Giải thích chi tiết từng phần
+			
+				1. SET AUTOTRACE
+
+					Là một lệnh môi trường trong SQL*Plus/SQL Developer, dùng để tự động hiển thị thông tin
+					truy vết (trace) sau mỗi câu lệnh SQL.
+
+					Tính năng này cho phép bạn xem:
+
+					Execution plan (kế hoạch thực thi)
+
+					Statistics (thống kê thực thi) — như số block đọc, số hàng xử lý, v.v.
+
+				2. TRACEONLY
+
+					Nghĩa là: không hiển thị kết quả dữ liệu thật từ câu lệnh SQL.
+
+					Oracle sẽ phân tích và hiển thị thông tin truy vết, nhưng không chạy truy vấn thực sự để
+					lấy dữ liệu.
+
+					✅ Tác dụng: nhanh hơn, không ảnh hưởng đến dữ liệu thật (đặc biệt hữu ích khi bạn chỉ muốn
+					kiểm tra hiệu năng, không muốn đọc hàng triệu bản ghi).
+
+				3. EXPLAIN
+
+					Chỉ hiển thị execution plan (kế hoạch thực thi).
+
+					Không hiển thị thống kê thực tế (như buffer gets, physical reads, etc.).
+
+					Dựa trên EXPLAIN PLAN nội bộ của Oracle, tương tự như bạn chạy thủ công:
+
+						EXPLAIN PLAN FOR <your query>;
+						SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+
+		- sql: SQL > set linesize 200;
+		
+			Được dùng trong SQL*Plus (hoặc SQL Developer ở chế độ SQL Worksheet / SQL*Plus compatible) để
+			điều chỉnh độ rộng của dòng hiển thị kết quả truy vấn.
+
+			🧠 Giải thích chi tiết:
+
+				LINESIZE (hay viết tắt là LINES) quy định số ký tự tối đa trên mỗi dòng khi hiển thị kết quả trong cửa sổ SQL*Plus.
+
+				Mặc định, LINESIZE thường là 80 ký tự.
+				→ Nếu kết quả truy vấn có dòng dài hơn 80 ký tự, SQL*Plus sẽ tự động xuống dòng.
+				→ Điều này khiến bảng bị vỡ cột, khó đọc hoặc không căn thẳng hàng.
+				
+		- sql: SQL> set autotrace traceonly statistics;
+		
+			Là một lệnh trong SQL*Plus (hoặc SQL Developer ở chế độ SQL*Plus) dùng để phân tích hiệu năng của truy
+			vấn SQL — nhưng chỉ hiển thị phần thống kê (statistics) mà không hiển thị dữ liệu truy vấn.
+			
+		- sql: SQL> set autotrace traceonly;
+		
+			Là một lệnh trong SQL*Plus (và có thể dùng trong SQL Developer ở chế độ SQL*Plus) dùng để phân tích hiệu
+			năng của truy vấn SQL, hiển thị Execution Plan và thống kê (Statistics), nhưng KHÔNG hiển thị dữ liệu
+			truy vấn.
+			
+		- sql: SQL> set autotrace on;
+		
+			Là một lệnh trong SQL*Plus (công cụ dòng lệnh của Oracle) dùng để bật Autotrace. Đây là cách nhanh chóng
+			để xem thống kê thực thi và kế hoạch thực hiện (execution plan) của một truy vấn SQL mà không cần phải
+			chạy các lệnh phức tạp như EXPLAIN PLAN.
+			
+			Sau khi chạy, bạn sẽ thấy:
+
+				Kết quả truy vấn (dữ liệu của employee_id=100)
+
+				Kế hoạch thực thi truy vấn
+
+				Thống kê chi tiết (logical reads, physical reads, CPU, v.v.)
+
+		- sql:
+		
+			Là một truy vấn Oracle để lấy dữ liệu từ view V$SQL. Đây là một view hệ thống (dynamic performance view)
+			quan trọng trong Oracle, chứa thông tin về tất cả các câu lệnh SQL đã được thực thi trong bộ nhớ shared pool.
+			
+			v$sql là gì?
+
+				Là Dynamic Performance View (còn gọi là V$ view).
+
+				Lưu trữ mọi câu lệnh SQL hiện đang ở Shared Pool, bao gồm:
+
+					Truy vấn SELECT
+
+					Câu lệnh INSERT, UPDATE, DELETE
+
+					Các PL/SQL block
+
+				Mỗi hàng đại diện cho một statement SQL đã được parse (biên dịch) trong bộ nhớ.
+				
+			Thông tin chứa trong v$sql
+
+				Một số cột quan trọng:
+
+					SQL_ID: Mã định danh duy nhất của câu lệnh SQL trong shared pool.
+
+					CHILD_NUMBER: Số con của câu lệnh (nếu cùng SQL nhưng parse nhiều lần với các bind variable khác nhau).
+
+					SQL_TEXT: Nội dung câu lệnh SQL.
+
+					EXECUTIONS: Số lần câu lệnh này được thực thi.
+
+					ELAPSED_TIME: Tổng thời gian thực thi câu lệnh (nano giây).
+
+					BUFFER_GETS: Số lượng block logical đã đọc (đánh giá I/O).
+
+					DISK_READS: Số block vật lý đọc từ đĩa.
+
+					ROWS_PROCESSED: Số dòng đã trả về hoặc thao tác.
+
+			Mục đích sử dụng
+
+				Phân tích hiệu suất SQL: Xem câu lệnh nào tốn nhiều CPU, đọc nhiều block, hay chạy chậm.
+
+				Tối ưu hóa truy vấn: Kết hợp với V$SQL_PLAN để xem kế hoạch thực thi của SQL đó.
+
+				Theo dõi activity trong shared pool: Quản lý bộ nhớ và cache của Oracle.
+						
+	- Xem optimizer statistics:
+	
+		Danh sách các bảng hệ thống mà người dùng có thể truy cập để xem thông tin thống kê:
+		
+			DBA_TABLES: Chứa thông tin về các bảng trong cơ sở dữ liệu.
+			
+			DBA_TAB_STATISTICS: Chứa thống kê cho từng bảng.
+			
+			DBA_TAB_COL_STATISTICS: Chứa thống kê cho các cột trong bảng.
+			
+			DBA_INDEXES: Chứa thông tin về các chỉ mục trong cơ sở dữ liệu.
+			
+			DBA_CLUSTERS: Chứa thông tin về các cluster trong cơ sở dữ liệu.
+			
+			DBA_IND_PARTITIONS: Thông tin về các phân vùng của chỉ mục.
+			
+			DBA_TAB_PARTITIONS: Thông tin về các phân vùng của bảng.
+			
+			DBA_PART_COL_STATISTICS: Thống kê cho các cột trong các phân vùng.
+			
+			
+			
+			
+			
+			USER_TABLES: Chứa thông tin về các bảng thuộc sở hữu của người dùng hiện tại.
+			
+			USER_TAB_STATISTICS: Cung cấp thống kê cho các bảng của người dùng hiện tại.
+			
+			USER_TAB_COL_STATISTICS: Cung cấp thống kê cho các cột trong các bảng của người dùng hiện tại.
+			
+			USER_INDEXES: Thông tin về các chỉ mục thuộc sở hữu của người dùng hiện tại.
+			
+			USER_CLUSTERS: Thông tin về các cluster thuộc sở hữu của người dùng hiện tại.
+			
+			USER_TAB_PARTITIONS: Thông tin về các phân vùng của bảng thuộc sở hữu của người dùng hiện tại.
+			
+			USER_IND_PARTITIONS: Thông tin về các phân vùng chỉ mục thuộc sở hữu của người dùng hiện tại.
+			
+			USER_PART_COL_STATISTICS: Thống kê cho các cột trong các phân vùng của người dùng hiện tại.
+			
+			
+			
+			
+			ALL_TABLES: Chứa thông tin về tất cả các bảng mà người dùng có quyền truy cập, không chỉ
+						các bảng thuộc sở hữu của người dùng hiện tại.
+			
+			ALL_TAB_STATISTICS: Cung cấp thống kê cho tất cả các bảng mà người dùng có quyền truy cập.
+			
+			ALL_TAB_COL_STATISTICS: Cung cấp thống kê cho các cột trong tất cả các bảng mà người
+									dùng có quyền truy cập.
+			
+			ALL_INDEXES: Thông tin về tất cả các chỉ mục mà người dùng có quyền truy cập.
+			
+			ALL_CLUSTERS: Thông tin về tất cả các cluster mà người dùng có quyền truy cập.
+			
+			ALL_TAB_PARTITIONS: Thông tin về các phân vùng của bảng mà người dùng có quyền truy cập.
+			
+			ALL_IND_PARTITIONS: Thông tin về các phân vùng chỉ mục mà người dùng có quyền truy cập.
+			
+			ALL_PART_COL_STATISTICS: Thống kê cho các cột trong tất cả các phân vùng mà người dùng
+									 có quyền truy cập.
+									 
+									 
+	Execution Plans & Statistics - Vì sao trước đó sqlplus hr/hr KHÔNG đăng nhập được?
+	
+		Vì sao trước đó sqlplus hr/hr KHÔNG đăng nhập được?
+	
+			Khi bạn chỉ gõ:
+
+				sqlplus hr/hr
+
+			Oracle mặc định kết nối tới CDB$ROOT (container gốc) của instance.
+			
+			Mà schema HR không tồn tại trong CDB$ROOT, nó chỉ tồn tại trong Pluggable Database (PDB) có tên ORCLPDB.
+			
+			=> Kết quả: Oracle báo ORA-01017: invalid username/password (do không tìm thấy user trong container hiện tại).
+			
+		Vì sao sqlplus hr/hr@localhost:1521/orclpdb hoạt động?
+
+			Câu lệnh này đã chỉ rõ tường minh PDB đích qua connect string:
+
+				@localhost:1521/orclpdb
+
+					localhost = máy cục bộ của bạn
+
+					1521 = cổng lắng nghe mặc định của Oracle Listener
+
+					orclpdb = service name của PDB chứa schema HR
+
+			Oracle lúc này hiểu:
+
+				“Hãy kết nối tới PDB có tên orclpdb, và đăng nhập user hr bằng mật khẩu hr trong PDB đó.”
+
+			HR tồn tại trong PDB này → đăng nhập thành công.
+		
+		Hiểu bản chất của kiến trúc CDB / PDB
+
+			Từ Oracle 12c trở đi, kiến trúc multitenant chia database thành:
+
+			Thành phần				Vai trò									Chứa gì
+			
+			CDB$ROOT				Container gốc (giống hệ điều hành)		Metadata, dictionary, views hệ thống
+			PDB (ví dụ: ORCLPDB)	Database con (giống máy ảo)				Các schemas thật: HR, SH, OE, ...
+
+			Mỗi PDB hoạt động độc lập, có người dùng, tablespace, dữ liệu riêng.
+			
+		Khi nào cần dùng cú pháp @localhost:1521/orclpdb
+
+			Luôn dùng khi:
+
+				Bạn làm việc với schema dữ liệu (HR, SH, OE, …)
+
+				Bạn muốn import/export (Data Pump)
+
+				Bạn kết nối qua ứng dụng, JDBC, SQL Developer, hay SQL*Plus
+				
+	Execution Plans & Statistics - So sánh SELECT * FROM PLAN_TABLE; và SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+	
+		EXPLAIN PLAN FOR ... tạo ra cái gì?
+
+			Khi bạn chạy:
+
+				EXPLAIN PLAN FOR SELECT * FROM employees WHERE employee_id = 100;
+
+			Oracle không chạy câu query thật, mà phân tích và ghi kế hoạch thực thi (execution plan) vào bảng
+			PLAN_TABLE (mặc định là PLAN_TABLE$ hoặc PLAN_TABLE trong schema của bạn).
+			
+		SELECT * FROM PLAN_TABLE;
+
+			Câu này đọc trực tiếp dữ liệu thô trong bảng PLAN_TABLE.
+			
+			Nó hiển thị các cột kỹ thuật mà Oracle lưu vào — ví dụ:
+
+				| STATEMENT_ID | PLAN_ID | OPERATION | OPTIONS | OBJECT_NAME | COST | ... |
+				|---------------|----------|------------|----------|--------------|------|
+				| (null) | 2 | SELECT STATEMENT | | | |
+				| (null) | 2 | TABLE ACCESS | BY INDEX ROWID | EMPLOYEES | |
+				| (null) | 2 | INDEX | UNIQUE SCAN | EMP_EMP_ID_PK | |
+
+			🔹 Ưu điểm:
+
+				Cho bạn xem mọi cột chi tiết Oracle lưu (PLAN_ID, DEPTH, PARENT_ID, COST, CARDINALITY…).
+
+				Dữ liệu “raw”, nên có thể dùng cho phân tích sâu hoặc tool tự động.
+
+			🔹 Nhược điểm:
+
+				Rất khó đọc — vì dữ liệu thô, không có indent, không trình bày dạng cây (tree structure).
+
+				Không có “Note” hoặc thông tin dễ hiểu như dbms_xplan.
+				
+		SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+
+			Đây là hàm hiển thị (display) kế hoạch thực thi được format đẹp từ PLAN_TABLE.
+
+			Oracle cung cấp gói DBMS_XPLAN để:
+
+				Đọc dữ liệu từ PLAN_TABLE.
+
+				Format lại thành cây kế hoạch dễ hiểu, có indent và chú thích.
+
+			Ví dụ:
+
+				EXPLAIN PLAN FOR SELECT * FROM employees WHERE employee_id = 100;
+				SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+
+
+				Kết quả:
+
+					Plan hash value: 395616093
+
+					---------------------------------------------------------------------------------
+					| Id  | Operation                   | Name          | Rows | Bytes | Cost (%CPU)|
+					---------------------------------------------------------------------------------
+					|   0 | SELECT STATEMENT            |               |     1|    13 |     2   (0) |
+					|   1 |  TABLE ACCESS BY INDEX ROWID| EMPLOYEES     |     1|    13 |     2   (0) |
+					|   2 |   INDEX UNIQUE SCAN         | EMP_EMP_ID_PK |     1|       |     1   (0) |
+					---------------------------------------------------------------------------------
+
+
+			🔹 Ưu điểm:
+
+				Dễ đọc (có indent thể hiện quan hệ cha–con).
+
+				Có thêm thông tin như Rows, Cost, CPU, và Plan hash value.
+
+				Chuẩn format khi bạn xem Execution Plan trong thực tế.
+
+			🔹 Nhược điểm:
+
+				Không hiển thị tất cả cột kỹ thuật như bảng gốc.
+
+
+	- Code khi thực thi lệnh:
+	
+		Case 1:
+		
+			explain plan for select * from employees where employee_id = 100;
+
+			select * from table(dbms_xplan.display());
+			
+				Plan hash value: 1833546154
+				 
+				---------------------------------------------------------------------------------------------
+				| Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |
+				---------------------------------------------------------------------------------------------
+				|   0 | SELECT STATEMENT            |               |     1 |    69 |     1   (0)| 00:00:01 |
+				|   1 |  TABLE ACCESS BY INDEX ROWID| EMPLOYEES     |     1 |    69 |     1   (0)| 00:00:01 |
+				|*  2 |   INDEX UNIQUE SCAN         | EMP_EMP_ID_PK |     1 |       |     0   (0)| 00:00:01 |
+				---------------------------------------------------------------------------------------------
+				 
+				Predicate Information (identified by operation id):
+				---------------------------------------------------
+				 
+				   2 - access("EMPLOYEE_ID"=100)
+				   
+			select * from plan_table;
+			
+				"STATEMENT_ID"                "PLAN_ID"                     "TIMESTAMP"                   "REMARKS"                     "OPERATION"                   "OPTIONS"                     "OBJECT_NODE"                 "OBJECT_OWNER"                "OBJECT_NAME"                 "OBJECT_ALIAS"           
+				""                            "2"                           "19-OCT-25"                   ""                            "SELECT STATEMENT"            ""                            ""                            ""                            ""                            ""                       
+				""                            "2"                           "19-OCT-25"                   ""                            "TABLE ACCESS"                "BY INDEX ROWID"              ""                            "HR"                          "EMPLOYEES"                   """EMPLOYEES""@""SEL$1"""
+				""                            "2"                           "19-OCT-25"                   ""                            "INDEX"                       "UNIQUE SCAN"                 ""                            "HR"                          "EMP_EMP_ID_PK"               """EMPLOYEES""@""SEL$1"""
+			
+		Case 2:
+		
+			EXPLAIN PLAN SET statement_id = 'MyID' FOR SELECT * FROM employees WHERE employee_id= 100;
+
+			select * from table(dbms_xplan.display());
+
+				Plan hash value: 1833546154
+				 
+				---------------------------------------------------------------------------------------------
+				| Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |
+				---------------------------------------------------------------------------------------------
+				|   0 | SELECT STATEMENT            |               |     1 |    69 |     1   (0)| 00:00:01 |
+				|   1 |  TABLE ACCESS BY INDEX ROWID| EMPLOYEES     |     1 |    69 |     1   (0)| 00:00:01 |
+				|*  2 |   INDEX UNIQUE SCAN         | EMP_EMP_ID_PK |     1 |       |     0   (0)| 00:00:01 |
+				---------------------------------------------------------------------------------------------
+				 
+				Predicate Information (identified by operation id):
+				---------------------------------------------------
+				 
+				   2 - access("EMPLOYEE_ID"=100)
+
+		Case 3:
+		
+			set autotrace traceonly explain;
+		
+			SQL> set linesize 200;
+			
+			SQL> select * from sales s, customers c where s.cust_id = c.cust_id and s.cust_id = 987;
+
+				Execution Plan
+				----------------------------------------------------------
+				Plan hash value: 1438316797
+
+				------------------------------------------------------------------------------------------------------------------------------
+				| Id  | Operation                                   | Name           | Rows  | Bytes | Cost (%CPU)| Time     | Pstart| Pstop |
+				------------------------------------------------------------------------------------------------------------------------------
+				|   0 | SELECT STATEMENT                            |                |   130 | 27300 |    56   (0)| 00:00:01 |       |       |
+				|*  1 |  HASH JOIN                                  |                |   130 | 27300 |    56   (0)| 00:00:01 |       |       |
+				|   2 |   TABLE ACCESS BY INDEX ROWID               | CUSTOMERS      |     1 |   181 |     2   (0)| 00:00:01 |       |       |
+				|*  3 |    INDEX UNIQUE SCAN                        | CUSTOMERS_PK   |     1 |       |     1   (0)| 00:00:01 |       |       |
+				|   4 |   PARTITION RANGE ALL                       |                |   130 |  3770 |    54   (0)| 00:00:01 |     1 |    28 |
+				|   5 |    TABLE ACCESS BY LOCAL INDEX ROWID BATCHED| SALES          |   130 |  3770 |    54   (0)| 00:00:01 |     1 |    28 |
+				|   6 |     BITMAP CONVERSION TO ROWIDS             |                |       |       |            |          |       |       |
+				|*  7 |      BITMAP INDEX SINGLE VALUE              | SALES_CUST_BIX |       |       |            |          |     1 |    28 |
+				------------------------------------------------------------------------------------------------------------------------------
+
+				Predicate Information (identified by operation id):
+				---------------------------------------------------
+
+				   1 - access("S"."CUST_ID"="C"."CUST_ID")
+				   3 - access("C"."CUST_ID"=987)
+				   7 - access("S"."CUST_ID"=987)
+
+		Case 4:
+		
+			SQL> set autotrace traceonly statistics;
+			SQL> select * from sales s, customers c where s.cust_id = c.cust_id and s.cust_id = 987;
+
+			180 rows selected.
+
+
+			Statistics
+			----------------------------------------------------------
+					  0  recursive calls
+					  0  db block gets
+					195  consistent gets
+					  4  physical reads
+					484  redo size
+				  13193  bytes sent via SQL*Net to client
+					565  bytes received via SQL*Net from client
+					 13  SQL*Net roundtrips to/from client
+					  0  sorts (memory)
+					  0  sorts (disk)
+					180  rows processed
+
+		Case 5:
+		
+			SQL> set autotrace traceonly;
+			
+			SQL> select * from sales s, customers c where s.cust_id = c.cust_id and s.cust_id = 987;
+
+				180 rows selected.
+
+
+				Execution Plan
+				----------------------------------------------------------
+				Plan hash value: 1438316797
+
+				------------------------------------------------------------------------------------------------------------------------------
+				| Id  | Operation                                   | Name           | Rows  | Bytes | Cost (%CPU)| Time     | Pstart| Pstop |
+				------------------------------------------------------------------------------------------------------------------------------
+				|   0 | SELECT STATEMENT                            |                |   130 | 27300 |    56   (0)| 00:00:01 |       |       |
+				|*  1 |  HASH JOIN                                  |                |   130 | 27300 |    56   (0)| 00:00:01 |       |       |
+				|   2 |   TABLE ACCESS BY INDEX ROWID               | CUSTOMERS      |     1 |   181 |     2   (0)| 00:00:01 |       |       |
+				|*  3 |    INDEX UNIQUE SCAN                        | CUSTOMERS_PK   |     1 |       |     1   (0)| 00:00:01 |       |       |
+				|   4 |   PARTITION RANGE ALL                       |                |   130 |  3770 |    54   (0)| 00:00:01 |     1 |    28 |
+				|   5 |    TABLE ACCESS BY LOCAL INDEX ROWID BATCHED| SALES          |   130 |  3770 |    54   (0)| 00:00:01 |     1 |    28 |
+				|   6 |     BITMAP CONVERSION TO ROWIDS             |                |       |       |            |          |       |       |
+				|*  7 |      BITMAP INDEX SINGLE VALUE              | SALES_CUST_BIX |       |       |            |          |     1 |    28 |
+				------------------------------------------------------------------------------------------------------------------------------
+
+				Predicate Information (identified by operation id):
+				---------------------------------------------------
+
+				   1 - access("S"."CUST_ID"="C"."CUST_ID")
+				   3 - access("C"."CUST_ID"=987)
+				   7 - access("S"."CUST_ID"=987)
+
+
+				Statistics
+				----------------------------------------------------------
+						  0  recursive calls
+						  0  db block gets
+						190  consistent gets
+						  0  physical reads
+						  0  redo size
+					  13193  bytes sent via SQL*Net to client
+						565  bytes received via SQL*Net from client
+						 13  SQL*Net roundtrips to/from client
+						  0  sorts (memory)
+						  0  sorts (disk)
+						180  rows processed
+
+		Case 6:
+		
+			SQL> set autotrace on;
+			SQL> select * from sales s, customers c where s.cust_id = c.cust_id and s.cust_id = 987;
+			
+				Kết quả có log rất dài
+
+		Case 7:
+		
+			select s.prod_id
+			from sales s, customers c
+			where s.cust_id = c.cust_id;
+
+			select * from v$sql;
+
+			select * from v$sql where sql_text like '%SELECT s.prod_id
+														FROM sales s, customers c
+															WHERE s.cust_id = c.cust_id%';
+										
+			select * from v$sql where sql_text like '%SELECT s.prod_id FROM sales s, customers c WHERE s.cust_id = c.cust_id%';
+
+			SELECT /* my query */ s.prod_id
+			FROM sales s, customers c
+			WHERE s.cust_id = c.cust_id;
+
+			select * from v$sql where sql_text like '%my_query%';
+
+			select * from v$sql_plan where sql_id = '599vq9ss0qzv6';
+
+			select * from table(dbms_xplan.display_cursor('599vq9ss0qzv6'));
+			
+		Case 8:
+		
+			SELECT /* my query*/ p.prod_id, p.prod_name, s.amount_sold, s.quantity_sold
+			FROM sales s, products p
+			WHERE s.prod_id = p.prod_id
+			and p.prod_id = 13;
+
+			select * from v$sql where sql_text like '%my query%';
+				 
+			select * from table(dbms_xplan.display_cursor('0a5k2fj0yfs40'));
+			
+				SQL_ID  0a5k2fj0yfs40, child number 0
+				-------------------------------------
+				SELECT /* my query*/ p.prod_id, p.prod_name, s.amount_sold, 
+				s.quantity_sold FROM sales s, products p WHERE s.prod_id = p.prod_id 
+				and p.prod_id = 13
+				 
+				Plan hash value: 662052938
+				 
+				------------------------------------------------------------------------------------------------------------------------------
+				| Id  | Operation                                   | Name           | Rows  | Bytes | Cost (%CPU)| Time     | Pstart| Pstop |
+				------------------------------------------------------------------------------------------------------------------------------
+				|   0 | SELECT STATEMENT                            |                |       |       |   362 (100)|          |       |       |
+				|   1 |  NESTED LOOPS                               |                |  6002 |   246K|   362   (1)| 00:00:01 |       |       |
+				|   2 |   TABLE ACCESS BY INDEX ROWID               | PRODUCTS       |     1 |    30 |     1   (0)| 00:00:01 |       |       |
+				|*  3 |    INDEX UNIQUE SCAN                        | PRODUCTS_PK    |     1 |       |     0   (0)|          |       |       |
+				|   4 |   PARTITION RANGE ALL                       |                |  6002 | 72024 |   362   (1)| 00:00:01 |     1 |    28 |
+				|   5 |    TABLE ACCESS BY LOCAL INDEX ROWID BATCHED| SALES          |  6002 | 72024 |   362   (1)| 00:00:01 |     1 |    28 |
+				|   6 |     BITMAP CONVERSION TO ROWIDS             |                |       |       |            |          |       |       |
+				|*  7 |      BITMAP INDEX SINGLE VALUE              | SALES_PROD_BIX |       |       |            |          |     1 |    28 |
+				------------------------------------------------------------------------------------------------------------------------------
+				 
+				Predicate Information (identified by operation id):
+				---------------------------------------------------
+				 
+				   3 - access("P"."PROD_ID"=13)
+				   7 - access("S"."PROD_ID"=13)
+					   filter("S"."PROD_ID"="P"."PROD_ID")
+				 
+		Case 9:
+		
+			explain plan for
+			SELECT p.pro_id, p.prod_name, s.amount_sold, s.quantity_sold
+			FROM sales s, products p, customers c
+			WHERE s.pro_id = p.prod_id
+			and s.CUST_ID =  c.CUST_ID
+			and s.cust_id between 2 and 5;
+
+			select * from table(dbms_xplan.display());
+
+				Plan hash value: 662052938
+				 
+				------------------------------------------------------------------------------------------------------------------------------
+				| Id  | Operation                                   | Name           | Rows  | Bytes | Cost (%CPU)| Time     | Pstart| Pstop |
+				------------------------------------------------------------------------------------------------------------------------------
+				|   0 | SELECT STATEMENT                            |                |  6002 |   246K|   362   (1)| 00:00:01 |       |       |
+				|   1 |  NESTED LOOPS                               |                |  6002 |   246K|   362   (1)| 00:00:01 |       |       |
+				|   2 |   TABLE ACCESS BY INDEX ROWID               | PRODUCTS       |     1 |    30 |     1   (0)| 00:00:01 |       |       |
+				|*  3 |    INDEX UNIQUE SCAN                        | PRODUCTS_PK    |     1 |       |     0   (0)| 00:00:01 |       |       |
+				|   4 |   PARTITION RANGE ALL                       |                |  6002 | 72024 |   362   (1)| 00:00:01 |     1 |    28 |
+				|   5 |    TABLE ACCESS BY LOCAL INDEX ROWID BATCHED| SALES          |  6002 | 72024 |   362   (1)| 00:00:01 |     1 |    28 |
+				|   6 |     BITMAP CONVERSION TO ROWIDS             |                |       |       |            |          |       |       |
+				|*  7 |      BITMAP INDEX SINGLE VALUE              | SALES_PROD_BIX |       |       |            |          |     1 |    28 |
+				------------------------------------------------------------------------------------------------------------------------------
+				 
+				Predicate Information (identified by operation id):
+				---------------------------------------------------
+				 
+				   3 - access("P"."PROD_ID"=13)
+				   7 - access("S"."PROD_ID"=13)
+					   filter("S"."PROD_ID"="P"."PROD_ID")
+
+--- Table & Index Access Paths:
+
+	- Tìm hiểu:
+	
+		B-TREE indexes và BITMAP indexes
+		
+		Table access paths va index access paths
+		
+			Table access paths:
+			
+				Table access full
+				
+				Table access by rowid
+				
+				Sample table scan
+				
+			Index access paths:
+			
+				Index unique scan
+				
+				Index range scan
+				
+				Index full scan
+				
+				Index fast full scan
+				
+				Index skip scan
+				
+				Index join scan
+				
+				Index organized tables
+				
+				Bitmap access paths
+				
+	Table & Index Access Paths - Table access paths va index access paths:
+	
+		Table Access Paths (Cách truy cập bảng)
+
+			Table Access Paths là cách Oracle đọc dữ liệu trực tiếp từ bảng. Có ba loại chính:
+
+				Table access full (Full Table Scan – FTS)
+
+					Ý nghĩa: Oracle quét toàn bộ bảng từ đầu đến cuối để lấy dữ liệu.
+
+					Khi nào xảy ra:
+
+						Không có index phù hợp với điều kiện WHERE.
+
+						Truy vấn yêu cầu hầu hết dữ liệu trong bảng.
+
+						Bảng nhỏ, full scan đôi khi nhanh hơn dùng index.
+
+					Ưu/Nhược:
+
+						✅ Dễ thực hiện.
+
+						❌ Chậm nếu bảng lớn vì phải đọc tất cả dữ liệu.
+
+			Table access by rowid
+
+				Ý nghĩa: Oracle biết chính xác vị trí vật lý (ROWID) của bản ghi, nên truy cập nhanh hơn full scan.
+
+				Khi nào xảy ra:
+
+					Thường dùng kết hợp với index: index tìm được ROWID, rồi Oracle dùng ROWID để truy cập bảng.
+
+				Ưu/Nhược:
+
+					✅ Rất nhanh vì truy cập trực tiếp bằng ROWID.
+
+					❌ Cần có index tìm được ROWID trước.
+
+			Sample table scan
+
+				Ý nghĩa: Oracle đọc ngẫu nhiên một phần dữ liệu trong bảng (ví dụ 10% bản ghi).
+
+				Khi nào xảy ra:
+
+					Thường dùng trong thống kê, thử nghiệm query, hoặc phân tích dữ liệu mẫu.
+
+				Ưu/Nhược:
+
+					✅ Tiết kiệm thời gian, giảm I/O.
+
+					❌ Không trả về tất cả dữ liệu.			
+					
+		Index Access Paths (Cách truy cập thông qua index)
+
+			Index Access Paths là cách Oracle dùng chỉ mục để tìm dữ liệu mà không cần quét toàn bộ bảng.
+
+			Index unique scan
+
+				Ý nghĩa: Truy cập một bản ghi duy nhất thông qua unique index (ví dụ: primary key).
+
+				Khi nào xảy ra:
+
+					Điều kiện WHERE sử dụng unique column.
+
+				Ưu/Nhược:
+
+					✅ Nhanh nhất, chỉ một bản ghi được đọc.
+
+			Index range scan
+
+				Ý nghĩa: Truy cập một phạm vi các giá trị trong index.
+
+				Khi nào xảy ra:
+
+					WHERE col BETWEEN x AND y, hoặc col > x AND col < y.
+
+				Ưu/Nhược:
+
+					✅ Hiệu quả khi chỉ cần một phần dữ liệu.
+
+					❌ Không nhanh bằng unique scan nếu phạm vi quá rộng.
+
+			Index full scan
+
+				Ý nghĩa: Oracle quét toàn bộ index từ đầu đến cuối.
+
+				Khi nào xảy ra:
+
+					Dữ liệu cần nhiều hoặc index nhỏ hơn bảng.
+
+				Ưu/Nhược:
+
+					✅ Ít tốn I/O hơn full table scan nếu index nhỏ.
+
+					❌ Chậm hơn range scan nếu chỉ cần một phần dữ liệu.
+
+			Index fast full scan
+
+				Ý nghĩa: Quét toàn bộ index nhanh hơn index full scan, vì đọc theo block, không theo thứ tự index.
+
+				Khi nào xảy ra:
+
+					Khi query cần tất cả giá trị của một hoặc vài cột trong index.
+
+				Ưu/Nhược:
+
+					✅ Rất nhanh với index nhỏ.
+
+			Index skip scan
+
+				Ý nghĩa: Oracle bỏ qua một vài phân vùng trong index, dùng khi column đầu tiên của index không được filter.
+
+				Khi nào xảy ra:
+
+					Index composite (nhiều cột), nhưng filter chỉ dùng cột thứ 2, thứ 3.
+
+				Ưu/Nhược:
+
+					✅ Cho phép dùng index dù không filter cột đầu.
+
+					❌ Chậm hơn range scan.
+
+			Index join scan
+
+				Ý nghĩa: Oracle truy cập index của hai bảng cùng lúc để join, không cần table scan.
+
+				Khi nào xảy ra:
+
+					Query JOIN hai bảng, cả hai có index.
+
+				Ưu/Nhược:
+
+					✅ Tiết kiệm I/O so với join bằng full table scan.
+
+			Index organized tables (IOT)
+
+				Ý nghĩa: Bảng được lưu trong cấu trúc index thay vì lưu riêng bảng + index.
+
+				Khi nào xảy ra:
+
+					Bảng nhỏ, hoặc cần truy cập theo primary key rất nhanh.
+
+				Ưu/Nhược:
+
+					✅ Truy cập theo key cực nhanh.
+
+					❌ Không linh hoạt như bảng bình thường.
+
+			Bitmap access paths
+
+				Ý nghĩa: Sử dụng bitmap index để tìm dữ liệu, phù hợp với cột có ít giá trị khác nhau (low cardinality).
+
+				Khi nào xảy ra:
+
+					Cột gender, trạng thái, loại…
+
+				Ưu/Nhược:
+
+					✅ Hiệu quả với query nhiều điều kiện AND/OR.
+
+					❌ Không thích hợp bảng thường xuyên UPDATE/INSERT vì bitmap index tốn tài nguyên.					
+						
+	Table & Index Access Paths - Index “tìm được ROWID” nghĩa là gì?
+
+		ROWID là gì?
+
+			ROWID là mã định danh duy nhất cho mỗi bản ghi trong bảng.
+
+			Nó cho biết vị trí vật lý của bản ghi trên ổ đĩa, gồm: datafile, block, row trong block.
+
+			Ví dụ: AAABBBCCC – Oracle biết ngay bản ghi nằm ở đâu trong bảng, không cần quét toàn bộ bảng.
+
+			Nói nôm na: ROWID giống như “địa chỉ nhà” của mỗi bản ghi.	
+					
+		Index “tìm được ROWID” nghĩa là gì?
+
+			Khi bạn tạo index trên một cột (hoặc nhiều cột), Oracle không lưu cả bản ghi trong index, mà lưu:
+			
+				giá trị cột + ROWID của bản ghi tương ứng
+
+			Ví dụ: bảng employees(id, name, dept) có index trên id:
+
+				id		ROWID
+				
+				101		AAA111
+				102		AAA112
+				103		AAA113
+
+			Khi bạn query:
+
+				SELECT * FROM employees WHERE id = 102;
+
+
+				Oracle tìm trong index id giá trị 102.
+
+				Index trả về ROWID = AAA112.
+
+				Oracle dùng ROWID này để truy cập trực tiếp bản ghi trong bảng (table access by rowid).
+
+			Ưu điểm: nhanh, vì không phải quét bảng, chỉ cần “đi thẳng đến địa chỉ nhà” của bản ghi.					
+					
+	- Code sql:
+
+		Case 1 (table access full):
+		
+			###
+			select * from sales;
+
+			select * from sales where amount_sold > 1770; # full table vi khong co condition cho index
+
+			select * from employees where employee_id > 100; # full table vi bang qua nho nen khong can dung index
+
+			###
+			explain plan for
+			select * from employees e, departments d
+			where e.employee_id = d.manager_id;
+
+			select * from table (dbms_xplan.display()); # full table cho ca 2 bang
+
+			###
+			explain plan for
+			select * from employees e, departments d
+			where e.department_id = d.department_id;
+
+			select * from table(dbms_xplan.display()); # index scan cho bang departments vi department_id la khoa ngoai tro toi bang departments
+
+				Plan hash value: 1343509718
+				 
+				--------------------------------------------------------------------------------------------
+				| Id  | Operation                    | Name        | Rows  | Bytes | Cost (%CPU)| Time     |
+				--------------------------------------------------------------------------------------------
+				|   0 | SELECT STATEMENT             |             |   106 |  9540 |     6  (17)| 00:00:01 |
+				|   1 |  MERGE JOIN                  |             |   106 |  9540 |     6  (17)| 00:00:01 |
+				|   2 |   TABLE ACCESS BY INDEX ROWID| DEPARTMENTS |    27 |   567 |     2   (0)| 00:00:01 |
+				|   3 |    INDEX FULL SCAN           | DEPT_ID_PK  |    27 |       |     1   (0)| 00:00:01 |
+				|*  4 |   SORT JOIN                  |             |   107 |  7383 |     4  (25)| 00:00:01 |
+				|   5 |    TABLE ACCESS FULL         | EMPLOYEES   |   107 |  7383 |     3   (0)| 00:00:01 |
+				--------------------------------------------------------------------------------------------
+				 
+				Predicate Information (identified by operation id):
+				---------------------------------------------------
+				 
+				   4 - access("E"."DEPARTMENT_ID"="D"."DEPARTMENT_ID")
+					   filter("E"."DEPARTMENT_ID"="D"."DEPARTMENT_ID")
+		Case 2 (Table Access by ROWID):
+		
+			select * from sales where prod_id = 116 and cust_id = 100090; # 2 bitmap index scans tren SALES_CUST_BIX va SALES_PROD_BIX
+
+			select * from sales where rowid = 'AAAR3DAAMAAAA5MAHl';
+
+			create index prod_cust_ix on sales (prod_id, cust_id);
+
+			select prod_id, cust_id from sales where prod_id = 116; # index range scan, but did not use ROWIDs and read from the table
+
+			select prod_id, cust_id, promo_id from sales where prod_id = 116; # table access by rowid
+			
+				Adding the promo_id column does not increase the performance. It actually decreases as we saw in the
+				example. As explained in the example, if we just write the prod_id and cust_id columns, as these two
+				columns are already stored in the index, there is no need to go to the table, so no need to use the
+				rowids. However, when we add the promo_id column, as this column does not exist in the index, it uses
+				the rowids to go to the table and get the whole row data and extract the promo_id from the actual table.
+
+			drop index prod_cust_ix;
+
+
+		Case 3 (Index Unique Scan):
+					
+			select * from employees where employee_id = 103; # index unique scan EMP_EMP_ID_PK
+			
+		Cse 4 (Index Range Scan):
+		
+			select * from sales where time_id > to_date('01-NOV-01', 'DD-MON-RR'); # index range scan SALES_TIME_BIX
+
+			select * from sales where time_id between to_date('01-NOV-00', 'DD-MON-RR') and to_date('05-NOV-00', 'DD-MON-RR'); # index range scan SALES_TIME_BIX
+
+			select * from employees where employee_id > 190; # index range scan EMP_EMP_ID_PK
+
+			select * from employees where department_id > 80; # index range scan EMP_EMP_ID_PK
+
+			select * from employees where employee_id > 190 order by email; # index range scan EMP_EMP_ID_PK, perform sort
+
+			select * from employees where employee_id > 190 order by employee_id; # index range scan EMP_EMP_ID_PK, did not perform sort, because it is already sorted
+
+			select * from employees where employee_id < 190 order by employee_id; # index range scan EMP_EMP_ID_PK, did not perform sort, because it is already sorted
+
+			select * from employees where department_id > 80 order by department_id desc; # index range scan EMP_EMP_ID_PK, did not perform sort
+
+			select * from employees where department_id > 80 order by department_id; # index range scan EMP_EMP_ID_PK, did not perform sort
+
+			select * from employees where department_id > 80 order by department_id desc; # index range scan EMP_EMP_ID_PK, did not perform sort
+
+			select * from products where prod_subcategory like 'Accessories%'; # index range scan PRODUCTS_PROD_SUBCAT_IX
+
+			select * from products where prod_subcategory like '%Accessories'; # full table scan PRODUCTS
+
+			select * from products where prod_subcategory like '%Accessories%'; # full table scan PRODUCTS
+			
+		Case 5 (Index Full Scan):
+
+			select * from departments order by department_id; # index full scan DEPT_ID_PK
+
+			select last_name, first_name from employees order by last_name; # index full scan EMP_NAME_IX
+
+			select first_name, last_name from employees order by last_name; # index full scan EMP_NAME_IX
+
+			select last_name, first_name from employees order by first_name; # index full scan EMP_NAME_IX, sort. because the index sorted based on the last name
+
+			select last_name, first_name from employees order by first_name, last_name; # index full scan EMP_NAME_IX, sort
+
+			select last_name, first_name from employees order by last_name, first_name; # index full scan EMP_NAME_IX
+
+			select last_name, first_name from employees order by last_name, salary; # full table scan, sort
+
+			select * from employees order by last_name, first_name; # full table scan, sort
+
+			select salary, count(*) from employees e # full table scan, using a column with no index leads a full table scan
+			where salary is not null
+			group by salary;
+
+			select department_id, count(*) from employees e # index full scan, sort since we use indexed columns in the group by clause
+			where department_id is not null
+			group by department_id;
+
+			select department_id, manager_id, count(*) from employees e # full table scan, using more columns than one index has may prevent index full scan
+			where department_id is not null
+			group by department_id, manager_id;
+
+			select e.employee_id, e.last_name, e.first_name, e.department_id, d.department_name # index full scan DEPT_ID_PK
+			from employees e, departments d
+			where e.department_id = d.department_id;		
+					
+					
+					
+					
+					
+					
+					
+					
