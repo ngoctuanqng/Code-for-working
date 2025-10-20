@@ -2385,11 +2385,179 @@ Nếu không chỉ rõ /orclpdb, bạn mặc định vào CDB$ROOT.
 			select e.employee_id, e.last_name, e.first_name, e.department_id, d.department_name # index full scan DEPT_ID_PK
 			from employees e, departments d
 			where e.department_id = d.department_id;		
+		
+		Case 6 (Index Fast Full Scan):
+
+			###
+			select e.employee_id, d.department_id, e.first_name, d.department_name # index full scan DEPT_ID_PK, sort
+			from employees e, departments d
+			where e.department_id = d.department_id;
+
+			###
+			select e.employee_id, d.department_id, d.department_name # index fast full scan EMP_EMP_ID_PK, EMP_DEPARTMENT_IX, since all the columns are in the index
+			from employees e, departments d
+			where e.department_id = d.department_id;
+
+
+			###
+			select prod_id from sales order by prod_id; # bitmap index fast full scan SALES_PROD_BIX
+
+			###
+			select time_id from sales order by time_id; # index full scan SALES_TIME_BIX
+
+			###
+			select time_id from sales; # bitmap index fast full scan SALES_TIME_BIX		
 					
+		Case 7 (Index Skip Scan):
+		
+			###
+			select * from employees where first_name = 'Alex'; # index skip scan EMP_NAME_IX
+
+			###
+			select * from employees where last_name = 'King' # index range scan EMP_NAME_IX, we use the first column of the index
+
+			###
+			select * from employees where salary between 6000 and 7000; # full table scan EMPLOYEES
+
+			###
+			create index dept_sal_ix on employees (department_id, salary);
+			select * from employees where salary between 6000 and 7000; # index skip scan DEPT_SAL_IX
+
+			###
+			select * from employees where salary between 6500 and 7000; # index skip scan DEPT_SAL_IX
+
+			###
+			drop index dept_sal_ix;
+			select * from employees where salary between 6500 and 7000; # full table scan EMPLOYEES
+
+			###
+			alter index customers_yob_bix invisible;
+			select * from customers where cust_year_of_birth between 1989 and 1990; # full table scan CUSTOMERS
+
+			###
+			create index customers_gen_dob_ix on customers (cust_gender, cust_year_of_birth);
+			select * from customers where cust_year_of_birth between 1989 and 1990; # index skip scan CUSTOMERS_GEN_DOB_IX
+			drop index customers_gen_dob_ix;
+			alter index customers_yob_bix visible;
 					
+		Case 8 (Index Join Scan):
+
+			/* Index join scan with two indexes */
+			select employee_id, email from employees; ## index fast full scan EMP_EMAIL_UK, EMP_EMP_ID_PK, hash join
+
+			/* Index join scan with two indexes, but with range scan included */
+			select last_name, email from employees where last_name like 'B%'; # index full scan EMP_EMAIL_UK, index range scan EMP_NAME_IX, hash join
+
+			/* Index join scan is not performd when we add rowid to the select clause */
+			select rowid, employee_id, email from employees; # full table scan		
 					
+--- Optimizer Hints:
+
+	- Code sql:
+	
+		Case 1:
+		
+			/* A query without a hint. It performs a range scan */
+			select employee_id, last_name # index range scan EMP_NAME_IX
+			from employees e
+			where last_name like 'A%';
+
+			/* Using a hint to command the optimizer to use full table scan */
+			select /*+ full(e) */ employee_id, last_name # full table scan EMPLOYEES
+			from employees e
+			where last_name like 'A%';
+
+			/* Using the hint with the table name as the parameter */
+			select /*+ full(employees) */ employee_id, last_name # full table scan EMPLOYEES
+			from employees
+			where last_name like 'A%';
+
+			/* Using the hint with the table name when it has an alias */
+			select /*+ full(employees) */ employee_id, last_name # index range scan EMP_NAME_IX
+			from employees e
+			where last_name like 'A%'
+
+			/* Using an unreasonable hint. The optimizer will not consider this hint */
+			select /*+ index(e EMP_DEPARTMENT_IX) */ employee_id, last_name # index range scan EMP_NAME_IX since it is lass constly than the full table scan
+			from employees e
+			where last_name like 'A%'
+
+			/* Using mutiple hints. but they aim for the same source. So, unresonable.
+			   The optimizer picks the index scan as the best choice */
+			select /* index(e EMP_NAME_IX) full(e) */ employee_id, last_name # index range scan EMP_NAME_IX
+			from employees e
+			where last_name like 'A%'
+
+			/* Changing the order of the hints. It dose not change the optimizer's decision */
+			select /*+ full(e) index(e EMP_NAME_IX) */ employee_id, last_name # index range scan EMP_NAME_IX
+			from employees e
+			where last_name like 'A%'
+
+			/* Using no hint to see the execution plan to compare with the next one */
+			select e.department_id, d.department_name, MAX(salary), AVG(salary) # full table scan EMPLOYEES, DEPARTMENTS
+			from employees e, departments d
+			where e.department_id = e.department_id
+			group by e.department_id, d.department_name
+
+			/* Using multiple hint to change the execution plan */
+			select /* leading (e d) index(d DEPT_ID_PK) index(e EMP_DEPARTMENT_IX) */ # index full scan DEPT_ID_PK, EMP_DEPARTMENT_IX
+			e.department_id, d.department_name, MAX(salary), AVG(salary)
+			from employees e, departments d
+			where e.department_id = e.department_id
+			group by e.department_id, d.department_name
+
+			/* There are two access paths: job_id and department_id.
+			   It will select the access path which has the lowest cost.*/
+			select employee_id, last_name # index range scan EMP_JOB_IX
+			from employees e
+			where job_id = 'SA_MAN'
+			and department_id < 90;
+
+			/* Since we use the hint, it will use the index even if the cost is a lot higher */
+			select /*+ index(e EMP_DEPARTMENT_IX) */ employee_id, last_name # index range scan EMP_DEPARTMENT_IX
+			from employees e
+			where job_id = 'SA_MAN'
+			and department_id < 90;
+
+			/* It will not select the index we specified with the hint since there is no access path for it. */
+			select /*+ index(e EMP_DEPARTMENT_IX) */ employee_id, last_name # index range scan EMP_JOB_IX
+			from employees e
+			where job_id = 'SA_MAN'
+
+			/* Another example with mutiple joins, groups, etc. But with no hint */
+			select customers.cust_first_name, customers.cust_last_name,
+				max(quantity_sold), avg(quantity_sold)
+			from sales, customers
+			where sales.cust_id = customers.cust_id
+			group by customers.cust_first_name, customers.cust_last_name;
+
+			/* Performance effect of using the parallel hint */
+			select /*+ parallel(4) */ customers.cust_first_name, customers.cust_last_name,
+				max(quantity_sold), avg(quantity_sold)
+			from sales, customers
+			where sales.cust_id = customers.cust_id
+			group by customers.cust_first_name, customers.cust_last_name;
 					
-					
-					
-					
-					
+--- Join Operations:
+
+	-  Tìm hiểu:
+	
+		Join method và join oder
+		
+		join methods:
+		
+			nested loop join, sort merge join, hash join, cartesian join
+			
+	- Code sql:
+	
+		Case 1 (Nested Loop Joins):
+		
+			/* Nested loop join example */
+			select * from employees e join departments d # nested loop join
+			on d.department_id = e.department_id
+			where d.department_id = 60
+
+			/* even if we change the join order and on clause order, the plan did not change */
+			select * from departments d join employees e # nested loop join
+			on e.department_id = d.department_id
+			where d.department_id = 60
