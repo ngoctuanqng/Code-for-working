@@ -2561,3 +2561,145 @@ Nếu không chỉ rõ /orclpdb, bạn mặc định vào CDB$ROOT.
 			select * from departments d join employees e # nested loop join
 			on e.department_id = d.department_id
 			where d.department_id = 60
+
+			/* We can you leading hint to change the driving table */
+			select /*+ leading(e) */ * from employees e join departments d # index uniqye scan DEPT_ID_PK, index range scan EMP_DEPARTMENT_IX, merge join
+			on d.department_id = e.department_id
+			where d.department_id = 60
+
+			/* Does not use nested loop without hint */
+			select * from employees e join departments d # table access full EMPLOYEES, index full scan DEPT_ID_PK, merge join
+			on d.department_id = e.department_id
+
+			/* Using nested loop hint */
+			select /*+ use_nl(d e) */ * from employees e join departments d # table access by rowid EMPLOYEES, index range scan EMP_DEPARTMENT_IX, nested loop
+			on d.department_id = e.department_id
+
+			/* Nested loop prefetching and double nested loops example */
+			select e.employee_id, e.last_name, d.department_id, d.department_name # table access by rowid EMPLOYEES, table access full EMPLOYEES, index range scan EMP_DEPARTMENT_IX, table access full DEPARTMENTS, nested loop
+			from employees e join departments d
+			on d.department_id = e.department_id
+			where d.department_name like 'A%'
+			
+		Case 2 (Sort Merge Joins):
+		
+			/* sort merge join example */
+			select * from employees e join departments d # index range scan EMP_NAME_IX, index full scan DEPT_ID_PK, sort, merge join
+			on d.department_id = e.department_id
+			where e.last_name like 'K%'
+
+			/* Force it to use nested loop join */
+			select /*+ use_nl(e d) */* from employees e join departments d # table access by rowid DEPARTMENTS, index unique scan DEPT_ID_PK, INDEX RANGE SCAN emp_name_ix, nested loop
+			on d.department_id = e.department_id
+			where e.last_name like 'K%'
+
+			/* Another sort merge join example */
+			select * from employees e join departments d # table access full EMPLOYEES, sort, index full scan DEPT_ID_PK, merge join
+			on d.department_id = e.department_id
+			where d.manager_id > 110;
+
+			/* Equality operator prevented sort merge join */
+			select * from employees e join departments d # table access by rowid EMPLOYEES, index range scan EMP_DEPARTMENT_IX, table access full DEPARTMENTS, nested loops
+			on d.department_id = e.department_id
+			where d.manager_id = 110
+
+			/* Using sort merge join hint */
+			select /*+ use_merge(e d) */* from employees e join departments d # table access full EMPLOYEES, sort, index full scan DEPT_ID_PK, table access by rowid DEPARTMENTS, merge join
+			on d.department_id = e.department_id
+			where d.manager_id = 110
+			
+		Case 3 (Hash Joins):
+		
+			grant select_catalog_role to hr;
+			grant select any dictionary to hr;
+
+			select * from employees e, departments d # table access full EMPLOYEES, table access by rowid EMPLOYEES, index range scan EMP_DEPARTMENT_IX, table access full DEPARTMENTS, nested loops
+			where d.department_id = e.department_id
+			and d.manager_id = 10
+
+			select /*+ use_hash(d e) */* from employees e, departments d # table access full EMPLOYEES, DEPARTMENTS, hash join
+			where d.department_id = e.department_id
+			and d.manager_id = 110
+			
+		Case 4 (Cartesian Joins):
+			
+			select * from employees e, departments d # table access full EMPLOYEES, table access full DEPARTMENTS, merge join cartesian
+			where d.manager_id = 110
+
+			select * from customers, sales # table access SALES, sort, table access CUSTOMERS, merger join cartesian
+			
+		Case 5 (Equijoins & Nonequijoins):
+		
+			/* Equijoin example */
+			select * from employees e, departments d # table access full EMPLOYEES, sort join, index full scan DEPT_ID_PK, merge join
+			where e.department_id = d.department_id
+
+			/* Nonequijoin examample */
+			select * from employees e, jobs j # table access full EMPLOYEES, sort join, table accces full JOBS, sort join, merge join
+			where e.salary between j.min_salary and j.max_salary
+			
+		Case 6 (Outer Joins):
+		
+			select * from employees e right outer join departments d # table access full EMPLOYEES, sort join, index full scan DEPT_ID_PK, table access by rowid DEPARTMENTS, merge join
+			using(department_id)
+
+			select * from departments d left outer join employees e # table access full EMPLOYEES, sort join, index full scan DEPT_ID_PK, table access by rowid DEPARTMENTS, merge join
+			using(department_id)
+
+			select * from employees e left outer join departments d # table access full EMPLOYEES, DEPARTMENTS, hash join right outer
+			using(department_id)
+
+			select * from departments d right outer join employees e # table access full EMPLOYEES, DEPARTMENTS, hash join right outer
+			using(department_id)
+
+			select /*+ use_merge(e d) */* from employees e left outer join departments d # table access full DEPARTMENTS, sort join, table access full EMPLOYEES, sort join, merge join outer
+			using(department_id)
+
+			select /*+ use_nl(e d) */* from employees e left outer join departments d # index unique scan DEPT_ID_PK, table access by rowid DEPARTMENTS, table access full EMPLOYEES, nested loops outer
+			using(department_id)
+
+			select /*+ use_nl(d e) */* from employees e right outer join departments d # index range scan EMP_dEPARTMENT_IX, table access by index rowid batched EMPLOYEES, table access full DEPARTMENTS, nested loops
+			using(department_id)
+
+			select * from employees e full outer join departments d # table access full EMPLOYEES, DEPARTMENTS, hash join full outer
+			using(department_id)
+
+			select * from employees e, departments d # table access full EMPLOYEES, DEPARTMENTS, hash join right outer
+			where e.department_id = d.department_id(+)
+
+			select * from employees e, departments d
+			where e.department_id(+) = d.department_id(+)
+
+			select * from employees e left outer join departments d # index full scan DEPT_ID_PK, merge join outer, table access full EMPLOYEES, DEPARTMENTS, HASH JOIN RIGHT OUTER, UNION-ALL, SORT UNIQUE
+			using(department_id)
+			union
+			select * from employees e right outer join departments d
+			using(department_id)
+			
+		Case 7 (Semijoins):
+		
+			select * from departments d where exists # index range scan EMP_DEPARTMENT_IX, table access full DEPARTMENTS, nested loops semi
+				(select 1 from employees e where d.department_id = e.department_id)
+				
+			select * from departments d where department_id in # index range scan EMP_DEPARTMENT_IX, table access full DEPARTMENTS, nested loops semi
+				(select department_id from employees e where d.department_id = e.department_id)
+				
+			select * from employees e where exists # table access full EMPLOYEES
+				(select 1 from departments d where d.department_id = e.department_id)
+				
+		Case 8 (Antijoins):
+		
+			select * from departments d where department_id not in # index range scan EMP_DEPARTMENT_IX, table access full DEPARTMENTS, nested loop anti
+				(select department_id from employees e where d.department_id = e.department_id)
+				
+			select * from departments d where not exists # index range scan EMP_DEPARTMENT_IX, table access full DEPARTMENTS, nested loops anti
+				(select 1 from employees e where d.department_id = e.department_id)
+				
+			select /*+ hash_aj */* from departments d where not exists # index range scan EMP_DEPARTMENT_IX, table access full DEPARTMENTS, nested loops anti
+				(select 1 from employees e where d.department_id = e.department_id)
+				
+			select * from departments d where not exists # index full scan EMP_DEPARTMENT_IX, table access full departments, hash join anti
+				(select /*+ hash_aj */1 from employees e where d.department_id = e.department_id)
+				
+			select * from employees e where not exists # table access full EMPLOYEES
+				(select 1 from departments d where d.department_id = e.department_id)
