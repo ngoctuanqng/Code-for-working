@@ -1,0 +1,4273 @@
+- @MappedSuperclass
+- @Validated
+- @Valid
+- @Pattern
+- @AllArgsConstructor
+- @Positive
+- @Tag
+- Github Webhook
+
+
+--- Config server:
+
+		Để auto refresh khi thay đổi thì cần dùng rabbitmq và webhook
+		
+		Lệnh start  rabbitmq container:
+		
+			docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
+
+		Khi không dùng chung 1 configserver:
+		
+			spring:
+			  config:
+				import:
+				  - "application_qa.yml"
+				  - "application_prod.yml"
+			  profiles:
+				active:
+				  - "qa"
+				  
+		Khi dùng chung 1 configserver:
+			
+			configserver:
+			
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-config-server</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-config-monitor</artifactId>
+				</dependency>	
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-bus-amqp</artifactId>
+				</dependency>			
+					
+				spring:
+				  cloud:
+					config:
+					  server:
+						# native:
+						  # search-locations: "classpath:/config"
+						  # search-locations: "file:///Users//eazybytes//Documents//config"
+						git:
+						  uri: "https://github.com/eazybytes/eazybytes-config.git"
+						  default-label: main
+						  timeout: 5
+						  clone-on-start: true
+						  force-pull: true
+				  rabbitmq:
+					host: "localhost"
+					port: 5672
+					username: "guest"
+					password: "guest"
+				management:
+				  endpoints:
+					web:
+					  exposure:
+						include: "*"
+						
+			accounts:
+			
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-config</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-bus-amqp</artifactId>
+				</dependency>		
+				
+				spring:
+				  config:
+					import: "optional:configserver:http://localhost:8071/"
+				  rabbitmq:
+					host: "localhost"
+					port: 5672
+					username: "guest"
+					password: "guest"
+				management:
+				  endpoints:
+					web:
+					  exposure:
+						include: "*"
+						
+--- Using MySQL DBs inside microservices:
+
+	application.yml:
+	
+		spring:
+		  datasource:
+			url: jdbc:mysql://localhost:3306/accountsdb
+			username: root
+			password: root
+		  jpa:
+			show-sql: true
+		  sql:
+			init:
+			
+	schema.sql:
+	
+		CREATE TABLE IF NOT EXISTS `customer` (
+		  `customer_id` int AUTO_INCREMENT  PRIMARY KEY,
+		  `name` varchar(100) NOT NULL,
+		  `email` varchar(100) NOT NULL,
+		  `mobile_number` varchar(20) NOT NULL,
+		  `created_at` date NOT NULL,
+		  `created_by` varchar(20) NOT NULL,
+		  `updated_at` date DEFAULT NULL,
+			`updated_by` varchar(20) DEFAULT NULL
+		);
+
+		CREATE TABLE IF NOT EXISTS `accounts` (
+		  `customer_id` int NOT NULL,
+		   `account_number` int AUTO_INCREMENT  PRIMARY KEY,
+		  `account_type` varchar(100) NOT NULL,
+		  `branch_address` varchar(200) NOT NULL,
+		  `created_at` date NOT NULL,
+		   `created_by` varchar(20) NOT NULL,
+		   `updated_at` date DEFAULT NULL,
+			`updated_by` varchar(20) DEFAULT NULL
+		);		
+			
+	pom.xml:
+	
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+	common-config.yml:
+	
+		services:
+		  network-deploy-service:
+			networks:
+			  - eazybank
+
+		  microservice-db-config:
+			extends:
+			  service: network-deploy-service
+			image: mysql
+			healthcheck:
+			  test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+			  timeout: 10s
+			  retries: 10
+			  interval: 10s
+			  start_period: 10s
+			environment:
+			  MYSQL_ROOT_PASSWORD: root
+			  
+	docker-compose.yml:
+	
+		services:
+		  accountsdb:
+			container_name: accountsdb
+			ports:
+			  - 3306:3306
+			environment:
+			  MYSQL_DATABASE: accountsdb
+			extends:
+			  file: common-config.yml
+			  service: microservice-db-config
+			  
+		  accounts:
+			image: "eazybytes/accounts:s7"
+			container_name: accounts-ms
+			ports:
+			  - "8080:8080"
+			environment:
+			  SPRING_APPLICATION_NAME: "accounts"
+			  SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
+			depends_on:
+			  accountsdb:
+				condition: service_healthy
+			  configserver:
+				condition: service_healthy
+			extends:
+			  file: common-config.yml
+			  service: microservice-configserver-config
+			  
+--- Service Discovery & Service Registration in microservices:
+
+		eurekaserver:
+		
+			pom.xml:
+		
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+				</dependency>
+				
+			eurekaserver.yml:
+			
+				eureka:
+				  instance:
+					hostname: localhost
+				  client:
+					fetchRegistry: false
+					registerWithEureka: false
+					serviceUrl:
+					  defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+				
+			EurekaserverApplication.java:
+			
+				@SpringBootApplication
+				@EnableEurekaServer
+				public class EurekaserverApplication {
+
+					public static void main(String[] args) {
+						SpringApplication.run(EurekaserverApplication.class, args);
+					}
+
+				}
+				
+		accounts:
+		
+			pom.xml:
+			
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-openfeign</artifactId>
+				</dependency>
+				
+			application.yml:
+			
+				eureka:
+				  instance:
+					preferIpAddress: true
+				  client:
+					fetchRegistry: true
+					registerWithEureka: true
+					serviceUrl:
+					  defaultZone: http://localhost:8070/eureka/
+					  
+			AccountsApplication.java:
+			
+				@EnableFeignClients
+					  
+			CardsFeignClient.java:
+			
+				@FeignClient("cards")
+				public interface CardsFeignClient {
+
+					@GetMapping(value = "/api/fetch",consumes = "application/json")
+					public ResponseEntity<CardsDto> fetchCardDetails(@RequestParam String mobileNumber);
+
+				}
+				
+			CustomersServiceImpl.java:
+			
+				private CardsFeignClient cardsFeignClient;
+			
+				@Override
+				public CustomerDetailsDto fetchCustomerDetails(String mobileNumber) {
+					...
+
+					ResponseEntity<CardsDto> cardsDtoResponseEntity = cardsFeignClient.fetchCardDetails(mobileNumber);
+					
+					...
+
+				}
+				
+--- Gateway, Routing & Cross cutting concerns in Microservices:
+
+	gatewayserver:
+	
+		pom.xml:
+	
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-gateway</artifactId>
+			</dependency>
+			
+		application.yml:
+		
+			spring:
+			  cloud:
+				gateway:
+				  discovery:
+					locator:
+					  enabled: false
+					  lowerCaseServiceId: true
+					  
+			management:
+			  endpoints:
+				web:
+				  exposure:
+					include: "*"
+			  endpoint:
+				gateway:
+				  access: unrestricted
+			  info:
+				env:
+				  enabled: true
+					  
+				Phần này chú ý có update liên quan đến webflux với version mới
+				
+		GatewayserverApplication.java:
+		
+			@SpringBootApplication
+			public class GatewayserverApplication {
+
+				public static void main(String[] args) {
+					SpringApplication.run(GatewayserverApplication.class, args);
+				}
+
+				@Bean
+				public RouteLocator eazyBankRouteConfig(RouteLocatorBuilder routeLocatorBuilder) {
+					return routeLocatorBuilder.routes()
+									.route(p -> p
+											.path("/eazybank/accounts/**")
+											.filters( f -> f.rewritePath("/eazybank/accounts/(?<segment>.*)","/${segment}")
+													.addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+											.uri("lb://ACCOUNTS"))
+								.route(p -> p
+										.path("/eazybank/loans/**")
+										.filters( f -> f.rewritePath("/eazybank/loans/(?<segment>.*)","/${segment}")
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+										.uri("lb://LOANS"))
+								.route(p -> p
+										.path("/eazybank/cards/**")
+										.filters( f -> f.rewritePath("/eazybank/cards/(?<segment>.*)","/${segment}")
+												.addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+										.uri("lb://CARDS")).build();
+				}
+			}
+			
+		FilterUtility.java:
+		
+			@Component
+			public class FilterUtility {
+
+				public static final String CORRELATION_ID = "eazybank-correlation-id";
+
+				public String getCorrelationId(HttpHeaders requestHeaders) {
+					if (requestHeaders.get(CORRELATION_ID) != null) {
+						List<String> requestHeaderList = requestHeaders.get(CORRELATION_ID);
+						return requestHeaderList.stream().findFirst().get();
+					} else {
+						return null;
+					}
+				}
+
+				public ServerWebExchange setRequestHeader(ServerWebExchange exchange, String name, String value) {
+					return exchange.mutate().request(exchange.getRequest().mutate().header(name, value).build()).build();
+				}
+
+				public ServerWebExchange setCorrelationId(ServerWebExchange exchange, String correlationId) {
+					return this.setRequestHeader(exchange, CORRELATION_ID, correlationId);
+				}
+
+			}
+			
+		RequestTraceFilter.java:
+		
+			@Order(1)
+			@Component
+			public class RequestTraceFilter implements GlobalFilter {
+
+				private static final Logger logger = LoggerFactory.getLogger(RequestTraceFilter.class);
+
+				@Autowired
+				FilterUtility filterUtility;
+
+				@Override
+				public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+					HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
+					if (isCorrelationIdPresent(requestHeaders)) {
+						logger.debug("eazyBank-correlation-id found in RequestTraceFilter : {}",
+								filterUtility.getCorrelationId(requestHeaders));
+					} else {
+						String correlationID = generateCorrelationId();
+						exchange = filterUtility.setCorrelationId(exchange, correlationID);
+						logger.debug("eazyBank-correlation-id generated in RequestTraceFilter : {}", correlationID);
+					}
+					return chain.filter(exchange);
+				}
+
+				private boolean isCorrelationIdPresent(HttpHeaders requestHeaders) {
+					if (filterUtility.getCorrelationId(requestHeaders) != null) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+
+				private String generateCorrelationId() {
+					return java.util.UUID.randomUUID().toString();
+				}
+
+			}
+			
+		ResponseTraceFilter.java:
+		
+			@Configuration
+			public class ResponseTraceFilter {
+
+				private static final Logger logger = LoggerFactory.getLogger(ResponseTraceFilter.class);
+
+				@Autowired
+				FilterUtility filterUtility;
+
+				@Bean
+				public GlobalFilter postGlobalFilter() {
+					return (exchange, chain) -> {
+						return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+							HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
+							String correlationId = filterUtility.getCorrelationId(requestHeaders);
+							logger.debug("Updated the correlation id to the outbound headers: {}", correlationId);
+							exchange.getResponse().getHeaders().add(filterUtility.CORRELATION_ID, correlationId);
+						}));
+					};
+				}
+			}
+		
+--- Making Microservices Resilient:
+
+		gatewayserver:
+		
+			pom.xml:
+			
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+				</dependency>
+				
+			application.yml:
+			
+				spring:
+				  cloud:
+					gateway:
+					  discovery:
+						locator:
+						  enabled: false
+						  lowerCaseServiceId: true
+					  httpclient:
+						connect-timeout: 1000
+						response-timeout: 2s
+				  data:
+					redis:
+					  connect-timeout: 2s
+					  host: localhost
+					  port: 6379
+					  timeout: 1s
+			
+				resilience4j.circuitbreaker:
+				  configs:
+					default:
+					  slidingWindowSize: 10
+					  permittedNumberOfCallsInHalfOpenState: 2
+					  failureRateThreshold: 50
+					  waitDurationInOpenState: 10000
+					  
+			GatewayserverApplication.java:
+			
+				@SpringBootApplication
+				public class GatewayserverApplication {
+
+					public static void main(String[] args) {
+						SpringApplication.run(GatewayserverApplication.class, args);
+					}
+
+					@Bean
+					public RouteLocator eazyBankRouteConfig(RouteLocatorBuilder routeLocatorBuilder) {
+						return routeLocatorBuilder.routes()
+										.route(p -> p
+												.path("/eazybank/accounts/**")
+												.filters( f -> f.rewritePath("/eazybank/accounts/(?<segment>.*)","/${segment}")
+														.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+														.circuitBreaker(config -> config.setName("accountsCircuitBreaker")
+																.setFallbackUri("forward:/contactSupport")))
+												.uri("lb://ACCOUNTS"))
+									.route(p -> p
+											.path("/eazybank/loans/**")
+											.filters( f -> f.rewritePath("/eazybank/loans/(?<segment>.*)","/${segment}")
+													.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+													.retry(retryConfig -> retryConfig.setRetries(3)
+															.setMethods(HttpMethod.GET)
+															.setBackoff(Duration.ofMillis(100),Duration.ofMillis(1000),2,true)))
+											.uri("lb://LOANS"))
+									.route(p -> p
+											.path("/eazybank/cards/**")
+											.filters( f -> f.rewritePath("/eazybank/cards/(?<segment>.*)","/${segment}")
+													.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+													.requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
+															.setKeyResolver(userKeyResolver())))
+											.uri("lb://CARDS")).build();
+					}
+
+					@Bean
+					public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer() {
+						return factory -> factory.configureDefault(id -> new Resilience4JConfigBuilder(id)
+								.circuitBreakerConfig(CircuitBreakerConfig.ofDefaults())
+								.timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(4)).build()).build());
+					}
+
+					@Bean
+					public RedisRateLimiter redisRateLimiter() {
+						return new RedisRateLimiter(1, 1, 1);
+					}
+
+					@Bean
+					KeyResolver userKeyResolver() {
+						return exchange -> Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst("user"))
+								.defaultIfEmpty("anonymous");
+					}
+
+				}
+				
+		FallbackController.java:
+		
+			@RestController
+			public class FallbackController {
+
+				@RequestMapping("/contactSupport")
+				public Mono<String> contactSupport() {
+					return Mono.just("An error occurred. Please try after some time or contact support team!!!");
+				}
+
+			}
+				
+	accounts:
+	
+		pom.xml:
+	
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+			</dependency>
+			
+		application.yml:
+		
+			spring:
+			  cloud:
+				openfeign:
+				  circuitbreaker:
+					enabled: true
+		
+			resilience4j.circuitbreaker:
+			  configs:
+				default:
+				  slidingWindowSize: 10
+				  permittedNumberOfCallsInHalfOpenState: 2
+				  failureRateThreshold: 50
+				  waitDurationInOpenState: 10000
+
+			resilience4j.retry:
+			  configs:
+				default:
+				  maxAttempts: 3
+				  waitDuration: 500
+				  enableExponentialBackoff: true
+				  exponentialBackoffMultiplier: 2
+				  ignoreExceptions:
+					- java.lang.NullPointerException
+				  retryExceptions:
+					- java.util.concurrent.TimeoutException
+
+			resilience4j.ratelimiter:
+			  configs:
+				default:
+				  timeoutDuration: 1000
+				  limitRefreshPeriod: 5000
+				  limitForPeriod: 1
+				  
+--- Observability and monitoring of microservices:
+
+		gatewayserver:
+		
+			pom.xml:
+			
+				<dependency>
+					<groupId>io.opentelemetry.javaagent</groupId>
+					<artifactId>opentelemetry-javaagent</artifactId>
+					<version>${otelVersion}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>io.micrometer</groupId>
+					<artifactId>micrometer-registry-prometheus</artifactId>
+				</dependency>
+				
+		application.yml:
+		
+			management:
+			  endpoints:
+				web:
+				  exposure:
+					include: "*"
+			  endpoint:
+				gateway:
+				  access: unrestricted
+			  info:
+				env:
+				  enabled: true
+			  metrics:
+				tags:
+				  application: ${spring.application.name}
+
+			logging:
+			  level:
+				com:
+				  eazybytes:
+					gatewayserver: DEBUG
+			  pattern:
+				level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+				
+	accounts:
+	
+		pom.xml:
+		
+			<dependency>
+				<groupId>io.opentelemetry.javaagent</groupId>
+				<artifactId>opentelemetry-javaagent</artifactId>
+				<version>${otelVersion}</version>
+				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-prometheus</artifactId>
+			</dependency>
+			
+		application.yml:
+		
+			management:
+			  endpoints:
+				web:
+				  exposure:
+					include: "*"
+			  endpoint:
+				shutdown:
+				  access: unrestricted
+				health:
+				  probes:
+					enabled: true
+			  info:
+				env:
+				  enabled: true
+			  metrics:
+				tags:
+				  application: ${spring.application.name}
+				  
+			logging:
+			  level:
+				com:
+				  eazybytes:
+					accounts: DEBUG
+			  pattern:
+				level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+				
+--- Microservices Security:
+
+		gatewayserver:
+		
+			pom.xml:
+
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-security</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.security</groupId>
+					<artifactId>spring-security-oauth2-resource-server</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.security</groupId>
+					<artifactId>spring-security-oauth2-jose</artifactId>
+				</dependency>
+				
+		application.yml:
+		
+			spring:
+			  security:
+				oauth2:
+				  resourceserver:
+					jwt:
+					  jwk-set-uri: "http://localhost:7080/realms/master/protocol/openid-connect/certs"
+					  
+		KeycloakRoleConverter.java:
+		
+			public class KeycloakRoleConverter  implements Converter<Jwt, Collection<GrantedAuthority>> {
+
+				@Override
+				public Collection<GrantedAuthority> convert(Jwt source) {
+					Map<String, Object> realmAccess = (Map<String, Object>) source.getClaims().get("realm_access");
+					if (realmAccess == null || realmAccess.isEmpty()) {
+						return new ArrayList<>();
+					}
+					Collection<GrantedAuthority> returnValue = ((List<String>) realmAccess.get("roles"))
+							.stream().map(roleName -> "ROLE_" + roleName)
+							.map(SimpleGrantedAuthority::new)
+							.collect(Collectors.toList());
+					return returnValue;
+				}
+			}
+			
+		SecurityConfig.java:
+		
+			@Configuration
+			@EnableWebFluxSecurity
+			public class SecurityConfig {
+
+				@Bean
+				public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity) {
+					serverHttpSecurity.authorizeExchange(exchanges -> exchanges.pathMatchers(HttpMethod.GET).permitAll()
+							.pathMatchers("/eazybank/accounts/**").hasRole("ACCOUNTS")
+							.pathMatchers("/eazybank/cards/**").hasRole("CARDS")
+							.pathMatchers("/eazybank/loans/**").hasRole("LOANS"))
+							.oauth2ResourceServer(oAuth2ResourceServerSpec -> oAuth2ResourceServerSpec
+									.jwt(jwtSpec -> jwtSpec.jwtAuthenticationConverter(grantedAuthoritiesExtractor())));
+					serverHttpSecurity.csrf(csrfSpec -> csrfSpec.disable());
+					return serverHttpSecurity.build();
+				}
+
+				private Converter<Jwt, Mono<AbstractAuthenticationToken>> grantedAuthoritiesExtractor() {
+					JwtAuthenticationConverter jwtAuthenticationConverter =
+							new JwtAuthenticationConverter();
+					jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter
+							(new KeycloakRoleConverter());
+					return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
+				}
+
+			}
+			
+--- Event Driven microservices using RabbitMQ,Spring Cloud Functions & Stream:
+
+		message:
+		
+			pom.xml:
+			
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-stream</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-stream-test-binder</artifactId>
+					<scope>test</scope>
+				</dependency>
+				
+		application.yml:
+		
+			spring:
+			  application:
+				name: "message"
+			  cloud:
+				function:
+				  definition: email|sms
+				stream:
+				  bindings:
+					emailsms-in-0:
+					  destination: send-communication
+					  group: ${spring.application.name}
+					emailsms-out-0:
+					  destination: communication-sent
+			  rabbitmq:
+				host: localhost
+				port: 5672
+				username: guest
+				password: guest
+				connection-timeout: 10s
+				
+		MessageFunctions.java:
+		
+			@Configuration
+			public class MessageFunctions {
+
+				private static final Logger log = LoggerFactory.getLogger(MessageFunctions.class);
+
+				@Bean
+				public Function<AccountsMsgDto,AccountsMsgDto> email() {
+					return accountsMsgDto -> {
+						log.info("Sending email with the details : " +  accountsMsgDto.toString());
+						return accountsMsgDto;
+					};
+				}
+
+				@Bean
+				public Function<AccountsMsgDto,Long> sms() {
+					return accountsMsgDto -> {
+						log.info("Sending sms with the details : " +  accountsMsgDto.toString());
+						return accountsMsgDto.accountNumber();
+					};
+				}
+
+			}
+			
+	accounts:
+	
+		pom.xml:
+		
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-stream</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+			</dependency>
+			
+		application.yml:
+		
+			spring:
+			  application:
+				name: "accounts"
+			  cloud:
+				function:
+				  definition: updateCommunication
+				stream:
+				  bindings:
+					updateCommunication-in-0:
+					  destination: communication-sent
+					  group: ${spring.application.name}
+					sendCommunication-out-0:
+					  destination: send-communication
+			  rabbitmq:
+				host: localhost
+				port: 5672
+				username: guest
+				password: guest
+				connection-timeout: 10s
+				
+		AccountsFunctions.java:
+		
+			@Configuration
+			public class AccountsFunctions {
+
+				private static final Logger log = LoggerFactory.getLogger(AccountsFunctions.class);
+
+				@Bean
+				public Consumer<Long> updateCommunication(IAccountsService accountsService) {
+					return accountNumber -> {
+						log.info("Updating Communication status for the account number : " + accountNumber.toString());
+						accountsService.updateCommunicationStatus(accountNumber);
+					};
+				}
+
+			}
+			
+		AccountsServiceImpl.java:
+		
+			private final StreamBridge streamBridge;
+			
+			@Override
+			public void createAccount(CustomerDto customerDto) {
+				Customer customer = CustomerMapper.mapToCustomer(customerDto, new Customer());
+				Optional<Customer> optionalCustomer = customerRepository.findByMobileNumber(customerDto.getMobileNumber());
+				if(optionalCustomer.isPresent()) {
+					throw new CustomerAlreadyExistsException("Customer already registered with given mobileNumber "
+							+customerDto.getMobileNumber());
+				}
+				Customer savedCustomer = customerRepository.save(customer);
+				Accounts savedAccount = accountsRepository.save(createNewAccount(savedCustomer));
+				sendCommunication(savedAccount, savedCustomer);
+			}
+
+			private void sendCommunication(Accounts account, Customer customer) {
+				var accountsMsgDto = new AccountsMsgDto(account.getAccountNumber(), customer.getName(),
+						customer.getEmail(), customer.getMobileNumber());
+				log.info("Sending Communication request for the details: {}", accountsMsgDto);
+				var result = streamBridge.send("sendCommunication-out-0", accountsMsgDto);
+				log.info("Is the Communication request successfully triggered ? : {}", result);
+			}
+			
+			@Override
+			public boolean updateCommunicationStatus(Long accountNumber) {
+				boolean isUpdated = false;
+				if(accountNumber !=null ){
+					Accounts accounts = accountsRepository.findById(accountNumber).orElseThrow(
+							() -> new ResourceNotFoundException("Account", "AccountNumber", accountNumber.toString())
+					);
+					accounts.setCommunicationSw(true);
+					accountsRepository.save(accounts);
+					isUpdated = true;
+				}
+				return  isUpdated;
+			}
+			
+--- Event Driven microservices using Kafka,Spring Cloud Functions & Stream:
+
+	Tương tự như RabbitMQ
+	
+	Một số điểm khác:
+
+		message:
+		
+			pom.xml:
+			
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-stream</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-stream-binder-kafka</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-stream-test-binder</artifactId>
+					<scope>test</scope>
+				</dependency>
+			
+			application.yml:
+
+				spring:
+				  cloud:
+					function:
+					  definition: email|sms
+					stream:
+					  bindings:
+						emailsms-in-0:
+						  destination: send-communication
+						  group: ${spring.application.name}
+						emailsms-out-0:
+						  destination: communication-sent
+					  kafka:
+						binder:
+						  brokers:
+							- localhost:9092	
+						
+		accounts:
+		
+			pom.xml:
+			
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-stream</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-stream-binder-kafka</artifactId>
+				</dependency>
+				
+			application.yml:
+			
+				spring:
+				  application:
+					name: "accounts"
+				  cloud:
+					function:
+					  definition: updateCommunication
+					stream:
+					  bindings:
+						updateCommunication-in-0:
+						  destination: communication-sent
+						  group: ${spring.application.name}
+						sendCommunication-out-0:
+						  destination: send-communication
+					  kafka:
+						binder:
+						  brokers:
+							- localhost:9092
+							
+--- Swagger UI:
+
+		accounts:
+		
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+				<version>2.8.1</version>
+			</dependency>
+			
+		AccountsApplication.java:
+		
+			@SpringBootApplication
+			/*@ComponentScans({ @ComponentScan("com.eazybytes.accounts.controller") })
+			@EnableJpaRepositories("com.eazybytes.accounts.repository")
+			@EntityScan("com.eazybytes.accounts.model")*/
+			@EnableJpaAuditing(auditorAwareRef = "auditAwareImpl")
+			@OpenAPIDefinition(
+					info = @Info(
+							title = "Accounts microservice REST API Documentation",
+							description = "EazyBank Accounts microservice REST API Documentation",
+							version = "v1",
+							contact = @Contact(
+									name = "Madan Reddy",
+									email = "tutor@eazybytes.com",
+									url = "https://www.eazybytes.com"
+							),
+							license = @License(
+									name = "Apache 2.0",
+									url = "https://www.eazybytes.com"
+							)
+					),
+					externalDocs = @ExternalDocumentation(
+							description =  "EazyBank Accounts microservice REST API Documentation",
+							url = "https://www.eazybytes.com/swagger-ui.html"
+					)
+			)
+			public class AccountsApplication {
+
+				public static void main(String[] args) {
+					SpringApplication.run(AccountsApplication.class, args);
+				}
+
+			}
+			
+		AccountsController.java:
+		
+			@Tag(
+					name = "CRUD REST APIs for Accounts in EazyBank",
+					description = "CRUD REST APIs in EazyBank to CREATE, UPDATE, FETCH AND DELETE account details"
+			)
+			@RestController
+			@RequestMapping(path="/api", produces = {MediaType.APPLICATION_JSON_VALUE})
+			@AllArgsConstructor
+			@Validated
+			public class AccountsController {
+
+				private IAccountsService iAccountsService;
+
+				@Operation(
+						summary = "Create Account REST API",
+						description = "REST API to create new Customer &  Account inside EazyBank"
+				)
+				@ApiResponses({
+						@ApiResponse(
+								responseCode = "201",
+								description = "HTTP Status CREATED"
+						),
+						@ApiResponse(
+								responseCode = "500",
+								description = "HTTP Status Internal Server Error",
+								content = @Content(
+										schema = @Schema(implementation = ErrorResponseDto.class)
+								)
+						)
+				}
+				)
+			}
+			
+		AccountsDto.java:
+		
+			@Data
+			@Schema(
+					name = "Accounts",
+					description = "Schema to hold Account information"
+			)
+			public class AccountsDto {
+
+				@NotEmpty(message = "AccountNumber can not be a null or empty")
+				@Pattern(regexp="(^$|[0-9]{10})",message = "AccountNumber must be 10 digits")
+				@Schema(
+						description = "Account Number of Eazy Bank account", example = "3454433243"
+				)
+				private Long accountNumber;
+
+				@NotEmpty(message = "AccountType can not be a null or empty")
+				@Schema(
+						description = "Account type of Eazy Bank account", example = "Savings"
+				)
+				private String accountType;
+
+				@NotEmpty(message = "BranchAddress can not be a null or empty")
+				@Schema(
+						description = "Eazy Bank branch address", example = "123 NewYork"
+				)
+				private String branchAddress;
+			}
+			
+	
+
+--- Intellij Config:
+
+	Để có thể debug thì cần thiết lập đầy đủ về maven và jdk, version của jdk cần check trong file pom
+	(thiết lập phải đầy đủ trong Setting và Project Structure)
+	
+	Chú ý build bằng Intellij và chạy cmd sẽ lấy jdk và maven khác nhau, cmd lấy từ biến môi trường trong
+	khi Intellij lấy từ đường dẫn mình setting trong nó
+
+--- Kubernetes:
+
+	Cài đặt kubernete dashboard
+
+	Các lệnh cần học:
+	
+		kubectl config get-contexts
+		
+		kubectl config get-clusters
+		
+		kubectl config use-context docker-desktop
+		
+		kubectl get nodes
+		
+		# Add kubernetes-dashboard repository
+		helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+		
+		# Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart
+		helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+	
+		kubectl apply -f dashboard-adminuser.yaml
+		
+		kubectl -n kubernetes-dashboard create token admin-user
+		
+		kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
+		
+		kubectl port-forward svc/keycloak 8080:80
+		
+		kubectl logs keycloak-0 -c keycloak
+		
+		kubectl get pods -n kong
+		
+		kubectl get pods -n kubernetes-dashboard
+		
+		kubectl logs kubernetes-dashboard-kong-79867c9c48-dmbnv -n kubernetes-dashboard
+		
+		kubectl proxy
+
+		kubectl get svc -n kubernetes-dashboard
+		
+		kubectl get pods -n kubernetes-dashboard -o wide
+		
+		kubectl create serviceaccount dashboard-admin-sa -n kubernetes-dashboard
+		
+		kubectl create clusterrolebinding dashboard-admin-sa  --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:dashboard-admin-sa 
+		
+		kubectl -n kubernetes-dashboard create token dashboard-admin-sa
+		
+		kubectl get services
+		
+		kubectl get replicaset
+		
+		kubectl get deployments
+		
+		kubectl delete pod accounts-deployment-7f7f75d899-vtvbq
+		
+		kubectl describe pod gatewayserver-deployment-54cd64599-2j4jz
+		
+		kubectl set image deployment gatewayserver-deployment gatewayserver=eazybytes/gatewayserver:s6 --record
+		
+		kubectl get events --sort-by=.metadata.creationTimestamp
+		
+		kubectl rollout history deployment gatewayserver-deployment
+		
+		kubectl rollout undo deployment gatewayserve-deployment --to-revision=1bectl delete -f 1_keycloak.yml
+		
+		kubectl get pvc
+		
+		kubectl delete deployment kubernetes-dashboard-kong -n kubernetes-dashboard
+		
+		kubectl delete svc kubernetes-dashboard-kong-proxy -n kubernetes-dashboard
+		
+		kubectl delete pod -l app.kubernetes.io/name=kong -n kubernetes-dashboard
+		
+		helm repo add kong https://charts.konghq.com
+		helm repo update
+		
+		kubectl describe pod kong-kong-5c8c45bd6d-kj5sl -n kubernetes-dashboard
+		
+		kubectl describe pod kong-kong-5c8c45bd6d-kj5sl -n kubernetes-dashboard | findstr "Failed"
+		
+		kubectl -n kubernetes-dashboard edit svc kubernetes-dashboard-kong-proxy
+		
+		kubectl get pvc -n default | findstr keycloak
+		kubectl get secret -n default | findstr keycloak
+		kubectl get configmap -n default | findstr keycloak
+		kubectl get sa -n default | findstr keycloak
+		
+		kubectl delete namespace kubernetes-dashboard
+		
+		kubectl delete crd probes.monitoring.coreos.com
+		
+		kubectl describe pod prometheus-prometheus-kube-prometheus-prometheus-0 -n default
+		
+		kubectl delete configmap eazybankprod-configmap -n default
+		
+		kubectl delete svc cards -n default
+		
+		helm install eazybank prod-env
+		
+		
+		help upgrade eazybank prod-env
+		
+
+		kubectl get pvc
+		
+		docker pull kong:3.9
+
+
+
+		
+		helm create eazybank-common
+		
+		helm dependencies build
+		
+		helm template .
+		
+		helm install keycloak keycloak
+		
+		helm list -A
+		
+		helm uninstall keycloak
+		
+		helm ls
+		
+		helm seach hub wordpress
+		
+		helm repo add bitnami https://charts.bitnami.com/bitnami
+		
+		helm install happy-panda bitnami/wordpress
+		
+		helm env
+		
+		helm uninstall kubernetes-dashboard -n kubernetes-dashboard
+		
+		helm install prometheus kube-prometheus --skip-crds
+		
+	Deployment và Service:
+	
+		Deployment là gì?
+		
+			Deployment là một object trong Kubernetes dùng để quản lý Pod (ứng dụng chạy thực sự).
+
+			Nó đảm bảo số lượng Pod bạn khai báo luôn chạy đủ, nếu Pod chết thì tự tạo lại.
+
+			Nó cũng hỗ trợ Rolling Update (cập nhật version dần dần, không downtime).
+			
+		Service là gì?
+		
+			Service dùng để expose (mở ra) các Pod cho các Pod khác hoặc bên ngoài có thể truy cập.
+
+			Vì Pod có IP thay đổi liên tục (mỗi lần restart Pod là IP đổi), nên bạn không thể truy cập trực
+			tiếp. Service sẽ tạo một IP cố định (ClusterIP) hoặc một cổng (NodePort/LoadBalancer) để truy cập.
+
+			Service còn có cơ chế load balancing giữa các Pod.
+			
+		Các loại Service phổ biến:
+		
+			ClusterIP (mặc định): chỉ cho phép truy cập trong cluster (nội bộ).
+
+			NodePort: mở port trên node để có thể truy cập từ ngoài qua <NodeIP>:<NodePort>.
+
+			LoadBalancer: (nếu cluster chạy trên cloud như AWS, GCP, Azure) sẽ tạo Load Balancer ngoài Internet.
+			
+		Mối quan hệ giữa Deployment và Service:
+		
+			Deployment chịu trách nhiệm: "Tạo và duy trì Pod".
+
+			Service chịu trách nhiệm: "Expose và điều phối traffic đến Pod đó".
+		
+			Deployment và Pod:
+
+				Deployment quản lý Pod.
+
+				Bạn định nghĩa image, số replicas (số Pod muốn chạy), Kubernetes sẽ tạo ra Pod tương ứng.
+
+				Nếu Pod chết → Deployment sẽ tự tạo lại.
+				
+			Service và Pod:
+			
+				Service không quản lý Pod, mà chỉ kết nối đến Pod dựa trên label selector.
+
+				Service sẽ tìm Pod nào có label khớp với selector, rồi load balancing request đến chúng.
+				
+				Ví dụ:
+				
+					selector:
+						app: my-app
+					  
+						Nó sẽ tự động tìm tất cả Pod do Deployment my-app tạo ra (có label app=my-app) để đưa request vào.
+		
+	Kubernetes dashboard:
+	
+		Cần 1 khoảng thời gian mới có thể truy cập vào được http://localhost:8001/
+		
+		Cài đặt bằng helm:
+		
+		Thêm Helm repo cho Kubernetes Dashboard:
+
+			# Add kubernetes-dashboard repository
+			helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+		
+		Cài đặt Dashboard bằng Helm:
+
+			Sau lệnh này, Helm sẽ tạo Deployment + Service cho Dashboard.
+
+				# Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart
+				helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+				
+		Tạo ServiceAccount & RBAC (admin):
+
+			Helm không tự tạo admin user. Bạn cần thêm dashboard-adminuser.yaml và dashboard-rolebinding.yaml
+
+			Say đó áp dụng:
+
+				kubectl apply -f dashboard-adminuser.yaml
+
+				kubectl apply -f dashboard-rolebinding.yaml
+				
+		Lấy token đăng nhập:
+
+			Lấy token ngắn hạn:
+
+				Chạy lệnh để lấy token:
+
+					kubectl -n kubernetes-dashboard create token admin-user
+				
+			Lấy token dài hạn:
+
+				Cần file secret.yaml
+				
+				kubectl apply -f secret.yaml
+				
+				Chạy lệnh để lấy token:
+				
+					kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath="{.data.token}" | base64 -d
+				
+		Truy cập Dashboard:
+		
+			Chú ý phải có Kubernetes dashboard kong proxy
+		
+			Port-forward (nhanh nhất):
+			
+				kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+
+				Mở:
+					
+					https://localhost:8443
+			
+			kubectl proxy:
+			
+				kubectl proxy
+
+				Mở:
+				
+					http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:/proxy/
+					
+			Expose bằng NodePort (nếu muốn truy cập từ bên ngoài):
+			
+				Ví dụ sửa service thành NodePort, đổi type: ClusterIP → NodePort:
+				
+					kubectl -n kubernetes-dashboard edit svc kubernetes-dashboard-kong-proxy
+
+				Mở:
+				
+					https://<NodeIP>:<NodePort>
+
+	Các loại dashboard của kubernetes:
+	
+	
+		kubernetes-dashboard-web → giao diện web UI (frontend React app).
+
+		kubernetes-dashboard-api → backend API phục vụ cho web UI.
+
+		kubernetes-dashboard-auth → xử lý authentication & session cho người dùng.
+
+		kubernetes-dashboard-metrics-scraper → component phụ để thu thập metrics từ các pods/nodes.
+
+		kubernetes-dashboard-kong → Kong Gateway đóng vai trò reverse proxy / ingress nội bộ, gom API và route traffic giữa các thành phần.		
+		
+	
+	Phân biệt ClusterIP / NodePort / LoadBalancer:
+	
+		ClusterIP:
+		
+			Mặc định khi bạn tạo Service.
+
+			Chỉ expose service bên trong cluster (các Pod khác trong cluster mới gọi được).
+
+			Không truy cập được từ ngoài cluster.
+			
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: my-service
+			spec:
+			  type: ClusterIP
+			  selector:
+				app: my-app
+			  ports:
+				- protocol: TCP
+				  port: 80        # service port
+				  targetPort: 8080  # pod containerPort
+				  
+				Truy cập: http://my-service:80 (chỉ từ pod trong cluster).
+				
+		NodePort:
+		
+			Expose service ra ngoài qua mỗi Node IP ở 1 port tĩnh (trong range 30000-32767).
+
+			Người ngoài có thể truy cập bằng NodeIP:NodePort.
+
+			Không cần Ingress, nhưng port bị giới hạn.
+
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: my-service
+			spec:
+			  type: NodePort
+			  selector:
+				app: my-app
+			  ports:
+				- protocol: TCP
+				  port: 80
+				  targetPort: 8080
+				  nodePort: 30080   # expose qua NodeIP:30080
+				  
+				Truy cập: http://<NodeIP>:30080
+				
+		LoadBalancer:
+		
+			Chỉ dùng được khi cluster chạy trên cloud provider có Load Balancer (AWS ELB, GCP, Azure, v.v).
+
+			Kubernetes sẽ yêu cầu cloud tạo LB → ánh xạ traffic vào NodePort/ClusterIP phía dưới.
+
+			Dễ dùng cho production vì có IP public.
+			
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: my-service
+			spec:
+			  type: LoadBalancer
+			  selector:
+				app: my-app
+			  ports:
+				- protocol: TCP
+				  port: 80
+				  targetPort: 8080
+
+				Truy cập: http://<External-IP>:80 (K8s tự cấp qua cloud LB).
+		
+
+	Kubernetes có rất nhiều kind (loại tài nguyên) khác nhau, mỗi loại đại diện cho một thành phần hoặc
+	một tài nguyên trong hệ sinh thái Kubernetes. Dưới đây là danh sách các kind phổ biến trong Kubernetes:
+
+	1. Pod
+
+		Kind: Pod
+
+		Đại diện cho một đơn vị triển khai cơ bản nhất trong Kubernetes. Một pod có thể chứa một hoặc
+		nhiều container.
+
+	2. Service
+
+		Kind: Service
+
+		Đại diện cho một endpoint mạng có thể truy cập được từ bên ngoài hoặc từ các pod khác trong cùng
+		namespace. Có các loại service như ClusterIP, NodePort, LoadBalancer, và ExternalName.
+
+	3. Deployment
+
+		Kind: Deployment
+
+		Quản lý việc triển khai các pod, đảm bảo số lượng pod đang chạy luôn đạt yêu cầu. Deployment tự
+		động cập nhật phiên bản mới của ứng dụng.
+
+	4. ReplicaSet
+
+		Kind: ReplicaSet
+
+		Đảm bảo rằng một số lượng cụ thể các bản sao của pod đang chạy tại mọi thời điểm. Deployment sử
+		dụng ReplicaSet để duy trì các bản sao của pod.
+
+	5. StatefulSet
+
+		Kind: StatefulSet
+
+		Dùng để triển khai các ứng dụng có trạng thái, đảm bảo các pod có tên và lưu trữ bền
+		vững (persistent storage).
+
+	6. DaemonSet
+
+		Kind: DaemonSet
+
+		Đảm bảo rằng một pod được chạy trên tất cả các node trong cluster, hoặc trên các node mà bạn chọn.
+
+	7. Job
+
+		Kind: Job
+
+		Đảm bảo rằng một hoặc nhiều pod chạy và hoàn thành một nhiệm vụ trong một khoảng thời gian xác định.
+
+	8. CronJob
+
+		Kind: CronJob
+
+		Quản lý các job theo lịch định kỳ, giống như cron job trên hệ điều hành Linux.
+
+	9. Namespace
+
+		Kind: Namespace
+
+		Một không gian tên (namespace) dùng để phân tách tài nguyên trong Kubernetes, giúp dễ dàng quản
+		lý các tài nguyên trong môi trường đa người dùng.
+
+	10. ConfigMap
+
+		Kind: ConfigMap
+
+		Dùng để lưu trữ các thông tin cấu hình mà có thể được sử dụng bởi các pod trong cluster.
+
+	11. Secret
+
+		Kind: Secret
+
+		Dùng để lưu trữ thông tin nhạy cảm như mật khẩu, token, hoặc chứng chỉ mà không muốn lưu trữ
+		dưới dạng plain text trong cấu hình.
+
+	12. Ingress
+
+		Kind: Ingress
+
+		Cung cấp các quy tắc để truy cập vào các dịch vụ trong Kubernetes từ ngoài cluster, thường
+		được sử dụng để cấu hình HTTP/HTTPS routing.
+
+	13. PersistentVolume (PV)
+
+		Kind: PersistentVolume
+
+		Đề cập đến một phần lưu trữ bền vững (bất kể là loại lưu trữ nào), có thể được sử dụng bởi các pod.
+
+	14. PersistentVolumeClaim (PVC)
+
+		Kind: PersistentVolumeClaim
+
+		Đại diện cho yêu cầu sử dụng PersistentVolume. PVC có thể được gắn với một pod để sử dụng lưu trữ bền vững.
+
+	15. HorizontalPodAutoscaler (HPA)
+
+		Kind: HorizontalPodAutoscaler
+
+		Tự động điều chỉnh số lượng pod trong một deployment hoặc replica set dựa trên chỉ số như CPU usage hoặc memory usage.
+
+	16. PodDisruptionBudget (PDB)
+
+		Kind: PodDisruptionBudget
+
+		Đảm bảo rằng có một số lượng tối thiểu pod hoạt động trong khi thực hiện các hoạt động như upgrade hoặc maintenance.
+
+	17. Role
+
+		Kind: Role
+
+		Định nghĩa quyền truy cập trong một namespace cụ thể. Thường được sử dụng kết hợp với RoleBinding.
+
+	18. RoleBinding
+
+		Kind: RoleBinding
+
+		Gắn quyền truy cập từ Role với người dùng hoặc nhóm người dùng trong Kubernetes.
+
+	19. ClusterRole
+
+		Kind: ClusterRole
+
+		Tương tự như Role, nhưng ClusterRole áp dụng cho toàn bộ cluster thay vì chỉ một namespace.
+
+	20. ClusterRoleBinding
+
+		Kind: ClusterRoleBinding
+
+		Gắn quyền truy cập từ ClusterRole với người dùng hoặc nhóm người dùng trên toàn bộ cluster.
+
+	21. NetworkPolicy
+
+		Kind: NetworkPolicy
+
+		Định nghĩa các quy tắc về bảo mật mạng, kiểm soát lưu lượng mạng giữa các pod.
+
+	22. ServiceAccount
+
+		Kind: ServiceAccount
+
+		Cung cấp danh tính cho các pod, giúp xác thực và ủy quyền trong Kubernetes.
+
+	23. APIService
+
+		Kind: APIService
+
+		Cung cấp khả năng mở rộng cho API server Kubernetes, giúp kết nối với các API bên ngoài.
+
+	24. Endpoint
+
+		Kind: Endpoints
+
+		Định nghĩa một hoặc nhiều IP và port mà dịch vụ có thể sử dụng để giao tiếp với pod.
+
+	25. Volume
+
+		Kind: Volume
+
+		Định nghĩa các loại lưu trữ có thể được sử dụng trong pod, ví dụ: emptyDir, hostPath, nfs, configMap, etc.
+
+	26. Event
+
+		Kind: Event
+
+		Đại diện cho các sự kiện trong cluster Kubernetes, cung cấp thông tin về các hành động hoặc trạng thái của các tài nguyên.
+		
+	Pod:
+		
+		Pod là đơn vị cơ bản và nhỏ nhất trong Kubernetes dùng để triển khai ứng dụng. Một Pod có thể chứa một hoặc nhiều containers,
+		thường là các container chạy các ứng dụng hoặc dịch vụ trong Kubernetes.
+
+		Khi bạn triển khai ứng dụng trên Kubernetes, bạn sẽ triển khai nó dưới dạng một Pod. Mỗi Pod chạy trên một node trong cluster
+		Kubernetes, và Kubernetes sẽ tự động quản lý vòng đời và sự tái tạo (rescheduling) của Pod khi có sự cố xảy ra.		
+		
+	Deployment và Service:
+	
+		Deployment đảm bảo rằng các Pod ứng dụng luôn được triển khai và duy trì ở trạng thái sẵn sàng.
+
+		Service thì đảm bảo các Pod này có thể giao tiếp với các ứng dụng khác trong hoặc ngoài cluster Kubernetes. Service sẽ
+		định tuyến lưu lượng tới các Pod do Deployment quản lý thông qua label selector.
+
+		Việc để chúng trong cùng một file giúp bạn nhận ra rằng Service đang cung cấp truy cập đến các Pod được triển khai bởi
+		Deployment. Đây là một cặp tài nguyên đi đôi với nhau và phụ thuộc vào nhau.
+		
+	Replicaset:
+	
+		ReplicaSet giám sát các pod và đảm bảo rằng số lượng pod đang chạy luôn bằng với số lượng yêu cầu (desired replicas).
+
+		Nếu có một pod nào đó bị lỗi hoặc bị xóa, ReplicaSet sẽ tạo ra một pod mới để thay thế pod đó, đảm bảo số lượng pod không thay đổi.
+
+		ReplicaSet sử dụng labels để xác định các pod mà nó quản lý.
+		
+		
+	kubectl proxy là gì?
+
+		Đây là một lệnh giúp mở một HTTP proxy server trên localhost, thường chạy ở port 8001.
+
+		Khi bạn chạy proxy, nó sẽ chuyển tiếp (forward) tất cả request từ máy của bạn đến API Server của Kubernetes.
+
+		Nhờ vậy bạn có thể truy cập API Kubernetes và cả Kubernetes Dashboard service thông qua localhost:8001.
+		
+		Khi bạn truy cập localhost:8001 sau khi chạy kubectl proxy, thì đó chính là kênh proxy vào API Server
+		của Kubernetes, không liên quan gì đến Kong cả.
+
+		Output bạn dán là toàn bộ các endpoints của Kubernetes API (/apis, /healthz, /readyz, /metrics, …), chứ
+		không phải Admin API của Kong.
+		
+		kong-proxy (cho client bên ngoài)
+
+		kong-admin (cho Admin API)
+		
+		Pod kubernetes-dashboard-kong → chạy Kong Gateway (reverse proxy).
+
+		Service kubernetes-dashboard-kong-proxy → expose Kong ra bên ngoài namespace
+		(kiểu ClusterIP/NodePort/LoadBalancer tùy manifest). Nó là “cửa ngõ” để bạn truy cập vào Dashboard.
+		
+		Người dùng không gọi trực tiếp vào kubernetes-dashboard-web hay kubernetes-dashboard-api.
+
+		Thay vào đó, tất cả request sẽ đi qua Kong proxy (service kubernetes-dashboard-kong-proxy), sau
+		đó Kong mới route tới các service khác (web, api, auth, metrics).
+		
+	kubectl get pods:
+		
+		Mặc định kubectl sẽ liệt kê Pod trong namespace default.
+
+		Trong khi các Pod của Kubernetes Dashboard (API, Web, Auth, Kong, Metrics scraper) lại nằm trong namespace
+		kubernetes-dashboard, nên bạn không thấy chúng trong output kia.
+		
+	Vì sao cần port-forward?
+	
+		Kubernetes Dashboard (và hầu hết các addon trong cluster) chạy trong mạng nội bộ của cluster (ClusterIP Service).
+
+		Tức là các service như kubernetes-dashboard-kong-proxy chỉ lắng nghe trong cluster, không tự động
+		expose ra ngoài laptop/PC của bạn.
+
+		kubectl port-forward tạo một tunnel từ cổng máy bạn (localhost:8443) tới cổng service trong cluster (443),
+		nhờ vậy bạn mới mở Dashboard trên trình duyệt.
+	
+	Code mẫu Kubernetes:
+	
+		apiVersion: apps/v1
+		kind: Deployment
+		metadata:
+		  name: keycloak
+		  labels:
+			app: keycloak
+		spec:
+		  replicas: 1
+		  selector:
+			matchLabels:
+			  app: keycloak
+		  template:
+			metadata:
+			  labels:
+				app: keycloak
+			spec:
+			  containers:
+				- name: keycloak
+				  image: quay.io/keycloak/keycloak:26.0.7
+				  args: ["start-dev"]
+				  env:
+				  - name: KEYCLOAK_ADMIN
+					valueFrom:
+					  configMapKeyRef:
+						name: eazybank-configmap
+						key: KEYCLOAK_ADMIN
+				  - name: KEYCLOAK_ADMIN_PASSWORD
+					valueFrom:
+					  configMapKeyRef:
+						name: eazybank-configmap
+						key: KEYCLOAK_ADMIN_PASSWORD
+				  ports:
+					- name: http
+					  containerPort: 8080
+		---
+		apiVersion: v1
+		kind: Service
+		metadata:
+		  name: keycloak
+		  labels:
+			app: keycloak
+		spec:
+		  selector:
+			app: keycloak
+		  type: LoadBalancer
+		  ports:
+			- name: http
+			  port: 7080
+			  targetPort: 8080
+			  
+			Được phân chia ra thành 2 phần: Deployment và Service
+			
+				Deployment:
+				
+					apiVersion: apps/v1: Đây là phiên bản của API mà Kubernetes sử dụng để định nghĩa các
+					tài nguyên loại Deployment (phiên bản v1 của API này).
+
+					kind: Deployment: Đây là kiểu tài nguyên của Kubernetes, đại diện cho một deployment — việc
+					triển khai và duy trì một ứng dụng với số lượng bản sao (replicas) cụ thể.
+
+					metadata: Phần này cung cấp thông tin định danh cho tài nguyên.
+
+					name: keycloak: Tên của deployment là keycloak.
+
+					labels: Dùng để gắn nhãn cho deployment này, giúp phân loại tài nguyên trong Kubernetes. Ở đây,
+					nhãn app: keycloak có thể dùng để lọc hoặc tìm kiếm tài nguyên liên quan đến Keycloak.
+
+					spec: Phần này định nghĩa cấu hình chi tiết cho deployment.
+
+					replicas: 1: Điều này yêu cầu Kubernetes chạy 1 pod cho deployment này.
+
+					selector: Định nghĩa cách Kubernetes xác định các pod mà deployment này quản lý.
+
+					matchLabels: app: keycloak: Chọn các pod có nhãn app: keycloak.
+
+					template: Đây là mẫu (template) của pod mà Kubernetes sẽ tạo ra cho deployment này.
+
+					metadata: Định nghĩa nhãn cho pod.
+
+					spec: Cấu hình cho các container trong pod.
+
+					containers: Danh sách các container trong pod. Mỗi container sẽ chạy một ứng dụng.
+
+					name: keycloak: Tên container là keycloak.
+
+					image: quay.io/keycloak/keycloak:26.0.7: Docker image sẽ được sử dụng để tạo container. Ở đây là
+					image của Keycloak phiên bản 26.0.7.
+
+					args: ["start-dev"]: Đây là các tham số sẽ được truyền cho container khi khởi động. start-dev là tham
+					số để chạy Keycloak trong chế độ phát triển.
+
+					env: Định nghĩa các biến môi trường cho container.
+
+					KEYCLOAK_ADMIN và KEYCLOAK_ADMIN_PASSWORD: Các biến môi trường này lấy giá trị từ một ConfigMap có tên
+					là eazybank-configmap. Chúng dùng để cấu hình tài khoản admin của Keycloak.
+
+					valueFrom.configMapKeyRef: Lấy giá trị từ ConfigMap thay vì gán trực tiếp.
+
+					ports: Cấu hình cổng mà container sẽ mở ra.
+
+					containerPort: 8080: Keycloak sẽ chạy trên cổng 8080 bên trong container.
+
+				Service:
+				
+					apiVersion: v1: Phiên bản API để định nghĩa tài nguyên Service.
+
+					kind: Service: Đây là kiểu tài nguyên Kubernetes dùng để tạo một dịch vụ (service) mà các pod có
+					thể truy cập từ bên ngoài hoặc các pod khác trong cluster.
+
+					metadata: Cung cấp thông tin nhận diện cho service.
+
+					name: keycloak: Tên của service là keycloak.
+
+					labels: Nhãn tương tự như trong deployment, giúp phân loại.
+
+					spec: Định nghĩa các cấu hình chi tiết của service.
+
+					selector: Dùng để chỉ định các pod mà service này sẽ truy cập, trong trường hợp này là các pod có
+					nhãn app: keycloak.
+
+					type: LoadBalancer: Điều này nghĩa là Kubernetes sẽ cấu hình một LoadBalancer để cung cấp địa chỉ IP
+					công cộng cho service. Service này có thể được truy cập từ ngoài cluster thông qua một IP công cộng hoặc DNS.
+
+					ports: Định nghĩa các cổng mà service sẽ lắng nghe.
+
+					port: 7080: Service sẽ lắng nghe trên cổng 7080 từ bên ngoài.
+
+					targetPort: 8080: Khi có yêu cầu đến service, yêu cầu sẽ được chuyển tiếp đến cổng 8080 trên container.
+
+	Các lệnh phổ biến của Kubernetes:
+	
+		kubectl set image <resource-type>/<resource-name> <container-name>=<new-image> [--record]
+		
+			Lệnh kubectl set image trong Kubernetes được sử dụng để thay đổi hoặc cập nhật image của container trong một resource
+			như Deployment, Pod, DaemonSet, StatefulSet, hoặc ReplicaSet. Đây là một trong những lệnh quan trọng để bạn có thể triển
+			khai các ứng dụng với các phiên bản image mới mà không cần phải tạo lại hoặc xóa đi các resource cũ.
+			
+			Khi bạn chạy kubectl set image để đổi image từ a → b, Kubernetes sẽ cập nhật Pod template trong Deployment/ReplicaSet.
+
+			Kể từ thời điểm đó, Kubernetes sẽ tạo các Pod mới dựa trên template mới, nghĩa là dùng image b.
+
+			Container cũ với image a vẫn chạy cho đến khi bị thay thế (rolling update) hoặc gặp sự cố.
+			
+		kubectl get events --sort-by=.metadata.creationTimestamp
+	
+	
+		1. Quản lý Cluster và Contexts
+
+			Kiểm tra thông tin cluster:
+
+				kubectl cluster-info
+
+
+			Kiểm tra các context và cluster hiện tại:
+
+				kubectl config current-context
+
+
+			Liệt kê các context:
+
+				kubectl config get-contexts
+
+
+			Chuyển đổi context (nếu bạn có nhiều clusters):
+
+			kubectl config use-context <context-name>
+
+		2. Quản lý Pods
+
+			Liệt kê các pods trong một namespace (mặc định là default):
+
+				kubectl get pods
+
+
+			Liệt kê pods trong một namespace cụ thể:
+
+				kubectl get pods -n <namespace>
+
+
+			Kiểm tra chi tiết của một pod:
+
+				kubectl describe pod <pod-name>
+
+
+			Xem log của một pod:
+
+				kubectl logs <pod-name>
+
+
+			Xem log của container trong pod:
+
+				kubectl logs <pod-name> -c <container-name>
+
+
+			Tạo pod từ file YAML:
+
+				kubectl apply -f <file-name>.yaml
+
+
+			Xóa pod:
+
+				kubectl delete pod <pod-name>
+
+		3. Quản lý Deployments
+
+			Liệt kê tất cả các deployments:
+
+				kubectl get deployments
+
+
+			Quản lý replicas của deployment (scale up/down):
+
+				kubectl scale deployment <deployment-name> --replicas=<number-of-replicas>
+
+
+			Kiểm tra chi tiết deployment:
+
+				kubectl describe deployment <deployment-name>
+
+
+			Xóa deployment:
+
+				kubectl delete deployment <deployment-name>
+
+		4. Quản lý Services
+
+			Liệt kê tất cả các services:
+
+				kubectl get svc
+
+
+			Kiểm tra chi tiết một service:
+
+				kubectl describe svc <service-name>
+
+
+			Xóa service:
+
+				kubectl delete svc <service-name>
+
+
+			Kiểm tra IP của service (external/internal IP):
+
+				kubectl get svc <service-name>
+
+		5. Quản lý ReplicaSets
+
+			Liệt kê các ReplicaSets:
+
+				kubectl get replicasets
+
+
+			Quản lý ReplicaSet:
+
+				kubectl scale replicasets <replicaset-name> --replicas=<number-of-replicas>
+
+		6. Quản lý ConfigMaps và Secrets
+
+			Liệt kê các ConfigMap:
+
+				kubectl get configmaps
+
+
+			Xem chi tiết một ConfigMap:
+
+				kubectl describe configmap <configmap-name>
+
+
+			Tạo ConfigMap từ file:
+
+				kubectl create configmap <configmap-name> --from-file=<file-path>
+
+
+			Liệt kê các Secrets:
+
+				kubectl get secrets
+
+
+			Xem chi tiết một Secret:
+
+				kubectl describe secret <secret-name>
+
+
+			Tạo Secret từ file:
+
+				kubectl create secret generic <secret-name> --from-file=<file-path>
+
+		7. Quản lý Namespaces
+
+			Liệt kê tất cả các namespaces:
+
+				kubectl get namespaces
+
+
+			Tạo namespace mới:
+
+				kubectl create namespace <namespace-name>
+
+
+			Xóa namespace:
+
+				kubectl delete namespace <namespace-name>
+
+		8. Quản lý Volumes
+
+			Liệt kê các PersistentVolumes (PV):
+
+				kubectl get pv
+
+
+			Liệt kê các PersistentVolumeClaims (PVC):
+
+				kubectl get pvc
+
+		9. Quản lý Ingress
+
+			Liệt kê các Ingress:
+
+				kubectl get ingress
+
+
+			Tạo Ingress từ file YAML:
+
+				kubectl apply -f ingress.yaml
+
+		10. Quản lý StatefulSets
+
+			Liệt kê tất cả StatefulSets:
+
+				kubectl get statefulsets
+
+
+			Kiểm tra chi tiết StatefulSet:
+
+				kubectl describe statefulset <statefulset-name>
+
+		11. Quản lý Jobs và CronJobs
+
+			Liệt kê các jobs:
+
+				kubectl get jobs
+
+
+			Liệt kê các cronjobs:
+
+				kubectl get cronjobs
+
+
+			Tạo cronjob từ file YAML:
+
+				kubectl apply -f cronjob.yaml
+
+		12. Quản lý Cluster Roles và RoleBindings
+
+			Liệt kê ClusterRoles:
+
+				kubectl get clusterroles
+
+
+			Liệt kê RoleBindings:
+
+				kubectl get rolebindings
+
+		13. Khám phá Cluster
+
+			Khám phá các node trong cluster:
+
+				kubectl get nodes
+
+
+			Thông tin chi tiết về một node:
+
+				kubectl describe node <node-name>
+
+
+			Kiểm tra tài nguyên của cluster (CPU, Memory):
+
+				kubectl top nodes
+
+
+			Kiểm tra tài nguyên của pods:
+
+				kubectl top pods
+
+		14. Khác
+
+			Tạo một pod tạm thời (nginx ví dụ):
+
+				kubectl run nginx --image=nginx --restart=Never
+
+
+			Khởi động một pod trong chế độ interactive:
+
+				kubectl run -i --tty --image=nginx nginx-shell --restart=Never -- bash
+
+
+			Sao lưu cấu hình từ Kubernetes (cluster) ra file:
+
+				kubectl get all --all-namespaces -o yaml > backup.yaml
+
+			Lệnh Debug và Troubleshooting
+
+				Khởi động một pod debug:
+
+			kubectl run debug --rm -i --tty --image=busybox --restart=Never -- sh
+
+
+			Tạo một pod mới để kiểm tra log:
+
+				kubectl run <pod-name> --image=<image-name> --restart=Never --command -- <command>
+
+--- Monitoring:
+
+	Alloy
+
+		Tác dụng:
+		
+			Alloy là một công cụ được sử dụng để kết nối và thu thập logs và metrics từ các dịch vụ khác trong
+			hệ thống. Nó cung cấp một giao diện để giám sát các dịch vụ và giúp dễ dàng truy xuất và phân tích logs.
+
+		Mối liên hệ:
+		
+			Alloy có thể gửi các logs thu thập được từ các microservices (hoặc các dịch vụ khác như Minio) đến
+			hệ thống giám sát như Prometheus hoặc Grafana. Thông qua việc cấu hình đúng các công cụ, Alloy sẽ giúp cung cấp
+			các logs chi tiết về hoạt động của các microservices.
+
+	Minio
+
+		Tác dụng:
+		
+			Minio là một dịch vụ lưu trữ đối tượng (object storage) tương tự như AWS S3, thường được sử dụng để lưu
+			trữ logs, metrics, hoặc các file dữ liệu lớn trong các hệ thống microservice. Minio có thể lưu trữ các logs từ các
+			dịch vụ khác như Promtail, Alloy, hoặc các microservices khác.
+
+		Mối liên hệ:
+		
+			Minio thường kết hợp với Promtail để lưu trữ logs hoặc các dữ liệu không cấu trúc khác từ các dịch vụ
+			trong hệ thống. Ngoài ra, Minio có thể là nơi chứa các bản sao của dữ liệu metrics từ Prometheus.
+
+	Prometheus
+
+		Tác dụng:
+		
+			Prometheus là một hệ thống giám sát và thu thập metrics mạnh mẽ, có khả năng lưu trữ thời gian thực và thực
+			hiện truy vấn dữ liệu. Nó thu thập metrics từ các microservices và hệ thống phụ trợ thông qua các endpoints HTTP cung
+			cấp các số liệu thống kê như số lượng request, thời gian phản hồi, tỷ lệ lỗi, v.v.
+
+		Mối liên hệ:
+		
+			Prometheus có thể thu thập dữ liệu từ các microservices hoặc từ Alloy nếu Alloy được cấu hình để xuất
+			metrics. Prometheus sẽ lưu trữ các metrics này và cung cấp chúng cho Grafana để trực quan hóa và theo dõi tình trạng hệ thống.
+
+	Grafana
+
+		Tác dụng:
+		
+			Grafana là công cụ trực quan hóa dữ liệu phổ biến. Grafana sử dụng dữ liệu từ các nguồn như Prometheus để tạo
+			ra các dashboard tương tác, cho phép theo dõi và phân tích các chỉ số của hệ thống và các dịch vụ microservice. Các dashboards
+			này có thể bao gồm các biểu đồ về hiệu suất hệ thống, số liệu logs, và nhiều dữ liệu khác.
+
+		Mối liên hệ:
+		
+			Grafana lấy dữ liệu từ Prometheus và hiển thị chúng trên các dashboard. Người dùng có thể theo dõi các chỉ số
+			như độ trễ, số lượng request, tài nguyên sử dụng, lỗi, và nhiều chỉ số khác trong thời gian thực. Grafana cũng có thể tích
+			hợp với các công cụ khác như Minio để theo dõi trạng thái lưu trữ đối tượng.
+
+	Promtail
+
+		Tác dụng:
+		
+			Promtail là một công cụ thu thập logs từ các dịch vụ và gửi chúng đến Loki (một hệ thống lưu trữ logs tương tự như
+			Prometheus nhưng dành riêng cho logs). Promtail giúp thu thập logs từ các container Docker hoặc các dịch vụ khác trong hệ
+			thống microservice và gửi chúng đến Loki để phân tích.
+
+		Mối liên hệ:
+		
+			Promtail tích hợp với Loki để thu thập logs và gửi chúng đến hệ thống phân tích. Grafana có thể sử dụng Loki
+			làm nguồn dữ liệu và hiển thị các logs trong các dashboard, kết hợp với các metrics từ Prometheus.
+			
+	Loki:
+	
+		Tác dụng:
+	
+			Loki giống như Prometheus, nhưng thay vì lưu trữ metrics (chỉ số hiệu suất), Loki lưu trữ logs. Điều này giúp bạn dễ
+			dàng truy vấn và phân tích logs của các dịch vụ trong hệ thống.
+
+			Loki có thể lưu trữ logs từ các dịch vụ khác nhau, bao gồm logs từ các microservices, Docker containers, và các dịch
+			vụ backend khác.
+			
+		Mối liên hệ:
+		
+			Grafana sử dụng Loki làm một nguồn dữ liệu logs. Khi bạn kết hợp Loki với Grafana, bạn có thể tạo ra các dashboards
+			hiển thị logs theo thời gian thực, giúp dễ dàng theo dõi và phân tích các sự kiện xảy ra trong hệ thống.
+		
+	Mối Quan Hệ Giữa Các Công Cụ:
+
+		Prometheus và Grafana:
+
+			Prometheus thu thập và lưu trữ metrics từ các dịch vụ trong hệ thống (microservices).
+
+			Grafana sử dụng dữ liệu từ Prometheus để trực quan hóa các chỉ số này, giúp giám sát và phân tích hiệu suất của hệ thống.
+
+		Loki và Promtail:
+
+			Promtail thu thập logs từ các dịch vụ trong hệ thống và gửi chúng đến Loki.
+
+			Grafana sử dụng Loki để hiển thị logs trên các dashboard, giúp theo dõi và phân tích logs của các dịch vụ.
+
+		Minio:
+
+			Minio là nơi lưu trữ logs và metrics (có thể từ Promtail và Prometheus).
+
+			Minio có thể lưu trữ các file dữ liệu lớn hoặc backup cho các logs và metrics, giúp dễ dàng phục hồi hoặc phân tích sau này.
+
+		Alloy:
+
+			Alloy thu thập logs và metrics từ các dịch vụ khác và gửi chúng cho các công cụ giám sát như Prometheus và Grafana.
+
+			Alloy giúp kết nối các dịch vụ trong hệ thống và cung cấp các thông tin chi tiết về hiệu suất và logs.
+			
+		Loki và Promtail:
+
+			Promtail thu thập logs từ các dịch vụ và gửi chúng đến Loki.
+
+			Loki sẽ phân loại các logs theo các labels (giống như cách Prometheus phân loại metrics) để dễ dàng
+			truy vấn và phân tích.
+
+		Loki và Grafana:
+
+			Grafana sử dụng Loki làm nguồn dữ liệu để trực quan hóa logs, giúp người dùng dễ dàng theo dõi các sự
+			kiện và lỗi trong hệ thống microservices.
+
+		Loki và Prometheus:
+
+			Prometheus thu thập metrics (chỉ số hiệu suất) và Loki thu thập logs. Trong Grafana, bạn có thể kết hợp
+			dữ liệu từ cả Prometheus và Loki vào cùng một dashboard, giúp bạn có cái nhìn toàn diện về hiệu suất và
+			logs của hệ thống.
+			
+			
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+	
+		Để có thể mở được actuator/prometheus thì cần dependency sau
+
+--- Make resilent:
+
+
+	Circuit Breaker:
+	
+		Chu trình trạng thái Circuit Breaker:
+		
+			CLOSED:
+			
+				Mọi request đều được phép qua.
+
+				Nếu failureRateThreshold bị vượt qua → chuyển sang OPEN.
+				
+			OPEN:
+			
+				Mọi request bị chặn.
+
+				Sau waitDurationInOpenState → chuyển sang HALF_OPEN.
+				
+			HALF_OPEN:
+			
+				Chỉ permittedNumberOfCallInHalfOpenState request được cho phép.
+
+				Nếu chúng thành công → chuyển về CLOSED.
+
+				Nếu có lỗi → quay lại OPEN.
+
+		resilience4j.circuitbreaker:
+		  configs:
+			default:
+			  slidingWindowSize: 10
+			  permittedNumberOfCallInHalfOpenState: 2
+			  failureRateThreshold: 50
+			  waitDurationInOpenState: 10000
+			  
+			 slidingWindowSize
+			 
+				Kích thước cửa sổ trượt (số lượng cuộc gọi gần nhất để theo dõi)
+				
+				Circuit breaker sẽ quan sát 10 request gần nhất để tính toán tỷ lệ lỗi.
+				
+			permittedNumberOfCallInHalfOpenState
+			
+				Số lượng request được phép đi qua trong trạng thái HALF_OPEN
+				
+				Khi circuit breaker chuyển sang trạng thái HALF_OPEN, nó sẽ chỉ cho phép 2 request
+				thử nghiệm đi qua. Nếu cả 2 đều thành công, circuit breaker sẽ trở lại CLOSED.
+				
+			failureRateThreshold
+			
+				Ngưỡng lỗi để mở circuit
+				
+				Nếu có hơn 50% request bị lỗi trong slidingWindowSize (tức là 5 lỗi/10 request),
+				circuit breaker sẽ chuyển sang OPEN.
+				
+			waitDurationInOpenState
+			
+				Thời gian chờ trước khi chuyển từ OPEN sang HALF_OPEN (tính bằng milliseconds)
+				
+				Circuit breaker sẽ giữ trạng thái OPEN trong 10 giây, rồi mới chuyển sang HALF_OPEN để thử lại.
+				
+		@Bean
+		public RouteLocator eazyBankRouteConfig(RouteLocatorBuilder routeLocatorBuilder) {
+			return routeLocatorBuilder.routes()
+					.route(p -> p.path("/eazybank/accounts/**")
+							.filters(f -> f.rewritePath("/eazybank/accounts/(?<segment>.*)","/${segment}")
+									.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+									.retry(retryconfig -> retryconfig.setRetries(3)
+											.setMethods(HttpMethod.GET)
+											.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true))
+									.circuitBreaker(config -> config.setName("accountsCircuitBreaker")
+											.setFallbackUri("forward:/contactSupport"))
+									)
+							.uri("lb://ACCOUNTS"))
+		}
+				
+		Ví dụ thực tế:
+		
+			Bạn có một service gọi đến một hệ thống bên ngoài (ví dụ: accountsService)
+
+			Cấu hình trên giúp bảo vệ hệ thống khỏi việc liên tục gọi vào một service đang "chết"
+
+			Nếu 5/10 request gần nhất lỗi → Circuit breaker sẽ ngăn không cho gọi tiếp trong 10 giây
+
+			Sau đó thử lại 2 request → nếu ổn → trở lại bình thường
+			
+		Mục tiêu chính của Circuit Breaker
+
+			Giảm thiểu downtime của hệ thống
+
+			Ngăn ngừa gọi lặp vào service đang lỗi, tránh quá tải hoặc treo toàn hệ thống
+
+			Tăng khả năng phục hồi (resilience) của hệ thống
+			
+		@Bean
+		public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer() {
+			return factory -> factory.configureDefault(id -> new Resilience4JConfigBuilder(id)
+					.circuitBreakerConfig(CircuitBreakerConfig.ofDefaults())
+							.timeLimiterConfig((TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(4)).build())).build());
+		}
+		
+			Đây là một đoạn cấu hình trong Spring Boot (Reactive Web) dùng để custom mặc định cấu hình cho Circuit
+			Breaker khi sử dụng Resilience4j với ReactiveResilience4JCircuitBreakerFactory.
+			
+			Customizer<ReactiveResilience4JCircuitBreakerFactory>
+
+				Là một hàm tùy biến (customizer) cho factory tạo ra các circuit breaker.
+
+				Cho phép bạn cấu hình mặc định cho tất cả circuit breaker sử dụng factory này.
+				
+			factory.configureDefault(...)
+
+				Dùng để thiết lập cấu hình mặc định cho mọi circuit breaker được tạo bởi factory.
+
+				id là tên (identifier) của circuit breaker.
+				
+			new Resilience4JConfigBuilder(id)
+
+				Tạo builder cho cấu hình resilience4j, sử dụng id để đặt tên.
+				
+			.circuitBreakerConfig(CircuitBreakerConfig.ofDefaults())
+
+				Áp dụng cấu hình Circuit Breaker mặc định:
+
+				failureRateThreshold: 50%
+
+				slidingWindowSize: 100
+
+				minimumNumberOfCalls: 100
+
+				waitDurationInOpenState: 60s
+
+				permittedNumberOfCallsInHalfOpenState: 10
+
+				v.v...
+
+				Bạn có thể override các giá trị này nếu muốn tinh chỉnh.
+				
+			.timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(4)).build())
+
+				Áp dụng cấu hình Time Limiter:
+
+				Nếu request mất hơn 4 giây → tự động timeout.
+
+				Bảo vệ service khỏi bị treo khi gọi service chậm.
+				
+			.build()
+
+				Kết thúc builder → tạo ra đối tượng cấu hình hoàn chỉnh.
+			
+	Retry Pattern:
+	
+		Là một kỹ thuật trong thiết kế hệ thống phân tán để xử lý các lỗi tạm thời (transient failures) như:
+
+			Network timeout
+
+			Service tạm thời không phản hồi
+
+			Kết nối DB/API bị reset
+
+		Thay vì thất bại ngay, hệ thống sẽ tự động thử lại sau một khoảng thời gian nhất định.
+
+		Tác dụng của Retry Pattern
+		
+			Tăng độ tin cậy	Hệ thống không dễ thất bại khi gặp lỗi tạm thời
+			
+			Giảm lỗi giả	Thử lại giúp vượt qua các lỗi do trễ mạng, quá tải
+			
+			Kết hợp với Circuit Breaker	Tránh spam service lỗi → chặn lại khi retry vẫn không hiệu quả
+			
+		resilience4j.retry:
+		  configs:
+			default:
+			  maxRetryAttemps: 3
+			  waitDuration: 100
+			  enableExponentialBackoff: true
+			  exponentialBackoffMutiplier: 2
+			  ignoreExceptions:
+				- java.lang.NullPointerException
+			  retryException:
+				- java.util.concurrent.TimeoutException
+				
+			maxRetryAttemps: 3
+			
+				Tối đa thử lại 3 lần (tính cả lần đầu tiên là lần gọi đầu).
+				
+				Nếu request thất bại, sẽ retry thêm 2 lần nữa.
+
+			waitDuration: 100
+			
+				Thời gian chờ giữa mỗi lần retry là 100ms (milliseconds).
+				
+				Nhưng nếu có exponential backoff, giá trị này sẽ được nhân dần.
+
+			enableExponentialBackoff: true
+			
+				Kích hoạt Exponential Backoff → mỗi lần retry sẽ chờ lâu hơn theo cấp số nhân.
+
+			exponentialBackoffMutiplier: 2
+			
+				Mỗi lần retry, thời gian chờ sẽ nhân đôi:
+
+					Retry 1: 100ms
+
+					Retry 2: 200ms
+
+					Retry 3: 400ms
+				
+				Điều này giúp giảm áp lực lên hệ thống khi lỗi đang xảy ra liên tục.
+				
+			ignoreExceptions
+			
+				Nếu một trong các exception liệt kê ở đây xảy ra, sẽ không retry, mà fail luôn.
+				
+				Trong ví dụ: NullPointerException sẽ bị bỏ qua retry (vì là lỗi lập trình, không phải lỗi tạm thời).
+
+			retryException
+			
+				Chỉ retry khi xảy ra TimeoutException.
+
+	Rate limiter:
+	
+		Giới hạn số lượng request được gửi đến hệ thống trong một khoảng thời gian, để ngăn người dùng
+		hoặc bot lạm dụng API.
+	
+		@Bean
+		public RedisRateLimiter redisRateLimiter() {
+			return new RedisRateLimiter(1, 1, 1);
+		}
+		
+			Đây là cấu hình rate limiter dựa trên Redis.
+			
+			Tham số
+				
+				replenishRate		Số token thêm vào mỗi giây (tốc độ nạp lại token)
+				
+				burstCapacity		Tổng số token tối đa được lưu trữ (để xử lý burst traffic)
+				
+				requestedTokens		Số token cần mỗi lần request
+				
+			Mỗi giây người dùng chỉ được 1 request (replenishRate = 1)
+
+			Không được phép gửi nhiều hơn 1 request cùng lúc (burstCapacity = 1)
+
+			Mỗi request dùng 1 token (requestedTokens = 1)
+		
+
+		@Bean
+		KeyResolver userKeyResolver() {
+			return exchange -> Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst("user"))
+					.defaultIfEmpty("anonymous");
+		}
+		
+			Dùng để xác định key cho từng người dùng mà RedisRateLimiter sẽ áp dụng hạn chế.
+				
+			Hoạt động:
+
+				Đọc header user trong request HTTP
+
+				Nếu có: lấy giá trị làm key
+
+				Nếu không có: dùng "anonymous"				
+--- Kafka:
+
+	<dependency>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-starter-bus-amqp</artifactId>
+	</dependency>
+	
+		Bạn vẫn dùng spring-cloud-starter-bus-amqp, mà bên trong nó phụ thuộc RabbitMQ binder
+
+--- Rabbitmq:
+
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-stream</artifactId>
+    </dependency>
+	
+		Chú ý thêm cấu hình này để có thể gửi nhận message
+
+	streamBridge.send:
+	
+		StreamBridge là một bean do Spring Cloud Stream cung cấp.
+
+		Nó cho phép bạn gửi message thủ công (imperative way), mà không cần phụ thuộc hoàn toàn vào Function/Consumer/Supplier.
+
+		Bạn có thể gửi dữ liệu đến output binding (ví dụ Kafka topic, RabbitMQ exchange) theo tên kênh.
+		
+		spring:
+		  cloud:
+			function:
+			  definition: updateCommunication
+			stream:
+			  bindings:
+				sendCommunication-out-0:   # Đây là channel output
+				  destination: communication-sent   # Kafka topic / Rabbit queue
+				  
+			Có nghĩa là khi bạn gọi streamBridge.send("sendCommunication-out-0", data), message data sẽ được
+			gửi tới topic communication-sent.
+			
+		Khi dùng spring.cloud.function.definition:
+		
+			Bạn viết hàm Function / Consumer / Supplier.
+
+			Spring Cloud Stream sẽ tự động binding input/output theo tên.
+
+			Message đến → tự động gọi function → kết quả gửi ra output binding.
+
+			Cách này: reactive, event-driven, tự động.
+			
+		Khi dùng streamBridge.send:
+		
+			Dùng trong code như một API thủ công để publish message.
+
+			Bạn không cần khai báo function.
+
+			Bạn chỉ cần có một binding output, rồi gọi lệnh gửi.
+
+
+	spring.cloud.function.definition = xác định function nào sẽ chạy.
+
+		Output binding (-out-*) = nơi kết quả của function đó sẽ được publish.
+
+		Nếu function có return → chắc chắn sẽ có ít nhất một -out-0.
+
+		Nếu function là Consumer → không có output binding.
+
+		Nếu function là Supplier → chỉ có -out-0, không có -in-0.
+		
+		Hàm (function/consumer/supplier) mà bạn khai báo trong spring.cloud.function.definition sẽ không tự động chạy
+		ngay khi ứng dụng start.
+
+		Nó sẽ chỉ chạy khi có sự kiện kích hoạt, ví dụ:
+
+		Consumer (hàm nhận in-0): chạy khi có message đến từ queue/topic đã được bind.
+
+		Supplier (hàm cung cấp out-0): chạy theo lịch (nếu có) hoặc khi khởi động ứng dụng (nếu bạn cấu hình spring.cloud.stream.poller).
+
+		Function (hàm có in-0 và out-0): chạy khi có message vào → xử lý → gửi kết quả ra.
+		
+		spring:
+		  cloud:
+			function:
+			  definition: processMessage
+			stream:
+			  bindings:
+				processMessage-in-0:
+				  destination: input-topic
+				processMessage-out-0:
+				  destination: output-topic
+				  
+		@Bean
+		public Function<String, String> processMessage() {
+			return msg -> "Processed: " + msg;
+		}
+		Khi có message publish vào Kafka topic input-topic, function processMessage sẽ được gọi.
+
+		Sau khi xử lý, kết quả sẽ gửi ra output-topic.
+
+		Nếu bạn không gửi message vào input-topic, thì processMessage sẽ không bao giờ được gọi.
+
+	Input (-in-*) mới là trigger
+
+		Các binding kiểu xxx-in-0, xxx-in-1, … là consumer channel.
+
+		Khi có message đi vào từ RabbitMQ/Kafka (qua exchange/topic đã config trong destination), Spring sẽ gọi function tương ứng.
+
+		👉 Đây mới là “cò súng” (trigger) để code trong function chạy.
+
+	2. Output (-out-*) không trigger hàm
+
+		Các binding kiểu xxx-out-0, xxx-out-1, … là producer channel.
+
+		Chúng không bao giờ tự động làm chạy hàm.
+
+		Chúng chỉ được dùng để publish kết quả của hàm sau khi hàm chạy nhờ input.
+		
+		spring.cloud.function.definition = xác định function nào sẽ chạy.
+
+		Output binding (-out-*) = nơi kết quả của function đó sẽ được publish.
+
+		Nếu function có return → chắc chắn sẽ có ít nhất một -out-0.
+
+		Nếu function là Consumer → không có output binding.
+
+		Nếu function là Supplier → chỉ có -out-0, không có -in-0.
+
+	Khai niem ve spring.cloud.function.definition
+	
+		Spring Cloud Function cơ bản
+		
+			Trong code Spring Boot, bạn có thể định nghĩa function dưới dạng bean, chú ý phải đánh dấu
+			với @Bean thì code mới chạy được, tại khi đánh dấu là @Bean thì spring mới hiểu và behind
+			the scene được:
+			
+				@Bean
+				public Function<String, String> upperCase() {
+					return message -> message.toUpperCase();
+				}
+
+				@Bean
+				public Consumer<String> logger() {
+					return message -> System.out.println("Received: " + message);
+				}
+
+				@Bean
+				public Supplier<String> greeter() {
+					return () -> "Hello from Supplier!";
+				}
+				
+					Function<T,R>: có input + output.
+
+					Consumer<T>: chỉ có input, không có output.
+
+					Supplier<T>: không có input, chỉ có output.
+					
+		updateCommunication-in-0
+		
+			Function updateCommunication chỉ có 1 input → nên Spring đánh số input đầu tiên là 0.
+
+			Nếu sau này bạn có thêm input thứ 2 thì nó sẽ là updateCommunication-in-1.
+			
+			@Bean
+			public BiFunction<String, Integer, String> process() {
+				return (text, number) -> text + number;
+			}
+			
+				Function process có 2 input (String, Integer) và 1 output (String).
+
+				Spring sẽ tạo ra binding:
+
+				process-in-0 → cho String
+
+				process-in-1 → cho Integer
+
+				process-out-0 → cho output String
+					
+		Vai trò của spring.cloud.function.definition
+		
+			Đây là cách bạn nói với Spring Cloud Stream:
+			"Service này sẽ chạy function nào để kết nối với message broker (RabbitMQ/Kafka)".
+			
+			spring:
+			  cloud:
+				function:
+				  definition: updateCommunication
+				
+				Nghĩa là function bean updateCommunication sẽ được gắn vào nếu có input binding (updateCommunication-in-0)
+				và nếu có output thì gắn vào output binding (updateCommunication-out-0).
+				
+		Khi có nhiều function:
+			
+			Bạn có thể có nhiều function trong cùng service.
+			
+				@Bean
+				public Function<String, String> email() { ... }
+
+				@Bean
+				public Function<String, String> sms() { ... }
+				
+			Nếu bạn không khai báo function.definition, Spring sẽ không biết phải chọn function nào để mapping.
+			
+			spring:
+			  cloud:
+				function:
+				  definition: email|sms
+
+			Ở đây email|sms nghĩa là compose/chaining:
+				Message → email() → output của email sẽ đi vào sms() → output cuối publish ra ngoài.
+				
+			function:
+			  definition: f1|f2|f3
+			  
+				Input message → f1 → f2 → f3 → Output message
+
+		spring.cloud.function.definition chỉ định function nào (hoặc chuỗi function nào) trong code sẽ được
+		Spring Cloud Stream dùng để kết nối với broker.
+
+		Nếu có nhiều function trong code → bắt buộc phải dùng definition để Spring biết chọn function nào.
+
+		Nếu chỉ có 1 function trong toàn service → Spring có thể tự động bind, không cần khai báo.
+
+		Khi khai báo nhiều function với dấu | → bạn đang định nghĩa pipeline xử lý message.
+
+	spring:
+	  cloud:
+		function:
+		  definition: updateCommunication
+		stream:
+		  bindings:
+			updateCommunication-in-0:
+			  destination: communication-sent
+			  group: ${spring.application.name}
+			sendCommunication-out-0:
+			  destination: send-communication
+			  
+		updateCommunication — đây là tên của một Spring Cloud Function (bean Java kiểu Function, Consumer,
+		hoặc Supplier) trong code của bạn.
+
+		Các binding (updateCommunication-in-0, sendCommunication-out-0) chỉ là kênh kết nối (input/output channels)
+		của function đó, chứ không phải là các hàm riêng.
+		
+		updateCommunication-in-0 (consumer binding)
+		
+			Đây là input channel cho function updateCommunication.
+
+			destination: communication-sent: RabbitMQ sẽ tạo một exchange communication-sent.
+
+			group: ${spring.application.name}:
+
+			RabbitMQ sẽ tạo queue cố định, ví dụ communication-sent.update-service.
+
+			Các instance cùng group sẽ share queue → load balancing (1 message chỉ xử lý bởi 1 instance).
+
+			Nếu bỏ group, mỗi instance sẽ có queue ephemeral riêng → message broadcast đến tất cả.
+
+			👉 Tóm lại: updateCommunication-in-0 = lắng nghe message từ exchange communication-sent thông qua queue cố định.
+			
+		sendCommunication-out-0 (producer binding)
+		
+			Đây là output channel cho function updateCommunication.
+
+			Sau khi xử lý xong input, function sẽ publish message vào exchange send-communication.
+
+			Ở đây không có group, vì producer không cần queue → chỉ cần gửi vào exchange, còn queue nào nhận là do consumer quyết định.
+			  
+		
+
+
+	spring:
+	  cloud:
+		stream:
+		  bindings:
+			sendCommunication-out-0:
+			  destination: send-communication
+			  
+    private void sendCommunication(Accounts account, Customer customer) {
+        var accountsMsgDto = new AccountsMsgDto(account.getAccountNumber(), customer.getName(),
+                customer.getEmail(), customer.getMobileNumber());
+        log.info("Sending communication rquest for the detail {}", accountsMsgDto);
+        var result = streamBridge.send("sendCommunication-out-0", accountsMsgDto);
+        log.info("Is the communication request successfully processed ?: {}", result);
+
+    }
+	
+	spring:
+	  cloud:
+		function:
+		  definition: email|sms
+		stream:
+		  bindings:
+			emailsms-in-0:
+			  destination: send-communication
+			  group: ${spring.application.name}	
+    @Bean
+    public Function<AccountsMsgDto, AccountsMsgDto> email() {
+        return accountsMsgDto -> {
+            log.info("Sending email with the details: " + accountsMsgDto.toString());
+            return accountsMsgDto;
+        };
+    }
+
+    @Bean
+    public Function<AccountsMsgDto, Long> sms() {
+        return accountsMsgDto -> {
+            log.info("Sending sms with the details: " + accountsMsgDto.toString());
+            return accountsMsgDto.accountNumber();
+        };
+    }
+	
+--- Pom.xml:
+
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
+	
+		Nếu không có dependency này thì web sẽ chạy rồi tự động dừng
+		
+		Khi bạn thêm spring-boot-starter-web vào pom.xml, Spring Boot sẽ tự động cấu hình một web
+		server (mặc định là Tomcat) và ứng dụng của bạn sẽ không dừng ngay sau khi khởi động, vì web
+		server này sẽ tiếp tục chạy và lắng nghe các yêu cầu HTTP.
+
+		Nếu không có dependency này, Spring Boot không tự động khởi tạo một server HTTP và ứng dụng sẽ
+		không có gì để làm sau khi hoàn tất khởi động.
+		
+		Web server (Tomcat, Jetty, Undertow, etc.) trong Spring Boot giữ cho ứng dụng sống bằng cách
+		tiếp tục xử lý các kết nối và yêu cầu, do đó ứng dụng của bạn sẽ không dừng.
+
+		Nếu không có web server, Spring Boot không có bất kỳ dịch vụ nào đang chạy liên tục, và sẽ
+		ngừng ngay sau khi hoàn tất việc khởi động.
+		
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-function-web</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+			Chú ý scope là test ở đây khiến code chạy không đúng.
+
+--- Security:
+
+	SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity) {
+		serverHttpSecurity
+			.authorizeExchange(exchanges -> exchanges
+				.pathMatchers(HttpMethod.GET).permitAll()
+				.pathMatchers("/eazybank/accounts/**").hasRole("ACCOUNTS")
+				.pathMatchers("/eazybank/cards/**").hasRole("CARDS"))
+			.oauth2ResourceServer(oAuth2ResourceServerSpec ->
+				oAuth2ResourceServerSpec.jwt(Customizer.withDefaults()));
+		serverHttpSecurity.csrf(csrfSpec -> csrfSpec.disable());
+		return serverHttpSecurity.build();
+	}
+	
+		Trong Spring WebFlux, SecurityWebFilterChain thay cho SecurityFilterChain (dùng trong Spring MVC).Đây là
+		bean trả về cấu hình bảo mật cho toàn bộ ứng dụng reactive.
+		.oauth2ResourceServer(oAuth2ResourceServerSpec -> oAuth2ResourceServerSpec.jwt(Customizer.withDefaults()))
+			Kích hoạt OAuth2 Resource Server với cơ chế JWT.
+			Nghĩa là app này sẽ verify JWT tokens (ví dụ phát hành từ Keycloak, Auth0, v.v.) cho mỗi request.
+			Customizer.withDefaults() → dùng cấu hình mặc định để parse và validate JWT.	
+			
+	private Converter<Jwt, Mono<AbstractAuthenticationToken>> grantedAuthoritiesExtractor() {
+		JwtAuthenticationConverter jwtAuthenticationConverter =
+				new JwtAuthenticationConverter();
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
+		return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
+	}
+	
+		Converter<Jwt, Mono<AbstractAuthenticationToken>>
+
+			Đây là một converter function:
+
+			Input: một Jwt (token JWT đã được decode).
+
+			Output: một Mono<AbstractAuthenticationToken> (WebFlux dùng Mono vì reactive).
+
+			AbstractAuthenticationToken là base class của các token trong Spring Security (ví dụ: JwtAuthenticationToken).	
+
+		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+
+			Đây là converter mặc định của Spring Security để chuyển một JWT thành JwtAuthenticationToken.
+
+			Nhưng mặc định nó chỉ lấy các claim chuẩn (scope, scp) để map thành authorities.
+
+			Nó không hiểu cấu trúc đặc thù của Keycloak.
+
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
+
+			Ở đây bạn custom lại cách lấy GrantedAuthorities (roles) từ JWT.
+
+			KeycloakRoleConverter là class tự viết, implement Converter<Jwt, Collection<GrantedAuthority>>.
+
+			Nó đọc roles từ claim Keycloak. Rồi convert thành ROLE_ACCOUNTS, ROLE_CARDS, ROLE_USER, ROLE_ADMIN.
+			Nhờ vậy khi bạn cấu hình hasRole("ACCOUNTS"), Spring Security mới match được.
+			
+				{
+				  "realm_access": {
+					"roles": ["ACCOUNTS", "CARDS"]
+				  },
+				  "resource_access": {
+					"my-client": {
+					  "roles": ["USER", "ADMIN"]
+					}
+				  }
+				}
+
+		return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
+
+			JwtAuthenticationConverter là imperative (blocking).
+
+			Trong WebFlux, bạn cần reactive converter (Mono).
+
+			ReactiveJwtAuthenticationConverterAdapter là adapter để biến converter cũ thành reactive.
+
+			Kết quả: trả về một converter phù hợp cho springSecurityFilterChain.
+
+    public Collection<GrantedAuthority> convert(Jwt source) {
+        Map<String, Object> realmAccess = (Map<String, Object>) source.getClaims().get("realm_access");
+        if (realmAccess == null || realmAccess.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Collection<GrantedAuthority> returnValue = ((List<String>) realmAccess.get("roles"))
+                .stream().map(roleName -> "ROLE_" + roleName)
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
+        return returnValue;
+
+    }
+	
+		Map<String, Object> realmAccess = (Map<String, Object>) source.getClaims().get("realm_access");
+
+		source là JWT (Keycloak phát hành).
+
+		Trong JWT của Keycloak thường có claim kiểu:		
+
+			{
+			  "realm_access": {
+				"roles": ["ACCOUNTS", "CARDS"]
+			  }
+			}
+		
+
+--- Gateway:
+
+	Với các version maven mới thì dùng như sau:
+	
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
+		</dependency>
+		
+		spring:
+		  cloud:
+			gateway:
+			  server:
+				webflux:
+				  discovery:
+					locator:
+					  enabled: true
+					  lowerCaseServiceId: true	
+
+	Code config đường dẫn trong gateway:
+
+		return routeLocatorBuilder.routes()
+				.route(p -> p.path("/eazybank/accounts/**")
+						.filters(f -> f.rewritePath("/eazybank/accounts/(?<segment>.*)","/${segment"))
+						.uri("lb://ACCOUNTS"))
+		
+			routeLocatorBuilder.routes()
+			
+				Đây là cách định nghĩa các route trong Spring Cloud Gateway.
+
+				Mỗi route sẽ ánh xạ từ một request client gửi vào Gateway → đến một service đích (thông qua uri).
+				
+			.route(p -> p.path("/eazybank/accounts/**") ... )
+			
+				Nghĩa là bất kỳ request nào có path bắt đầu bằng /eazybank/accounts/ sẽ match route này.
+				
+			.filters(f -> f.rewritePath("/eazybank/accounts/(?<segment>.*)", "/${segment}"))
+			
+				Đây là filter rewrite path, nó dùng Regex để đổi lại đường dẫn trước khi forward về service đích.
+				
+				(?<segment>.*) nghĩa là lấy tất cả phần còn lại sau /eazybank/accounts/ và gán vào biến segment.
+				
+				/${segment} Tức là khi forward, chỉ giữ lại phần segment.
+				
+					Ví dụ:
+					
+						Request đến Gateway: /eazybank/accounts/api/create
+						
+						Sau khi rewrite: /api/create
+						
+			.uri("lb://ACCOUNTS")
+			
+				lb:// = Load Balancer (tức là sẽ dùng Service Discovery như Eureka/Consul).
+				
+				"ACCOUNTS" = tên service đã đăng ký trên Service Registry.
+
+				Gateway sẽ forward request đến một instance của service ACCOUNTS.
+				
+		Trong container, localhost chỉ trỏ đến chính container gatewayserver, không phải Keycloak.
+
+		Bạn đang chạy Keycloak ở container riêng (keycloak), cổng nội bộ của nó là 8080, còn khi ra host thì bạn map 7080:8080.
+
+		→ Vì gatewayserver cũng chạy trong Docker network, nên phải dùng DNS name của service Keycloak.
+		
+			SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI: "http://keycloak:8080/realms/master/protocol/openid-connect/certs"
+
+		Nếu chạy local (gatewayserver ở IntelliJ, Keycloak container) thì URI phải là:
+		
+			http://localhost:7080/realms/master/protocol/openid-connect/certs
+
+--- FeignClient:
+	
+	Bản chất là nó đi thẳng từ Controller đến repository của 1 service khác.
+
+--- Kết nối database:
+
+	Cổng a:b với mysql thì b sẽ thường là 3306, đây là cổng mặc định, còn cổng a thì có thể tùy biến
+	
+	spring.jpa.sql.init.mode=always là một thuộc tính cấu hình trong Spring Boot dùng để điều khiển việc khởi tạo dữ
+	liệu SQL (chạy các file schema.sql, data.sql, hoặc các file tùy chỉnh) khi ứng dụng khởi động.
+	
+	Trong kiến trúc microservices, database thường được coi là một service riêng biệt và có thể chạy trong một
+	container riêng (thường là Docker container).
+
+--- Trong Docker, khi bạn sử dụng cú pháp -p a:b, các tham số a và b có nghĩa như sau:
+		
+		Cổng trên máy chủ (a):
+		
+			Cổng mà bạn sử dụng để kết nối đến dịch vụ từ bên ngoài container
+		
+			Đây là cổng trên máy tính của bạn (máy chủ) mà người dùng sẽ kết nối đến để truy cập dịch vụ đang chạy trong container.
+			
+			Nếu bạn ánh xạ cổng 3308, thì bạn sẽ truy cập dịch vụ qua localhost:3308 hoặc 127.0.0.1:3308.
+			
+		Cổng trên container (b):
+		
+			Cổng mà ứng dụng trong container sử dụng để tiếp nhận kết nối
+			
+			Đây là cổng mà ứng dụng bên trong container đang lắng nghe. Mỗi ứng dụng thường có một cổng mặc định mà nó sử dụng
+			để tiếp nhận kết nối.
+			
+			Đối với MySQL, cổng mặc định là 3306. Khi bạn chạy MySQL trong container, nó sẽ lắng nghe trên cổng 3306.
+
+--- Configserver:
+
+		Ở đây chú ý phải start configserver trước, sau đó mới start accounts
+
+		application.yml của accounts bắt buộc phải define spring.name=accounts, vì như vậy thì bên configserver mới
+		bắt đúng được cho các file yml của accounts
+
+		Sẽ luôn có 2 cái, 1 là configserver trong đó sẽ cài server config, và 1 cái là client config sẽ tham chiếu đến server
+		config thông qua config.import=... để lấy config, nếu nó k tham chiếu thì sẽ mặc định lấy các file trong service của nó
+		
+		cards (pom.xml) Không có dependency spring-cloud-starter-config. Do đó khi chạy, Spring Boot không hiểu
+		prefix configserver: trong SPRING_CONFIG_IMPORT → báo lỗi
+		
+		Ta dung spring-cloud-config-monitor, để monitor nó cần 1 amqp, nếu ta tắt đi rabbitmq thì sẽ sinh ra lỗi
+		
+		Cơ chế đọc spring.config.import:
+		
+			Với các property đơn lẻ (ví dụ server.port), thì env var > application.yml → sẽ ghi đè.
+
+			Nhưng với property dạng list accumulator (như spring.config.import), Spring Boot sẽ nối chuỗi lại thay vì ghi đè.
+
+			Cho nên localhost không bị bỏ đi, mà vẫn tồn tại song song.
+		
+			application.yml (bên trong JAR/service):
+
+				spring:
+				  config:
+					import: "optional:configserver:http://localhost:8071"
+
+
+			common-config.yml (Docker Compose env):
+
+				environment:
+				  SPRING_CONFIG_IMPORT=configserver:http://configserver:8071/
+
+
+			Spring Boot sẽ merge hai nguồn lại, tạo thành danh sách:
+
+				spring.config.import = [
+				  "optional:configserver:http://localhost:8071",
+				  "configserver:http://configserver:8071/"
+				]
+
+--- Docker:
+
+	Thêm dependency để build bằng jib:
+	
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <to>
+                        <image>eazybytes/${project.artifactId}:s6</image>
+                    </to>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+		
+--- Docker compose:
+
+	Trong naỳ khi gọi đến service khác phải dùng name thay vì localhost, bởi vì docker compose trong này sẽ
+	dùng để giao tiếp giữa các container, localhost chỉ dùng riêng cho chính container đó
+	
+    healthcheck:
+        test: "curl --fail --silent localhost:8070/actuator/health/readiness | grep UP || exit 1"
+        interval: 60s
+        timeout: 30s
+        retries: 10
+        start_period: 60s
+	  
+		curl --fail --silent localhost:8070/actuator/health/readiness | grep UP || exit 1
+		
+			curl --fail → gọi API http://localhost:8070/actuator/health/readiness, nếu HTTP status khác 2xx thì coi như fail.
+
+			--silent → không in ra log chi tiết của curl.
+
+			| grep UP → tìm chữ "UP" trong kết quả trả về (nghĩa là service đã sẵn sàng).
+
+			|| exit 1 → nếu không tìm thấy "UP", thì trả về code 1 (thất bại).
+
+			Nghĩa là: healthcheck chỉ pass nếu endpoint readiness trả về UP.
+			
+		interval: 60s
+
+			Cứ 60 giây Docker sẽ chạy lại lệnh test một lần để kiểm tra service.
+			
+		timeout: 30s
+
+			Mỗi lần chạy test, nếu sau 30 giây mà không có kết quả thì coi như fail.
+			
+		retries: 10
+
+			Nếu test fail liên tiếp 10 lần, thì container sẽ bị đánh dấu là unhealthy.
+			
+		start_period: 60s
+
+			Trong 60 giây đầu sau khi container start, Docker không tính fail healthcheck (cho service có thời gian khởi động).
+
+			Sau 60s, nếu test fail thì bắt đầu đếm retries.
+			
+		Chú ý:
+			
+			Phải có config sau mới bật được /actuator/health/readiness, lúc đó mới heck được điều kiện trên
+			
+				management:
+				  endpoints:
+					web:
+					  exposure:
+						include: "*"
+				  health:
+					readiness-state:
+					  enabled: true
+					liveness-state:
+					  enabled: true
+				  endpoint:
+					health:
+					  probes:
+						enabled: true			
+			
+	Khi ta run container thì giữa việc dùng docker-compose.yml và việc ta thao tác tay trên docker desktop là khác nhau,
+	với docker-compose.yml sẽ có các lệnh, thiết lập biến...còn với docker desktop thì đơn giản chỉ là run container từ file image
+	
+	dependency failed to start: container account-ms has no healthcheck configured
+	
+		Trong docker-compose.yml, service account-ms đang được một service khác depends_on.
+
+		Nhưng account-ms không có healthcheck → Docker không biết cách xác định khi nào nó "healthy".
+
+		Vì vậy container phụ thuộc sẽ không start được, báo lỗi như trên.
+	
+--- Port:
+
+		Trong accounts bạn đang set:
+
+		SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3310/accountsdb"
+
+
+		accountsdb → là tên service/container (Docker DNS sẽ resolve được).
+
+		3310 → là host port được map ra ngoài, nhưng các container trong cùng 1 network Docker không cần dùng
+		host port, mà dùng container port nội bộ.
+
+		Nội bộ container MySQL luôn expose port 3306, không phải 3310.
+
+		👉 Vì thế khi accounts connect tới accountsdb:3310 thì sẽ không được, phải dùng accountsdb:3306.
+
+--- Thứ tự start các container:
+
+		Trong trường hợp bạn có các microservices như Eureka, Accounts, Cards, và GatewayServer, thứ tự khởi động
+		của các service rất quan trọng để đảm bảo chúng có thể giao tiếp với nhau đúng cách. Dưới đây là thứ tự
+		khởi động đề xuất:
+
+		1. Eureka Server (Discovery Service):
+
+			Eureka Server là service quản lý discovery của các microservices trong hệ thống. Nó cần phải chạy đầu
+			tiên, vì các microservices khác (Accounts, Cards, GatewayServer) cần phải đăng ký vào Eureka để chúng
+			có thể giao tiếp với nhau.
+
+			Thứ tự: Khởi động Eureka đầu tiên.
+
+			Lý do: Các microservices như Accounts, Cards, và GatewayServer sẽ cần đăng ký với Eureka để có thể được
+			phát hiện (discovered) bởi các service khác. Nếu Eureka không chạy trước, các microservices này sẽ không
+			thể đăng ký với Eureka.
+
+		2. ConfigServer (Nếu có):
+
+			Nếu bạn đang sử dụng Spring Cloud Config Server để quản lý cấu hình cho các microservices, thì ConfigServer
+			cũng nên được khởi động ngay sau Eureka. Điều này sẽ đảm bảo rằng các microservices có thể tải cấu hình từ
+			Config Server khi chúng khởi động.
+
+			Thứ tự: Khởi động ConfigServer sau Eureka.
+
+			Lý do: Các microservices như Accounts, Cards, và GatewayServer sẽ cần tải cấu hình từ ConfigServer, do đó
+			ConfigServer cần phải có mặt trước khi chúng khởi động.
+
+		3. Các Microservices (Accounts, Cards):
+
+			Các microservices như Accounts và Cards có thể được khởi động sau khi Eureka và ConfigServer đã sẵn sàng. Các
+			service này sẽ đăng ký vào Eureka để có thể được phát hiện và giao tiếp với các service khác trong hệ thống.
+
+			Thứ tự: Khởi động Accounts và Cards sau Eureka và ConfigServer.
+
+			Lý do: Accounts và Cards cần đăng ký với Eureka và có thể lấy cấu hình từ ConfigServer.
+
+		4. GatewayServer:
+
+			GatewayServer là lớp API Gateway cho hệ thống microservices của bạn. Nó thường sẽ đứng sau các service như Accounts
+			và Cards để có thể định tuyến các yêu cầu từ người dùng tới các microservices tương ứng (thường thông qua các dịch
+			vụ khác như Eureka).
+
+			Thứ tự: Khởi động GatewayServer cuối cùng.
+
+			Lý do: GatewayServer cần biết các dịch vụ khác như Accounts và Cards thông qua Eureka. Nếu Eureka chưa khởi động,
+			GatewayServer sẽ không thể tìm thấy các dịch vụ này.
+
+-- So sánh image, container và volume
+		Docker Image – như file .iso hoặc .exe
+			Là template để tạo container.
+			Không có trạng thái, không chạy được trực tiếp.
+			Được build từ Dockerfile.
+			Template, không thay đổi
+			
+		Docker Container – như một máy ảo đang chạy
+			Là instance của image khi được chạy.
+			Bạn có thể chạy nhiều container từ một image.
+			Dữ liệu bên trong sẽ mất nếu container bị xóa (trừ khi dùng volume).
+			Instance đang chạy, có thể thay đổi
+			
+		Docker Volume – ổ đĩa riêng cho dữ liệu
+			Lưu trữ dữ liệu tách biệt với container.
+			Không bị mất nếu container bị xóa.
+			Dùng để lưu database, file upload, v.v.
+			Dữ liệu lưu bền vững, dùng lại được
+		
+		Docker Image     →      Container       +        Volume
+		(Recipe)         	(Chạy thật - app)        (Data bền vững)
+	
+--- properties file:
+
+	networks:
+	  eazybank:
+		driver: "bridge"
+		
+		networks: Đây là phần khai báo mạng trong Docker Compose. Nó cho phép bạn xác định các mạng mà
+		các dịch vụ có thể kết nối với nhau.
+		
+		eazybank: Đây là tên của mạng mà bạn đang định nghĩa. Bạn có thể đặt tên bất kỳ cho mạng này.
+		
+		driver: Thuộc tính này chỉ định kiểu driver mà mạng sẽ sử dụng. Trong trường hợp này, nó được đặt thành "bridge".
+		
+		bridge: Đây là loại driver mặc định trong Docker. Nó tạo một mạng lưới riêng cho các container, cho phép
+		chúng giao tiếp với nhau mà không cần phải tiếp xúc trực tiếp với mạng bên ngoài.
+		
+		Tóm lại:
+			Đoạn mã này tạo ra một mạng tên là eazybank sử dụng driver bridge, giúp cho các container trong cùng
+			một mạng có thể giao tiếp dễ dàng với nhau.
+
+-- DockerFile:
+
+	# Start with a base image containing Java runtime
+	FROM openjdk:21-jdk-slim
+	
+		FROM: Chỉ định hình ảnh cơ sở mà Docker sẽ sử dụng để xây dựng hình ảnh mới. Ở đây, hình ảnh cơ sở
+		là openjdk:21-jdk-slim, cung cấp môi trường Java với phiên bản JDK 21, đã được tối ưu hóa để nhẹ.
+
+	# MAINTAINER instruction is deprecated in favor of using label
+	# MAINTAINER eazybytes.com
+	# Information around who maintains the image
+	LABEL "org.opencontainers.image.authors"="eazybytes.com"
+	
+		LABEL: Cung cấp thông tin về hình ảnh, chẳng hạn như tác giả. Ở đây, org.opencontainers.image.authors
+		được sử dụng để ghi nhận thông tin về ai duy trì hình ảnh, thay thế cho chỉ thị MAINTAINER đã lỗi thời.
+
+	# Add the application's jar to the image
+	COPY target/accounts-0.0.1-SNAPSHOT.jar accounts-0.0.1-SNAPSHOT.jar
+	
+		COPY: Sao chép tệp JAR của ứng dụng từ thư mục target trên máy chủ vào hình ảnh Docker. Tệp JAR này sẽ
+		được chạy khi container khởi động.
+
+	# execute the application
+	ENTRYPOINT ["java", "-jar", "accounts-0.0.1-SNAPSHOT.jar"]
+	
+		ENTRYPOINT: Chỉ định lệnh sẽ được thực thi khi container khởi động. Ở đây, lệnh java -jar accounts-0.0.1-SNAPSHOT.jar sẽ
+		được thực thi, giúp chạy ứng dụng Java.
+		
+	Tóm lại:
+	
+		Tệp Dockerfile này xây dựng một hình ảnh Docker cho ứng dụng Java bằng cách sử dụng hình ảnh cơ sở chứa JDK, thêm
+		tệp JAR của ứng dụng vào hình ảnh, và thiết lập lệnh khởi động cho container.
+
+
+
+services:
+  accounts:
+services: Phần này định nghĩa các dịch vụ mà Docker Compose sẽ quản lý. Mỗi dịch vụ sẽ chạy trong một container riêng biệt.
+accounts: Tên của dịch vụ này. Bạn có thể gọi nó bất kỳ tên gì, nhưng trong trường hợp này, nó được gọi là accounts.
+
+image: "eazybytes/accounts:s4"
+image: Chỉ định hình ảnh Docker mà dịch vụ sẽ sử dụng. Ở đây, dịch vụ sẽ sử dụng hình ảnh eazybytes/accounts với thẻ s4.
+
+container_name: accounts-ms
+container_name: Đặt tên cụ thể cho container khi nó chạy. Trong trường hợp này, container sẽ được gọi là accounts-ms.
+
+ports:
+    - "8080:8080"
+ports: Chỉ định các cổng mà container sẽ sử dụng. Ở đây, cổng 8080 trên máy chủ sẽ được ánh xạ tới cổng 8080 trong container, cho phép truy cập vào dịch vụ từ bên ngoài.
+
+deploy:
+  resources:
+    limits:
+      memory: 700m
+deploy: Cung cấp cấu hình cho việc triển khai dịch vụ, thường dùng trong môi trường Docker Swarm.
+resources: Định nghĩa các tài nguyên mà dịch vụ có thể sử dụng.
+limits: Chỉ định giới hạn tài nguyên. Ở đây, dịch vụ accounts bị giới hạn sử dụng tối đa 700 MB bộ nhớ.
+
+networks:
+  - eazybank
+networks: Chỉ định các mạng mà dịch vụ sẽ kết nối đến. Trong trường hợp này, dịch vụ sẽ được kết nối với mạng eazybank, cho phép nó giao tiếp với các dịch vụ khác trong mạng đó.
+Tóm lại:
+Đoạn mã này định nghĩa một dịch vụ tên là accounts, sử dụng hình ảnh Docker đã được chỉ định, thiết lập ánh xạ cổng, giới hạn tài nguyên bộ nhớ, và kết nối với mạng eazybank.
+
+Mục đích của Dockerfile
+	Xây dựng Hình ảnh Docker: Dockerfile chứa các chỉ thị cần thiết để tạo ra một hình ảnh Docker. Nó cho phép bạn định nghĩa môi trường mà ứng dụng của bạn sẽ chạy.
+	Tự động hóa Quá trình Cài đặt: Các lệnh trong Dockerfile giúp tự động hóa việc cài đặt các phần mềm cần thiết, cấu hình môi trường, và sao chép mã nguồn vào hình ảnh.
+	Tái sử dụng và Chia sẻ: Hình ảnh Docker được tạo ra từ Dockerfile có thể được lưu trữ và chia sẻ qua các registry như Docker Hub, giúp dễ dàng triển khai trên nhiều môi trường khác nhau.
+	Quản lý Phiên bản: Bạn có thể theo dõi và quản lý các phiên bản của hình ảnh Docker bằng cách sử dụng các thẻ (tags) trong Dockerfile.
+Mục đích của docker-compose.yml
+	Quản lý Nhiều Dịch vụ: Docker Compose cho phép bạn định nghĩa và quản lý nhiều dịch vụ trong cùng một tệp cấu hình, giúp dễ dàng triển khai các ứng dụng phức tạp.
+	Cấu hình Mạng và Volume: Bạn có thể thiết lập mạng và volume chia sẻ giữa các dịch vụ, giúp các container giao tiếp và lưu trữ dữ liệu một cách hiệu quả.
+	Dễ dàng Khởi động và Dừng: Với một lệnh đơn giản (docker-compose up hoặc docker-compose down), bạn có thể khởi động hoặc dừng toàn bộ stack ứng dụng của mình.
+	Tự động hóa Triển khai: Docker Compose giúp tự động hóa quá trình triển khai ứng dụng với các thông số đã được định nghĩa, giảm thiểu lỗi do thao tác thủ công.
+Tóm lại
+Dockerfile: Tạo ra hình ảnh Docker cho ứng dụng.
+docker-compose.yml: Quản lý và triển khai các dịch vụ, mạng, và volume cho ứng dụng.
+
+Có, giữa Dockerfile và docker-compose.yml có mối liên hệ chặt chẽ với nhau trong quá trình phát triển và triển khai ứng dụng. Dưới đây là các điểm liên quan:
+1. Xây dựng Hình ảnh
+Dockerfile: Chứa các chỉ thị để xây dựng hình ảnh Docker cho ứng dụng.
+docker-compose.yml: Tham chiếu đến hình ảnh được tạo ra từ Dockerfile thông qua thuộc tính image. Nếu bạn không chỉ định hình ảnh đã có, Docker Compose sẽ tự động xây dựng hình ảnh từ Dockerfile khi chạy lệnh docker-compose up.
+2. Triển khai Dịch vụ
+Dockerfile: Định nghĩa môi trường cần thiết để ứng dụng chạy, như các thư viện và tệp cần thiết.
+docker-compose.yml: Sử dụng hình ảnh được xây dựng từ Dockerfile để tạo và quản lý các dịch vụ. Nó cho phép bạn cấu hình các dịch vụ này với các thông số như cổng, mạng, và tài nguyên.
+3. Quản lý Tính Tương Thích
+Thông qua Dockerfile, bạn có thể đảm bảo rằng môi trường chạy ứng dụng tương thích với yêu cầu của nó. docker-compose.yml giúp bạn triển khai nhiều dịch vụ trong môi trường đó một cách dễ dàng.
+4. Môi Trường Phát Triển và Sản Xuất
+Cả hai tệp này có thể được sử dụng để tạo ra môi trường phát triển và sản xuất nhất quán. Dockerfile đảm bảo rằng hình ảnh của bạn luôn giống nhau, trong khi docker-compose.yml quản lý cách các dịch vụ tương tác.
+Tóm lại
+Dockerfile và docker-compose.yml bổ sung cho nhau: Dockerfile tạo ra hình ảnh ứng dụng, trong khi docker-compose.yml quản lý việc triển khai và cấu hình các dịch vụ dựa trên hình ảnh đó.
+
+
+
+Khi sử dụng Docker, quy trình thực hiện thường diễn ra theo các bước sau:
+1. Xây dựng Hình ảnh từ Dockerfile
+Bước 1: Khi bạn muốn tạo một hình ảnh Docker, bạn sẽ sử dụng lệnh docker build để xây dựng hình ảnh từ tệp Dockerfile.
+Bước 2: Docker sẽ thực hiện từng chỉ thị trong Dockerfile theo thứ tự từ trên xuống dưới, tạo ra một hình ảnh hoàn chỉnh cho ứng dụng của bạn.
+2. Triển khai Dịch vụ với docker-compose.yml
+Bước 3: Sau khi hình ảnh đã được xây dựng, bạn sẽ sử dụng lệnh docker-compose up để khởi động các dịch vụ được định nghĩa trong tệp docker-compose.yml.
+Bước 4: Docker Compose sẽ kiểm tra xem hình ảnh đã được xây dựng hay chưa. Nếu chưa, nó sẽ tự động xây dựng hình ảnh từ Dockerfile (nếu có tham chiếu đến hình ảnh này trong docker-compose.yml).
+Bước 5: Docker Compose sẽ tạo và khởi động các container dựa trên hình ảnh đã được xây dựng và các cấu hình được chỉ định trong docker-compose.yml.
+Flow tổng quan
+Viết Dockerfile: Định nghĩa cách xây dựng hình ảnh.
+Chạy lệnh docker build: Tạo hình ảnh từ Dockerfile.
+Viết docker-compose.yml: Định nghĩa cấu hình cho các dịch vụ.
+Chạy lệnh docker-compose up: Khởi động toàn bộ stack ứng dụng.
+Docker Compose: Kiểm tra hình ảnh, xây dựng nếu cần, và khởi động các container.
+Tóm lại
+Dockerfile: Chạy trước để xây dựng hình ảnh.
+docker-compose.yml: Chạy sau để triển khai các dịch vụ từ hình ảnh đã xây dựng.
+
+
+
+spring:
+spring: Đây là phần cấu hình chính cho ứng dụng Spring Boot. Tất cả các cấu hình thuộc về Spring đều nằm trong khối này.
+
+config:
+    import:
+      - "application_qa.yml"
+      - "application_prod.yml"
+config: Chỉ định các cài đặt liên quan đến cấu hình Spring.
+import: Cho phép bạn nhập các tệp cấu hình khác vào tệp application.yml chính.
+application_qa.yml: Tệp cấu hình cho môi trường Quality Assurance (QA).
+application_prod.yml: Tệp cấu hình cho môi trường Production (Prod).
+Việc nhập các tệp này cho phép bạn tổ chức và quản lý cấu hình cho các môi trường khác nhau một cách hiệu quả.
+
+profiles:
+    active:
+      - "qa"
+profiles: Chỉ định các profile (hồ sơ) mà ứng dụng sẽ sử dụng.
+active: Xác định các profile đang hoạt động.
+"qa": Chỉ định rằng profile QA sẽ được kích hoạt. Điều này có nghĩa là ứng dụng sẽ sử dụng các cấu hình từ tệp application_qa.yml và có thể áp dụng các cấu hình từ tệp application_prod.yml nếu cần.
+Tóm lại
+Tệp application.yml này cấu hình cho ứng dụng Spring Boot để nhập các tệp cấu hình cho các môi trường khác nhau (QA và Prod) và kích hoạt profile QA, giúp ứng dụng có thể dễ dàng cấu hình và quản lý
+cho các môi trường khác nhau.
+
+Nghia la o phia tren thi noi dung cua "application_qa.yml" hay "application_prod.yml" se duoc import vao application.yml
+Đúng vậy! Nội dung của các tệp application_qa.yml và application_prod.yml sẽ được nhập vào tệp application.yml.
+Giải thích cụ thể:
+Khi bạn chỉ định import trong phần cấu hình spring.config, Spring Boot sẽ tìm và nạp các tệp được chỉ định (application_qa.yml và application_prod.yml) vào cấu hình chính.
+Nội dung từ các tệp này sẽ được kết hợp với cấu hình trong application.yml, giúp bạn dễ dàng quản lý các cấu hình cho các môi trường khác nhau (QA và Prod).
+Với profile được kích hoạt là qa, ứng dụng sẽ ưu tiên sử dụng các cấu hình từ application_qa.yml, nhưng vẫn có thể sử dụng các cấu hình từ application_prod.yml nếu chúng không bị ghi đè.
+Tóm lại
+Nội dung của application_qa.yml và application_prod.yml sẽ được nạp vào application.yml, cho phép cấu hình linh hoạt cho ứng dụng dựa trên môi trường đang hoạt động.
+
+
+
+spring:
+spring: Đây là phần cấu hình chính cho ứng dụng Spring Boot, nơi bạn định nghĩa các thông số cấu hình cho ứng dụng của mình.
+
+
+config:
+    activate:
+      on-profile: "prod"
+config: Chỉ định các cài đặt liên quan đến cấu hình Spring.
+activate: Xác định điều kiện để kích hoạt các cấu hình trong tệp này.
+on-profile: Chỉ định rằng các cấu hình trong tệp này sẽ chỉ được kích hoạt khi profile prod đang hoạt động.
+"prod": Định nghĩa rằng đây là cấu hình dành riêng cho môi trường sản xuất (Production).
+Tóm lại
+Tệp application_prod.yml cấu hình để kích hoạt các cài đặt chỉ khi profile prod đang được sử dụng. Điều này giúp bạn quản lý và phân tách các cấu hình cho môi trường sản xuất một cách rõ
+ràng và hiệu quả. Các cài đặt trong tệp này sẽ chỉ có hiệu lực khi ứng dụng chạy với profile prod.
+
+
+
+spring:
+spring: Đây là phần cấu hình chính cho ứng dụng Spring Boot, nơi bạn định nghĩa các tham số cấu hình cho ứng dụng của mình.
+
+application:
+    name: "accounts"
+application: Phần này dùng để cấu hình các thông tin liên quan đến ứng dụng.
+name: Đặt tên cho ứng dụng. Trong trường hợp này, ứng dụng được đặt tên là "accounts".
+
+config:
+    import: "optional:configserver:http://localhost:8071/"
+config: Chỉ định các cài đặt liên quan đến cấu hình Spring.
+import: Cho phép bạn nhập cấu hình từ một nguồn bên ngoài.
+"optional:configserver:http://localhost:8071/": Đây là cú pháp để chỉ định rằng cấu hình sẽ được lấy từ một Spring Cloud Config Server chạy tại địa chỉ http://localhost:8071/.
+optional: Từ khóa này cho biết rằng việc nhập cấu hình từ Config Server là không bắt buộc. Nếu Config Server không khả dụng, ứng dụng vẫn có thể khởi động mà không gặp lỗi.
+Tóm lại
+Tệp application.yml này cấu hình cho ứng dụng Spring Boot với tên là "accounts" và chỉ định rằng ứng dụng sẽ cố gắng nhập cấu hình từ một Spring Cloud Config Server
+tại http://localhost:8071/. Việc nhập này là tùy chọn, cho phép ứng dụng hoạt động ngay cả khi Config Server không khả dụng.
+
+
+
+management:
+management: Đây là phần cấu hình liên quan đến quản lý trong ứng dụng Spring Boot, thường được sử dụng để cấu hình các endpoints quản lý.
+
+endpoints:
+    web:
+      exposure:
+        include: "*"
+endpoints: Chỉ định các điểm cuối (endpoints) quản lý mà ứng dụng sẽ cung cấp.
+web: Phần này cụ thể cho các endpoints quản lý có thể truy cập qua HTTP.
+exposure: Xác định cách mà các endpoints này được hiển thị hoặc truy cập.
+include: Chỉ định các endpoints nào sẽ được bao gồm trong quản lý.
+"*": Dấu hoa thị này có nghĩa là tất cả các endpoints sẽ được bao gồm và có thể truy cập từ web. Điều này cho phép bất kỳ endpoint quản lý nào có sẵn trong ứng dụng đều có thể được truy cập thông qua HTTP.
+Tóm lại
+Cấu hình này cho phép tất cả các endpoints quản lý trong ứng dụng Spring Boot được hiển thị và truy cập thông qua giao thức web. Điều này rất hữu ích cho việc giám sát và quản lý ứng dụng, nhưng
+cũng cần được sử dụng cẩn thận để đảm bảo an ninh, vì việc mở rộng tất cả các endpoints có thể dẫn đến rủi ro bảo mật.
+
+
+
+spring:
+spring: Đây là phần cấu hình chính cho ứng dụng Spring Boot.
+
+application:
+    name: "configserver"
+application: Phần này dùng để cấu hình các thông tin liên quan đến ứng dụng.
+name: Đặt tên cho ứng dụng là "configserver".
+
+
+profiles:
+    active: git
+profiles: Chỉ định các profile mà ứng dụng sẽ sử dụng.
+active: Đặt profile đang hoạt động là git. Profile này có thể được sử dụng để nạp các cấu hình từ nguồn Git.
+
+
+cloud:
+    config:
+      server:
+        git:
+          uri: "https://github.com/eazybytes/eazybytes-config.git"
+cloud: Cấu hình cho Spring Cloud.
+config: Phần này liên quan đến cấu hình của Spring Cloud Config Server.
+server: Chỉ định rằng ứng dụng này sẽ hoạt động như một Config Server.
+git: Cấu hình cho việc lấy cấu hình từ một kho Git.
+uri: Địa chỉ của kho Git chứa các tệp cấu hình, trong trường hợp này là https://github.com/eazybytes/eazybytes-config.git.
+
+
+default-label: main
+default-label: Chỉ định nhánh mặc định mà Config Server sẽ sử dụng khi truy cập kho Git, ở đây là nhánh main.
+
+timeout: 5
+timeout: Thời gian chờ (timeout) tối đa (tính bằng giây) khi cố gắng kết nối đến kho Git.
+
+
+clone-on-start: true
+clone-on-start: Nếu được đặt là true, Config Server sẽ sao chép kho Git vào bộ nhớ trong khi khởi động.
+
+force-pull: true
+force-pull: Nếu được đặt là true, server sẽ luôn kéo (pull) các thay đổi mới từ kho Git mỗi khi có yêu cầu, bất kể dữ liệu đã có trong bộ nhớ hay chưa.
+Tóm lại
+Cấu hình này thiết lập một Spring Cloud Config Server với tên là configserver, sử dụng kho Git https://github.com/eazybytes/eazybytes-config.git để lấy các tệp
+cấu hình. Server sẽ sao chép kho Git khi khởi động, thiết lập nhánh mặc định là main, và có thời gian chờ là 5 giây cho các kết nối.
+
+
+
+
+
+spring:
+spring: Đây là phần cấu hình chính cho ứng dụng Spring Boot.
+
+application:
+    name: "cards"
+application: Phần này dùng để cấu hình các thông tin liên quan đến ứng dụng.
+name: Đặt tên cho ứng dụng là "cards".
+
+profiles:
+    active: "prod"
+profiles: Chỉ định các profile mà ứng dụng sẽ sử dụng.
+active: Đặt profile đang hoạt động là "prod". Điều này chỉ ra rằng ứng dụng sẽ chạy trong môi trường sản xuất.
+
+
+config:
+    import: "optional:configserver:http://localhost:8071/"
+config: Phần này liên quan đến cấu hình Spring.
+import: Cho phép bạn nhập cấu hình từ một nguồn bên ngoài.
+"optional:configserver:http://localhost:8071/": Chỉ định rằng cấu hình sẽ được lấy từ một Spring Cloud Config Server chạy tại địa chỉ http://localhost:8071/.
+optional: Từ khóa này có nghĩa là việc nhập cấu hình từ Config Server không bắt buộc. Nếu Config Server không khả dụng, ứng dụng vẫn có thể khởi động mà không gặp lỗi.
+Tóm lại
+Cấu hình này thiết lập một ứng dụng Spring Boot có tên là "cards" và chỉ định rằng ứng dụng sẽ chạy với profile prod. Nó cũng cấu hình để cố gắng nhập các tệp
+cấu hình từ một Spring Cloud Config Server tại http://localhost:8071/, nhưng thao tác này là tùy chọn, cho phép ứng dụng hoạt động ngay cả khi Config Server không khả dụng.
+
+
+services:
+  rabbit:
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+services: Đây là phần cấu hình dành cho các dịch vụ trong ứng dụng. Trong ngữ cảnh này, có thể bạn đang sử dụng Docker Compose hoặc một công cụ tương tự để định nghĩa các dịch vụ.
+
+rabbit: Đây là tên của dịch vụ mà bạn đang định nghĩa. Dịch vụ này có thể liên quan đến RabbitMQ (một hệ thống nhắn tin), nhưng tên cụ thể có thể thay đổi tùy thuộc vào ngữ cảnh của ứng dụng.
+
+extends: Từ khóa này được sử dụng để chỉ định rằng dịch vụ rabbit sẽ mở rộng từ một dịch vụ hoặc cấu hình đã có sẵn.
+
+file: Đây là tham số chỉ ra tệp cấu hình mà dịch vụ sẽ mở rộng từ đó. Trong trường hợp này, tệp là common-config.yml.
+
+service: Đây là tên của dịch vụ trong tệp cấu hình được chỉ định mà bạn đang mở rộng. Ở đây, dịch vụ là network-deploy-service.
+
+Tóm lại
+Đoạn mã này định nghĩa một dịch vụ có tên là rabbit, mở rộng từ cấu hình của dịch vụ network-deploy-service trong tệp common-config.yml. Việc sử dụng extends giúp tái sử dụng cấu hình
+và giảm thiểu sự lặp lại trong cấu hình dịch vụ.
+
+
+services:
+  configserver:
+    image: "eazybytes/configserver:s6"
+    container_name: configserver-ms
+    ports:
+      - "8071:8071"
+    depends_on:
+      rabbit:
+        condition: service_healthy
+services: Đây là phần cấu hình chính trong Docker Compose, nơi bạn định nghĩa các dịch vụ mà ứng dụng của bạn sẽ sử dụng.
+
+configserver: Đây là tên của dịch vụ mà bạn đang định nghĩa. Trong trường hợp này, dịch vụ này có thể liên quan đến một server cấu hình (config server) trong kiến trúc microservices.
+
+image:
+
+eazybytes/configserver:s6: Đây là tên và tag của hình ảnh Docker mà dịch vụ này sẽ sử dụng. Nó cho biết rằng sẽ lấy hình ảnh từ kho lưu trữ Docker với tên eazybytes/configserver và tag là s6.
+container_name:
+
+configserver-ms: Đây là tên cụ thể mà container sẽ được gán khi chạy. Điều này hữu ích để dễ dàng quản lý và xác định container trong Docker.
+ports:
+
+- "8071:8071": Dòng này chỉ định ánh xạ cổng giữa máy chủ và container. Cổng 8071 của máy chủ sẽ được ánh xạ đến cổng 8071 của container. Điều này cho phép bạn truy cập dịch vụ từ máy chủ thông qua cổng 8071.
+depends_on:
+
+rabbit: Dịch vụ này phụ thuộc vào một dịch vụ khác có tên là rabbit.
+condition: service_healthy: Điều này chỉ định rằng dịch vụ configserver sẽ chỉ được khởi động khi dịch vụ rabbit đã sẵn sàng và ở trạng thái khỏe mạnh (healthy). Điều kiện này thường được
+sử dụng để đảm bảo rằng các dịch vụ phụ thuộc đã sẵn sàng trước khi dịch vụ chính bắt đầu.
+Tóm lại
+Đoạn mã này định nghĩa một dịch vụ configserver trong Docker Compose, với một hình ảnh cụ thể, ánh xạ cổng, tên container cụ thể và điều kiện phụ thuộc vào dịch vụ rabbit. Điều này giúp
+đảm bảo rằng tất cả các dịch vụ cần thiết đều hoạt động đúng cách khi khởi động ứng dụng.
+
+
+
+configserver:
+  healthcheck:
+    test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+    interval: 10s
+    timeout: 5s
+    retries: 10
+    start_period: 10s
+configserver: Đây là dịch vụ mà bạn đang định nghĩa healthcheck cho nó.
+
+healthcheck: Phần này định nghĩa cách Docker sẽ kiểm tra tình trạng sức khỏe của dịch vụ configserver.
+
+test: Đây là lệnh mà Docker sẽ thực thi để kiểm tra sức khỏe của dịch vụ.
+
+curl --fail --silent localhost:8071/actuator/health/readiness: Lệnh này sử dụng curl để gửi yêu cầu đến endpoint /actuator/health/readiness của
+dịch vụ, kiểm tra xem dịch vụ có sẵn sàng hay không.
+| grep UP: Kết quả của lệnh curl sẽ được kiểm tra xem có chứa từ "UP" hay không, điều này cho thấy dịch vụ đang hoạt động và sẵn sàng.
+|| exit 1: Nếu lệnh grep không tìm thấy "UP", lệnh sẽ trả về mã lỗi 1, cho biết rằng dịch vụ không khỏe mạnh.
+interval:
+
+10s: Đây là khoảng thời gian giữa các lần kiểm tra sức khỏe. Trong trường hợp này, Docker sẽ kiểm tra sức khỏe của dịch vụ sau mỗi 10 giây.
+timeout:
+
+5s: Đây là thời gian tối đa mà lệnh kiểm tra sức khỏe được phép chạy trước khi bị coi là không thành công. Nếu lệnh không hoàn thành trong 5
+giây, nó sẽ được coi là lỗi.
+retries:
+
+10: Đây là số lần mà Docker sẽ thử lại kiểm tra sức khỏe trước khi coi dịch vụ là không khỏe mạnh. Trong trường hợp này, Docker sẽ thử lại 10 lần.
+start_period:
+
+10s: Đây là khoảng thời gian mà Docker sẽ chờ sau khi khởi động dịch vụ trước khi bắt đầu thực hiện các kiểm tra sức khỏe. Điều này cho phép dịch
+vụ có thời gian để khởi động hoàn toàn trước khi bị kiểm tra.
+Tóm lại
+Đoạn mã này định nghĩa một kiểm tra sức khỏe cho dịch vụ configserver, sử dụng lệnh curl để kiểm tra trạng thái của
+endpoint /actuator/health/readiness. Các tham số cấu hình cung cấp thông tin về tần suất kiểm tra, thời gian chờ, số
+lần thử lại và thời gian chờ khởi động, giúp đảm bảo rằng dịch vụ chỉ được coi là khỏe mạnh khi nó thực sự sẵn sàng hoạt động.
+
+
+environment:
+  SPRING_RABBITMQ_HOST: "rabbit"
+  SPRING_PROFILES_ACTIVE: default
+  SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+environment: Phần này định nghĩa các biến môi trường mà dịch vụ sẽ sử dụng khi chạy. Các biến này sẽ được truyền vào container của dịch vụ.
+
+SPRING_RABBITMQ_HOST:
+
+SPRING_RABBITMQ_HOST: "rabbit": Biến môi trường này chỉ định địa chỉ của RabbitMQ mà ứng dụng sẽ kết nối. Giá trị "rabbit" thường là
+tên của dịch vụ RabbitMQ được định nghĩa trong cùng một Docker Compose file. Điều này cho phép ứng dụng dễ dàng tìm thấy và kết
+nối đến RabbitMQ khi nó khởi động.
+SPRING_PROFILES_ACTIVE:
+
+SPRING_PROFILES_ACTIVE: default: Biến môi trường này chỉ định profile Spring mà ứng dụng sẽ sử dụng. Trong trường hợp này, profile
+là default. Điều này có nghĩa là ứng dụng sẽ hoạt động với các cấu hình và tính năng được định nghĩa trong profile default, giúp quản lý các cấu hình khác nhau cho các môi trường khác nhau (như phát triển, kiểm thử, sản xuất).
+SPRING_CONFIG_IMPORT:
+
+SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/: Biến môi trường này chỉ định rằng ứng dụng sẽ nhập cấu hình từ một
+server cấu hình (config server) tại địa chỉ http://configserver:8071/. Điều này cho phép ứng dụng tải các cấu hình từ server bên
+ngoài, giúp quản lý cấu hình một cách tập trung và linh hoạt hơn.
+Tóm lại
+Đoạn mã này thiết lập các biến môi trường cho dịch vụ, bao gồm địa chỉ của RabbitMQ, profile Spring đang sử dụng và nguồn cấu hình
+từ một config server. Điều này giúp ứng dụng hoạt động hiệu quả và kết nối với các dịch vụ cần thiết khi chạy trong container.
+
+
+Nếu bạn có cấu hình spring.application.name = "cards" trong file application.yml, thì bạn có thể sử dụng @FeignClient("cards") để gọi dịch vụ này.
+
+
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    fetchRegistry: false
+    registerWithEureka: false
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+eureka: Đây là phần cấu hình liên quan đến Eureka, một dịch vụ discovery server trong kiến trúc microservices.
+
+instance:
+
+hostname: localhost: Đây là tên máy chủ mà ứng dụng sẽ sử dụng. Trong trường hợp này, máy chủ được đặt là localhost, nghĩa
+là ứng dụng sẽ chạy trên máy cục bộ.
+client:
+
+Phần này định nghĩa các cấu hình cho client Eureka.
+
+fetchRegistry: false: Khi cấu hình này được đặt là false, ứng dụng sẽ không tải danh sách các dịch vụ đã đăng ký từ Eureka.
+Điều này có nghĩa là client sẽ không nhận thông tin về các dịch vụ khác đã đăng ký.
+
+registerWithEureka: false: Khi cấu hình này được đặt là false, ứng dụng sẽ không đăng ký với Eureka. Điều này có nghĩa là dịch
+vụ này sẽ không được công nhận là một dịch vụ trong hệ thống discovery, và các dịch vụ khác sẽ không thể tìm thấy nó.
+
+serviceUrl:
+
+defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/: Đây là URL mà client sẽ sử dụng để kết nối với Eureka server.
+${eureka.instance.hostname} sẽ được thay thế bằng giá trị của hostname (trong trường hợp này là localhost).
+${server.port} sẽ được thay thế bằng cổng mà ứng dụng đang chạy. Nếu bạn không định nghĩa cổng, mặc định sẽ là 8080.
+Kết quả cuối cùng sẽ là http://localhost:<server.port>/eureka/, nơi <server.port> là cổng mà ứng dụng đang sử dụng.
+Tóm lại
+Đoạn mã này cấu hình một ứng dụng Spring để kết nối với một server Eureka, nhưng ứng dụng này không đăng ký với Eureka và cũng
+không tải danh sách các dịch vụ từ đó. Điều này thường được sử dụng trong các trường hợp thử nghiệm hoặc khi bạn không muốn ứng
+dụng tham gia vào hệ thống discovery.
+
+
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
+eureka: Đây là phần cấu hình liên quan đến Eureka, một service discovery server trong kiến trúc microservices.
+
+instance:
+
+preferIpAddress: true: Khi cấu hình này được đặt là true, ứng dụng sẽ sử dụng địa chỉ IP của nó thay vì hostname khi đăng
+ký với Eureka. Điều này có thể hữu ích trong một số trường hợp, chẳng hạn như khi hostname không thể được giải quyết từ các dịch vụ khác.
+client:
+
+Phần này định nghĩa các cấu hình cho client Eureka.
+
+fetchRegistry: true: Khi cấu hình này được đặt là true, ứng dụng sẽ tải danh sách các dịch vụ đã đăng ký từ Eureka. Điều này
+cho phép ứng dụng biết về các dịch vụ khác trong hệ thống.
+
+registerWithEureka: true: Khi cấu hình này được đặt là true, ứng dụng sẽ đăng ký với Eureka. Điều này cho phép các dịch vụ khác
+tìm thấy ứng dụng này thông qua Eureka.
+
+serviceUrl:
+
+defaultZone: http://localhost:8070/eureka/: Đây là URL mà client sẽ sử dụng để kết nối với Eureka server.
+Trong trường hợp này, server Eureka đang chạy trên localhost và cổng 8070.
+URL này sẽ được sử dụng để đăng ký dịch vụ và tải danh sách các dịch vụ khác.
+Tóm lại
+Đoạn mã này cấu hình một ứng dụng Spring để kết nối với một server Eureka, cho phép ứng dụng đăng ký với Eureka và tải danh
+sách các dịch vụ đã đăng ký. Việc sử dụng địa chỉ IP thay vì hostname có thể giúp tránh những vấn đề liên quan đến việc phân
+giải tên miền trong một số môi trường.
+
+
+
+@Bean
+public RouteLocator eazyBankRouteConfig(RouteLocatorBuilder routeLocatorBuilder) {
+    return routeLocatorBuilder.routes()
+        .route(p -> p
+            .path("/eazybank/accounts/**")
+            .filters(f -> f.rewritePath("/eazybank/accounts/(?<segment>.*)", "/${segment}")
+                .addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+            .uri("lb://ACCOUNTS"))
+        .route(p -> p
+            .path("/eazybank/loans/**")
+            .filters(f -> f.rewritePath("/eazybank/loans/(?<segment>.*)", "/${segment}")
+                .addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+            .uri("lb://LOANS"))
+        .route(p -> p
+            .path("/eazybank/cards/**")
+            .filters(f -> f.rewritePath("/eazybank/cards/(?<segment>.*)", "/${segment}")
+                .addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+            .uri("lb://CARDS"))
+        .build();
+}
+@Bean:
+
+Annotation này cho biết phương thức sẽ trả về một bean Spring, cho phép Spring quản lý vòng đời của nó.
+RouteLocator eazyBankRouteConfig(RouteLocatorBuilder routeLocatorBuilder):
+
+Phương thức này định nghĩa các tuyến đường (routes) cho một API Gateway (hoặc Spring Cloud Gateway).
+routeLocatorBuilder.routes():
+
+Bắt đầu quá trình định nghĩa các tuyến đường. RouteLocatorBuilder được sử dụng để tạo ra các route.
+.route(p -> p.path("/eazybank/accounts/")...)**:
+
+Định nghĩa một route cho các yêu cầu có đường dẫn bắt đầu bằng /eazybank/accounts/.
+Các route tiếp theo cho các yêu cầu đến /eazybank/loans/** và /eazybank/cards/** được định nghĩa tương tự.
+filters(...):
+
+Định nghĩa các bộ lọc cho route. Các bộ lọc này sẽ được áp dụng cho các yêu cầu khớp với route.
+
+rewritePath(...):
+
+Thay đổi đường dẫn của yêu cầu.
+Cụ thể, khi yêu cầu có đường dẫn /eazybank/accounts/something, nó sẽ được chuyển thành /something.
+(?<segment>.*) là một nhóm regex để lấy phần còn lại của đường dẫn.
+addResponseHeader(...):
+
+Thêm một header vào phản hồi, trong trường hợp này là X-Response-Time, chứa thời gian hiện tại.
+uri("lb://ACCOUNTS"):
+
+Chỉ định địa chỉ của dịch vụ mà yêu cầu sẽ được chuyển tiếp đến.
+lb:// cho biết đây là một dịch vụ được quản lý bởi load balancer. Tên dịch vụ là ACCOUNTS, LOANS, và CARDS tương ứng với các route.
+.build():
+
+Kết thúc việc định nghĩa các route và trả về một RouteLocator chứa tất cả các route đã được định nghĩa.
+
+Tóm lại
+Đoạn mã này định nghĩa các route cho một API Gateway, cho phép chuyển tiếp các yêu cầu đến các dịch vụ khác
+nhau (ACCOUNTS, LOANS, CARDS) với việc thay đổi đường dẫn và thêm header vào phản hồi. Điều này giúp quản lý và
+điều hướng lưu lượng truy cập đến các dịch vụ microservices một cách hiệu quả.
+
+
+
+
+
+Câu lệnh .path("/eazybank/accounts/**") trong đoạn mã có ý nghĩa như sau:
+
+Giải thích:
+Path Matching:
+
+Phần này định nghĩa một mẫu đường dẫn (path pattern) mà route sẽ kiểm tra.
+Mẫu "/eazybank/accounts/**" có nghĩa là bất kỳ yêu cầu nào có đường dẫn bắt đầu bằng /eazybank/accounts/ sẽ khớp với route này.
+Wildcard **:
+
+Ký hiệu ** là một wildcard trong Spring Cloud Gateway.
+Nó cho phép khớp với bất kỳ phần nào của đường dẫn phía sau /eazybank/accounts/, bao gồm cả các đường dẫn con.
+Ví dụ: các đường dẫn như /eazybank/accounts/123, /eazybank/accounts/transactions, hoặc /eazybank/accounts/123/details đều sẽ khớp với route này.
+Tóm lại
+.path("/eazybank/accounts/**") chỉ định rằng route này sẽ xử lý tất cả các yêu cầu có đường dẫn bắt đầu
+bằng /eazybank/accounts/, giúp định hướng lưu lượng đến dịch vụ tương ứng (trong trường hợp này là dịch vụ "ACCOUNTS").
+
+
+
+
+
+
+
+
+
+
+Phần .filters(f -> f.rewritePath("/eazybank/accounts/(?<segment>.*)", "/${segment}") trong đoạn mã có ý nghĩa như sau:
+
+Giải thích:
+rewritePath:
+
+Đây là một bộ lọc (filter) được sử dụng để thay đổi đường dẫn của yêu cầu trước khi nó được chuyển tiếp đến dịch vụ đích.
+Mẫu Đường Dẫn:
+
+"/eazybank/accounts/(?<segment>.*)": Đây là mẫu đường dẫn sử dụng regex.
+(?<segment>.*) là một nhóm (group) regex với tên là segment.
+.* có nghĩa là nó sẽ khớp với bất kỳ ký tự nào (bao gồm cả các ký tự đặc biệt), và sẽ lấy tất cả các ký tự ở phía sau /eazybank/accounts/.
+Thay Thế Đường Dẫn:
+
+"/${segment}": Đây là đường dẫn mới mà yêu cầu sẽ được chuyển đến.
+${segment} sẽ được thay thế bằng giá trị mà nhóm segment đã khớp.
+Điều này có nghĩa là phần còn lại của đường dẫn sau /eazybank/accounts/ sẽ được giữ nguyên.
+Ví dụ:
+Nếu yêu cầu đến với đường dẫn /eazybank/accounts/123, thì sau khi áp dụng rewritePath, đường dẫn sẽ trở thành /123.
+Nếu yêu cầu đến với đường dẫn /eazybank/accounts/transactions, thì đường dẫn sẽ trở thành /transactions.
+Tóm lại:
+Bộ lọc này cho phép bạn thay đổi đường dẫn của yêu cầu bằng cách loại bỏ phần /eazybank/accounts/ và giữ lại phần còn
+lại, giúp điều hướng yêu cầu đến dịch vụ đúng với định dạng mà dịch vụ đó mong đợi.
+
+
+
+
+
+Câu lệnh .uri("lb://LOANS") trong đoạn mã có ý nghĩa như sau:
+
+Giải thích:
+URI:
+
+uri là phương thức được sử dụng để chỉ định địa chỉ mà yêu cầu sẽ được chuyển tiếp đến.
+lb://:
+
+Tiền tố lb:// chỉ định rằng đây là một dịch vụ được quản lý bởi một load balancer (cân bằng tải).
+Điều này có nghĩa là khi client gửi yêu cầu đến route này, API Gateway sẽ tìm kiếm dịch vụ có tên là LOANS trong
+danh sách các dịch vụ đã đăng ký với service discovery (như Eureka).
+"LOANS":
+
+Đây là tên dịch vụ mà yêu cầu sẽ được chuyển đến.
+Khi có yêu cầu đến route này, API Gateway sẽ sử dụng load balancer để tìm và chuyển tiếp yêu cầu đến một trong các instance của dịch vụ LOANS.
+Tóm lại:
+.uri("lb://LOANS") chỉ định rằng yêu cầu sẽ được chuyển tiếp đến dịch vụ có tên LOANS, và việc chuyển tiếp này sẽ được
+thực hiện thông qua một load balancer, cho phép phân phối tải giữa các instance của dịch vụ đó.
+
+
+
+
+
+
+
+Dưới đây là giải thích cho đoạn mã .circuitBreaker(config -> config.setName("accountsCircuitBreaker").setFallbackUri("forward:/contactSupport")):
+
+Giải thích:
+circuitBreaker:
+
+Đây là một phương thức được sử dụng để thêm một "circuit breaker" vào route. Circuit breaker là một mẫu thiết kế giúp
+ngăn chặn việc gửi yêu cầu đến một dịch vụ không hoạt động hoặc bị quá tải, nhằm bảo vệ hệ thống và cải thiện độ tin cậy.
+config -> ...:
+
+Đây là một biểu thức lambda, cho phép bạn cấu hình các thuộc tính của circuit breaker.
+setName("accountsCircuitBreaker"):
+
+Phương thức này đặt tên cho circuit breaker.
+Tên này có thể được sử dụng để theo dõi và giám sát circuit breaker trong hệ thống.
+setFallbackUri("forward:/contactSupport"):
+
+Phương thức này chỉ định một URI fallback (dự phòng) mà ứng dụng sẽ chuyển hướng đến khi circuit breaker đang mở (tức
+là khi dịch vụ không phản hồi hoặc gặp lỗi).
+Trong trường hợp này, nếu dịch vụ mà circuit breaker bảo vệ gặp sự cố, yêu cầu sẽ được chuyển hướng đến đường dẫn /contactSupport.
+Việc này giúp cung cấp trải nghiệm người dùng tốt hơn bằng cách hướng dẫn họ đến trang hỗ trợ thay vì nhận được một lỗi không rõ ràng.
+Tóm lại:
+Đoạn mã này cấu hình một circuit breaker cho route, với tên là accountsCircuitBreaker, và chỉ định rằng nếu dịch vụ không
+hoạt động, yêu cầu sẽ được chuyển hướng đến /contactSupport. Điều này giúp đảm bảo rằng người dùng không gặp lỗi trực tiếp
+và có thể nhận được sự hỗ trợ khi cần thiết.
+
+
+
+
+
+
+spring:
+  application:
+    name: "message"
+  cloud:
+    function:
+      definition: email|sms
+    stream:
+      bindings:
+        emailsms-in-0:
+          destination: send-communication
+          group: ${spring.application.name}
+        emailsms-out-0:
+          destination: communication-sent
+spring.application.name: "message":
+
+Đặt tên cho ứng dụng là "message". Tên này có thể được sử dụng trong các cấu hình khác hoặc trong hệ thống quản lý dịch vụ.
+spring.cloud.function.definition: email|sms:
+
+Định nghĩa một hàm (function) trong Spring Cloud, với hai lựa chọn là email và sms.
+Dấu | giữa email và sms cho biết rằng hàm này có thể xử lý cả hai loại yêu cầu: gửi email và gửi tin nhắn SMS.
+Điều này cho phép ứng dụng có thể lựa chọn cách gửi thông điệp dựa trên yêu cầu đầu vào.
+spring.stream.bindings:
+
+Đây là phần cấu hình cho Spring Cloud Stream, cho phép ứng dụng kết nối với các nguồn dữ liệu và điểm đến.
+emailsms-in-0:
+
+Đây là một binding đầu vào (input binding) cho phép ứng dụng nhận thông điệp từ một nguồn.
+destination: send-communication: Xác định nguồn dữ liệu mà ứng dụng sẽ lắng nghe, trong trường hợp này là send-communication.
+group: ${spring.application.name}: Đặt nhóm cho binding này, sử dụng tên ứng dụng "message". Điều này có thể giúp phân
+phối thông điệp giữa các instance của ứng dụng.
+emailsms-out-0:
+
+Đây là một binding đầu ra (output binding) cho phép ứng dụng gửi thông điệp đến một đích.
+destination: communication-sent: Xác định nơi mà thông điệp sẽ được gửi đi sau khi xử lý (ví dụ: khi một email hoặc SMS đã được gửi thành công).
+Tóm lại
+Cấu hình này cho phép ứng dụng "message" xử lý các yêu cầu gửi thông điệp qua hai phương thức: email và SMS. Nó nhận thông
+điệp từ nguồn send-communication và gửi thông điệp đã xử lý đến communication-sent. Dấu | trong email|sms cho biết rằng hàm
+có thể xử lý cả hai loại gửi thông điệp tùy thuộc vào yêu cầu đầu vào.
+
+
+
+
+
+
+
+
+
+
+
+
+spring.cloud.function.definition được sử dụng để định nghĩa các hàm (functions) trong Spring Cloud Function. Dưới đây là
+một số điểm chính về ý nghĩa và cách sử dụng của nó:
+
+Mục đích:
+Định nghĩa Hàm:
+
+Cấu hình này cho phép bạn chỉ định một hoặc nhiều hàm mà ứng dụng sẽ sử dụng để xử lý dữ liệu đầu vào.
+Hỗ trợ Đa dạng:
+
+Bạn có thể định nghĩa nhiều hàm trong cùng một ứng dụng, và có thể sử dụng dấu phân cách (như |) để xác định nhiều hàm. Ví dụ: email|sms cho
+phép ứng dụng xử lý cả hai loại yêu cầu gửi thông điệp.
+Cách Hoạt Động:
+Khi ứng dụng khởi động, Spring Cloud Function sẽ đọc cấu hình này và thiết lập các hàm được định nghĩa để có thể lắng nghe và
+xử lý các sự kiện hoặc thông điệp.
+Hàm có thể nhận đầu vào từ các nguồn khác nhau (như message queues, HTTP requests, v.v.) và trả về kết quả hoặc gửi thông điệp đến các đích khác.
+Tóm lại:
+spring.cloud.function.definition là một phần quan trọng trong Spring Cloud Function, cho phép bạn định nghĩa và cấu hình các
+hàm để xử lý dữ liệu trong ứng dụng, hỗ trợ cho lập trình chức năng và linh hoạt trong việc xử lý các loại yêu cầu khác nhau.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    connection-timeout: 10s
+spring.rabbitmq:
+
+Đây là phần cấu hình cho RabbitMQ trong ứng dụng Spring. Nó cho phép bạn thiết lập các thông số cần thiết để kết nối đến RabbitMQ.
+host: localhost:
+
+Chỉ định địa chỉ máy chủ RabbitMQ. localhost có nghĩa là RabbitMQ đang chạy trên cùng một máy với ứng dụng. Nếu RabbitMQ
+chạy trên một máy chủ khác, bạn sẽ cần thay đổi địa chỉ này thành tên miền hoặc địa chỉ IP của máy chủ đó.
+port: 5672:
+
+Cổng mà RabbitMQ lắng nghe các kết nối. Cổng mặc định cho RabbitMQ là 5672. Nếu RabbitMQ được cấu hình để sử dụng cổng khác, bạn
+cần thay đổi giá trị này.
+username: guest:
+
+Tên người dùng để xác thực với RabbitMQ. Tên người dùng mặc định là guest. Tuy nhiên, trong môi trường sản xuất, bạn nên sử dụng các
+tài khoản khác với quyền hạn phù hợp.
+password: guest:
+
+Mật khẩu tương ứng với tên người dùng. Mật khẩu mặc định cho tài khoản guest là guest. Tương tự như tên người dùng, trong môi trường sản
+xuất, bạn nên thay đổi mật khẩu này để bảo mật hơn.
+connection-timeout: 10s:
+
+Thời gian chờ tối đa để thiết lập kết nối đến RabbitMQ. Nếu không thể kết nối trong vòng 10 giây, ứng dụng sẽ ném ra một ngoại lệ. Thông
+số này giúp đảm bảo rằng ứng dụng không bị treo lâu nếu RabbitMQ không phản hồi.
+Tóm lại:
+Đoạn mã cấu hình này thiết lập các thông số cần thiết để kết nối ứng dụng Spring với RabbitMQ, bao gồm địa chỉ máy chủ, cổng, thông tin
+xác thực và thời gian chờ kết nối.
+
+
+
+
+
+
+
+
+
+spring:
+  kafka:
+    binder:
+      brokers:
+        - localhost:9092
+spring.kafka:
+
+Đây là phần cấu hình cho Kafka trong ứng dụng Spring. Nó cho phép thiết lập các thông số cần thiết để kết nối đến Kafka.
+binder:
+
+binder là một khái niệm trong Spring Cloud Stream, dùng để kết nối ứng dụng với các message brokers như Kafka. Nó quản lý việc gửi và nhận thông điệp.
+brokers:
+
+Đây là danh sách các broker Kafka mà ứng dụng sẽ kết nối đến. Trong trường hợp này, ứng dụng sẽ kết nối đến một broker duy nhất.
+- localhost:9092:
+
+Đây là địa chỉ và cổng của broker Kafka. localhost có nghĩa là broker đang chạy trên cùng một máy với ứng dụng, và 9092 là cổng
+mặc định mà Kafka lắng nghe các kết nối.
+Tóm lại:
+Đoạn mã cấu hình này thiết lập thông tin kết nối đến một broker Kafka trên địa chỉ localhost và cổng 9092, cho phép ứng dụng Spring
+gửi và nhận thông điệp từ Kafka.
+
+
+
+
+
+
+
+
+
+
+
+
+Trong kiến trúc microservices, việc giao tiếp giữa các service có thể thực hiện bằng nhiều cách khác nhau, bao gồm:
+
+1. Service Discovery với OpenFeign:
+OpenFeign: Là một công cụ giúp các microservice gọi lẫn nhau qua HTTP. Nó sử dụng service discovery để tìm địa chỉ của service cần gọi.
+Ưu điểm:
+Đơn giản hóa việc gọi API giữa các service.
+Tự động hóa việc tạo các client HTTP.
+Sử dụng: Thích hợp cho các trường hợp cần giao tiếp đồng bộ và có độ trễ thấp.
+2. Giao tiếp qua Message Broker (RabbitMQ, Kafka):
+Message Broker: Sử dụng RabbitMQ, Kafka hoặc các message broker khác để giao tiếp giữa các service.
+Ưu điểm:
+Hỗ trợ giao tiếp bất đồng bộ, giúp tăng tính linh hoạt và độ chịu lỗi của hệ thống.
+Giúp giảm độ kết nối giữa các service, cho phép các service hoạt động độc lập hơn.
+Sử dụng: Thích hợp cho các trường hợp xử lý thông điệp lớn hoặc cần độ tin cậy cao.
+Kết hợp Cả Hai:
+Trong nhiều ứng dụng microservices, bạn có thể sử dụng cả hai phương pháp:
+Sử dụng OpenFeign cho các yêu cầu đồng bộ.
+Sử dụng message broker cho các yêu cầu bất đồng bộ.
+Tóm lại:
+Việc sử dụng OpenFeign và message broker như RabbitMQ hoặc Kafka là hoàn toàn hợp lý trong kiến trúc microservices. Sự lựa
+chọn giữa chúng phụ thuộc vào yêu cầu cụ thể của ứng dụng, bao gồm độ trễ, tính linh hoạt và khả năng mở rộng.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Khi sử dụng Message Broker trong kiến trúc microservices, việc sử dụng Service Discovery không phải là bắt buộc, nhưng có thể là hữu
+ích tùy vào tình huống cụ thể. Dưới đây là một số điểm cần xem xét:
+
+1. Không Cần Service Discovery:
+Giao tiếp Qua Message Broker: Khi các microservice gửi và nhận thông điệp qua một message broker (như RabbitMQ hoặc Kafka), chúng không
+cần biết địa chỉ cụ thể của nhau. Chúng chỉ cần biết về topic hoặc queue mà chúng tương tác.
+Tính Độc Lập: Các service có thể hoạt động độc lập, và việc thay đổi địa chỉ của một service không ảnh hưởng đến các service khác, miễn
+là cấu hình của message broker được giữ nguyên.
+2. Nên Sử Dụng Service Discovery:
+Quản lý Nhiều Instance: Nếu bạn có nhiều instance của cùng một service, Service Discovery có thể giúp các service tìm thấy nhau một cách
+nhanh chóng và dễ dàng.
+Khả Năng Mở Rộng: Khi bạn mở rộng các service (như thêm instance mới), Service Discovery có thể giúp các instance mới tự động được phát hiện.
+3. Tình Huống Cụ Thể:
+Giao tiếp Bất Đồng Bộ: Nếu các service chủ yếu giao tiếp bằng message broker và không cần tương tác trực tiếp với nhau, thì không
+cần Service Discovery.
+Giao tiếp Đồng Bộ: Nếu có các yêu cầu cần giao tiếp đồng bộ (ví dụ: một service cần phản hồi ngay lập tức từ service khác), bạn có
+thể cần Service Discovery để tìm địa chỉ của service đó.
+Tóm lại:
+Việc sử dụng Service Discovery khi có message broker là tùy thuộc vào cách thức giao tiếp giữa các service và yêu cầu cụ thể của
+ứng dụng. Trong nhiều trường hợp, việc kết hợp cả hai sẽ mang lại lợi ích tối ưu.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Trong kiến trúc microservices, có nhiều cách để các service giao tiếp với nhau. Dưới đây là những phương pháp phổ biến:
+
+1. Giao tiếp Đồng Bộ:
+HTTP REST:
+
+Sử dụng giao thức HTTP để gọi các API RESTful giữa các service.
+Ví dụ: OpenFeign, RestTemplate.
+gRPC:
+
+Sử dụng giao thức gRPC cho giao tiếp hiệu quả, hỗ trợ nhiều ngôn ngữ và có khả năng truyền tải dữ liệu nhanh chóng.
+GraphQL:
+
+Một phương thức để yêu cầu dữ liệu từ nhiều service thông qua một endpoint duy nhất.
+2. Giao tiếp Bất Đồng Bộ:
+Message Broker:
+Sử dụng các message broker như RabbitMQ, Kafka để gửi và nhận thông điệp giữa các service.
+Event Streaming:
+Sử dụng các hệ thống như Kafka để xử lý luồng sự kiện và cho phép các service phản hồi các sự kiện.
+3. Giao tiếp Qua Tệp (File-based communication):
+Tệp tin:
+Các service có thể giao tiếp thông qua việc ghi và đọc tệp tin từ một hệ thống tệp chung.
+4. Giao tiếp qua Database:
+Chia sẻ cơ sở dữ liệu:
+Các service có thể giao tiếp bằng cách đọc và ghi dữ liệu vào cùng một cơ sở dữ liệu. Tuy nhiên, phương pháp này không được
+khuyến khích do làm giảm tính độc lập của các service.
+5. Service Discovery:
+Phát hiện Dịch vụ:
+Sử dụng các công cụ như Eureka, Consul để cho phép các service tìm kiếm địa chỉ của nhau, thường được kết hợp với các phương pháp trên.
+Tóm lại:
+Các phương pháp giao tiếp giữa các service trong microservices rất đa dạng và có thể được kết hợp tùy theo yêu cầu và kiến trúc
+của hệ thống. Việc lựa chọn phương pháp phù hợp sẽ giúp cải thiện hiệu suất và khả năng mở rộng của ứng dụng.
+
+
+
+
+
+
+
+
+
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eurekaserver-deployment
+  labels:
+    app: eurekaserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eurekaserver
+  template:
+    metadata:
+      labels:
+        app: eurekaserver
+    spec:
+      containers:
+      - name: eurekaserver
+        image: eazybytes/eurekaserver:s12
+        ports:
+        - containerPort: 8070
+        env:
+        - name: SPRING_APPLICATION_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: EUREKA_APPLICATION_NAME
+        - name: SPRING_CONFIG_IMPORT
+          valueFrom: 
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_CONFIG_IMPORT
+apiVersion: apps/v1:
+
+Xác định phiên bản API của Kubernetes được sử dụng cho Deployment.
+kind: Deployment:
+
+Loại đối tượng Kubernetes là Deployment, giúp quản lý việc triển khai và mở rộng ứng dụng.
+metadata:
+
+Chứa thông tin về Deployment, bao gồm tên và nhãn (labels).
+spec:
+
+Định nghĩa các thông số cho Deployment:
+replicas: 1: Số lượng bản sao của ứng dụng cần chạy (1 instance).
+selector: Xác định cách tìm các pod liên quan đến Deployment này.
+template: Mô tả pod mà Deployment sẽ tạo:
+metadata: Nhãn cho pod.
+spec: Thông tin về các container trong pod:
+containers: Danh sách các container. Trong trường hợp này chỉ có một container:
+name: Tên của container.
+image: Hình ảnh Docker được sử dụng cho container (eazybytes/eurekaserver:s12).
+ports: Cổng mà container sẽ lắng nghe (8070).
+env: Biến môi trường được cấu hình từ ConfigMap:
+SPRING_APPLICATION_NAME: Tên ứng dụng.
+SPRING_CONFIG_IMPORT: Cấu hình import.
+
+
+apiVersion: v1:
+
+Phiên bản API cho Service.
+kind: Service:
+
+Loại đối tượng Kubernetes là Service, dùng để định nghĩa cách truy cập vào một hoặc nhiều pod.
+metadata:
+
+Thông tin về Service, bao gồm tên.
+spec:
+
+Định nghĩa các thông số cho Service:
+selector: Chọn các pod dựa trên nhãn app: eurekaserver.
+type: LoadBalancer: Xác định loại Service là LoadBalancer, cho phép truy cập từ bên ngoài.
+ports: Cấu hình cổng cho Service:
+protocol: Giao thức (TCP).
+port: Cổng mà Service sẽ lắng nghe (8070).
+targetPort: Cổng mà pod sẽ lắng nghe (8070).
+
+
+Đoạn mã này cấu hình một Deployment cho Eureka Server với một instance duy nhất và một Service để cung cấp
+truy cập bên ngoài thông qua LoadBalancer. Biến môi trường được lấy từ một ConfigMap giúp cấu hình ứng dụng linh hoạt.
+
