@@ -2703,3 +2703,1830 @@ Nếu không chỉ rõ /orclpdb, bạn mặc định vào CDB$ROOT.
 				
 			select * from employees e where not exists # table access full EMPLOYEES
 				(select 1 from departments d where d.department_id = e.department_id)
+				
+--- Other Optimizer Operators:
+
+	- Code sql:
+	
+		Case 1 (Result Cache Operator):
+		
+			exec dbms_result_cache.flush;
+
+			select * from v$result_cache_objects;
+			
+			select cust_id, avg(amount_sold) from sales # table access full SALES, partition range ALL, sort group by, no result cache
+			group by cust_id
+			order by cust_id
+
+			select /*+ result_cache */ cust_id, avg(amount_sold) from sales #  table access full SALES, partition range ALL, sort group by, result cache
+			group by cust_id
+			order by cust_id
+
+			select /*+ result_cache */ cust_id, min(amount_sold), avg(amount_sold) from sales # lan chay khac lan dau se cho ket qua nhanh hon nhieu lan
+			group by cust_id
+			order by cust_id
+
+			select * from v$result_cache_objects;
+
+			select result_cache from user_tables where table_name = 'SALES' # DEFAULT
+
+			alter table sales result_cache (mode force)
+			select result_cache from user_tables where table_name = 'SALES' # FORCE
+
+			select cust_id, max(amount_sold) from sales # table access full SALES, parition range all, sort group by, result cache
+			group by cust_id
+			order by cust_id
+
+			alter table sales result_cache (mode default)
+			
+		Case 2 (View Operator):
+		
+			SELECT e.first_name, e.last_name, dept_locs_v.street_address, # table access full LOCATIONS, DEPARTMENTS, index LOC_id_pk, DEPt_id_pk, nested loop, hash join
+				   dept_locs_v.postal_code
+			FROM   employees e,
+				  ( SELECT d.department_id, d.department_name, 
+						   l.street_address, l.postal_code
+					FROM   departments d, locations l
+					WHERE  d.location_id = l.location_id ) dept_locs_v
+			WHERE  dept_locs_v.department_id = e.department_id
+			AND    e.last_name = 'Smith';
+			 
+			 
+			select e.first_name, e.last_name, l.street_address, l.postal_code # table access full LOCATIONS, index unique scan DEPT_ID_PK, index range scan EMP_NAME_IX, nested loop, hash join
+			from employees e, departments d, locations l
+			where d.location_id = l.location_id
+			and d.department_id = e.department_id
+			and e.last_name = 'Smith';
+			 
+			 
+			SELECT e.first_name, e.last_name, dept_locs_v.street_address, # index unique scan LOC_ID_PK, DEPT_ID_PK, nested loops, index range scan EMP_NAME_IX, nested loops
+				   dept_locs_v.postal_code
+			FROM   employees e,
+				  ( SELECT /*+ NO_MERGE */ d.department_id, d.department_name, 
+						   l.street_address, l.postal_code
+					FROM   departments d, locations l
+					WHERE  d.location_id = l.location_id ) dept_locs_v
+			WHERE  dept_locs_v.department_id = e.department_id
+			AND    e.last_name = 'Smith';
+			 
+			 
+			select v.*,d.department_name from (select department_id, sum(salary) SUM_SAL # table access full EMPLOYEES, hash, view, sort, index full scan DEPT_ID_PK, merge join
+			from employees group by department_id) v, departments d 
+			where v.department_id=d.department_id;
+			 
+			 
+			create view v as select department_id, salary from employees
+			select department_id, salary from v # table access full EMPLOYEES
+
+			drop view v
+			create view v as select /*+ NO_MERGE */ department_id, salary from employees
+			select department_id, salary from v # table access full EMPOYEES, view V
+			
+		Case 3 (Clusters):
+		
+			create cluster emp_dep_cluster (dep_id number(4, 0))
+				tablespace users
+				storage (initial 250k next 50k)
+				hash is dep_id hashkeys 500
+				
+			create table emps_clustered (
+				employee_id number(6,0) primary key,
+				first_name varchar2(20),
+				last_name varchar2(25),
+				department_id number(4,0)
+			) cluster emp_dep_cluster (department_id)
+
+			insert into emps_clustered (employee_id, first_name, last_name, department_id)
+			select employee_id, first_name, last_name, department_id from employees
+
+			create table deps_clustered (
+				department_id number(4,0) primary key,
+				department_name varchar2(30)
+			) cluster emp_dep_cluster (department_id)
+
+			insert into deps_clustered (department_id, department_name)
+			select department_id, department_name from departments
+
+			select employee_id, first_name, department_name from employees e, departments d # index range scan EMP_DEPARTMENT_IX, index unique scan DEPT_ID_PK, nested loops
+			where e.department_id = d.department_id
+			and e.department_id = 80
+
+			select employee_id, first_name, department_name from emps_clustered e, deps_clustered d # table access hash EMPS_CLUSTERED, DEPS_CLUSTERED, nested loops
+			where e.department_id = d.department_id
+			and e.department_id = 80
+
+			select employee_id, first_name, department_name from emps_clustered e, deps_clustered d # table access hash EMPS_CLUSTERED, table access full DEPS_CLUSTERED, nested loops
+			where e.department_id = d.department_id
+			and e.department_id > 80
+
+			select employee_id, first_name, department_name from employees e, departments d # index range scan DEPT_ID_PK, EMP_DEPARTMENT_IX, nested loops, hash join
+			where e.department_id = d.department_id
+			and e.department_id > 80
+
+			select * from emps_clustered # table access full EMPS_CLUSTERED
+
+			drop table deps_clustered
+			drop table emps_clustered
+			drop cluster emp_dep_cluster
+			
+		Case 4 (Sort Operators):
+		
+			select distinct prod_id, cust_id from sales
+
+			select distinct prod_id, cust_id from sales order by prod_id # table access full SALES, parition range all, sort unique
+
+			select prod_id, cust_id, sum(amount_sold) from sales # table access full SALES, partition range all, hash group by
+			group by prod_id, cust_id
+
+			select prod_id, cust_id, sum(amount_sold) from sales # table access full SALES, partition range all, sort group by
+			group by prod_id, cust_id
+			order by prod_id
+
+			select prod_id, cust_first_name, amount_sold from sales, customers # table access full SALES, CUSTOMERS, parition range all, buffer sort, merge join cartesian
+			
+		Case 5 (INLIST Operator):
+		
+			select * from employees where employee_id in (100, 110, 146) # or clause, index unique scan EMP_EMP_ID_PK, inlist iterator
+
+			select * from employees where employee_id in (100, 110, 146, 103, 124, 132, 102, # index unique scan EMP_EMP_ID_PK, inlist iterator
+														  156, 187, 203, 177, 108, 123, 163,
+														  104, 105, 188, 142, 151, 129, 109,
+														  200, 130, 116, 104, 174, 152, 122,
+														  155, 181, 133, 127, 158, 193, 140,
+														  101, 119, 183, 152, 150, 119, 139);
+														  
+				This time it performed a full table scan because the optimizer thinks that instead of reading from the
+				index and then from the table over and over again, reading the whole table for once and filtering will
+				be easier.
+				
+			select * from employees where employee_id = 100 or # or clause, index unique scan EMP_EMP_ID_PK, inlist iterator
+										  employee_id = 110 or
+										  employee_id = 146
+										  
+		Case 6 (Count Stopkey Operator):
+		
+			select * from employees where rownum < 11# table access full EMPLOYEES, count stopkey
+
+			select * from employees where rownum < 11 order by employee_id desc # index full scan descending EMP_EMP_ID_PK, count stopkey
+
+			select * from employees fetch first 10 rows only # table access full EMPLOYEES, window nosort stopkey, view SYS.null
+			
+		Case 7 (First Row Operator):
+		
+			select min(employee_id) from employees where employee_id < 140 # index range scan (min/max) EMP_EMP_ID_PK, first row, sort aggregate
+
+			select max(employee_id) from employees where employee_id < 140 # index range scan (min/max) EMP_EMP_ID_PK, first row, sort aggregate
+
+			select min(employee_id) from employees # index full scan (min/max) sort aggregate
+
+			select min(employee_id), max(employee_id) from employees where employee_id < 140 # index range scan EMP_EMP_ID_PK, sort aggregate
+
+			select min(commission_pct) from employees where commission_pct < 0.1 # table access full employees, sort aggregate
+			
+		Case 8 (Filter Operator):
+		
+			select min(salary), department_id from employees # table access full EMPLOYEES, filter
+			group by department_id
+			having min(salary) < 10000
+
+		Case 9 (Concatenation Operator):
+		
+			select * from employees where employee_id = 103 or department_id = 80 # table access full EMPLOYEES
+
+			select /*+ use_concat*/* from employees where employee_id = 103 or department_id = 80 # table access full EMPLOYEES, index unique scan EMP_EMP_ID_PK, table access by rowid EMPLOYEES, concatenation
+			
+		Case 10 (UNION Operators):
+		
+			select * from employees where department_id = 80 # index skip scan EMP_NAME_IX, table access full EMPLOYEES, union all, sort
+			union
+			select * from employees where first_name like 'A%'
+
+			select * from employees where department_id = 80 # index skip scan EMP_NAME_IX, table access full EMPLOYEES, union all
+			union all
+			select * from employees where first_name like 'A%'
+			
+		Case 11 (Intersect Operator):
+		
+			select * from employees where department_id = 80 # index skip scan EMP_NAME_IX, sort, table access full EMPLOYEES, sort, intersection
+			intersect
+			select * from employees where first_name like 'A%'
+
+			select * from employees where employee_id between 145 and 179 # index range scan EMP_NAME_IX, sort, index range scan EMP_EMP_ID_PK, sort unique, intersection
+			intersect
+			select * from employees where first_name like 'A%'
+
+			select employee_id from employees where employee_id between 145 and 179 # index skip scan EMP_NAME_IX, sort unique, index range scan EMP_EMP_ID_PK, sort unique nosort, intersection
+			intersect
+			select employee_id from employees where first_name like 'A%'
+
+			select employee_id from employees E where employee_id between 145 and 179 # index skip scan EMP_NAME_IX
+			and exists
+				(select employee_id from employees T where first_name like 'A%' and e.employee_id = T.employee_id)
+				
+		Case 12 (Minus Operator):
+		
+			select employee_id from employees where employee_id between 145 and 179 # index skip scan EMP_NAME_IX, sort unique, index range scan EMP_EMP_ID_PK, sort unique nosort, minus
+			minus
+			select employee_id from employees where first_name like 'A%'
+
+			select employee_id from employees e where employee_id between 145 and 179 # index skip scan EMP_NAME_IX, index unique scan EMP_EMP_ID_PK, index range scan EMP_EMP_ID_PK, nested loops anti, hash join anti
+			and not exists
+				(select employee_id from employees t where first_name like 'A%' and e.employee_id = t.employee_id)
+				
+				
+--- SQL Tuning Techniques:
+	
+	Oracle SQL Developer -> Tools -> Real Time SQL Monitor
+	
+	- Tim hieu:
+	
+		SQL engine khac gi voi PL/SQL engine
+
+
+	SQL Tuning Techniques - Common reasons for a Bad SQL:
+	
+		❌ Poorly written query
+		❌ Index used or not used
+		❌ There is no index
+		❌ Predicates are not used
+		❌ Wrong types in predicates
+		❌ Wrong join order
+		❌ Other
+		
+	SQL Tuning Techniques - Common possible solutions:
+	
+		✅ Make the statistics up to date
+		✅ Use dynamic statistics
+		✅ Create or modify indexes
+		✅ Rewrite the query to use an index
+		✅ Use hints
+		✅ Remove wrong hints
+		✅ Change the hints
+		✅ Eliminate implicit data type conversion
+		✅ Create function-based indexes
+		✅ Use index-organized tables
+		✅ Change the optimizer mode
+		✅ Use parallel execution
+		✅ Use materialized views
+		✅ Modify or disable triggers and constraints
+		✅ Other
+		
+	- SQL:
+	
+		- sql: SQL> EXEC DBMS_XDB_CONFIG.SETHTTPSPORT(5500);
+		- sql: SQL> SELECT DBMS_XDB_CONFIG.GETHTTPSPORT FROM DUAL;
+		- sql: SQL> alter session set tracefile_identifier = TUN;
+		- sql: SQL> alter session set sql_trace = true;
+		- sql: SQL> alter session set sql_trace = false;
+		- sql: SQL> select value from v$diag_info where name = 'Diag Trace';
+		- sql: tkprof orcl_aqpc_18144.trc tun_ex.txt
+		- sql: SQL> alter session set timed_statistics = true;
+		- sql: SQL> exec dbms_session.session_trace_enable(waits=>true, binds=>false);
+		- sql: SQL> exec dbms_session.session_trace_disable;
+		
+		
+		
+	- Code sql:
+	
+		Case 1 (Using the Trace Files & TKPROF Utility):
+		
+			select * from sales s, customers c
+			where s.cust_id = c.cust_id and
+			channel_id = 9;
+			 
+			select /*+ monitor */* from sales s, customers c
+			where s.cust_id = c.cust_id and
+			channel_id = 9;
+			 
+			alter system flush shared_pool;
+			alter system flush buffer_cache;
+			 
+			SELECT /*+ PARALLEL(4) */ c.cust_first_name, c.cust_last_name, 
+			  MAX(QUANTITY_SOLD), AVG(QUANTITY_SOLD)
+			FROM sales s, customers c, countries ct, costs cs
+			WHERE s.cust_id = c.cust_id
+			and s.channel_id = :v_channel_id
+			and c.country_id = ct.country_id
+			--and cs.prod_id = s.prod_id
+			GROUP BY c.cust_first_name, c.cust_last_name
+			order by c.cust_first_name, c.cust_last_name;
+			
+			###############
+			
+			SQL> select s.prod_id, p.prod_name, s.cust_id, c.cust_first_name from sh.sales s, sh.products p, sh.customers c where s.prod_id = p.prod_id and s.cust_id = c.cust_id and s.amount_sold > 1500;
+			
+		Case 2 (Using the Trace Files & TKPROF Utility):
+
+			sqlplus / as sysdba;
+			 
+			alter session set tracefile_identifier= TUN;
+			 
+			alter session set sql_trace = true;
+			 
+			select * from hr.employees;
+			 
+			alter session set sql_trace = false;
+			 
+			select value from v$diag_info where name = ‘Diag Trace’;
+			 
+			cd c:\app\omr\diag\rdbms\orcl\orcl\trace
+			 
+			tkprof file_name.trc tun_ex.txt
+			 
+			/********************************************************************/
+			 
+			alter session set timed_statistics=true;
+			 
+			exec dbms_session.session_trace_enable(waits => true, binds => false);
+			 
+			select s.prod_id,p.prod_name,s.cust_id,c.cust_first_name 
+			from sh.sales s, sh.products p, sh.customers c
+			where s.prod_id = p.prod_id
+			and s.cust_id = c.cust_id
+			and s.amount_sold > 1500;
+			 
+			exec dbms_session.session_trace_disable;
+
+		Case 3 (Get What You Need Only):
+			
+			select * from sales # table access full SALES, parition range all
+
+			select prod_id, cust_id, amount_sold from sales # table access full SALES, partition range all
+
+			select * from employees # table access full EMPLOYEES
+
+			select employee_id, first_name, last_name from employees # index full scan EMP_EMP_ID_PK, EMP_NAME_IX, hash join, view
+			
+		Case 4 (Index Usage):
+		
+			select cust_first_name, cust_last_name, cust_year_of_birth # index unique scan CUSTOMERS_PK
+			from customers
+			where cust_id = 975
+
+			select cust_first_name, cust_last_name, cust_year_of_birth # table access full CUSTOMERS
+			from customers
+			where cust_id <> 975
+
+			select cust_first_name, cust_last_name, cust_year_of_birth # table access full CUSTOMERS
+			from customers
+			where cust_id < 5000
+
+			select /*+ index(customers CUSTOMERS_PK) */ cust_first_name, cust_last_name, cust_year_of_birth # index range scan CUSTOMERS_PK
+			from customers
+			where cust_id < 5000
+
+			select /*+ index(customers CUSTOMERS_PK) */ cust_first_name, cust_last_name, cust_year_of_birth # index range scan CUSTOMERS_PK
+			from customers
+			where cust_id < 500
+
+			select cust_first_name, cust_last_name, cust_year_of_birth # index range scan CUSTOMERS_PK
+			from customers
+			where cust_id < 100
+
+			select cust_first_name, cust_last_name # index range scan CUSTOMERS_PK
+			from customers
+			where cust_id between 100 and 130
+
+			select cust_year_of_birth # bitmap index full scan CUSTOMERS_YOB_BIX, index range scan CUSTOMERS_PK, hash join, view
+			from customers
+			where cust_id < 50
+
+			select cust_year_of_birth, cust_last_name # index range scan CUSTOMERS_PK
+			from customers
+			where cust_id < 50
+
+			SELECT E.employee_id, E.last_name, E.job_id, E.manager_id, D.department_name,D.department_id, C.country_name # index range scan EMP_EMP_ID_PK, EMP_DEPARTMENT_IX, index unique scan COUNTRY_C_ID_PK, index fast full scan LOC_ID_PK, LOC_COUNTRY_IX, index full scan DEPT_LOCATION_IX, merge join, nested loops
+			FROM employees E, departments D, locations L, countries C
+			WHERE E.department_id = D.department_id
+			AND D.location_id = L.location_id
+			AND L.country_id = C.country_id
+			AND E.employee_id BETWEEN 120 AND 199;
+
+			SELECT E.employee_id, E.last_name, E.job_id, E.manager_id, D.department_name,D.department_id, C.country_name # index range scan EMP_EMP_ID_PK, EMP_DEPARTMENT_IX, index unique scan COUNTRY_C_ID_PK, LOC_ID_PK, DEPT_ID_PK, inlist iterator, nested loops, hash join
+			FROM employees E, departments D, locations L, countries C
+			WHERE E.department_id = D.department_id
+			AND D.location_id = L.location_id
+			AND L.country_id = C.country_id
+			AND E.employee_id BETWEEN 120 AND 199
+			and e.department_id in (50,80);
+			
+		Case 5 (Using Concatenation Operator):
+		
+			select first_name, last_name, employee_id, salary # table access full EMPLOYEES
+			from employees
+			where first_name||last_name = 'StevenKING'
+
+			select first_name, last_name, employee_id, salary # index range scan EMP_NAME_IX
+			from employees
+			where first_name = 'Steven' and last_name = 'KING'
+			
+		Case 6 (Using Arithmetic Operators):
+		
+			select prod_id, cust_id, time_id # table access full SALES, partition range all
+			from sales
+			where time_id+10 = '20-JAN-98'
+
+			select prod_id, cust_id, time_id # bitmap index single vale SALES_TIME_BIX, partition range single
+			from sales
+			where time_id = '10-JAN-98'
+
+			select prod_id, cust_id, time_id # bitmap index single value SALES_TIME_BIX, partition range single
+			from sales
+			where time_id = to_date('20-JAN-98', 'DD-MON-RR')-10
+			
+		Case 7(Using Like Conditions):
+		
+			select employee_id, first_name, last_name, salary # table access full EMPLOYEES
+			from employees
+			where last_name like '%on'
+
+			select employee_id, first_name, last_name, salary # table access full EMPLOYEES
+			from employees
+			where last_name like '%on%'
+
+			select employee_id, first_name, last_name, salary # index range scan EMP_NAME_IX
+			from employees
+			where last_name like 'Ba%'
+
+			create index last_name_reverse_index on employees(REVERSE(last_name));
+			select employee_id, first_name, last_name, reverse(last_name), salary # index range scan LAST_NAME_VERSE_IN
+			from employees
+			where reverse(last_name) like 'rahh%'
+
+			drop index last_name_reverse_index;
+			
+		Case 8 (Using Functions on the Indexed Columns):
+		
+			create index emp_date_temp_idx on employees (hire_date) compute statistics;
+
+			select employee_id, first_name, last_name # table access full EMPLOYEES
+			from employees
+			where trunc(hire_date, 'YEAR') = '01-JAN-2002';
+
+			select employee_id, first_name, last_name # index range scan EMP_DATE_TEMP_IDX
+			from employees
+			where hire_date between '01-JAN-2002' and '31-DEC-2002';
+
+			drop index emp_date_temp_idx;
+
+			select prod_id, prod_category, prod_subcategory # table access full PRODUCTS
+			from products
+			where substr(prod_subcategory,1,2) = 'Po';
+
+			select prod_id, prod_category, prod_subcategory # index range scan PRODUCTS_PROD_SUBCAT_IX
+			from products
+			where prod_subcategory like 'Po%'
+			
+		Case 9 (Handling NULL-Based Performance Problems):
+		
+			create table employees_temp as select * from employees;
+
+			create index com_pct_idx on employees_temp(commission_pct) compute statistics;
+
+			select * from employees_temp where commission_pct <> 1; # table access full EMPLOYEES_TEMP
+
+			select * from employees_temp where commission_pct <> 1 and commission_pct is not null; # index full scan COM_PCT_IX
+
+			select employee_id, commission_pct from employees_temp where commission_pct is null # table access full EMPLOYEES_TEMP
+
+			select /*+ index(employees_temp com_pct_idx)*/employee_id, commission_pct # table access full EMPLOYEES_TEMP
+			from employees_temp
+			where commission_pct is null
+
+			update employees_temp set commission_pct = 0 where commission_pct is null;
+			commit;
+			select employee_id, commission_pct from employees_temp where commission_pct = 0 # index range scan COM_PCT_IDX
+
+			update employees_temp set commission_pct = null where commission_pct = 0;
+			commit;
+			drop index com_pct_idx;
+			create bitmap index comm_pct_idx on employees_temp(commission_pct) compute statistics;
+			select employee_id, commission_pct # table access full EMPLOYEES_TEMP
+			from employees_temp
+			where commission_pct is null
+
+			select /*+ index(employees_temp comm_pct_idx)*/employee_id, commission_pct # bitmap index single value COMM_PCT_IDX, table conversion to rowids
+			from employees_temp
+			where commission_pct is null
+			
+		Case 10 (Using TRUNCATE instead of DELETE command):
+		
+			create table sales_temp1 as select * from sales;
+			create table sales_temp2 as select * from sales;
+
+			delete from sales_temp1;
+
+			truncate table sales_temp2;
+			
+		Case 11 (Data Type Mismatch):
+		
+			select cust_id, cust_first_name, cust_last_name # index unique scan CUSTOMERS_PK
+			from customers
+			where cust_id = 3228
+
+			select cust_id, cust_first_name, cust_last_name # index unique scan CUSTOMERS_PK
+			from customers
+			where cust_id = '3228'
+
+			create index cust_postal_code_idx on customers (cust_postal_code);
+
+			select cust_id, cust_first_name, cust_last_name # table access full CUSTOMERS
+			from customers
+			where cust_postal_code = 60332
+
+			select cust_id, cust_first_name, cust_last_name # index range scan CUST_POSTAL_CODE_IDX
+			from customers
+			where cust_postal_code = '60332'
+
+			select cust_id, cust_first_name, cust_last_name # table access full CUSTOMERS
+			from customers
+			where to_number(cust_postal_code) = 60332
+
+			drop index cust_postal_code_idx;
+			
+		Case 12 (Tuning Ordered Queries):
+		
+			select prod_id, cust_id, time_id # table access full SALES, parition range all, sort order byte
+			from sales
+			order by amount_sold
+
+			select prod_id, cust_id, time_id # table access full SALES, partition range all, sort order by
+			from sales
+			order by cust_id
+
+			select prod_id, cust_id, time_id # bitmap index range scan SALES_CUST_BIX, sort order by
+			from sales
+			where cust_id < 100
+			order by cust_id
+
+			select cust_id # bitmap index fast full scan SALES_CUST_BIX, sort order by
+			from sales
+			order by cust_id
+
+			select cust_id # index full scan CUSTOMERS_PK
+			from customers
+			order by cust_id
+
+			select cust_id, cust_first_name, cust_last_name # index range scan CUSTOMERS_PK
+			from customers
+			where cust_id < 100
+			order by cust_id
+
+			select cust_id, cust_first_name, cust_last_name # table access full CUSTOMERS, sort order by
+			from customers
+			order by cust_first_name
+			
+		Case 13 (Retrieving the MIN & MAX Values):
+		
+			select max(cust_street_address) from customers; # table access full CUSTOMERS, sort aggregate
+
+			select max(cust_year_of_birth) from customers; # bitmap index sigle value CUSTOMERS_YOB_BIX, sort aggregate
+
+			select cust_year_of_birth from customers; # bitmap index fast full scan CUSTOMERS_YOB_BIX
+
+			select max(cust_id) from customers; # index full scan(min/max) CUSTOMERS_PK, sort aggregate
+
+			select cust_id from customers; # index fast full scan CUSTOMERS_PK
+
+			select cust_id from customers where cust_id < 1000 # index range scan CUSTOMERS_PK
+
+			select max(cust_id) from customers where cust_id < 1000 # index range scan(min/max) CUSTOMERS_PK, first row, sort aggregate
+
+			select min(cust_id) from customers; # index full scan(min/max) CUSTOMERS_PK, sort aggregate
+
+			select min(cust_id), max(cust_id) from customers; # index fast full scan CUSTOMERS_PK, sort aggregate
+
+			select max(cust_id), max(cust_id) from customers; # index fast full scan CUSTOMERS_PK, sort aggregate
+
+			select * from # index full scan(min/max) CUSTOMERS_PK, sort aggregate, view, nested loops
+				(select min(cust_id) min_cust from customers) min_customer,
+				(select max(cust_id) max_cust from customers) max_customer
+				
+		Case 14 (UNION and UNION ALL Operators (Which one is faster?)):
+		
+			select prod_id, cust_id, time_id, amount_sold, channel_id # table access full SALES, union-all, sort
+			from sales where channel_id = 3
+			union
+			select prod_id, cust_id, time_id, amount_sold, channel_id
+			from sales where channel_id = 4
+
+			select prod_id, cust_id, time_id, amount_sold, channel_id # table access full SALES, union-all
+			from sales where channel_id = 3
+			union all
+			select prod_id, cust_id, time_id, amount_sold, channel_id
+			from sales where channel_id = 4
+			
+		Case 15 (Avoid Using the HAVING Clause!):
+		
+			select time_id, sum(amount_sold) from sales # table access full SALES, hash group by, parition range all, filter
+			group by time_id
+			having time_id between '01-JAN-01' and '28-FEB-01'
+
+			select time_id, sum(amount_sold) from sales # table access full SALES, partition range iterator, filter, hash group by
+			where time_id between '01-JAN-01' and '28-FEB-01'
+			group by time_id
+
+			select prod_id, sum(amount_sold) from sales # table access full SALES, parition range all, hash group by, filter
+			group by prod_id
+			having prod_id = 136
+
+			select prod_id, sum(amount_sold) from sales # bitmap index single value SALES_PROD_BIX, parition range all, sort
+			where prod_id = 136
+			group by prod_id
+			
+		Case 16 (Be Careful on Views!):
+		
+			CREATE OR REPLACE VIEW vw_emp_dept AS
+			SELECT E.employee_id, E.last_name, E.first_name, E.salary, E.job_id,
+				D.department_id, D.department_name, D.location_id, L.state_province
+				FROM employees E, departments D , locations L
+			WHERE E.department_id(+) = D.department_id
+			AND D.location_id = L.location_id;
+			 
+			SELECT  V.first_name, V.last_name, j.job_title # index full scan DEPT_LOCATION_IX, index range scan EMP_JOB_IX, index unique scan JOB_ID_PK, nested loops, hash join
+			FROM jobs j, vw_emp_dept V
+			WHERE j.job_id = 'IT_PROG'
+			AND V.job_id = j.job_id;
+			 
+			select * from vw_emp_dept; # table access full EMPLOYEES, DEPARTMENTS, index range scan EMP_DEPARTMENT_IX, index full scan LOC_ID_PK, merge join, nested loops, hash join
+			 
+			SELECT  E.first_name, E.last_name, j.job_title # index range scan EMP_JOB_IX, index unique scan JOB_ID_PK, nested loops
+			FROM employees E, jobs j
+			WHERE j.job_id = 'IT_PROG'
+			AND E.job_id = j.job_id;
+			 
+			 
+			CREATE OR REPLACE VIEW vw_cust_num_sold AS
+			SELECT C.cust_id, cust_first_name,cust_last_name, prod_id, COUNT(*) num_sold FROM sales S, customers C
+			WHERE S.cust_id = C.cust_id
+			GROUP BY C.cust_id,cust_first_name, cust_last_name, prod_id
+			ORDER BY num_sold DESC;
+			 
+			SELECT cust_id,prod_name,num_sold # table access by rowid CUSTOMERS, index unique scan CUSTOMERS_PK, PRODUCTS_PK, nested loops, filter, sort
+			FROM vw_cust_num_sold V, products P
+			WHERE V.prod_id = P.prod_id
+			AND V.prod_id = 13;
+			 
+			SELECT cust_id,prod_name,num_sold # table access full CUSTOMERS, index unique scan CUSTOMERS_PK, PRODUCTS_PK, nested loops, hash join, hash group by, sort order by, view, hash join right outer
+			FROM vw_cust_num_sold V, products P
+			WHERE V.prod_id = P.prod_id(+)
+			AND V.prod_id = 13;
+			 
+			SELECT C.cust_id, P.prod_name, COUNT(*) num_sold FROM sales S, customers C, products P # index unique scan CUSTOMERS_PK, PRODUCTS_PK, nested loops, hash group by, view, hash group by, sort order by
+			WHERE S.cust_id = C.cust_id
+			AND S.prod_id = P.prod_id(+)
+			AND P.prod_id = 13
+			GROUP BY C.cust_id, P.prod_name
+			ORDER BY num_sold DESC;
+			 
+			DROP VIEW hr.vw_emp_dept;
+			DROP VIEW vw_cust_num_sold;
+			
+		Case 17 (Create Materialized Views):
+		
+			SELECT C.cust_id, cust_first_name,cust_last_name, prod_id, COUNT(*) num_sold FROM sales S, customers C # table access full CUSTOMERS, SALES, sort join, hash group by, view, merge join, hash group by, sort order by
+			WHERE S.cust_id = C.cust_id
+			GROUP BY C.cust_id,cust_first_name, cust_last_name, prod_id
+			ORDER BY num_sold DESC;
+			 
+			CREATE MATERIALIZED VIEW vw_cust_num_sold
+			ENABLE QUERY REWRITE AS
+			SELECT C.cust_id, cust_first_name,cust_last_name, prod_id, COUNT(*) num_sold FROM sales S, customers C
+			WHERE S.cust_id = C.cust_id
+			GROUP BY C.cust_id,cust_first_name, cust_last_name, prod_id
+			ORDER BY num_sold DESC;
+			 
+			SELECT * FROM vw_cust_num_sold; # MAT_VIEW_ACCESS FULL
+			 
+			SELECT cust_id,prod_name,num_sold # MAT_VIEW_ACCESS FULL, index unique scan PRODUCTS_PK, nested loops
+			FROM vw_cust_num_sold V, products P
+			WHERE V.prod_id = P.prod_id
+			AND V.prod_id = 13;
+			 
+			SELECT cust_id,prod_name,num_sold # MAT_VIEW_ACCESS FULL, index unique scan PRODUCTS_PK, hash join
+			FROM vw_cust_num_sold V, products P
+			WHERE V.prod_id = P.prod_id(+)
+			AND V.prod_id = 13;
+			 
+			SELECT C.cust_id, cust_first_name,cust_last_name, prod_id, COUNT(*) num_sold FROM sales S, customers C # MAT_VIEW_ACCESS FULL, sort order by
+			WHERE S.cust_id = C.cust_id
+			AND prod_id = 13
+			GROUP BY C.cust_id,cust_first_name, cust_last_name, prod_id
+			ORDER BY num_sold DESC;
+			 
+			DROP MATERIALIZED VIEW vw_cust_num_sold;
+			
+		Case 18 (Avoid Commit Too Much or Too Less!):
+		
+			create table sales_temp as select * from sales
+
+			select sum(amount_sold) from sales_temp where time_id between '01-JAN-01' and '31-DEC-03' # table access full SALES_TEMP, filter, sort aggregate
+
+			select sum(amount_sold) from sales where time_id between '01-JAN-01' and '31-DEC-03' # table access full SALES, partition range iterator, filter, sort aggregate
+
+			drop table sales_temp
+			
+		Case 19 (Using BULK COLLECT):
+		
+			DECLARE
+			CURSOR c1 IS SELECT cust_id, cust_email FROM customers ORDER BY cust_id;
+			TYPE r_type IS TABLE OF c1%rowtype;
+			r1 r_type := r_type();
+			idx PLS_INTEGER := 0;
+			BEGIN
+			OPEN c1;
+			LOOP
+			idx:=idx+1;
+			r1.extend;
+			FETCH c1 INTO r1(idx);
+			EXIT WHEN c1%notfound;
+			END LOOP;
+			CLOSE c1;
+			END;
+			/
+			 
+			DECLARE
+			CURSOR c2 IS SELECT cust_id, cust_email FROM customers ORDER BY cust_id;
+			TYPE r_type IS TABLE OF c2%rowtype;
+			r1 r_type := r_type();
+			BEGIN
+			OPEN c2;
+			FETCH c2 BULK COLLECT INTO r1;
+			CLOSE c2;
+			END;
+			/
+			 
+			DECLARE
+			CURSOR c3 IS SELECT cust_id, cust_email FROM customers ORDER BY cust_id;
+			TYPE r_type IS TABLE OF c3%rowtype;
+			r1 r_type := r_type();
+			BEGIN
+			OPEN c3;
+			FETCH c3 BULK COLLECT INTO r1 LIMIT 100;
+			CLOSE c3;
+			END;
+			/
+			 
+			DECLARE
+			CURSOR c4 IS SELECT cust_id, cust_email FROM customers ORDER BY cust_id;
+			TYPE r_type IS TABLE OF c4%rowtype;
+			r1 r_type := r_type();
+			BEGIN
+			OPEN c4;
+			LOOP
+			FETCH c4 BULK COLLECT INTO r1 LIMIT 100;
+			EXIT WHEN c4%notfound;
+			END LOOP;
+			CLOSE c4;
+			END;
+			/
+			 
+			DECLARE
+			CURSOR c5 IS SELECT cust_id, cust_email FROM customers ORDER BY cust_id;
+			TYPE r_type IS TABLE OF c5%rowtype;
+			r1 r_type := r_type();
+			BEGIN
+			OPEN c5;
+			LOOP
+			FETCH c5 BULK COLLECT INTO r1 LIMIT 1000;
+			EXIT WHEN c5%notfound;
+			END LOOP;
+			CLOSE c5;
+			END;
+			/
+			 
+			DECLARE
+			CURSOR c6 IS SELECT cust_id, cust_email FROM customers ORDER BY cust_id;
+			TYPE r_type IS TABLE OF c6%rowtype;
+			r1 r_type := r_type();
+			BEGIN
+			OPEN c6;
+			LOOP
+			FETCH c6 BULK COLLECT INTO r1 LIMIT 100000;
+			EXIT WHEN c6%notfound;
+			END LOOP;
+			CLOSE c6;
+			END;
+			/
+			 
+			DECLARE
+			TYPE r_type IS TABLE OF varchar2(100) index by pls_integer;
+			r1 r_type;
+			BEGIN
+			FOR r2 IN (SELECT cust_id, cust_email FROM customers ORDER BY cust_id) LOOP
+			r1(r2.cust_id) := r2.cust_email;
+			END LOOP;
+			END;
+			/
+			
+		Case 20 (Tuning the Join Order):
+		
+			SELECT /*+ ORDERED */P.prod_name,C.cust_first_name,S.amount_sold FROM  customers C, products P, sales S # table access full PRODUCTS, CUSTOMERS, SALES, merge join cartesian, partition range all, hash join
+			WHERE S.cust_id = C.cust_id
+			AND P.prod_id = S.prod_id;
+			 
+			SELECT /*+ ORDERED */P.prod_name,C.cust_first_name,S.amount_sold FROM sales S, customers C, products P # table access full CUSTOMERS, SALES, PRODUCTS, index unique scan CUSTOMERS_PK, hash join
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id;
+			 
+			SELECT /*+ ORDERED */P.prod_name,C.cust_first_name,S.amount_sold FROM sales S, products P , customers C # table access full PRODUCTS, SALES, CUSTOMERS, index unique scan PRODUCTS_PK, , hash join
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id;
+			 
+			SELECT /*+ ORDERED */P.prod_name,C.cust_first_name,S.amount_sold FROM  products P , sales S, customers C # table access full SALES, PRODUCTS, CUSTOMERS, bitmap index single value SALES_PROD_BIX, nested loops, hash join
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id;
+			 
+			SELECT P.prod_name,C.cust_first_name,S.amount_sold FROM  products P , sales S, customers C # table access full SALES, PRODUCTS, CUSTOMERS, bitmap index single value SALES_PROD_BIX, nested loops, hash join
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id;
+			
+		Case 21 (Multitable DML Operations):
+		
+			------------------------ INSERT ALL EXAMPLE -----------------------------
+			 
+			CREATE TABLE it_programmers AS SELECT * FROM employees WHERE 1=2;
+			 
+			CREATE TABLE sales_representatives AS SELECT * FROM employees WHERE 1=2;
+			 
+			INSERT INTO it_programmers SELECT * FROM employees WHERE job_id = 'IT_PROG';
+			 
+			INSERT INTO sales_representatives SELECT * FROM employees WHERE job_id = 'SA_REP';
+			 
+			INSERT ALL 
+				WHEN job_id = 'IT_PROG' THEN INTO it_programmers
+				WHEN job_id = 'SA_REP' THEN INTO sales_representatives
+			SELECT * FROM employees WHERE job_id IN ('IT_PROG','SA_REP');
+			 
+			-------------------------- MERGE EXAMPLE --------------------------------
+			 
+			CREATE TABLE bonuses (employee_id NUMBER(6,0), bonus NUMBER(8,2), salary NUMBER(8,2), department_id NUMBER(4,0));
+			 
+			INSERT INTO bonuses SELECT employee_id, 1000, salary, department_id FROM employees WHERE ROWNUM < 70;
+			 
+			INSERT INTO bonuses SELECT employee_id, 1000, salary, department_id FROM employees WHERE department_id = 80 AND salary < 10000
+			AND employee_id NOT IN (SELECT employee_id FROM bonuses);
+			 
+			UPDATE bonuses b SET b.bonus = b.bonus + bonus*0.15 
+			WHERE employee_id IN (SELECT employee_id FROM employees WHERE department_id = 80 AND salary < 10000);
+			 
+			DELETE FROM bonuses WHERE employee_id IN (SELECT employee_id FROM employees WHERE salary >= 10000 OR department_id <> 80);
+			 
+			MERGE INTO bonuses b
+			   USING (SELECT employee_id, salary, department_id FROM employees) E
+			   ON (b.employee_id = E.employee_id )
+			   WHEN MATCHED THEN 
+				 UPDATE SET b.bonus = b.bonus + b.bonus*0.15 
+				 DELETE WHERE (b.salary >= 10000 OR b.department_id != 80)
+			   WHEN NOT MATCHED THEN 
+			   INSERT (b.employee_id, b.bonus, b.salary, b.department_id)
+				 VALUES (E.employee_id, 1000 + 1000*0.15, E.salary, E.department_id)
+				 WHERE (E.salary < 10000 AND E.department_id = 80);
+			 
+			DROP TABLE it_programmers;
+			DROP TABLE sales_representatives;
+			DROP TABLE bonuses;
+			
+		Case 22 (Using Temporary Tables):
+		
+			SELECT P.prod_name,C.cust_first_name,sum(S.amount_sold) sold FROM  products P , sales S, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			group by p.prod_name, c.cust_first_name
+			having sum(amount_sold) > 10
+			order by sold;
+			 
+			SELECT P.prod_name,C.cust_first_name,sum(S.amount_sold) sold FROM  products P , sales S, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			and p.prod_name like 'DVD-R%'
+			group by p.prod_name, c.cust_first_name
+			order by sold;
+			 
+			SELECT P.prod_name,C.cust_first_name,sum(S.amount_sold) sold FROM  products P , sales S, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			and p.prod_name like 'CD-R%'
+			group by p.prod_name, c.cust_first_name
+			order by sold;
+			 
+			create global temporary table products_sum_sold_amount(prod_name, cust_first_name, sum_amount_sold) 
+			on commit preserve rows as
+			SELECT P.prod_name,C.cust_first_name,sum(S.amount_sold) sold FROM  products P , sales S, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			group by p.prod_name, c.cust_first_name
+			order by sold;
+			 
+			SELECT prod_name,cust_first_name, sum_amount_sold FROM  products_sum_sold_amount
+			WHERE sum_amount_sold > 10;
+			 
+			SELECT prod_name,cust_first_name, sum_amount_sold FROM  products_sum_sold_amount
+			WHERE prod_name like 'DVD-R%';
+			 
+			SELECT prod_name,cust_first_name, sum_amount_sold FROM  products_sum_sold_amount
+			WHERE prod_name like 'CD-R%';
+		
+		Case 23 (Combining SQL Statements):
+		
+			SELECT MAX(S.amount_sold) max_sold FROM products P , sales S, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND P.prod_id = 13;
+			 
+			SELECT COUNT(S.amount_sold) count_sold FROM products P , sales S, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND C.cust_first_name = 'Brant';
+			 
+			SELECT AVG(S.amount_sold) avg_sold FROM products P , sales S, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND P.prod_category = 'Photo';
+			 
+			SELECT
+			MAX(decode(P.prod_id,13,S.amount_sold,0)) max_sold,
+			SUM(decode(C.cust_first_name,'Brant',1,0)) count_sold,
+			SUM(decode(P.prod_category,'Photo',amount_sold)) / SUM(decode(P.prod_category,'Photo',1)) avg_sold
+			FROM products P , sales S, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id;
+		
+		Case 24 (Using "WITH" Clause):
+		
+			SELECT prod_name, 
+				(SELECT SUM(amount_sold) amt_sold FROM sales WHERE prod_id = P.prod_id) / (SELECT COUNT(*) num_prods FROM products)
+			FROM products P
+			WHERE P.prod_id IN (SELECT prod_id FROM sales GROUP BY prod_id HAVING SUM(amount_sold) > 100000);
+			 
+			WITH sum_amount AS
+					(SELECT SUM(amount_sold) amt_sold, prod_id FROM sales GROUP BY prod_id),
+				 num_of_prods AS
+					(SELECT COUNT(*) num_prods FROM products)
+			SELECT prod_name, 
+				amt_sold / (SELECT num_prods FROM num_of_prods)
+			FROM products P, sum_amount S
+			WHERE P.prod_id = S.prod_id
+			AND amt_sold > 100000;
+			 
+			 
+			SELECT DISTINCT S.cust_id,S.prod_id,S.amount_sold, 
+			(SELECT AVG(amount_sold) avg_sold FROM sales s1 WHERE channel_id = 2 
+					AND S.prod_id = s1.prod_id) avg_sold ,
+			(SELECT COUNT(s2.amount_sold) amt_sold FROM customers c2, sales s2 
+					WHERE s2.cust_id = c2.cust_id
+						  AND c2.cust_marital_status = 'married'
+						  AND S.cust_id = s2.cust_id 
+						  GROUP BY c2.cust_first_name,c2.cust_last_name,c2.cust_id) amt_sold
+			FROM  sales S
+			WHERE S.channel_id = 2
+			AND S.amount_sold >
+				(SELECT AVG(amount_sold) avg_sold FROM sales s1 WHERE channel_id = 2 AND S.prod_id = s1.prod_id)
+			AND (SELECT COUNT(s2.amount_sold) amt_sold FROM customers c2, sales s2 
+					WHERE s2.cust_id = c2.cust_id
+						  AND c2.cust_marital_status = 'married'
+						  AND S.cust_id = s2.cust_id
+						  GROUP BY c2.cust_first_name,c2.cust_last_name,c2.cust_id) > 200
+			ORDER BY cust_id,prod_id;
+			 
+			 
+			 
+			WITH avg_amounts_per_prod AS
+					(SELECT AVG(amount_sold) avg_sold, prod_id FROM sales WHERE channel_id = 2 GROUP BY prod_id),
+				amounts_sold AS
+					(SELECT C.cust_first_name, C.cust_last_name, C.cust_id, COUNT(S.amount_sold) tot_amt_sold FROM customers C, sales S 
+						WHERE S.cust_id = C.cust_id
+							  AND C.cust_marital_status = 'married'
+							  GROUP BY C.cust_first_name,C.cust_last_name,C.cust_id)
+			SELECT DISTINCT S.cust_id,S.prod_id,S.amount_sold, 
+			(SELECT avg_sold FROM avg_amounts_per_prod A WHERE A.prod_id = S.prod_id) avg_sold,
+			(SELECT tot_amt_sold FROM amounts_sold T WHERE T.cust_id = S.cust_id)
+			FROM  sales S
+			WHERE S.channel_id = 2
+			AND S.amount_sold > (SELECT avg_sold FROM avg_amounts_per_prod A WHERE A.prod_id = S.prod_id)
+			AND (SELECT tot_amt_sold FROM amounts_sold T WHERE T.cust_id = S.cust_id) > 200
+			ORDER BY cust_id,prod_id;
+			
+		Case 25 (Using Analytical Functions):
+		
+			select e1.employee_id, e1.first_name, e1.last_name, 
+				   e1.department_id, e1.salary, e3.next_sal, e2.avg_sal
+			from employees e1,
+				(select department_id, round(avg(salary),2) as avg_sal from employees
+				 group by department_id) e2,
+				(select employee_id, salary next_sal from employees) e3
+			where e1.department_id = e2.department_id(+)
+			and e1.employee_id+1 = e3.employee_id(+)
+			order by e1.employee_id;
+			 
+			select employee_id, first_name, last_name, department_id, salary, 
+				   lead(salary,1) over (order by employee_id) next_sal,
+				   round(avg(salary) over (partition by department_id),2) as avg_sal
+			from employees
+			order by employee_id;
+
+--- Tuning with ADVANCED Indexing Techniques:
+
+	- Tim hieu:
+	
+		Can phan biet duoc giua bitmap index va btree index
+
+	- SQL code:
+	
+		Case 1 (B-Tree Indexes in Details):
+		
+			create table employee_copy as select * from employees;
+
+			select * from employee_copy where employee_id = 120 # table access full EMPLOYEE_COPY
+
+			create index emp_id_idx on employee_copy(employee_id) compute statistics;
+
+			select * from employee_copy where employee_id = 120 # index range scan EMP_ID_IDX
+
+			exec dbms_stats.gather_table_stats (ownname=>'HR', tabname => 'EMPLOYEE_COPY', CASCADE => TRUE);
+
+			select * from employee_copy where employee_id = 120; # index range scan EMP_ID_IDX
+
+			alter table employee_copy add constraint unique_emps unique (employee_id);
+
+			select * from employee_copy where employee_id = 120; # index range scan EMP_ID_IDX
+
+			alter index emp_id_idx rebuild;
+
+			select * from employee_copy where employee_id = 120; # index range scan EMP_ID_IDX
+
+			alter table employee_copy drop constraint unique_emps;
+
+			alter table employee_copy add constraint unique_emps unique (employee_id)
+			using index emp_id_idx;
+
+			select * from employee_copy where employee_id = 120; # index range scan EMP_ID_IDX
+
+			alter table employee_copy drop constraint unique_emps;
+			drop index emp_id_idx;
+
+			alter table employee_copy add constraint unique_emps unique (employee_id);
+
+			select * from employee_copy where employee_id = 120; # index unique scan UNIQUE_EMPS
+
+			drop table employee_copy;
+			
+		Case 2 (Bitmap Indexes in Details):
+		
+			select * from employees where department_id is not null; # table access full EMPLOYEES
+
+			select department_id from employees where department_id is not null; # index full scan EMP_DEPARTMENT_IX
+
+			select department_id from employees where department_id is null; # table access full EMPLOYEES
+
+			select * from customers where cust_marital_status is not null; # table access full CUSTOMERS
+
+			select cust_marital_status from customers where cust_marital_status is not null; # bitmap index fast full scan CUSTOMERS_MARITAL_BIX
+
+			select cust_marital_status from customers where cust_marital_status is null; # bitmap index single value CUSTOMERS_MARITAL_BIX
+
+			select count(cust_marital_status) from customers where cust_marital_status is null; # bitmap index single value CUSTOMERS_MARITAL_BIX
+
+			create table customers_temp as select * from customers;
+
+			create index cust_mar_stat_ix on customers_temp(cust_marital_status);
+
+			select * from customers_temp where cust_marital_status = 'married'; # index range scan CUST_MAR_STAT_IX
+
+			create index cust_gender_ix on customers_temp(cust_gender);
+
+			select * from customers_temp where cust_gender = 'M'; # table access full CUSTOMERS_TEMP
+
+			select * from customers_temp where cust_gender = 'M' and cust_marital_status = 'married'; # index range scan CUST_MAR_STAT_IX
+
+			drop index cust_gender_ix;
+			drop index cust_mar_stat_ix;
+
+			create bitmap index cust_mar_stat_bix on customers_temp(cust_marital_status);
+
+			select * from customers_temp where cust_marital_status = 'married'; # bitmap index single value CUST_MAR_STAT_BIX
+
+			create bitmap index cust_gender_bix on customers_temp(cust_gender);
+
+			select *from customers_temp where cust_gender = 'M'; # table access full CUSTOMERS_TEMP
+
+			select * from customers_temp where cust_gender = 'M' and cust_marital_status = 'married'; # bitmap iindex single value CUST_GENDER_BIX, CUST_MAR_STAT_BIX, bitmap and, bitmap conversion to rowids
+
+			drop table customers_temp;
+			
+		Case 3 (Composite Indexes and Order of Indexed Columns):
+		
+			create table sales_temp as select * from sales;
+
+			create index sales_idx on sales_temp(prod_id, cust_id, time_id);
+
+			select * from sales_temp # index range scan SALES_IDX
+			where prod_id = 13 and cust_id = 2380 and time_id = '10-JUL-98';
+
+			select * from sales_temp # index range scan SALES_IDX
+			where prod_id = 13 and cust_id = 2380;
+
+			select * from sales_temp # index range scan SALES_IDX
+			where prod_id = 13 and time_id = '10-JUL-98';
+
+			select * from sales_temp # index range scan SALES_IDX
+			where prod_id = 13 and time_id = '10-JUL-99';
+
+			select * from sales_temp # index skip scan SALES_IDX
+			where cust_id = 2380 and time_id = '10-JUL-98'
+
+			drop index sales_idx;
+			create index sales_idx on sales_temp(cust_id, prod_id, time_id);
+
+			select * from sales_temp # index range scan SALES_IDX
+			where cust_id = 2380 and time_id = '10-JUL-98';
+
+			drop table sales_temp;
+			
+		Case 4 (Covering Indexes):
+		
+			create table sales_temp as select * from sales;
+
+			create index sales_idx on sales_temp(prod_id, cust_id, time_id);
+
+			select prod_id, cust_id # index range scan SALES_IDX
+			from sales_temp
+			where prod_id = 13;
+
+			select prod_id, cust_id, time_id # index range scan SALES_IDX
+			from sales_temp
+			where prod_id = 13;
+
+			select prod_id, cust_id, time_id, amount_sold # table access full SALES_TEMP
+			from sales_temp
+			where prod_id = 13;
+
+			drop index sales_idx;
+			create index sales_idx on sales_temp(prod_id, time_id, amount_sold);
+
+			select prod_id, cust_id, amount_sold # index range scan SALES_IDX
+			from sales_temp
+			where prod_id = 13;
+
+			drop table sales_temp;
+			
+		Case 5 (Bitmap Join Indexes):
+		
+			ALTER TABLE customers ENABLE VALIDATE CONSTRAINT customers_pk;
+			ALTER TABLE products ENABLE VALIDATE CONSTRAINT products_pk;
+
+			SELECT AVG(S.quantity_sold) # table access full SALES, CUSTOMERS, bitmap index single value SALES_CUST_BIX, nested loops, hash join, index range scan PRODUCTS_PROD_SUBCAT_IX, hash join, sort
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND P.prod_subcategory = 'CD-ROM'
+			AND C.cust_city = 'Manchester';
+
+			CREATE BITMAP INDEX sales_temp_bjx ON sales(P.prod_subcategory, C.cust_city)
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			LOCAL;
+
+			SELECT AVG(S.quantity_sold) # bitmap index single value SALES_TEMP_BJX, parition range all, sort aggregate
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND P.prod_subcategory = 'CD-ROM'
+			AND C.cust_city = 'Manchester';
+
+			DROP INDEX sales_temp_bjx;
+
+			SELECT DISTINCT C.cust_postal_code # index unique scan PRODUCTS_PK,table access full SALES, hash join, nested loops semi, hash unique
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND C.cust_city = 'Manchester';
+
+			CREATE BITMAP INDEX sales_temp_bjx ON sales(C.cust_city)
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			LOCAL;
+
+			SELECT DISTINCT C.cust_postal_code # index unique scan PRODUCTS_PK, bitmap index single value SALES_TEMP_BJX, table access full CUSTOMERS, hash join, nested loops, hash unique
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND C.cust_city = 'Manchester';
+
+			SELECT DISTINCT S.channel_id # bitmap index single value SALES_TEMP_BJX, partition range all, hash unique
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND C.cust_city = 'Manchester';
+
+			SELECT COUNT(*) # bitmap index single value SALES_TEMP_BJX, bitmap conversion count,, partition range all, sort aggregate
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id
+			AND C.cust_city = 'Manchester';
+
+			DROP INDEX sales_temp_bjx;
+			ALTER TABLE customers ENABLE NOVALIDATE CONSTRAINT customers_pk;
+			ALTER TABLE products ENABLE NOVALIDATE CONSTRAINT products_pk;
+			
+		Case 6 (Combining Bitmap Indexes):
+		
+			CREATE TABLE customers_temp AS SELECT * FROM customers;
+			 
+			CREATE INDEX cust_city_ix ON customers_temp(cust_city);
+			CREATE INDEX cust_name_ix ON customers_temp(cust_first_name,cust_last_name);
+			 
+			SELECT * FROM customers_temp # index range scan CUST_CITY_IX
+			WHERE cust_city IN ('Aachen','Abingdon','Bolton','Santos');
+
+			SELECT * FROM customers_temp # table access full CUSTOMERS_TEMP
+			WHERE cust_city IN ('Aachen','Abingdon','Bolton','Santos','Barry','Westminster','Tilburg');
+
+			SELECT * FROM customers_temp # index range scan CUST_CITY_IX, bitmap or, index range scan CUST_NAME_IX, sort order by, bitmap and
+			WHERE cust_city IN ('Aachen','Abingdon','Bolton','Santos') AND cust_first_name = 'Abigail';
+
+			SELECT /*+ index(c cust_name_ix, cust_name_ix)*/* FROM customers_temp C # index range scan CUST_NAME_IX, access predicates, filter prodicates
+			WHERE cust_city IN ('Aachen','Abingdon','Bolton','Santos') AND cust_first_name = 'Abigail';
+			 
+			DROP INDEX cust_city_ix;
+			DROP INDEX cust_name_ix;
+			CREATE BITMAP INDEX cust_city_bix ON customers_temp(cust_city);
+			CREATE BITMAP INDEX cust_name_bix ON customers_temp(cust_first_name,cust_last_name);
+			 
+			SELECT * FROM customers_temp # bitmap index single value CUST_CITY_BIX, inlist iterator
+			WHERE cust_city IN ('Aachen','Abingdon','Bolton','Santos');
+
+			SELECT * FROM customers_temp # bitmap index single value CUST_CITY_BIX, inlist iterator
+			WHERE cust_city IN ('Aachen','Abingdon','Bolton','Santos','Barry','Westminster','Tilburg');
+
+			SELECT * FROM customers_temp #  bitmap index single value CUST_CITY_BIX, bitmap or, bitmap index range scan CUST_NAME_BIX, bitmap merge, bitmap and
+			WHERE cust_city IN ('Aachen','Abingdon','Bolton','Santos') AND cust_first_name = 'Abigail';
+			 
+			DROP TABLE customers_temp;
+			
+		Case 7 (Function-Based Indexes):
+		
+			SELECT * FROM employees;
+
+			SELECT * FROM employees WHERE last_name = 'KING'; # index range scan EMP_NAME_IX
+
+			SELECT * FROM employees WHERE UPPER(last_name) = 'KING'; # table access full EMPLOYEES
+			 
+			CREATE INDEX last_name_fix ON employees (UPPER(last_name));
+			SELECT * FROM employees WHERE UPPER(last_name) = 'KING'; # index range scan LAST_NAME_FIX
+
+			SELECT * FROM employees WHERE UPPER(substr(last_name,1,1)) = 'K'; # table access full EMPLOYEES
+
+			DROP INDEX last_name_fix;
+			 
+			CREATE INDEX last_name_fix ON employees (UPPER(substr(last_name,1,1)));
+
+			SELECT * FROM employees WHERE UPPER(substr(last_name,1,1)) = 'K'; # index range scan LAST_NAME_FIX
+
+			SELECT * FROM employees WHERE UPPER(substr(last_name,1,2)) = 'KI'; # table access full EMPLOYEES
+
+			DROP INDEX last_name_fix;
+			 
+			CREATE INDEX annual_salary_fix ON employees(salary*12-300);
+
+			SELECT * FROM employees WHERE salary > 10000; # table access full EMPLOYEES
+
+			SELECT * FROM employees WHERE salary*12 > 10000; # table access full EMPLOYEES
+
+			SELECT * FROM employees WHERE salary*12-300 > 10000; # index range scan ANNUAL_SALARY_FIX
+
+			SELECT * FROM employees WHERE salary*12-301 > 10000+1; # table access full EMPLOYEES
+
+			DROP INDEX annual_salary_fix;
+			
+		Case 8 (Index-Organized Tables):
+		
+			CREATE TABLE customers_temp AS
+				SELECT cust_id,cust_first_name,cust_last_name,cust_gender,cust_year_of_birth,
+				cust_marital_status,cust_postal_code,cust_city_id,cust_credit_limit FROM customers;
+			 
+			CREATE INDEX cus_ix ON customers_temp(cust_id);
+			 
+			CREATE TABLE customers_iot (cust_id NUMBER,
+										cust_first_name VARCHAR2(20),
+										cust_last_name VARCHAR2(40),
+										cust_gender CHAR(1),
+										cust_year_of_birth NUMBER(4,0),
+										cust_marital_status VARCHAR2(20),
+										cust_postal_code VARCHAR2(10),
+										cust_city_id NUMBER,
+										cust_credit_limit NUMBER,
+										CONSTRAINT cid_pk PRIMARY KEY (cust_id))
+				ORGANIZATION INDEX
+				PCTTHRESHOLD 40;
+			 
+			INSERT INTO customers_iot SELECT cust_id,cust_first_name,cust_last_name,cust_gender,cust_year_of_birth,
+					cust_marital_status,cust_postal_code,cust_city_id,cust_credit_limit FROM customers;
+			 
+			SELECT * FROM customers_temp WHERE cust_id = 47006; # index range scan CUS_IX
+
+			SELECT * FROM customers_iot WHERE cust_id = 47006; # index unique scan CID_PK
+
+			SELECT * FROM customers_temp WHERE cust_id BETWEEN 5000 AND 5050; # index range scan CUS_IX
+
+			SELECT * FROM customers_iot WHERE cust_id BETWEEN 5000 AND 5050; # index range scan CID_PK
+
+			SELECT * FROM customers_temp WHERE cust_id BETWEEN 5000 AND 10000; # index access full CUSTOMERS_TEMP
+
+			SELECT * FROM customers_iot WHERE cust_id BETWEEN 5000 AND 10000; # index range scan CID_PK
+
+			SELECT * FROM customers_temp WHERE cust_year_of_birth = 1978; # table access full CUSTOMERS_TEMP
+
+			SELECT * FROM customers_iot WHERE cust_year_of_birth = 1978; # index fast full scan CID_PK
+			 
+			DROP TABLE customers_temp;
+			DROP TABLE customers_iot;
+			
+		Case 9 (Cluster Indexes):
+		
+			CREATE CLUSTER emp_dep_cluster (dep_id NUMBER(4,0))
+				TABLESPACE USERS
+				STORAGE (INITIAL 250K NEXT 50K )
+				HASH IS dep_id HASHKEYS 500;
+			 
+			CREATE CLUSTER emp_dep_cluster (dep_id NUMBER(4,0))
+				TABLESPACE USERS
+				STORAGE (INITIAL 250K NEXT 50K );
+			 
+			CREATE TABLE emps_clustered (
+				employee_id NUMBER(6,0) PRIMARY KEY,
+				first_name VARCHAR2(20),
+				last_name VARCHAR2(25),
+				department_id NUMBER(4,0)
+			) CLUSTER emp_dep_cluster (department_id);
+			 
+			CREATE TABLE deps_clustered (
+				department_id NUMBER(4,0) PRIMARY KEY,
+				department_name VARCHAR2(30)
+			) CLUSTER emp_dep_cluster (department_id);
+			 
+			CREATE INDEX emp_dept_index
+				ON CLUSTER emp_dep_cluster
+				TABLESPACE USERS
+				STORAGE (INITIAL 250K NEXT 50K);
+			 
+			INSERT INTO emps_clustered (employee_id,first_name,last_name,department_id)
+			SELECT employee_id,first_name,last_name,department_id FROM employees;
+			 
+			INSERT INTO deps_clustered (department_id,department_name)
+			SELECT department_id,department_name FROM departments;
+			 
+			SELECT employee_id,first_name,department_name FROM emps_clustered E, deps_clustered D
+			WHERE E.department_id = D.department_id
+			AND E.department_id = 80;
+			 
+			SELECT employee_id,first_name,department_name FROM emps_clustered E, deps_clustered D
+			WHERE E.department_id = D.department_id
+			AND E.department_id > 80;
+			 
+			SELECT * FROM emps_clustered;
+			 
+			DROP TABLE deps_clustered;
+			DROP TABLE emps_clustered;
+			DROP CLUSTER emp_dep_cluster;
+			
+		Case 10 (Invisible Indexes):
+		
+			create table customers_temp as select * from customers;
+			 
+			select * from customers_temp;
+			 
+			create index name_idx on customers_temp(cust_first_name,cust_last_name);
+			 
+			select * from customers_temp where cust_first_name = 'Arnold'; # index range scan NAME_IDX
+			 
+			alter index name_idx invisible;
+			select * from customers_temp where cust_first_name = 'Arnold'; # table access full CUSTOMERS_TEMP
+
+			alter index name_idx visible;
+			select * from customers_temp where cust_first_name = 'Arnold'; # index range scan NAME_IDX
+
+			alter index name_idx invisible;
+			create bitmap index name_bidx on customers_temp(cust_first_name,cust_last_name);
+			select * from customers_temp where cust_first_name = 'Arnold'; # bitmap index range scan NAME_BIDX
+			 
+			drop table customers_temp;
+			
+		Case 11 (Index Key Compression):
+		
+			CREATE TABLE sales_temp AS SELECT * FROM sales;
+			 
+			CREATE INDEX sales_idx ON sales_temp(prod_id,cust_id,time_id,amount_sold);
+			 
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 32
+			 
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # NORMAL
+			WHERE index_name = 'SALES_IDX';
+			 
+			SELECT prod_id,cust_id,time_id FROM sales_temp # index range scan SALES_IDX
+			WHERE prod_id = 13; 
+			 
+			ALTER INDEX sales_idx REBUILD COMPRESS 1;
+
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 28
+
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # NORMAL
+			WHERE index_name = 'SALES_IDX';
+
+			SELECT prod_id,cust_id,time_id FROM sales_temp # index range scan SALES_IDX
+			WHERE prod_id = 13;
+			 
+			ALTER INDEX sales_idx REBUILD COMPRESS 2;
+
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 28
+
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # NORMAL
+			WHERE index_name = 'SALES_IDX';
+
+			SELECT prod_id,cust_id,time_id FROM sales_temp # index range scan SALES_IDX
+			WHERE prod_id = 13;
+			 
+			ALTER INDEX sales_idx REBUILD COMPRESS 3;
+
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 33
+
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # NORMAL
+			WHERE index_name = 'SALES_IDX';
+
+			SELECT prod_id,cust_id,time_id FROM sales_temp # index range scan SALES_IDX
+			WHERE prod_id = 13;
+			 
+			ALTER INDEX sales_idx REBUILD COMPRESS;
+
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 36
+
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # NORMAL
+			WHERE index_name = 'SALES_IDX';
+
+			SELECT prod_id,cust_id,time_id FROM sales_temp # index range scan SALES_IDX
+			WHERE prod_id = 13;
+			 
+			ALTER INDEX sales_idx REBUILD COMPRESS ADVANCED LOW;
+
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 28
+
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # NORMAL
+			WHERE index_name = 'SALES_IDX';
+
+			SELECT prod_id,cust_id,time_id FROM sales_temp # index range scan SALES_IDX
+			WHERE prod_id = 13;
+			 
+			ALTER INDEX sales_idx REBUILD COMPRESS ADVANCED HIGH;
+
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 14
+
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # NORMAL
+			WHERE index_name = 'SALES_IDX';
+
+			SELECT prod_id,cust_id,time_id FROM sales_temp # index range scan SALES_IDX
+			WHERE prod_id = 13;
+			 
+			DROP INDEX sales_idx;
+			CREATE BITMAP INDEX sales_idx ON sales_temp(prod_id,cust_id,time_id,amount_sold);
+
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 38
+
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # BITMAP
+			WHERE index_name = 'SALES_IDX';
+
+			SELECT prod_id,cust_id,time_id FROM sales_temp # bitmap index range scan SALES_IDX
+			WHERE prod_id = 13;
+			 
+			DROP INDEX sales_idx;
+			CREATE BITMAP INDEX sales_idx ON sales_temp(prod_id,cust_id,time_id,amount_sold) COMPRESS;
+			 
+			DROP INDEX sales_idx;
+			CREATE INDEX sales_idx ON sales_temp(prod_id) COMPRESS;
+
+			SELECT BYTES/(1024*1024) mb FROM user_segments WHERE  segment_name = 'SALES_IDX'; # 12
+
+			SELECT index_name, index_type, leaf_blocks, compression FROM user_indexes # NORMAL
+			WHERE index_name = 'SALES_IDX';
+
+			SELECT prod_id,cust_id,time_id FROM sales_temp # index range scan SALES_IDX
+			WHERE prod_id = 13;
+			 
+			DROP TABLE sales_temp;
+			
+		Case 12 (Full-Text Searches):
+		
+			GRANT EXECUTE ON ctxsys.ctx_ddl TO sh;
+			 
+			CREATE TABLE products_temp AS SELECT * FROM products;
+			 
+			EXEC ctx_ddl.create_index_set('products_iset');
+			EXEC ctx_ddl.add_index('products_iset','prod_list_price');
+			--EXEC CTX_DDL.REMOVE_INDEX('products_iset','price');
+			CREATE INDEX my_products_name_idx ON products_temp(prod_desc) INDEXTYPE IS ctxsys.ctxcat
+			PARAMETERS ('index set products_iset');
+			 
+			SELECT prod_id, prod_list_price, prod_name,prod_subcategory,prod_desc
+			FROM   products_temp
+			WHERE  catsearch(prod_desc, 'CD', 'prod_list_price > 10')> 0;
+			 
+			SELECT prod_id, prod_list_price, prod_name,prod_subcategory,prod_desc FROM products # domain index my_products_name_idx
+			WHERE prod_desc LIKE '%CD%' AND prod_list_price > 10;
+			 
+			DROP INDEX my_products_name_idx;
+			DROP TABLE products_temp;
+			 
+			 
+			CREATE TABLE temp_table(CLASSIFICATION VARCHAR2(50),text VARCHAR2(2000));
+			 
+			INSERT INTO temp_table VALUES('US Politics', 'democrat or republican');
+			INSERT INTO temp_table VALUES('Music', 'ABOUT(music)');
+			INSERT INTO temp_table VALUES('Football', 'footballer');
+			INSERT INTO temp_table VALUES('Countries', 'United States or Great Britain or Argentina');
+			INSERT INTO temp_table VALUES('Names', 'Lionel NEAR Messi OR David or Ronaldo');
+			 
+			CREATE INDEX temp_rule ON temp_table(text) INDEXTYPE IS ctxsys.ctxrule;
+			 
+			SELECT CLASSIFICATION FROM temp_table WHERE matches(text, 'Lionel Messi is a famous footballer from Argentina') > 0; # domain index TEMP_RULE
+			 
+			EXEC ctx_ddl.drop_index_set('products_iset');
+			DROP TABLE temp_table;
+			 
+			 
+			https://docs.oracle.com/cd/A64702_01/doc/cartridg.805/a63821/ling.htm#7641
+			https://docs.oracle.com/cd/A64702_01/doc/cartridg.805/a63821/know.htm#38324
+
+--- Advanced SQL Tuning Techniques:
+
+	- SQL code:
+	
+		Case 1 (Tuning Star Queries):
+
+			create table sales_temp as select * from sales;
+			create index sales_temp_pk on sales_temp (prod_id,cust_id,time_id,channel_id);
+			 
+			select sum(amount_sold) from sales_temp # table access full SALES_TEMP, sort aggregate
+			where prod_id between 100 and 300
+			and cust_id between 100 and 300;
+			 
+			select sum(amount_sold) from sales_temp s, products p # table access full SALES_TEMP, index range scan SALES_TEMP_PK, PRODUCS_PK, nested loops, hash join, sort aggregate
+			where s.prod_id = p.prod_id 
+			and p.prod_id between 100 and 300
+			and s.cust_id between 100 and 300;
+			 
+			select /*+ index_rs ( sales_temp sales_temp_pk)*/sum(amount_sold) from sales_temp # index skip scan SALES_TEMP_PK
+			where prod_id between 100 and 300
+			and cust_id between 100 and 300;
+			 
+			select c.cust_last_name,s.amount_sold, p.prod_name, c2.channel_desc # table access full SALES, CUSTOMERS, index unique scan CHANNELS_PK, hash join, index range scan PRODUCTS_PK, hash join
+			from sales s, products p, customers c, channels c2
+			where s.prod_id = p.prod_id
+			and s.cust_id = c.cust_id
+			and s.channel_id = c2.channel_id
+			and p.prod_id < 100
+			and c2.channel_id = 2
+			and c.cust_postal_code = 52773;
+			 
+			alter session set star_transformation_enabled = true;
+			 
+			select /*+ star_transformation fact(s)*/ # 
+			c.cust_last_name,s.amount_sold, p.prod_name, c2.channel_desc
+			from sales s, products p, customers c, channels c2
+			where s.prod_id = p.prod_id
+			and s.cust_id = c.cust_id
+			and s.channel_id = c2.channel_id
+			and p.prod_id < 100
+			and c2.channel_id = 2
+			and c.cust_postal_code = 52773;
+			 
+			drop table sales_temp;
+		
+		Case 2 (Using Bind Variables):
+		
+			select avg(salary) from employees where department_id = 30;
+			select avg(salary) from employees where department_id = 40;
+			select avg(salary) from employees where department_id = 50;
+			 
+			select sql_id,executions,parse_calls,first_load_time,last_load_time,sql_text from v$sql
+			where sql_text like '%avg(salary) from employees%'
+			order by first_load_time desc;
+			 
+			select avg(salary) from employees where department_id = :b;
+			 
+			declare
+			 v_dept_id number(2);
+			 v_count number(2);
+			begin
+				for r1 in (select department_id from departments) loop
+					select count(*) into v_count from employees where department_id = v_dept_id;
+				end loop;
+			end;
+			/
+			 
+			declare
+				  type c1 is ref cursor;
+				  r1 c1;
+				  l_temp all_objects.object_name%type;
+			  begin
+				  for i in 1 .. 1000
+				  loop
+					  open r1 for
+					  'select object_name from all_objects where object_id = ' || i;
+					  fetch r1 into l_temp;
+					  close r1;
+				  end loop;
+			  end;
+			/
+			 
+			declare
+				  type c1 is ref cursor;
+				  r1 c1;
+				  l_temp all_objects.object_name%type;
+			  begin
+				  for i in 1 .. 1000
+				  loop
+					  open r1 for
+					  'select object_name from all_objects where object_id = :x' using i;
+					  fetch r1 into l_temp;
+					  close r1;
+				  end loop;
+			end;
+			/
+			 
+			declare
+				  l_temp all_objects.object_name%type;
+			  begin
+				  for r1 in (select object_name from all_objects where object_id < 1001) loop
+					l_temp := r1.object_name;
+				  end loop;
+			  end;
+		
+		Case 3 (Beware of Bind Variable Peeking):
+		
+			CREATE TABLE customers_temp AS SELECT * FROM customers;
+			 
+			SELECT COUNT(*),cust_credit_limit FROM customers_temp 
+			GROUP BY cust_credit_limit
+			ORDER BY COUNT(*);
+			 
+			DELETE FROM customers_temp WHERE cust_credit_limit = 15000 AND ROWNUM < 1860;
+			COMMIT;
+			 
+			CREATE INDEX c_temp_ix ON customers_temp(cust_credit_limit);
+			 
+			BEGIN 
+				dbms_stats.gather_table_stats(ownname => 'SH', tabname => 'CUSTOMERS_TEMP',
+				method_opt  => 'for columns size 254 CUST_CREDIT_LIMIT', CASCADE=>TRUE);
+			END;
+			 
+			SELECT * FROM customers_temp WHERE cust_credit_limit = 1500; # table access full CUSTOMERS_TEMP
+
+			SELECT * FROM customers_temp WHERE cust_credit_limit = 15000; # index range scan C_TEMP_IX
+			 
+			SELECT * FROM customers_temp WHERE cust_credit_limit = :b; # table access full CUSTOMERS_TEMP
+			 
+			DROP TABLE customers_temp;
+			
+		Case 4 (Cursor Sharing):
+		
+			ALTER SYSTEM FLUSH SHARED_POOL;
+			 
+			 
+			ALTER SESSION SET cursor_sharing = 'EXACT';
+			--ALTER SESSION SET cursor_sharing = 'FORCE';
+			 
+			SELECT * FROM employees WHERE first_name = 'Alex';
+			SELECT * FROM employees WHERE first_name = 'Lex';
+			SELECT * FROM employees WHERE first_name = 'David';
+			 
+			SELECT * FROM employees WHERE first_name LIKE 'A%';
+			SELECT * FROM employees WHERE first_name LIKE 'B%';
+			SELECT * FROM employees WHERE first_name LIKE 'C%';
+			 
+			SELECT * FROM employees WHERE employee_id = 102;
+			SELECT * FROM employees WHERE employee_id = 125;
+			SELECT * FROM employees WHERE employee_id = 166;
+			SELECT * FROM employees WHERE employee_id = 102;
+			 
+			SELECT * FROM employees WHERE salary > 1500;
+			SELECT * FROM employees WHERE salary > 15000;
+			SELECT * FROM employees WHERE salary > 20000;
+			 
+			VARIABLE b NUMBER;
+			EXEC :b := 1000;
+			SELECT * FROM employees WHERE salary > :b;
+			EXEC :b := 20000;
+			SELECT * FROM employees WHERE salary > :b;
+			 
+			set linesize 2000;
+			 
+			SELECT sql_id,child_number,executions,loads,parse_calls,sql_text
+			FROM v$sql WHERE sql_text LIKE 'SELECT * FROM employees WHERE first_name =%';
+			 
+			SELECT sql_id,child_number,executions,loads,parse_calls,sql_text
+			FROM v$sql WHERE sql_text LIKE 'SELECT * FROM employees WHERE first_name LIKE%';
+			 
+			SELECT sql_id,child_number,executions,loads,parse_calls,sql_text
+			FROM v$sql WHERE sql_text LIKE 'SELECT * FROM employees WHERE employee_id =%';
+			 
+			SELECT sql_id,child_number,executions,loads,parse_calls,sql_text
+			FROM v$sql WHERE sql_text LIKE 'SELECT * FROM employees WHERE salary >%';
+			
+		Case 5 (Adaptive Cursor Sharing):
+		
+			ALTER SYSTEM FLUSH SHARED_POOL;
+			 
+			 
+			SELECT COUNT(*),country_id FROM customers GROUP BY country_id order by count(*);
+			CREATE TABLE customers_temp AS SELECT * FROM customers;
+			CREATE INDEX cost_temp_country_id ON customers_temp(country_id);
+			 
+			BEGIN
+				dbms_stats.gather_table_stats(ownname => 'SH', tabname => 'CUSTOMERS_TEMP',
+				method_opt => 'for columns size 254 COUNTRY_ID', CASCADE=>TRUE);
+			END;
+			 
+			VARIABLE country_id NUMBER;
+			EXEC :country_id := 52787;
+			SELECT * FROM customers_temp WHERE country_id = :country_id;
+			EXEC :country_id := 52790;
+			SELECT * FROM customers_temp WHERE country_id = :country_id;
+			EXEC :country_id := 52770;
+			SELECT * FROM customers_temp WHERE country_id = :country_id;
+			EXEC :country_id := 52788;
+			SELECT * FROM customers_temp WHERE country_id = :country_id;
+			EXEC :country_id := 52790;
+			SELECT * FROM customers_temp WHERE country_id = :country_id;
+			 
+			SELECT * FROM TABLE(dbms_xplan.display_cursor(NULL,NULL,'TYPICAL +PEEKED_BINDS'));
+			 
+			SELECT sql_id,child_number,executions,loads,parse_calls,is_bind_sensitive,is_bind_aware,sql_text
+			FROM v$sql WHERE sql_text LIKE 'SELECT * FROM customers_temp WHERE country_id =%';
+			 
+			SELECT hash_value,sql_id,child_number,range_id,LOW,HIGH,predicate
+			FROM v$sql_cs_selectivity;
+			 
+			DROP TABLE customers_temp;
+
+		Case 6 (Adaptive Plans):
+		
+			ALTER SYSTEM FLUSH SHARED_POOL;
+			 
+			SELECT COUNT(*)
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id;
+			 
+			SELECT * FROM TABLE(dbms_xplan.display_cursor());
+			 
+			SELECT * FROM TABLE(dbms_xplan.display_cursor(FORMAT => 'adaptive'));
+			 
+			SELECT /*+ GATHER_PLAN_STATISTICS */COUNT(*)
+			FROM sales S, products P, customers C
+			WHERE S.prod_id = P.prod_id
+			AND S.cust_id = C.cust_id;
+			 
+			SELECT * FROM TABLE(dbms_xplan.display_cursor(FORMAT => 'adaptive allstats last'));
+			
+		Case 7 (Dynamic Statistics (Dynamic Sampling)):
+		
+			ALTER SYSTEM FLUSH SHARED_POOL;
+			 
+			CREATE TABLE customers_temp AS SELECT * FROM customers;
+			CREATE INDEX cost_prov_ix ON customers_temp(cust_city,cust_state_province);
+			 
+			SELECT /*+ GATHER_PLAN_STATISTICS */ * FROM customers_temp
+			WHERE cust_city='Los Angeles' AND cust_state_province='CA';
+			 
+			SELECT * FROM TABLE(dbms_xplan.display_cursor(FORMAT => 'allstats last'));
+			 
+			SELECT /*+ GATHER_PLAN_STATISTICS dynamic_sampling(1) */ * FROM customers_temp
+			WHERE cust_city='Los Angeles' AND cust_state_province='CA';
+			 
+			SELECT /*+ GATHER_PLAN_STATISTICS dynamic_sampling(4) */ * FROM customers_temp
+			WHERE cust_city='Los Angeles' AND cust_state_province='CA';
+			 
+			SELECT /*+ GATHER_PLAN_STATISTICS dynamic_sampling(7) */ * FROM customers_temp
+			WHERE cust_city='Los Angeles' AND cust_state_province='CA';
+			 
+			SELECT /*+ GATHER_PLAN_STATISTICS dynamic_sampling(10) */ * FROM customers_temp
+			WHERE cust_city='Los Angeles' AND cust_state_province='CA';
+			 
+			SELECT /*+ GATHER_PLAN_STATISTICS dynamic_sampling(11) */ * FROM customers_temp
+			WHERE cust_city='Los Angeles' AND cust_state_province='CA';
+			 
+			DROP TABLE customers_temp;
+			 
+			--The dynamic sampling levels and their meanings
+			https://docs.oracle.com/database/121/TGSQL/tgsql_astat.htm#TGSQL451
+
+		
+
+		
+
+
+
+		
+
+		
