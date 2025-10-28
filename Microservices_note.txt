@@ -3419,15 +3419,15 @@
 					
 					⚠️ Không nên dùng trong môi trường production (vì sẽ mở API server cho mọi thiết bị).
 
-			🧩 5. Tùy chọn phổ biến
+			Tùy chọn phổ biến
 			
-			Tùy chọn						Mô tả
-			
-			--port=<số>						Chọn cổng local (mặc định: 8001)
-			--address=<IP>					Chọn địa chỉ IP để lắng nghe (mặc định: localhost)
-			--accept-hosts=<regex>			Giới hạn host nào được phép kết nối
-			--accept-paths=<regex>			Giới hạn đường dẫn API nào được phép
-			--disable-filter				Bỏ lọc đường dẫn API (cho phép tất cả request)
+				Tùy chọn						Mô tả
+				
+				--port=<số>						Chọn cổng local (mặc định: 8001)
+				--address=<IP>					Chọn địa chỉ IP để lắng nghe (mặc định: localhost)
+				--accept-hosts=<regex>			Giới hạn host nào được phép kết nối
+				--accept-paths=<regex>			Giới hạn đường dẫn API nào được phép
+				--disable-filter				Bỏ lọc đường dẫn API (cho phép tất cả request)
 			
 			Khi chạy, bạn sẽ thấy:
 			
@@ -3451,58 +3451,1933 @@
 		
 		- cmd: kubectl get svc -n kubernetes-dashboard		
 		
-		
+			Lệnh kubectl get svc -n kubernetes-dashboard liệt kê tất cả Services trong
+			namespace kubernetes-dashboard.
+
+				kubectl get svc: hiển thị danh sách các Service đang chạy trong cluster.
+
+				-n kubernetes-dashboard: giới hạn phạm vi truy vấn trong namespace kubernetes-dashboard.
+
+			Kết quả cho biết tên Service, kiểu (ClusterIP, NodePort, LoadBalancer), địa chỉ IP nội bộ,
+			cổng (PORT), và đích (TARGET PORT).		
 		
 		- cmd: kubectl get pods -n kubernetes-dashboard -o wide		
+		
+				kubectl get pods: liệt kê tất cả Pods đang chạy trong cluster.
+
+				-n kubernetes-dashboard: chỉ lấy Pods thuộc namespace kubernetes-dashboard.
+
+				-o wide: hiển thị thêm thông tin chi tiết cho mỗi Pod.
+
+			Cụ thể, ngoài các cột mặc định như NAME, READY, STATUS, RESTARTS, AGE, khi thêm -o wide bạn sẽ thấy thêm:
+
+				IP: địa chỉ IP nội bộ của Pod.
+
+				NODE: tên node (máy chủ) mà Pod đang chạy trên đó.
+
+				NOMINATED NODE và READINESS GATES (nếu có).
+
+			Lệnh này thường dùng để kiểm tra Pod đang chạy ở node nào và IP nội bộ của nó.		
+		
 		- cmd: kubectl create serviceaccount dashboard-admin-sa -n kubernetes-dashboard		
+		
+				kubectl create serviceaccount: tạo một ServiceAccount mới trong Kubernetes.
+
+				dashboard-admin-sa: tên của ServiceAccount được tạo.
+
+				-n kubernetes-dashboard: tạo ServiceAccount này trong namespace kubernetes-dashboard.
+
+			Giải thích thêm:
+
+				ServiceAccount là một loại tài khoản dành cho ứng dụng hoặc Pod (không phải người dùng). Nó dùng để xác thực
+				khi Pod cần tương tác với API Server của Kubernetes.
+
+				Mỗi Pod có thể gắn với một ServiceAccount, và ServiceAccount đó sẽ có token giúp Pod thực hiện các thao tác được phép.
+
+			Tình huống sử dụng:
+			
+				Lệnh này thường được dùng khi bạn muốn tạo một ServiceAccount có quyền quản trị (admin) để đăng nhập vào Kubernetes
+				Dashboard, giúp truy cập và quản lý tài nguyên trong cluster.		
+		
 		- cmd: kubectl create clusterrolebinding dashboard-admin-sa  --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:dashboard-admin-sa 
-		- cmd: kubectl -n kubernetes-dashboard create token dashboard-admin-sa		
+		
+		
+		
+		- cmd: kubectl -n kubernetes-dashboard create token dashboard-admin-sa	
+
+			kubectl create clusterrolebinding:
+			
+				Tạo một ClusterRoleBinding, tức là liên kết một ClusterRole (vai trò có quyền trên toàn cluster) với một subject (như user, group, hay service account).
+
+			dashboard-admin-sa:
+			
+				Tên của ClusterRoleBinding bạn đang tạo.
+
+			--clusterrole=cluster-admin:
+			
+				Chỉ định ClusterRole mà bạn muốn gán.
+			
+				Ở đây là cluster-admin, tức là vai trò cao nhất trong Kubernetes, có toàn quyền trên mọi tài nguyên trong toàn cluster.
+
+			--serviceaccount=kubernetes-dashboard:dashboard-admin-sa:
+			
+				Chỉ định ServiceAccount được gán quyền này:
+
+					kubernetes-dashboard là namespace của ServiceAccount.
+
+					dashboard-admin-sa là tên của ServiceAccount đã tạo trước đó.
+
+			Tóm lại:
+			
+				Lệnh này gán quyền quản trị toàn cluster (cluster-admin) cho ServiceAccount dashboard-admin-sa
+				trong namespace kubernetes-dashboard.
+
+			Ứng dụng thực tế:
+			
+				Lệnh này thường được dùng khi bạn muốn đăng nhập vào Kubernetes Dashboard với quyền admin đầy đủ, cho phép xem và
+				thao tác với mọi tài nguyên trong cluster (không bị giới hạn quyền).
+		
 		- cmd: kubectl get services		
-		- cmd: kubectl get replicaset		
+		
+			Liệt kê tất cả các Service trong namespace hiện tại (mặc định là default, trừ khi bạn chỉ định -n).
+
+			Giải thích từng phần:
+
+				kubectl: công cụ dòng lệnh dùng để tương tác với Kubernetes cluster.
+
+				get: lệnh dùng để xem danh sách hoặc thông tin tài nguyên.
+
+				services (hoặc svc): loại tài nguyên muốn xem — ở đây là Service, dùng để cung cấp điểm truy cập (endpoint) cho các Pod.
+
+			Kết quả hiển thị thường có các cột:
+			
+				Cột							Ý nghĩa
+				
+				NAME						Tên của Service
+				TYPE						Kiểu Service (ClusterIP, NodePort, LoadBalancer, ExternalName)
+				CLUSTER-IP					IP nội bộ trong cluster mà các Pod khác có thể dùng để truy cập
+				EXTERNAL-IP					IP bên ngoài (nếu có, ví dụ khi dùng LoadBalancer)
+				PORT(S)						Cổng mà Service lắng nghe và ánh xạ đến Pod
+				AGE							Thời gian tồn tại của Service
+			
+			Ví dụ:
+			
+				kubectl get services
+
+
+			Kết quả có thể như:
+
+				NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+				
+				kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        10d
+				my-app-svc   NodePort    10.102.36.117   <none>        80:30080/TCP   2d
+
+
+			Giải thích:
+
+				kubernetes: service mặc định cho API Server.
+
+				my-app-svc: service cho ứng dụng my-app, có thể truy cập qua node port 30080.		
+		
+		- cmd: kubectl get replicaset	
+
+			Liệt kê tất cả các ReplicaSet trong namespace hiện tại (mặc định là default, trừ khi bạn chỉ định -n <namespace>).
+
+			Giải thích từng phần:
+
+				kubectl: công cụ dòng lệnh để quản lý Kubernetes.
+
+				get: hiển thị danh sách tài nguyên.
+
+				replicaset (hoặc rs): loại tài nguyên bạn muốn xem — ReplicaSet.
+
+			ReplicaSet là gì?
+
+				ReplicaSet là một đối tượng trong Kubernetes có nhiệm vụ đảm bảo số lượng Pod đang chạy luôn đúng với
+				số lượng mong muốn (số replicas).
+				
+				Nếu một Pod bị xóa hoặc lỗi, ReplicaSet sẽ tự động tạo mới Pod khác để thay thế.
+
+				ReplicaSet thường được tạo tự động bởi Deployment, chứ ít khi được tạo thủ công.
+
+			Kết quả của lệnh thường có dạng:
+			
+				Cột					Ý nghĩa
+				
+				NAME				Tên của ReplicaSet
+				DESIRED				Số Pod mong muốn (replicas)
+				CURRENT				Số Pod hiện đang tồn tại
+				READY				Số Pod đang sẵn sàng phục vụ
+				AGE					Thời gian tồn tại của ReplicaSet
+			
+			Ví dụ:
+			
+				kubectl get replicaset
+
+
+			Kết quả:
+
+				NAME                        DESIRED   CURRENT   READY   AGE
+				nginx-deployment-5c689d4b4  3         3         3       2d
+
+
+			Giải thích:
+
+				ReplicaSet tên nginx-deployment-5c689d4b4 có:
+
+					DESIRED = 3: mong muốn có 3 Pod chạy.
+
+					CURRENT = 3: hiện tại đang có 3 Pod tồn tại.
+
+					READY = 3: cả 3 Pod đều đang hoạt động tốt.
+		
 		- cmd: kubectl get deployments		
-		- cmd: kubectl delete pod accounts-deployment-7f7f75d899-vtvbq		
-		- cmd: kubectl describe pod gatewayserver-deployment-54cd64599-2j4jz		
-		- cmd: kubectl set image deployment gatewayserver-deployment gatewayserver=eazybytes/gatewayserver:s6 --record		
-		- cmd: kubectl get events --sort-by=.metadata.creationTimestamp		
+		
+			Liệt kê tất cả các Deployment trong namespace hiện tại (mặc định là default, trừ khi bạn chỉ định -n <namespace>).
+
+			Giải thích từng phần:
+
+				kubectl: công cụ dòng lệnh tương tác với Kubernetes cluster.
+
+				get: hiển thị danh sách hoặc thông tin tài nguyên.
+
+				deployments: loại tài nguyên muốn xem — Deployment.
+
+			Deployment là gì?
+
+				Deployment là một đối tượng quản lý cấp cao trong Kubernetes, dùng để:
+
+					Triển khai và cập nhật ứng dụng (thông qua các Pod).
+
+					Tự động tạo và quản lý ReplicaSet.
+
+					Đảm bảo số lượng Pod mong muốn luôn hoạt động ổn định.
+
+					Hỗ trợ rolling update và rollback (cập nhật phiên bản mới an toàn, có thể quay lại nếu lỗi).
+
+			Khi chạy lệnh:
+			
+				kubectl get deployments
+
+			Kết quả thường như sau:
+
+				NAME              READY   UP-TO-DATE   AVAILABLE   AGE
+				nginx-deployment  3/3     3            3           5d
+
+			Giải thích các cột:
+			
+				Cột					Ý nghĩa
+				
+				NAME				Tên của Deployment
+				READY				Số Pod sẵn sàng / tổng số Pod mong muốn
+				UP-TO-DATE			Số Pod đã được cập nhật với cấu hình mới nhất
+				AVAILABLE			Số Pod hiện đang hoạt động và phục vụ yêu cầu
+				AGE					Thời gian tồn tại của Deployment
+			
+			Ví dụ:
+			
+				kubectl get deployments -n kubernetes-dashboard
+
+
+			Hiển thị tất cả Deployment trong namespace kubernetes-dashboard, ví dụ:
+
+				NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+				kubernetes-dashboard   1/1     1            1           3d
+
+
+				Nghĩa là có 1 Pod của kubernetes-dashboard đang chạy và hoạt động bình thường.		
+		
+		- cmd: kubectl delete pod accounts-deployment-7f7f75d899-vtvbq
+
+			Giải thích từng phần:
+
+				kubectl: công cụ dòng lệnh để quản lý Kubernetes cluster.
+
+				delete: dùng để xóa một tài nguyên trong cluster.
+
+				pod: loại tài nguyên muốn xóa.
+
+				accounts-deployment-7f7f75d899-vtvbq: tên cụ thể của Pod cần xóa.
+
+			Khi chạy lệnh này, chuyện gì xảy ra?
+
+				Kubernetes sẽ xóa Pod có tên accounts-deployment-7f7f75d899-vtvbq.
+
+				Nếu Pod này được tạo bởi một Deployment hoặc ReplicaSet, Kubernetes sẽ tự động tạo lại một Pod mới để đảm bảo số
+				lượng Pod đúng với cấu hình mong muốn (số replicas).
+
+				Vì thế, việc xóa một Pod "thuộc" Deployment không làm ứng dụng ngừng chạy — nó chỉ tạm thời khởi động lại Pod mới.
+
+			Ví dụ:
+
+				Giả sử bạn có Deployment tên accounts-deployment với 3 replicas (3 Pod).
+				
+				Danh sách Pod:
+
+					accounts-deployment-7f7f75d899-vtvbq
+					accounts-deployment-7f7f75d899-kwm7c
+					accounts-deployment-7f7f75d899-bj8h9
+
+
+			Nếu bạn chạy:
+
+				kubectl delete pod accounts-deployment-7f7f75d899-vtvbq
+
+
+				Pod đó sẽ bị xóa.
+				Ngay sau đó, ReplicaSet của Deployment sẽ tạo một Pod mới (ví dụ tên accounts-deployment-7f7f75d899-x9d4p) để thay thế.
+
+			Ứng dụng thực tế:
+
+				Dùng để "restart" thủ công một Pod bị lỗi.
+
+				Dùng để kiểm tra cơ chế tự phục hồi (self-healing) của Deployment/ReplicaSet.
+
+				Dùng để giải phóng Pod đang treo hoặc bị stuck.
+		
+		- cmd: kubectl describe pod gatewayserver-deployment-54cd64599-2j4jz	
+
+			Mục đích:
+
+				Lệnh này dùng để xem chi tiết toàn bộ thông tin về một Pod cụ thể trong Kubernetes.
+				
+				Nó giúp bạn chẩn đoán lỗi, kiểm tra cấu hình, hoặc xem sự kiện (events) liên quan đến Pod đó.
+
+			Giải thích từng phần:
+
+				kubectl → công cụ dòng lệnh để làm việc với Kubernetes.
+
+				describe → hiển thị mô tả chi tiết (thông tin đầy đủ hơn kubectl get).
+
+				pod → loại tài nguyên muốn mô tả.
+
+				gatewayserver-deployment-54cd64599-2j4jz → tên cụ thể của Pod.
+
+			Khi chạy lệnh này, bạn sẽ thấy thông tin gồm nhiều phần như:
+			
+				1. Basic Info (Thông tin cơ bản):
+				
+					Name:         gatewayserver-deployment-54cd64599-2j4jz
+					Namespace:    default
+					Node:         worker-node1/192.168.1.10
+					Start Time:   Tue, 28 Oct 2025 14:10:23 +0700
+					Labels:       app=gatewayserver
+					Status:       Running
+					IP:           10.244.1.5
+					Controlled By: ReplicaSet/gatewayserver-deployment-54cd64599
+
+
+					Cho biết Pod đang chạy ở node nào, IP nội bộ, thuộc ReplicaSet nào, và trạng thái hiện tại.
+
+			Containers (Các container bên trong Pod):
+				
+				Containers:
+				  gatewayserver:
+					Image:        myregistry/gatewayserver:v1.0
+					Ports:        8080/TCP
+					State:        Running
+					Ready:        True
+					Restart Count: 0
+
+
+				Mỗi Pod có thể chứa nhiều container. Phần này cho biết:
+
+					Tên container (gatewayserver)
+
+					Image (phiên bản container)
+
+					Cổng đang mở
+
+					Trạng thái: Running / Waiting / Terminated
+
+					Số lần khởi động lại (Restart Count)
+
+			Environment & Mounts (Biến môi trường, volume, mount):
+
+				Cho biết container có gắn volume, secret, configmap nào hay không.
+
+			Conditions (Điều kiện hoạt động):
+			
+				Conditions:
+				  Type              Status
+				  Initialized       True
+				  Ready             True
+				  ContainersReady   True
+				  PodScheduled      True
+
+
+				Tất cả True nghĩa là Pod hoạt động bình thường.
+
+			Events (Sự kiện quan trọng):
+			
+				Events:
+				  Type    Reason     Age   From               Message
+				  ----    ------     ----  ----               -------
+				  Normal  Scheduled  2m    default-scheduler  Successfully assigned default/gatewayserver-deployment-54cd64599-2j4jz to worker-node1
+				  Normal  Pulled     2m    kubelet            Container image "myregistry/gatewayserver:v1.0" already present on machine
+				  Normal  Started    2m    kubelet            Started container gatewayserver
+
+
+				Các sự kiện giúp bạn hiểu quá trình khởi tạo hoặc lỗi (ví dụ: kéo image thất bại, không đủ tài nguyên, crash loop...).
+
+			Ứng dụng thực tế:
+
+				Kiểm tra tình trạng chi tiết của Pod (đang chạy, pending, crash...).
+
+				Xem nguyên nhân Pod lỗi (như image lỗi, lệnh khởi chạy sai, thiếu volume).
+
+				Xem Pod đang chạy trên node nào và đang dùng image nào.
+		
+		- cmd: kubectl set image deployment gatewayserver-deployment gatewayserver=eazybytes/gatewayserver:s6 --record
+
+			Mục đích:
+
+				Lệnh này được dùng để cập nhật (thay đổi) image của container trong một Deployment — thường dùng khi bạn muốn triển khai phiên bản mới của ứng dụng.
+
+			Giải thích từng phần:
+			
+				Thành phần										Ý nghĩa
+				kubectl											Công cụ dòng lệnh để quản lý Kubernetes cluster
+				set image										Dùng để thay đổi (update) image container trong một tài nguyên (Deployment, DaemonSet, StatefulSet, v.v.)
+				deployment gatewayserver-deployment				Chỉ định loại tài nguyên (deployment) và tên của nó (gatewayserver-deployment)
+				gatewayserver=eazybytes/gatewayserver:s6		Gán container có tên gatewayserver trong Deployment này sử dụng image mới eazybytes/gatewayserver:s6
+				--record										(Tùy chọn cũ, một số phiên bản mới đã bỏ) — ghi lại thay đổi này vào lịch sử rollout để có thể rollback sau này
+			
+			Hiểu rõ hơn phần thay đổi image:
+
+				Một Deployment có thể quản lý nhiều container.
+			
+			Cú pháp:
+
+				<container_name>=<new_image>
+
+
+			Trong ví dụ này:
+
+				Tên container: gatewayserver
+
+				Image mới: eazybytes/gatewayserver:s6
+				→ tức là bạn đang cập nhật container đó sang phiên bản mới s6.
+
+			Khi bạn chạy lệnh này:
+
+				Kubernetes tạo một ReplicaSet mới với image eazybytes/gatewayserver:s6.
+
+				Bắt đầu rolling update (cập nhật dần dần):
+
+					Dừng từng Pod cũ (dùng image cũ).
+
+					Tạo Pod mới với image mới.
+
+				Sau khi cập nhật xong, ReplicaSet cũ vẫn được giữ lại (để rollback nếu cần).
+
+			Kiểm tra tiến trình cập nhật:
+
+				Bạn có thể dùng:
+
+					kubectl rollout status deployment gatewayserver-deployment
+
+
+				hoặc xem lịch sử:
+
+					kubectl rollout history deployment gatewayserver-deployment
+
+
+				Nếu có lỗi, bạn có thể quay lại bản cũ:
+
+					kubectl rollout undo deployment gatewayserver-deployment
+		
+		- cmd: kubectl get events --sort-by=.metadata.creationTimestamp	
+
+			Mục đích:
+
+				Lệnh này được dùng để xem danh sách tất cả các sự kiện (Events) trong cluster Kubernetes, theo thứ tự thời gian — từ cũ đến mới.
+				
+				Rất hữu ích để kiểm tra nguyên nhân lỗi khi Pod, Deployment hoặc Service gặp sự cố.
+
+			Giải thích từng phần:
+			
+				Thành phần								Ý nghĩa
+				
+				kubectl									Công cụ dòng lệnh để làm việc với Kubernetes
+				get events								Lấy danh sách các sự kiện (Events) do Kubernetes ghi lại
+				--sort-by=.metadata.creationTimestamp	Sắp xếp kết quả theo thời gian tạo của mỗi event (từ cũ → mới)
+			
+			Events trong Kubernetes là gì?
+
+				Event là các bản ghi tạm thời mà Kubernetes tạo ra để mô tả những gì đang xảy ra trong cluster, ví dụ:
+
+					Một Pod được tạo / xóa.
+
+					Container bắt đầu chạy hoặc bị crash.
+
+					Scheduler gán Pod vào một node.
+
+					Image được kéo (pulled) thành công hoặc thất bại.
+
+					Lỗi khi mount volume hoặc thiếu tài nguyên CPU/RAM.
+
+			Kết quả ví dụ:
+			
+				LAST SEEN   TYPE      REASON              OBJECT                              	 MESSAGE
+				12m         Normal    Scheduled           pod/nginx-deployment-7f7f75d899-5s9p2  Successfully assigned default/nginx-deployment-7f7f75d899-5s9p2 to worker-node1
+				12m         Normal    Pulling             pod/nginx-deployment-7f7f75d899-5s9p2  Pulling image "nginx:latest"
+				11m         Normal    Pulled              pod/nginx-deployment-7f7f75d899-5s9p2  Successfully pulled image "nginx:latest"
+				11m         Normal    Started             pod/nginx-deployment-7f7f75d899-5s9p2  Started container nginx
+				5m          Warning   BackOff             pod/app-7d89f65c9d-xj8df               Back-off restarting failed container
+
+			Giải thích các cột:
+			
+				Cột					Ý nghĩa
+				
+				LAST SEEN			Thời điểm event được ghi nhận lần cuối
+				TYPE				Loại sự kiện: Normal hoặc Warning
+				REASON				Nguyên nhân / hành động (ví dụ: Scheduled, Failed, Started, BackOff, …)
+				OBJECT				Tài nguyên (Pod, Deployment, Node, …) liên quan
+				MESSAGE				Mô tả chi tiết về sự kiện
+				
+			Ứng dụng thực tế:
+
+				Debug lỗi Pod: Kiểm tra xem Pod có bị crash, không kéo được image, hay thiếu tài nguyên không.
+
+				Theo dõi hoạt động cluster: Biết khi nào một Pod, Node, hay Deployment được tạo hoặc thay đổi.
+
+				Kết hợp lọc: Có thể thêm -n <namespace> để xem events trong một namespace cụ thể.
+
+			Ví dụ:
+
+				kubectl get events -n kubernetes-dashboard --sort-by=.metadata.creationTimestamp
+
+		
 		- cmd: kubectl rollout history deployment gatewayserver-deployment	
-		- cmd: kubectl rollout undo deployment gatewayserve-deployment --to-revision=1bectl delete -f 1_keycloak.yml		
+		
+			Mục đích:
+
+				Lệnh này được dùng để xem lịch sử các lần triển khai (rollout) của một Deployment trong Kubernetes.
+				
+				Nó giúp bạn biết Deployment đã được cập nhật bao nhiêu lần, khi nào, và sử dụng image nào trong từng phiên bản.
+
+			Giải thích từng phần:
+			
+				Thành phần								Ý nghĩa
+					
+				kubectl									Công cụ dòng lệnh làm việc với Kubernetes
+				rollout									Nhóm lệnh quản lý quá trình triển khai (rollout) của Deployment / DaemonSet / StatefulSet
+				history									Hiển thị lịch sử các lần cập nhật
+				deployment gatewayserver-deployment		Chỉ định tên Deployment mà bạn muốn xem lịch sử
+				
+			Khi chạy lệnh, bạn sẽ thấy kết quả như:
+			
+				REVISION  CHANGE-CAUSE
+				1         <none>
+				2         kubectl set image deployment gatewayserver-deployment gatewayserver=eazybytes/gatewayserver:s6 --record=true
+				3         kubectl set image deployment gatewayserver-deployment gatewayserver=eazybytes/gatewayserver:s7 --record=true
+
+			Giải thích các cột:
+			
+				Cột				Ý nghĩa
+				
+				REVISION		Số thứ tự của lần triển khai (Deployment revision)
+				CHANGE-CAUSE	Ghi chú nguyên nhân thay đổi — thường là câu lệnh bạn dùng để thay đổi image (nếu có --record)
+				
+			Cách hoạt động của Rollout History:
+
+				Mỗi khi bạn cập nhật Deployment (ví dụ: đổi image bằng kubectl set image), Kubernetes sẽ:
+
+					Tạo một ReplicaSet mới (ứng với revision mới).
+
+					Giữ lại các ReplicaSet cũ để có thể rollback khi cần.
+
+				Nếu bạn đã dùng --record trong các lệnh trước (như khi set image), Kubernetes sẽ lưu lại lệnh đó trong
+				phần CHANGE-CAUSE, giúp bạn biết rõ mỗi lần thay đổi đã làm gì.
+
+			Để xem chi tiết 1 phiên bản cụ thể:
+
+				Bạn có thể chạy:
+
+					kubectl rollout history deployment gatewayserver-deployment --revision=2
+
+
+				Kết quả sẽ cho biết:
+
+					Image được dùng,
+
+					Số lượng replicas,
+
+					Labels,
+
+					Container name,
+					v.v.
+
+			Ứng dụng thực tế:
+
+				Theo dõi lịch sử cập nhật ứng dụng (ai thay đổi, thay đổi gì).
+
+				Rollback (quay lại phiên bản cũ) nếu phiên bản mới bị lỗi.
+				
+				→ Dùng lệnh:
+
+					kubectl rollout undo deployment gatewayserver-deployment --to-revision=2
+		
+		
+		
+		- cmd: kubectl rollout undo deployment gatewayserve-deployment --to-revision=1
+
+			Dùng để quay lại (rollback) Deployment gatewayserve-deployment về phiên bản (revision) số 1 trong lịch sử rollout.
+
+			Giải thích từng phần:
+			
+				Thành phần							Ý nghĩa
+							
+				kubectl								Công cụ dòng lệnh quản lý Kubernetes
+				rollout undo						Thực hiện hoàn tác (rollback) bản cập nhật gần đây nhất của Deployment
+				deployment gatewayserve-deployment	Tên của Deployment muốn rollback
+				--to-revision=1						(Tùy chọn) Chỉ định số phiên bản cụ thể muốn quay lại (ở đây là revision 1). Nếu không ghi, mặc định rollback về phiên bản trước đó
+			
+			Khi chạy lệnh:
+
+				Kubernetes sẽ:
+
+					Xác định ReplicaSet tương ứng với revision số 1.
+
+					Khôi phục cấu hình Deployment về trạng thái ở revision đó (ví dụ image, số replicas, config…).
+
+					Thực hiện rolling update ngược — dừng Pod của bản mới, tạo lại Pod theo cấu hình cũ.
+
+			Kiểm tra lại sau rollback:
+			
+				kubectl rollout history deployment gatewayserve-deployment
+				
+				kubectl get pods
+				
+				kubectl describe deployment gatewayserve-deployment
+		
 		- cmd: kubectl get pvc		
-		- cmd: kubectl delete deployment kubernetes-dashboard-kong -n kubernetes-dashboard		
-		- cmd: kubectl delete svc kubernetes-dashboard-kong-proxy -n kubernetes-dashboard		
-		- cmd: kubectl delete pod -l app.kubernetes.io/name=kong -n kubernetes-dashboard	
-		- cmd: kubectl describe pod kong-kong-5c8c45bd6d-kj5sl -n kubernetes-dashboard		
-		- cmd: kubectl describe pod kong-kong-5c8c45bd6d-kj5sl -n kubernetes-dashboard | findstr "Failed"		
+		
+			Lệnh này dùng để liệt kê tất cả các PersistentVolumeClaim (PVC) trong namespace hiện tại (mặc định là default, trừ khi bạn chỉ định -n <namespace>).
+
+			Nói đơn giản: nó giúp bạn xem các yêu cầu lưu trữ dữ liệu (storage) mà các ứng dụng trong Kubernetes đang sử dụng.
+
+			Giải thích từng phần:
+			
+			Thành phần			Ý nghĩa
+			
+			kubectl				Công cụ dòng lệnh để quản lý Kubernetes cluster
+			get					Hiển thị danh sách tài nguyên
+			pvc					Viết tắt của PersistentVolumeClaim – tức là “yêu cầu lưu trữ cố định”
+			
+			PVC là gì?
+
+				PVC (PersistentVolumeClaim) là yêu cầu của người dùng để sử dụng một ổ lưu trữ (Persistent Volume).
+
+				Nó hoạt động giống như “tôi cần một ổ đĩa dung lượng 10Gi để lưu dữ liệu ứng dụng này”.
+
+				Kubernetes sẽ tìm hoặc tạo một PersistentVolume (PV) phù hợp để gán cho PVC đó.
+
+			Khi bạn chạy lệnh:
+			
+				kubectl get pvc
+
+				Kết quả sẽ trông như sau:
+
+				NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+				mysql-pv-claim     Bound    pvc-3b63f77b-bb5a-4d69-9dc5-0a6d62132c2f   10Gi       RWO            standard       5d
+				redis-pv-claim     Pending                                             1Gi        RWO            fast           10m
+
+			Giải thích các cột:
+			
+				Cột					Ý nghĩa
+				NAME				Tên của PVC
+				STATUS				Trạng thái của PVC:
+									🔸 Pending: chưa được gắn với PersistentVolume nào.
+									🔸 Bound: đã được gắn (được PV đáp ứng).
+									🔸 Lost: PV bị mất hoặc xóa.
+				VOLUME				Tên của PersistentVolume (PV) được gắn với PVC
+				CAPACITY			Dung lượng mà PVC yêu cầu
+				ACCESS MODES		Chế độ truy cập (ví dụ: RWO, RWX, ROX):
+									🔸 RWO – ReadWriteOnce: chỉ một node có thể ghi.
+									🔸 RWX – ReadWriteMany: nhiều node có thể đọc/ghi cùng lúc.
+									🔸 ROX – ReadOnlyMany: nhiều node chỉ đọc.
+				STORAGECLASS		Tên của StorageClass (quy định cách tạo volume)
+				AGE					Thời gian PVC đã tồn tại
+			
+			Ví dụ thực tế:
+			
+				kubectl get pvc -n mysql
+
+					Hiển thị các PVC trong namespace mysql.
+
+					Nếu thấy STATUS = Bound, nghĩa là volume đã sẵn sàng để Pod sử dụng.
+
+			Ứng dụng thực tế:
+
+				Kiểm tra ứng dụng có được gắn volume thành công hay chưa.
+
+				Theo dõi dung lượng và trạng thái lưu trữ của database, app, v.v.
+
+				Debug lỗi Pod không mount được volume (thường do PVC chưa Bound).		
+		
+		- cmd: kubectl delete deployment kubernetes-dashboard-kong -n kubernetes-dashboard	
+
+			Mục đích:
+
+				Lệnh này dùng để xóa một Deployment có tên là kubernetes-dashboard-kong trong namespace kubernetes-dashboard.
+
+				Nói đơn giản:
+				
+					Bạn đang xóa ứng dụng (Deployment) có tên kubernetes-dashboard-kong ra khỏi namespace kubernetes-dashboard.
+
+			Giải thích từng phần:
+			
+				Thành phần					Ý nghĩa
+				
+				kubectl						Công cụ dòng lệnh để tương tác với Kubernetes
+				delete						Thực hiện thao tác xóa tài nguyên
+				deployment					Loại tài nguyên muốn xóa — ở đây là một Deployment
+				kubernetes-dashboard-kong	Tên của Deployment cần xóa
+				-n kubernetes-dashboard		Chỉ định namespace mà Deployment này đang tồn tại
+				
+			Khi chạy lệnh:
+
+				Kubernetes sẽ:
+
+					Xóa đối tượng Deployment tên kubernetes-dashboard-kong.
+
+					Tự động xóa tất cả các Pod do Deployment đó quản lý (vì Pod được tạo bởi ReplicaSet của Deployment).
+
+					ReplicaSet liên quan đến Deployment này cũng sẽ bị xóa.
+
+			🔹 Ví dụ trước và sau khi xóa:
+
+				Trước:
+
+					kubectl get deployments -n kubernetes-dashboard
+					NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+					kubernetes-dashboard        1/1     1            1           3d
+					kubernetes-dashboard-kong   1/1     1            1           3d
+
+
+			Sau khi chạy:
+
+				kubectl delete deployment kubernetes-dashboard-kong -n kubernetes-dashboard
+
+			Kết quả:
+
+				deployment.apps "kubernetes-dashboard-kong" deleted
+
+			Kiểm tra lại:
+
+				kubectl get deployments -n kubernetes-dashboard
+
+
+					→ Chỉ còn kubernetes-dashboard, kubernetes-dashboard-kong đã biến mất.
+
+			Lưu ý:
+
+				Nếu chỉ muốn tạm dừng (scale về 0) thay vì xóa hoàn toàn, có thể dùng:
+
+					kubectl scale deployment kubernetes-dashboard-kong -n kubernetes-dashboard --replicas=0
+
+				Nếu muốn xóa toàn bộ tài nguyên có liên quan (Deployment, Service, ConfigMap, Secret...), bạn có thể dùng file YAML gốc:
+
+					kubectl delete -f dashboard_kong.yml
+
+		
+		- cmd: kubectl delete svc kubernetes-dashboard-kong-proxy -n kubernetes-dashboard	
+
+			Mục đích:
+
+				Lệnh này dùng để xóa một Service có tên là kubernetes-dashboard-kong-proxy trong namespace kubernetes-dashboard.
+
+				Nói ngắn gọn: bạn đang gỡ bỏ “cổng truy cập mạng” (Service) của thành phần kubernetes-dashboard-kong.
+
+			Giải thích từng phần:
+			
+				Thành phần							Ý nghĩa
+				
+				kubectl								Công cụ dòng lệnh để làm việc với Kubernetes
+				delete								Thao tác xóa tài nguyên
+				svc									Viết tắt của Service — là tài nguyên định nghĩa cách truy cập đến các Pod
+				kubernetes-dashboard-kong-proxy		Tên của Service cần xóa
+				-n kubernetes-dashboard				Xác định namespace chứa Service đó
+			
+			Khi chạy lệnh này:
+
+				Kubernetes sẽ:
+
+					Xóa Service kubernetes-dashboard-kong-proxy.
+
+					Service này sẽ không còn phân phối lưu lượng (traffic) đến các Pod của kubernetes-dashboard-kong nữa.
+
+					Không ảnh hưởng trực tiếp đến các Pod hoặc Deployment — chúng vẫn còn tồn tại, chỉ là không thể truy cập được qua Service này.
+
+			Trước khi xóa:
+
+				Khi bạn chạy:
+
+					kubectl get svc -n kubernetes-dashboard
+
+			Có thể bạn thấy kết quả như:
+
+			NAME                             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   		AGE
+			kubernetes-dashboard             ClusterIP   10.96.0.12      <none>        443/TCP   		3d
+			kubernetes-dashboard-kong-proxy  NodePort    10.96.0.45      <none>        80:30080/TCP   	3d
+
+			Service kubernetes-dashboard-kong-proxy ở đây là “proxy” cho Dashboard qua Kong — thường dùng để truy cập Dashboard từ bên ngoài
+			cluster (qua NodePort hoặc LoadBalancer).
+
+			Sau khi xóa:
+
+				Chạy:
+
+					kubectl delete svc kubernetes-dashboard-kong-proxy -n kubernetes-dashboard
+
+				Kết quả:
+
+					service "kubernetes-dashboard-kong-proxy" deleted
+
+				Và khi kiểm tra lại:
+
+					kubectl get svc -n kubernetes-dashboard
+
+					→ Service này không còn xuất hiện, nghĩa là:
+
+					Dashboard không thể truy cập được thông qua Kong nữa.
+
+					Nếu vẫn cần truy cập Dashboard, bạn phải dùng các cách khác như:
+
+						kubectl proxy
+
+					hoặc
+
+						kubectl port-forward svc/kubernetes-dashboard 8443:443 -n kubernetes-dashboard
+
+		
+		- cmd: kubectl delete pod -l app.kubernetes.io/name=kong -n kubernetes-dashboard
+
+			Mục đích:
+
+				Lệnh này dùng để xóa tất cả các Pod trong namespace kubernetes-dashboard có label app.kubernetes.io/name=kong.
+
+				Nói đơn giản: bạn đang xóa tất cả các Pod của ứng dụng Kong trong namespace kubernetes-dashboard.
+
+			Giải thích từng phần:
+			
+				Thành phần							Ý nghĩa
+				
+				kubectl								Công cụ dòng lệnh quản lý Kubernetes
+				delete pod							Xóa một hoặc nhiều Pod
+				-l app.kubernetes.io/name=kong		Tùy chọn lọc (label selector) — chỉ chọn các Pod có nhãn (label) app.kubernetes.io/name=kong
+				-n kubernetes-dashboard				Giới hạn phạm vi tìm Pod trong namespace kubernetes-dashboard
+				
+			Về “label selector” (-l):
+
+				Label (nhãn) là các cặp key=value gắn lên tài nguyên Kubernetes để phân loại, tìm kiếm, hoặc quản lý.
+
+				Ví dụ, một Pod của Kong có thể có nhãn như sau:
+
+					metadata:
+					  labels:
+						app.kubernetes.io/name: kong
+						app.kubernetes.io/part-of: kubernetes-dashboard
+
+
+				Vậy khi bạn dùng -l app.kubernetes.io/name=kong, Kubernetes sẽ chọn tất cả Pod nào có nhãn đó, không cần chỉ rõ tên cụ thể.
+
+			Khi bạn chạy lệnh:
+
+				Kubernetes sẽ tìm tất cả các Pod có nhãn app.kubernetes.io/name=kong trong namespace kubernetes-dashboard
+				và xóa toàn bộ chúng.
+
+				Ví dụ:
+
+					kubectl get pods -n kubernetes-dashboard -l app.kubernetes.io/name=kong
+
+				Trước khi xóa, có thể thấy:
+
+					NAME                                        READY   STATUS    RESTARTS   AGE
+					kubernetes-dashboard-kong-64d9b4c9d8-abc1   1/1     Running   0          2d
+					kubernetes-dashboard-kong-64d9b4c9d8-xyz2   1/1     Running   0          2d
+
+				Sau khi chạy:
+
+					kubectl delete pod -l app.kubernetes.io/name=kong -n kubernetes-dashboard
+
+
+				Kết quả:
+
+					pod "kubernetes-dashboard-kong-64d9b4c9d8-abc1" deleted
+					pod "kubernetes-dashboard-kong-64d9b4c9d8-xyz2" deleted
+
+			Điều gì xảy ra sau khi xóa?
+
+				Nếu các Pod này được quản lý bởi một Deployment hoặc ReplicaSet, thì Kubernetes sẽ tự động tạo lại
+				các Pod mới để đảm bảo số lượng replicas đúng như cấu hình.
+
+				Nếu đây là Pod độc lập (không thuộc Deployment), thì khi bị xóa → biến mất hoàn toàn, không được tạo lại.
+
+			Mục đích thường gặp:
+
+				Dùng để restart nhanh các Pod của ứng dụng Kong (xóa để chúng tự tạo lại).
+
+				Dùng khi Kong bị lỗi hoặc cấu hình mới chưa áp dụng.
+
+				Dọn dẹp môi trường khi bạn không cần Kong trong namespace kubernetes-dashboard nữa.
+		
+		- cmd: kubectl describe pod kong-kong-5c8c45bd6d-kj5sl -n kubernetes-dashboard	
+
+			Mục đích:
+
+				Lệnh này dùng để xem thông tin chi tiết về Pod có tên kong-kong-5c8c45bd6d-kj5sl trong namespace kubernetes-dashboard.
+
+				Nói cách khác: đây là cách bạn kiểm tra mọi thứ bên trong và xung quanh một Pod, như container,
+				image, sự kiện (events), IP, node, lý do Pod lỗi, v.v.
+
+			Giải thích từng phần:
+			
+				Thành phần					Ý nghĩa
+				
+				kubectl						Công cụ dòng lệnh để quản lý Kubernetes
+				describe					Hiển thị thông tin chi tiết của một tài nguyên (chi tiết hơn get)
+				pod							Loại tài nguyên cần xem (ở đây là Pod)
+				kong-kong-5c8c45bd6d-kj5sl	Tên cụ thể của Pod cần xem
+				-n kubernetes-dashboard		Namespace chứa Pod đó
+			
+			Khi chạy lệnh, bạn sẽ thấy gì?
+
+				Kết quả sẽ là một báo cáo chi tiết gồm nhiều phần, ví dụ:
+
+					Name:         kong-kong-5c8c45bd6d-kj5sl
+					Namespace:    kubernetes-dashboard
+					Priority:     0
+					Node:         worker-node-1/10.0.1.23
+					Start Time:   Tue, 28 Oct 2025 16:30:12 +0700
+					Labels:       app.kubernetes.io/component=app
+								  app.kubernetes.io/instance=kong
+								  app.kubernetes.io/name=kong
+					Status:       Running
+					IP:           10.244.2.14
+					Controlled By: ReplicaSet/kong-kong-5c8c45bd6d
+					Containers:
+					  kong:
+						Container ID:   docker://a7d5...
+						Image:          kong/kong-gateway:3.5
+						Image ID:       docker-pullable://kong/kong-gateway@sha256:...
+						Port:           8000/TCP, 8443/TCP, 8001/TCP, 8444/TCP
+						State:          Running
+						  Started:      Tue, 28 Oct 2025 16:30:15 +0700
+						Ready:          True
+						Restart Count:  0
+						Environment:
+						  KONG_DATABASE:              off
+						  KONG_DECLARATIVE_CONFIG:    /kong_dbless/kong.yml
+						Mounts:
+						  /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-7f8gm (ro)
+					Events:
+					  Type    Reason     Age   From               Message
+					  ----    ------     ----  ----               -------
+					  Normal  Scheduled  12m   default-scheduler  Successfully assigned kubernetes-dashboard/kong-kong-5c8c45bd6d-kj5sl to worker-node-1
+					  Normal  Pulled     12m   kubelet            Container image "kong/kong-gateway:3.5" already present on machine
+					  Normal  Created    12m   kubelet            Created container kong
+					  Normal  Started    12m   kubelet            Started container kong
+
+			Giải thích các phần chính:
+			
+				Phần					Ý nghĩa
+				
+				Name / Namespace		Tên và không gian tên của Pod
+				Node					Tên node vật lý (hoặc VM) mà Pod đang chạy trên đó
+				Start Time				Thời điểm Pod được khởi tạo
+				Labels / Annotations	Thông tin định danh, dùng cho chọn lọc (selector)
+				Status					Trạng thái tổng thể của Pod (Pending, Running, Succeeded, Failed, CrashLoopBackOff, …)
+				IP						Địa chỉ IP nội bộ của Pod
+				Controlled By			Pod này do đối tượng nào tạo ra (thường là ReplicaSet hoặc Deployment)
+				Containers				Mô tả chi tiết các container bên trong Pod:
+				 ↳ Image				Docker image mà container sử dụng (ở đây là kong/kong-gateway)
+				 ↳ Ports				Các cổng container mở ra
+				 ↳ State				Trạng thái hiện tại: Running, Waiting, hoặc Terminated
+				 ↳ Restart Count		Số lần container đã bị khởi động lại
+				 ↳ Environment			Các biến môi trường (env) cấu hình trong Pod
+				Events					Nhật ký sự kiện quan trọng (Pod được tạo, image được kéo, container khởi động hoặc lỗi, v.v.)
+			
+			Mục đích sử dụng thực tế:
+
+				Debug lỗi Pod (ví dụ: image không kéo được, container crash, thiếu volume).
+
+				Xem chi tiết cấu hình và môi trường của container.
+
+				Kiểm tra log sự kiện (Events) liên quan đến Pod để biết nguyên nhân khi Pod không khởi chạy được.
+
+				Xác định mối quan hệ giữa Pod ↔ ReplicaSet ↔ Deployment.
+		
+		- cmd: kubectl describe pod kong-kong-5c8c45bd6d-kj5sl -n kubernetes-dashboard | findstr "Failed"	
+
+			Mục đích:
+
+				Lệnh này dùng để tìm nhanh các dòng có chứa chữ “Failed” trong phần mô tả chi tiết của Pod
+				kong-kong-5c8c45bd6d-kj5sl trong namespace kubernetes-dashboard.
+
+				Nói đơn giản: nó giúp bạn lọc ra lỗi (Failed events) từ kết quả kubectl describe pod, thay vì phải đọc thủ công toàn bộ thông tin dài dòng.
+
+			Giải thích từng phần:
+			
+				Thành phần																Ý nghĩa
+				
+				kubectl describe pod kong-kong-5c8c45bd6d-kj5sl -n kubernetes-dashboard	Hiển thị thông tin chi tiết của Pod (như bạn đã biết ở lệnh trước).
+				**`																		` (pipe)**
+				findstr "Failed"														Lệnh của Windows, có tác dụng tìm và hiển thị các dòng chứa chuỗi ký tự “Failed” trong kết quả đầu vào.
+			
+			Cách hoạt động:
+
+				kubectl describe pod ... in ra toàn bộ thông tin chi tiết của Pod (nhiều dòng).
+
+				Kết quả đó được chuyển qua lệnh findstr.
+
+				findstr chỉ hiển thị những dòng có chứa từ “Failed”, ví dụ:
+
+					  Warning  FailedScheduling  3m    default-scheduler  pod has unbound immediate PersistentVolumeClaims
+					  Warning  FailedMount       2m    kubelet            Unable to attach or mount volumes: timed out waiting for the condition
+					  Warning  Failed            1m    kubelet            Error: ImagePullBackOff
+
+
+				Nhờ vậy bạn phát hiện lỗi nhanh hơn, không phải cuộn xem từng phần trong mô tả.
+
+			Khi nào dùng lệnh này:
+
+				Khi Pod không khởi động được (STATUS=CrashLoopBackOff, Pending, ImagePullBackOff, …).
+
+				Khi bạn nghi ngờ Pod bị lỗi volume, image, hoặc kết nối mạng.
+
+				Khi bạn chỉ cần xem dòng có chữ “Failed” để khoanh vùng sự cố.
+
+			Mẹo thêm:
+
+				Nếu bạn đang dùng Linux hoặc macOS, lệnh tương đương là:
+
+				kubectl describe pod kong-kong-5c8c45bd6d-kj5sl -n kubernetes-dashboard | grep "Failed"
+
+		
 		- cmd: kubectl -n kubernetes-dashboard edit svc kubernetes-dashboard-kong-proxy		
+		
+			Mục đích:
+
+				Lệnh này dùng để mở và chỉnh sửa trực tiếp cấu hình của Service có tên
+				kubernetes-dashboard-kong-proxy trong namespace kubernetes-dashboard.
+
+				Nói cách khác, bạn đang mở file YAML của Service đó ra để sửa ngay trong trình soạn thảo (thường là vi hoặc nano)
+				và sau khi lưu lại, Kubernetes sẽ áp dụng thay đổi mới ngay lập tức.
+
+			Giải thích từng phần:
+			
+				Thành phần							Ý nghĩa
+				
+				kubectl								Công cụ dòng lệnh làm việc với Kubernetes
+				-n kubernetes-dashboard				Chỉ định namespace cần thao tác
+				edit								Mở trình chỉnh sửa trực tiếp cấu hình tài nguyên trên cluster
+				svc									Loại tài nguyên muốn chỉnh sửa — ở đây là Service
+				kubernetes-dashboard-kong-proxy		Tên Service cụ thể cần chỉnh sửa
+			
+			Khi chạy lệnh:
+
+				Kubernetes sẽ tải cấu hình YAML hiện tại của Service kubernetes-dashboard-kong-proxy.
+
+				Mở nội dung đó trong trình soạn thảo (mặc định là vi, trừ khi bạn cấu hình khác).
+
+				Bạn có thể thay đổi các giá trị như:
+
+					type (ClusterIP → NodePort / LoadBalancer)
+
+					ports
+
+					selector
+
+					annotations
+
+					labels
+
+				Khi bạn lưu và thoát, Kubernetes sẽ:
+
+					So sánh thay đổi.
+
+					Áp dụng cấu hình mới lên cluster ngay.
+
+			Ví dụ: nội dung Service trước khi chỉnh sửa
+			
+				apiVersion: v1
+				kind: Service
+				metadata:
+				  name: kubernetes-dashboard-kong-proxy
+				  namespace: kubernetes-dashboard
+				spec:
+				  type: ClusterIP
+				  selector:
+					app.kubernetes.io/name: kong
+				  ports:
+					- port: 80
+					  targetPort: 8000
+
+			Ví dụ thay đổi:
+
+				Nếu bạn muốn truy cập từ bên ngoài cluster, có thể đổi type từ ClusterIP thành NodePort:
+
+				spec:
+				  type: NodePort
+				  selector:
+					app.kubernetes.io/name: kong
+				  ports:
+					- port: 80
+					  targetPort: 8000
+					  nodePort: 32080
+
+
+				Sau khi lưu và thoát (:wq trong vi), bạn sẽ thấy thông báo:
+
+					service/kubernetes-dashboard-kong-proxy edited
+
+
+				Kubernetes ngay lập tức cập nhật Service đó.
+
+			Kiểm tra lại thay đổi:
+			
+				kubectl get svc kubernetes-dashboard-kong-proxy -n kubernetes-dashboard
+
+
+				hoặc xem chi tiết YAML:
+
+					kubectl get svc kubernetes-dashboard-kong-proxy -n kubernetes-dashboard -o yaml
+
+			Mục đích thực tế của lệnh:
+
+				Dùng để chỉnh nhanh cấu hình Service mà không cần tìm và chỉnh file YAML gốc.
+
+				Thường dùng để:
+
+					Mở truy cập bên ngoài (ClusterIP → NodePort / LoadBalancer)
+
+					Thay đổi port hoặc selector
+
+					Thêm annotation phục vụ Ingress Controller, DNS, hay Load Balancer
+
+					Gỡ lỗi (debug) Service routing		
+		
 		- cmd: kubectl get pvc -n default | findstr keycloak
+		
+			Giải thích tổng thể:
+
+				Lệnh này dùng để tìm các PersistentVolumeClaim (PVC) trong namespace default có chứa chuỗi “keycloak” trong tên hoặc thông tin hiển thị.
+
+			Phân tích từng phần:
+			
+				Thành phần				Ý nghĩa
+				
+				kubectl get pvc			Liệt kê tất cả các PersistentVolumeClaim (yêu cầu lưu trữ dữ liệu) trong namespace được chỉ định.
+				-n default				Chỉ định namespace là default, tức namespace mặc định trong cluster Kubernetes.
+				**`						`**
+				findstr keycloak		Lệnh của Windows, dùng để lọc và chỉ hiển thị các dòng có chứa chữ “keycloak” trong kết quả đầu ra.
+			
+			Ví dụ minh họa:
+
+				Giả sử bạn có kết quả của:
+
+					kubectl get pvc -n default
+
+
+				là:
+
+					NAME                STATUS   VOLUME                                     CAPACITY   ACCESS MODES   AGE
+					mysql-pvc           Bound    pvc-12345678-aaaa-bbbb-cccc-111122223333   1Gi        RWO            2d
+					keycloak-data-pvc   Bound    pvc-87654321-dddd-eeee-ffff-444455556666   5Gi        RWO            1d
+					redis-pvc           Bound    pvc-99998888-aaaa-bbbb-cccc-777766665555   1Gi        RWO            5h
+
+
+				Khi chạy:
+
+					kubectl get pvc -n default | findstr keycloak
+
+				Kết quả sẽ là:
+
+					keycloak-data-pvc   Bound    pvc-87654321-dddd-eeee-ffff-444455556666   5Gi        RWO            1d
+
+				Nghĩa là chỉ hiện PVC có liên quan đến Keycloak.		
+		
 		- cmd: kubectl get secret -n default | findstr keycloak
+		
+			Mục đích:
+
+				Lệnh này được dùng để tìm các Secret có liên quan đến Keycloak trong namespace default.
+				
+				Tức là nó lọc danh sách các Secret trong namespace default và chỉ hiển thị những secret có tên chứa chữ “keycloak”.
+
+			Giải thích chi tiết từng phần:
+			
+				Thành phần				Ý nghĩa
+				
+				kubectl get secret		Hiển thị danh sách tất cả các Secret trong namespace chỉ định.
+										Secret là nơi Kubernetes lưu thông tin nhạy cảm như mật khẩu, token, key, chứng chỉ TLS, v.v.
+				-n default				Giới hạn phạm vi tìm kiếm trong namespace default.
+				**`						` (pipe)**
+				findstr keycloak		Lệnh trong Windows để lọc ra các dòng chứa chuỗi “keycloak”.
+										(Nếu bạn đang dùng Linux/macOS thì lệnh tương đương là grep keycloak.)
+			
+			Ví dụ minh họa:
+
+				Giả sử khi bạn chạy:
+
+					kubectl get secret -n default
+
+				bạn nhận được:
+
+					NAME                              TYPE                                  AGE
+					default-token-7d2ht               kubernetes.io/service-account-token   3d
+					keycloak-db-secret                Opaque                                2d
+					keycloak-tls-secret               kubernetes.io/tls                     2d
+					myapp-secret                      Opaque                                1d
+
+
+				Nếu bạn lọc bằng:
+
+					kubectl get secret -n default | findstr keycloak
+
+				Kết quả sẽ là:
+
+					keycloak-db-secret                Opaque                                2d
+					keycloak-tls-secret               kubernetes.io/tls                     2d
+
+
+				Nghĩa là bạn chỉ thấy các Secret liên quan đến Keycloak.
+
+			🔹 Khi nào dùng lệnh này:
+
+				Khi bạn muốn kiểm tra Keycloak có tạo ra secret nào không, ví dụ như:
+
+					Mật khẩu admin của Keycloak (keycloak-admin-secret)
+
+					Chứng chỉ HTTPS (keycloak-tls-secret)
+
+					Thông tin kết nối database (keycloak-db-secret)
+
+				Khi bạn cần xem hoặc xóa các secret cũ của Keycloak.
+
+				Khi debug lỗi khởi động của Keycloak mà nghi ngờ thiếu secret cần thiết.
+
+			Nếu muốn xem chi tiết một secret:
+
+			Sau khi biết tên secret (ví dụ keycloak-db-secret), bạn có thể xem chi tiết bằng:
+
+				kubectl describe secret keycloak-db-secret -n default
+
+			hoặc (để xem nội dung thật, ở dạng giải mã base64):
+
+				kubectl get secret keycloak-db-secret -n default -o yaml
+		
+		
 		- cmd: kubectl get configmap -n default | findstr keycloak
+		
+			Mục đích:
+
+				Lệnh này được dùng để tìm các ConfigMap có liên quan đến Keycloak trong namespace default.
+				
+				Nói cách khác, nó liệt kê các ConfigMap trong namespace default, rồi lọc những dòng có chứa chữ “keycloak”.
+
+			Giải thích chi tiết từng phần:
+			
+				Thành phần				Ý nghĩa
+				
+				kubectl get configmap	Lấy danh sách tất cả ConfigMap trong namespace được chỉ định.
+										ConfigMap là đối tượng trong Kubernetes dùng để lưu trữ cấu hình không nhạy cảm (ví dụ: file cấu hình, biến môi trường, URL, cổng dịch vụ, ...).
+				-n default				Chỉ định namespace cần tìm — ở đây là default.
+				**`						` (pipe)**
+				findstr keycloak		Lệnh trong Windows để lọc và chỉ hiển thị các dòng có chứa chữ “keycloak”.
+										(Tương đương với grep keycloak trong Linux/macOS.)
+			
+			Ví dụ minh họa:
+
+				Khi bạn chạy:
+
+					kubectl get configmap -n default
+
+				Kết quả có thể là:
+
+					NAME                          DATA   AGE
+					keycloak-config               3      2d
+					keycloak-env                  5      2d
+					app-settings                  2      1d
+					database-config               4      3d
+
+
+				Khi bạn chạy:
+
+					kubectl get configmap -n default | findstr keycloak
+
+
+				Kết quả lọc ra:
+
+					keycloak-config               3      2d
+					keycloak-env                  5      2d
+
+
+				Chỉ hiển thị các ConfigMap có tên chứa “keycloak”.
+
+			Khi nào bạn dùng lệnh này:
+
+				Khi bạn muốn kiểm tra Keycloak có tạo ra ConfigMap nào không.
+				(VD: Keycloak có thể tạo ConfigMap để chứa biến môi trường hoặc cấu hình mạng.)
+
+				Khi bạn muốn sửa hoặc xóa ConfigMap cũ của Keycloak.
+
+				Khi debug lỗi Keycloak mà nghi ngờ liên quan đến file cấu hình (env, database URL, realm, …).
+
+				🔹 Để xem chi tiết nội dung của một ConfigMap:
+
+				Sau khi biết tên, ví dụ keycloak-config, bạn có thể xem bằng:
+
+				kubectl describe configmap keycloak-config -n default
+
+
+				hoặc nếu muốn xem nội dung YAML đầy đủ:
+
+					kubectl get configmap keycloak-config -n default -o yaml
+		
+		
 		- cmd: kubectl get sa -n default | findstr keycloak	
-		- cmd: kubectl delete namespace kubernetes-dashboard		
-		- cmd: kubectl delete crd probes.monitoring.coreos.com		
+		
+			Mục đích:
+
+				Lệnh này dùng để tìm tất cả các ServiceAccount có liên quan đến Keycloak trong namespace default.
+				
+				Nói cách khác, nó liệt kê toàn bộ ServiceAccount (SA) trong namespace default rồi lọc ra những cái có tên chứa chữ “keycloak”.
+
+			Giải thích từng phần:
+			
+				Thành phần					Ý nghĩa
+				
+				kubectl get sa				Lấy danh sách tất cả các ServiceAccount trong namespace được chỉ định.
+											ServiceAccount là tài khoản kỹ thuật mà Pod hoặc ứng dụng trong Kubernetes dùng để xác thực với API Server (để có quyền truy cập vào tài nguyên).
+				-n default					Chỉ định namespace là default, tức namespace mặc định của cluster.
+				**`							` (pipe)**
+				findstr keycloak			Lọc ra các dòng có chứa chữ “keycloak” (chỉ có trong Windows CMD/PowerShell).
+											(Tương đương grep keycloak trên Linux/macOS)
+			
+			Ví dụ minh họa:
+
+				Giả sử bạn chạy:
+
+					kubectl get sa -n default
+
+				và nhận được:
+
+					NAME                   SECRETS   AGE
+					default                1         5d
+					keycloak               1         2d
+					keycloak-admin-sa      1         2d
+					app-serviceaccount     1         1d
+
+
+				Nếu bạn chạy:
+
+					kubectl get sa -n default | findstr keycloak
+
+				Kết quả sẽ là:
+
+					keycloak               1         2d
+					keycloak-admin-sa      1         2d
+
+
+				Chỉ các ServiceAccount có tên chứa “keycloak” sẽ được hiển thị.
+
+			Khi nào bạn dùng lệnh này:
+
+				Khi muốn kiểm tra Keycloak có ServiceAccount nào đang tồn tại không.
+				(Ví dụ: keycloak hoặc keycloak-admin-sa).
+
+				Khi bạn cần liên kết quyền (ClusterRoleBinding / RoleBinding) cho ServiceAccount của Keycloak.
+
+				Khi bạn cần xóa hoặc sửa quyền truy cập của Keycloak trong cluster.
+
+				Khi debug lỗi "permission denied" của Pod Keycloak.
+
+			Để xem chi tiết về một ServiceAccount:
+
+				Sau khi biết tên SA, bạn có thể xem thông tin chi tiết bằng:
+
+					kubectl describe sa keycloak-admin-sa -n default
+
+
+				Lệnh này sẽ hiển thị:
+
+					Các Secret token liên kết với SA đó.
+
+					Các annotations hoặc imagePullSecrets.
+
+					Namespace mà nó thuộc về.		
+		
+		- cmd: kubectl delete namespace kubernetes-dashboard	
+
+			Mục đích:
+
+				Lệnh này dùng để xóa toàn bộ namespace kubernetes-dashboard cùng với tất cả tài nguyên (resources) nằm trong đó.
+
+				Nói cách khác: bạn đang xóa luôn toàn bộ Kubernetes Dashboard và mọi thứ đi kèm (pod, service, deployment,
+				secret, configmap, v.v.).
+
+			
+			Giải thích từng phần:
+			
+				Thành phần				Ý nghĩa
+				
+				kubectl					Công cụ dòng lệnh để làm việc với Kubernetes.
+				delete					Thao tác xóa một hoặc nhiều đối tượng (resources).
+				namespace				Loại đối tượng bạn muốn xóa — ở đây là namespace.
+				kubernetes-dashboard	Tên namespace cần xóa.
+			
+			Khi thực hiện, Kubernetes sẽ:
+
+				Đánh dấu namespace là “Terminating” (đang xóa).
+
+				Xóa toàn bộ tài nguyên bên trong, bao gồm:
+
+					Pods
+
+					Deployments
+
+					Services
+
+					Secrets
+
+					ConfigMaps
+
+					ServiceAccounts
+
+					RoleBindings / ClusterRoleBindings
+
+					PersistentVolumeClaims (PVCs)
+
+					v.v.
+
+				Sau khi tất cả tài nguyên trong namespace bị xóa xong → namespace cũng sẽ biến mất hoàn toàn khỏi cluster.
+
+			🔹 Ví dụ:
+
+				Trước khi xóa:
+
+					kubectl get ns
+
+				Kết quả:
+
+					NAME                   STATUS   AGE
+					default                Active   10d
+					kube-system            Active   10d
+					kubernetes-dashboard   Active   2d
+
+				Sau khi chạy:
+
+					kubectl delete namespace kubernetes-dashboard
+
+				Kết quả:
+
+					namespace "kubernetes-dashboard" deleted
+
+				Và nếu kiểm tra lại:
+
+					kubectl get ns
+
+				Thì bạn sẽ thấy:
+
+					NAME                   STATUS   AGE
+					default                Active   10d
+					kube-system            Active   10d
+
+				(không còn kubernetes-dashboard nữa)
+
+			Lưu ý quan trọng:
+
+				Xóa namespace sẽ xóa toàn bộ dữ liệu và cấu hình bên trong — thao tác không thể khôi phục.
+
+				Một số namespace (như kube-system, default) không nên xóa, vì chúng chứa thành phần lõi của Kubernetes.
+
+				Nếu namespace bị kẹt ở trạng thái Terminating, bạn có thể cần xóa thủ công các finalizer trong YAML của
+				namespace (dành cho trường hợp đặc biệt khi có tài nguyên không tự xóa được).
+
+			Nếu bạn chỉ muốn xóa Dashboard mà không xóa cả namespace, bạn có thể chạy:
+			
+				kubectl delete all --all -n kubernetes-dashboard
+
+			Lệnh này chỉ xóa toàn bộ tài nguyên bên trong namespace, nhưng vẫn giữ lại namespace.
+		
+		- cmd: kubectl delete crd probes.monitoring.coreos.com	
+
+			Mục đích:
+
+				Lệnh này dùng để xóa CustomResourceDefinition (CRD) có tên probes.monitoring.coreos.com khỏi cluster Kubernetes.
+
+				Nói cách khác: bạn đang gỡ bỏ hoàn toàn kiểu tài nguyên “Probe” do hệ thống giám sát (Monitoring) — thường
+				là Prometheus Operator — tạo ra.
+
+			Giải thích từng phần:
+			
+				Thành phần						Ý nghĩa
+				kubectl							Công cụ dòng lệnh để tương tác với Kubernetes API.
+				delete							Hành động xóa tài nguyên.
+				crd								Viết tắt của CustomResourceDefinition — là loại tài nguyên tùy chỉnh mà người dùng hoặc
+												operator định nghĩa thêm vào Kubernetes (ngoài các loại mặc định như Pod, Deployment, Service...).
+				probes.monitoring.coreos.com	Tên đầy đủ (fully qualified name) của CRD cần xóa.
+												→ Đây là CRD thuộc nhóm monitoring.coreos.com — thường được cài đặt khi bạn dùng Prometheus
+												Operator hoặc kube-prometheus-stack.
+			
+			CRD là gì?
+
+				CRD (CustomResourceDefinition) cho phép bạn mở rộng API của Kubernetes.
+
+				Khi một CRD được tạo, Kubernetes hiểu rằng có một loại tài nguyên mới tồn tại — ví dụ:
+
+					prometheuses.monitoring.coreos.com
+
+					alertmanagers.monitoring.coreos.com
+
+					servicemonitors.monitoring.coreos.com
+
+					probes.monitoring.coreos.com ← chính là cái bạn đang xóa.
+
+				CRD này định nghĩa cách hoạt động của đối tượng “Probe” — dùng để cấu hình các kiểm tra (probes) do Prometheus thực hiện.
+
+			Khi bạn chạy lệnh:
+
+				Kubernetes sẽ:
+
+					Gỡ bỏ định nghĩa của CRD probes.monitoring.coreos.com.
+
+					Xóa tất cả các đối tượng (instances) thuộc loại này — ví dụ:
+
+						kubectl get probes.monitoring.coreos.com
+
+						→ Tất cả các “Probe” này sẽ biến mất.
+
+					Sau khi xóa, Kubernetes không còn hiểu loại tài nguyên Probe nữa.
+
+			Ví dụ thực tế:
+
+				Trước khi xóa:
+
+					kubectl get crd | grep probe
+
+				Kết quả:
+
+					probes.monitoring.coreos.com                   2024-09-01T10:12:30Z
+
+				Sau khi chạy:
+
+					kubectl delete crd probes.monitoring.coreos.com
+
+				Kết quả:
+
+					customresourcedefinition.apiextensions.k8s.io "probes.monitoring.coreos.com" deleted
+
+				Nếu bạn kiểm tra lại:
+
+					kubectl get crd | grep probe
+
+					→ Không còn thấy probes.monitoring.coreos.com.
+
+			Lưu ý quan trọng:
+
+				Việc xóa CRD này sẽ xóa toàn bộ các tài nguyên “Probe” trong cluster.
+
+				Nếu hệ thống giám sát (như Prometheus Operator) vẫn đang chạy, nó có thể gặp lỗi vì không tìm thấy CRD cần thiết.
+
+				Thường, bạn chỉ nên xóa CRD khi:
+
+					Bạn gỡ bỏ hoàn toàn Prometheus Operator hoặc monitoring stack, hoặc
+
+					CRD bị lỗi / xung đột và cần cài đặt lại.
+
+			Nếu bạn muốn chỉ xem CRD thay vì xóa:
+			
+				kubectl get crd probes.monitoring.coreos.com -o yaml
+
+				Nếu bạn muốn xóa tất cả CRD của Prometheus Operator, có thể dùng:
+
+					kubectl get crd | findstr monitoring.coreos.com
+
+				(hoặc grep trên Linux), rồi xóa từng cái nếu cần.
+		
 		- cmd: kubectl describe pod prometheus-prometheus-kube-prometheus-prometheus-0 -n default		
-		- cmd: kubectl delete configmap eazybankprod-configmap -n default		
+		
+			Mục đích:
+
+				Lệnh này dùng để xem chi tiết thông tin hoạt động của Pod Prometheus có tên
+				prometheus-prometheus-kube-prometheus-prometheus-0 trong namespace default.
+
+				Nói đơn giản: nó giúp bạn xem mọi thứ đang diễn ra bên trong Pod Prometheus, bao gồm cấu hình,
+				container, volume, trạng thái, và cả lỗi nếu có.
+
+			Phân tích từng phần:
+			
+				Thành phần												Ý nghĩa
+				
+				kubectl													Công cụ dòng lệnh để tương tác với Kubernetes cluster.
+				describe												Hiển thị thông tin chi tiết (mô tả đầy đủ) của một tài nguyên Kubernetes.
+				pod														Loại tài nguyên mà bạn muốn xem chi tiết — ở đây là Pod.
+				prometheus-prometheus-kube-prometheus-prometheus-0		Tên cụ thể của Pod Prometheus.
+																		Đây thường là Pod StatefulSet của Prometheus trong stack kube-prometheus.
+				-n default												Chỉ định namespace là default, tức là Pod này nằm trong namespace mặc định.
+			
+			Khi chạy lệnh, bạn sẽ thấy những gì:
+
+				Kubernetes sẽ hiển thị một bản mô tả chi tiết của Pod, gồm nhiều phần như sau:
+
+					Basic Info (thông tin cơ bản)
+
+						Ví dụ:
+
+						Name:         prometheus-prometheus-kube-prometheus-prometheus-0
+						Namespace:    default
+						Node:         worker-node1/10.0.0.5
+						Start Time:   Mon, 28 Oct 2025 16:30:00 +0700
+						Status:       Running
+						IP:           10.244.1.12
+						Controlled By: StatefulSet/prometheus-prometheus-kube-prometheus-prometheus
+
+
+						Cho biết:
+
+							Tên Pod, namespace, node nơi Pod đang chạy.
+
+							Trạng thái hiện tại (Running, Pending, CrashLoopBackOff, …).
+
+							Ai quản lý Pod này (ở đây là StatefulSet).
+
+					Containers
+
+						Phần này mô tả từng container trong Pod:
+
+							Containers:
+							  prometheus:
+								Image:      quay.io/prometheus/prometheus:v2.54.1
+								Port:       9090/TCP
+								State:      Running
+								Ready:      True
+								Restart Count:  0
+
+						Thông tin bao gồm:
+
+							Tên container (prometheus)
+
+							Image đang sử dụng
+
+							Port mà container mở
+
+							Trạng thái (Running, Waiting, Terminated)
+
+							Số lần khởi động lại (Restart Count)
+
+							Các volume mount (nơi lưu trữ dữ liệu Prometheus, thường ở /prometheus)
+
+					Conditions (Điều kiện hoạt động)
+					
+						Conditions:
+						  Type              Status
+						  Initialized       True
+						  Ready             True
+						  ContainersReady   True
+						  PodScheduled      True
+
+
+						Nếu tất cả điều kiện là True, nghĩa là Pod đang chạy ổn định.
+
+					Volumes (Ổ lưu trữ gắn vào Pod)
+					
+						Volumes:
+						  prometheus-prometheus-kube-prometheus-prometheus-db:
+							Type: PersistentVolumeClaim (PVC)
+							ClaimName: prometheus-prometheus-kube-prometheus-prometheus-db-prometheus-prometheus-kube-prometheus-prometheus-0
+
+
+						Phần này cho thấy Pod Prometheus đang dùng PVC (PersistentVolumeClaim) để lưu trữ dữ liệu metric bền vững.
+
+					Events (Sự kiện gần đây)
+
+					Ví dụ:
+
+						Events:
+						  Type    Reason     Age   From               Message
+						  ----    ------     ----  ----               -------
+						  Normal  Scheduled  5m    default-scheduler  Successfully assigned default/prometheus-prometheus-kube-prometheus-prometheus-0 to worker-node1
+						  Normal  Pulled     5m    kubelet            Container image "quay.io/prometheus/prometheus:v2.54.1" already present on machine
+						  Normal  Started    5m    kubelet            Started container prometheus
+
+
+					Phần này cực kỳ hữu ích để debug lỗi, vì nó cho biết:
+
+						Khi nào Pod được gán vào node.
+
+						Có tải image thành công không.
+
+						Có lỗi nào xảy ra khi khởi động không (như CrashLoopBackOff, ImagePullBackOff, v.v.)
+
+			Pod này là gì?
+
+				Pod có tên dài như prometheus-prometheus-kube-prometheus-prometheus-0 thường là:
+
+				Pod chính của Prometheus trong kube-prometheus-stack (của Prometheus Operator).
+
+				Được quản lý bởi một StatefulSet, nên có số thứ tự ở cuối (-0, -1, ...).
+
+				Dùng để thu thập metric từ cluster Kubernetes.		
+		
+		- cmd: kubectl delete configmap eazybankprod-configmap -n default	
+
+			Mục đích:
+			
+				Lệnh này dùng để xóa một ConfigMap có tên là eazybankprod-configmap trong namespace default.
+
+				Nói cách khác: bạn đang xóa cấu hình môi trường (dạng key–value) đã được Kubernetes lưu cho ứng
+				dụng “EazyBank” ở môi trường production (prod).
+
+
+			Phân tích từng phần:
+			
+				Thành phần					Ý nghĩa
+				
+				kubectl						Công cụ dòng lệnh để làm việc với Kubernetes cluster.
+				delete						Lệnh dùng để xóa tài nguyên (Pod, Service, ConfigMap, Secret, v.v.).
+				configmap					Loại tài nguyên cần xóa — ở đây là ConfigMap, dùng để lưu trữ cấu hình (key-value) mà Pod có thể đọc.
+				eazybankprod-configmap		Tên của ConfigMap cụ thể cần xóa.
+				-n default					Chỉ định namespace chứa ConfigMap này là default.
+			
+			ConfigMap là gì?
+			
+				ConfigMap là đối tượng Kubernetes dùng để lưu trữ cấu hình dưới dạng key–value pairs.
+				
+				Các Pod hoặc container trong cluster có thể:
+
+				Đọc dữ liệu từ ConfigMap qua biến môi trường, hoặc
+
+				Mount ConfigMap vào container dưới dạng file cấu hình.
+
+
+				Ví dụ một ConfigMap (được tạo từ YAML):
+				
+					apiVersion: v1
+					kind: ConfigMap
+					metadata:
+					  name: eazybankprod-configmap
+					  namespace: default
+					data:
+					  DATABASE_URL: jdbc:mysql://mysql:3306/eazybank
+					  LOG_LEVEL: INFO
+					  FEATURE_TOGGLE: "true"
+
+
+			Khi bạn chạy lệnh delete này:
+			
+				Kubernetes sẽ:
+
+					Xóa ConfigMap eazybankprod-configmap khỏi namespace default.
+
+				Mọi Pod đang sử dụng ConfigMap này sẽ không tự động khởi động lại, nhưng nếu Pod bị restart hoặc redeploy, nó
+				sẽ không còn đọc được cấu hình đó nữa (vì ConfigMap đã bị xóa).
+
+			Kết quả sau khi chạy lệnh:
+			
+				Bạn sẽ thấy thông báo như:
+				
+				configmap "eazybankprod-configmap" deleted
+
+			Lưu ý quan trọng:
+
+
+				Sau khi xóa ConfigMap, nếu có Deployment hoặc Pod nào phụ thuộc vào nó, bạn có thể gặp lỗi như:
+				
+					MountVolume.SetUp failed for volume "config-volume" : configmap "eazybankprod-configmap" not found
+
+				Để tránh lỗi, nên kiểm tra trước bằng:
+				
+					kubectl get pod -n default -o yaml | findstr eazybankprod-configmap
+
+				để xem có Pod nào đang sử dụng ConfigMap này không.
+
+			Mẹo quản lý an toàn:
+			
+				Nếu bạn chỉ muốn cập nhật cấu hình, không cần xóa hẳn, có thể dùng:
+				
+					kubectl apply -f eazybankprod-configmap.yml
+
+				hoặc:
+					
+					kubectl create configmap eazybankprod-configmap --from-literal=KEY=VALUE --dry-run=client -o yaml | kubectl apply -f -
+
+				→ Cách này sẽ cập nhật ConfigMap mà không phải xóa đi tạo lại, giúp hệ thống ổn định hơn.
+		
 		- cmd: kubectl delete svc cards -n default	
-		- cmd: helm install eazybank prod-env			
-		- cmd: help upgrade eazybank prod-env		
+	
+			Mục đích:
+
+				Lệnh này dùng để xóa một Service có tên là cards trong namespace default.
+
+				Nói cách khác: bạn đang gỡ bỏ cơ chế truy cập mạng nội bộ (hoặc bên ngoài) cho ứng dụng cards trong Kubernetes.
+
+			Phân tích từng phần:
+			
+				Thành phần					Ý nghĩa
+				
+				kubectl						Công cụ dòng lệnh để tương tác với Kubernetes cluster.
+				delete						Dùng để xóa tài nguyên (Pod, Service, ConfigMap, Deployment, v.v.).
+				svc (viết tắt của service)	Loại tài nguyên cần xóa — ở đây là Service, chịu trách nhiệm định tuyến network tới các Pod.
+				cards						Tên Service cần xóa (ứng dụng “cards” của bạn).
+				-n default					Chỉ định namespace là default (vì Kubernetes có thể có nhiều namespace).
+				
+			Service là gì trong Kubernetes?
+
+				Service là một tài nguyên giúp ổn định địa chỉ mạng cho các Pod trong cùng một ứng dụng.
+
+				Vì Pod có thể bị xóa và tạo lại (thay đổi IP), Service cung cấp một điểm truy cập cố định để:
+
+					Các Pod khác trong cluster có thể truy cập ổn định qua tên Service (DNS).
+
+					(Nếu là NodePort hoặc LoadBalancer) các client bên ngoài cluster cũng có thể truy cập vào ứng dụng.
+
+			🔹 Ví dụ:
+
+				Giả sử Service cards được tạo bằng YAML như sau:
+
+					apiVersion: v1
+					kind: Service
+					metadata:
+					  name: cards
+					  namespace: default
+					spec:
+					  selector:
+						app: cards
+					  ports:
+						- port: 8080
+						  targetPort: 8080
+					  type: ClusterIP
+
+
+				Service này cho phép các Pod khác trong cluster gọi http://cards:8080 để truy cập ứng dụng cards.
+
+			Khi bạn chạy lệnh xóa:
+			
+				kubectl delete svc cards -n default
+
+
+			Kubernetes sẽ:
+
+				Xóa Service cards khỏi namespace default.
+
+				Ngắt toàn bộ kết nối đến các Pod cards thông qua DNS hoặc cổng NodePort/LoadBalancer.
+
+				Các Pod thật (ứng dụng cards) vẫn còn, nhưng không thể được truy cập qua Service nữa.
+
+			Kết quả hiển thị:
+
+				Nếu xóa thành công, bạn sẽ thấy:
+
+					service "cards" deleted
+
+			Lưu ý:
+
+				Việc xóa Service không xóa các Pod hay Deployment liên quan.
+
+				Tuy nhiên, bất kỳ ứng dụng nào đang gọi đến cards (qua DNS cards.default.svc.cluster.local) sẽ bị lỗi kết nối (Connection refused, Name not found, v.v.).
+
+				Nếu bạn dùng Ingress hoặc LoadBalancer phụ thuộc vào Service này, nó cũng sẽ mất đường dẫn truy cập.
+
+			Kiểm tra trước khi xóa (gợi ý):
+
+				Trước khi xóa, bạn có thể kiểm tra xem Service đang hoạt động thế nào:
+
+					kubectl get svc cards -n default -o wide
+
+				Hoặc xem có Ingress nào đang dùng Service cards:
+
+					kubectl get ingress -n default -o yaml | findstr cards
+		
 		- cmd: kubectl get pvc		
+		
+		
+		
 		- cmd: docker pull kong:3.9		
+		
+		
+		
 		- cmd: helm repo add kong https://charts.konghq.com
+		
+		
+		
 		- cmd: helm repo update	
-		- cmd: helm create eazybank-common		
+		
+		
+		
+		- cmd: helm create eazybank-common	
+
+
+		
 		- cmd: helm dependencies build		
+		
+		
+		
 		- cmd: helm template .	
-		- cmd: helm install keycloak keycloak		
+		
+		
+		
+		- cmd: helm install keycloak keycloak	
+
+
+		
 		- cmd: helm list -A		
+		
+		
+		
 		- cmd: helm uninstall keycloak		
+		
+		
+		
 		- cmd: helm ls		
+		
+		
+		
 		- cmd: helm seach hub wordpress	
+		
+		
+		
 		- cmd: helm repo add bitnami https://charts.bitnami.com/bitnami		
+		
+		
+		
 		- cmd: helm install happy-panda bitnami/wordpress		
+		
+		
+		
 		- cmd: helm env		
+		
+		
+		
 		- cmd: helm uninstall kubernetes-dashboard -n kubernetes-dashboard		
+		
+		
+		
 		- cmd: helm install prometheus kube-prometheus --skip-crds
-		- cmd: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/ # Add kubernetes-dashboard repository						
+		
+		
+		
+		- cmd: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/ # Add kubernetes-dashboard repository
+		
+
+
+		- cmd: helm install eazybank prod-env
+
+
+
+		- cmd: help upgrade eazybank prod-env			
+
+
+
+		
 		- cmd: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard # Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart	
+		
+		
+		
 		
 	Deployment và Service:
 	
