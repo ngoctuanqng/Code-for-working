@@ -1152,7 +1152,159 @@ Missing Build tools lession
 --- Các lệnh cmd:
 
 	- cmd: choco list
+	
+		============================================================
+		LỆNH: choco list
+		============================================================
+
+		1. MỤC ĐÍCH CHUNG
+		   - Hiển thị danh sách các package liên quan tới Chocolatey.
+		   - Có thể dùng để:
+			   • Tìm package trên nguồn (remote) hoặc
+			   • Liệt kê package đã cài cục bộ (tùy phiên bản choco).
+		   - Thường dùng để kiểm tra package sẵn có, kiểm tra phiên bản, hoặc xuất danh sách package đã cài.
+
+		------------------------------------------------------------
+		2. CÚ PHÁP CƠ BẢN
+		   choco list <filter> [<options/switches>]
+
+		   Ví dụ đơn giản:
+			 choco list
+			 choco list git
+			 choco list --local-only
+
+		   (Thông tin chính thức và các option được lấy từ tài liệu lệnh `choco list` của Chocolatey). :contentReference[oaicite:0]{index=0}
+
+		------------------------------------------------------------
+		3. Ý NGHĨA CÁC THÀNH PHẦN
+		   - <filter>
+			   → Từ khóa tìm kiếm (có thể là tên package hoặc phần của tên).
+			   → Nếu không truyền filter, choco sẽ trả về nhiều kết quả (tuỳ source/phiên bản).
+
+		   - <options/switches>
+			   → Các tuỳ chọn điều chỉnh hành vi hiển thị (xem phần 4 cho các tuỳ chọn thường dùng).
+
+		------------------------------------------------------------
+		4. CÁC TUỲ CHỌN / SWITCH THƯỜNG DÙNG (chọn lọc, giải thích)
+		   NOTE: danh sách dưới đây tóm tắt các tuỳ chọn quan trọng nhất; tham khảo docs để xem đầy đủ. :contentReference[oaicite:1]{index=1}
+
+		   - --local-only  (cũng thấy dưới dạng -l hoặc -lo ở một số tài liệu/phiên bản)
+			   → Chỉ liệt kê các package đã **cài cục bộ** (installed packages).
+			   → Lưu ý: cách xử lý flag này có khác nhau giữa các phiên bản Chocolatey (v2+ có thay đổi). :contentReference[oaicite:2]{index=2}
+
+		   - -i, --include-programs, --include-programs
+			   → Bao gồm cả phần mềm hiển thị trong "Programs and Features" (Windows) mà không do Chocolatey quản lý.
+
+		   - --exact  (or -e)
+			   → Chỉ trả về package có tên **chính xác** bằng filter.
+
+		   - --id-only
+			   → Chỉ in ra Package IDs (ít thông tin hơn, hữu ích cho scripting).
+
+		   - --pre, --prerelease
+			   → Bao gồm các phiên bản prerelease (pre-release) trong kết quả.
+
+		   - --version=<value>
+			   → Lọc kết quả theo một **phiên bản cụ thể** của package.
+
+		   - --page=<n>  và  --page-size=<n>
+			   → Phân trang kết quả (page: trang cần lấy; page-size: số item mỗi trang).
+			   → Mặc định choco trả về tất cả kết quả, nhưng có thể giới hạn bằng page/page-size.
+
+		   - -r, --limit-output
+			   → Giảm bớt output về thông tin thiết yếu (ít noise hơn).
+
+		   - --include-headers
+			   → Khi dùng --limit-output, hiển thị header (yêu cầu CLI 2.5.0+).
+
+		   - --by-id-only / --by-tag-only / --id-starts-with
+			   → Lọc theo cách so khớp id hoặc tag.
+
+		   - --ignore-pinned
+			   → Bỏ qua việc hiển thị các package bị "pinned".
+
+		   - -d, --debug; -v, --verbose; --trace
+			   → Thay đổi mức logging để debug hoặc xem chi tiết.
+
+		   (Nguồn: trang tài liệu lệnh `choco list` từ Chocolatey). :contentReference[oaicite:3]{index=3}
+
+		------------------------------------------------------------
+		5. KẾT QUẢ MẪU & Ý NGHĨA
+		   - Kết quả thông thường (remote search):
+			   git 2.41.0
+			   git.install 2.41.0
+			   git-lfs 3.4.0
+			 → Dạng: <packageId> <version>
+
+		   - Khi dùng --local-only:
+			   7zip 19.00
+			   git 2.41.0
+			 → Liệt kê package đã cài kèm phiên bản; dòng cuối có thể in tóm tắt "X packages installed."
+
+		   - Khi dùng --id-only: chỉ in
+			   git
+			   7zip
+			 → dùng cho scripting/pipe.
+
+		------------------------------------------------------------
+		6. EXIT CODES (tóm tắt hữu ích cho scripts)
+		   - 0: thành công
+		   - 1 (hoặc -1): lỗi
+		   - 2: (enhanced exit codes enabled) không có kết quả
+		   → Tùy thuộc vào cấu hình feature `useEnhancedExitCodes`. :contentReference[oaicite:4]{index=4}
+
+		------------------------------------------------------------
+		7. VÍ DỤ THỰC HÀNH (COPY-PASTE)
+
+		   # 1) Tìm package tên chứa "git"
+		   choco list git
+
+		   # 2) Liệt kê package đã cài cục bộ (backup danh sách)
+		   choco list --local-only > installed-packages.txt
+
+		   # 3) Chỉ in ID (phù hợp cho piping)
+		   choco list git --id-only
+
+		   # 4) Bao gồm chương trình từ Programs and Features
+		   choco list --local-only --include-programs
+
+		   # 5) Lọc chính xác tên package
+		   choco list --exact git
+
+		   # 6) Hiển thị ít output (dùng trong automation)
+		   choco list git --limit-output
+
+		   # 7) Phân trang (ví dụ lấy trang 2, 25 item/trang)
+		   choco list --page=2 --page-size=25
+
+		   (Các ví dụ trên dựa theo cú pháp và options trong docs của Chocolatey). :contentReference[oaicite:5]{index=5}
+
+		------------------------------------------------------------
+		8. LƯU Ý & MẸO
+		   - Phiên bản Chocolatey khác nhau có thể thay đổi hành vi một số flag (ví dụ `--local-only` trước đây phổ biến, trong choco v2+ cách mặc định có thay đổi). Kiểm tra `choco --version` và `choco list --help` nếu kết quả khác kỳ vọng. :contentReference[oaicite:6]{index=6}
+		   - Để backup toàn bộ package list rồi restore trên máy khác:
+			   choco list --local-only > packages.txt
+			   choco install < packages.txt
+		   - Dùng `--limit-output` và `--id-only` khi viết script để giảm parsing complexity.
+		   - Nếu cần debug: thêm `-d` hoặc `--trace` để xem chi tiết.
+
+		------------------------------------------------------------
+		9. TÀI NGUYÊN THAM KHẢO
+		   - Documentation: Chocolatey — List Command (choco list). :contentReference[oaicite:7]{index=7}
+
+		------------------------------------------------------------
+		10. TÓM TẮT NGẮN GỌN
+		   - `choco list` là lệnh để **tìm và/hoặc liệt kê** package liên quan tới Chocolatey.
+		   - Dùng `--local-only` để xem package đã cài; dùng các flag như `--exact`, `--id-only`, `--include-programs` để điều chỉnh output cho scripting hay automation.
+		   - Luôn kiểm tra `choco list --help` / docs chính thức nếu cần chi tiết theo phiên bản.
+
+		============================================================
+	
+	
 	- cmd: choco install virtualbox --version=7.0.8 -y
+	
+	
+	
 	- cmd: choco install vagrant --version=2.3.7 -y
 	- cmd: choco install corretto17jdk -y
 	- cmd: choco install maven -y

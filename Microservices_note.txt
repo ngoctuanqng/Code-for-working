@@ -5293,89 +5293,1901 @@
 
 					kubectl get ingress -n default -o yaml | findstr cards
 		
-		- cmd: kubectl get pvc		
-		
-		
-		
 		- cmd: docker pull kong:3.9		
 		
-		
+			Lệnh docker pull kong:3.9 dùng để tải (pull) một image của Kong Gateway phiên bản 3.9 từ Docker Hub về máy của bạn.
+			
+
+			Cú pháp:
+			
+				docker pull <tên_image>:<tag>
+
+
+				Trong trường hợp này:
+
+					docker pull kong:3.9
+
+			Giải nghĩa từng phần:
+			
+				Thành phần				Ý nghĩa
+				
+				docker					Lệnh chính của Docker CLI (command-line interface)
+				pull					Hành động tải image từ registry (thường là Docker Hub)
+				kong					Tên image — đây là image chính thức của Kong Gateway (API Gateway mã nguồn mở)
+				3.9						Tag chỉ phiên bản của image (ở đây là Kong phiên bản 3.9)
+			
+			Khi chạy lệnh này:
+
+				Docker sẽ kiểm tra xem image kong:3.9 có sẵn trong máy bạn chưa.
+
+					Nếu đã có, Docker sẽ bỏ qua (trừ khi bạn ép cập nhật).
+
+					Nếu chưa có, Docker sẽ tải từ Docker Hub (mặc định registry).
+
+				Sau khi tải xong, bạn có thể xác nhận bằng:
+
+					docker images
+
+
+					→ Sẽ thấy dòng tương tự:
+
+					REPOSITORY   TAG     IMAGE ID       CREATED       SIZE
+					kong         3.9     <some_id>      <date>        <size>
+
+			Ví dụ sử dụng tiếp theo:
+
+				Sau khi pull xong, bạn có thể chạy Kong bằng:
+
+					docker run -d --name kong \
+					  -p 8000:8000 -p 8001:8001 \
+					  kong:3.9
+
+
+				Lúc này Kong Gateway sẽ khởi động và lắng nghe cổng 8000 (proxy) và 8001 (admin API).
+
+			Ghi chú:
+
+				Nếu bạn không chỉ định tag (ví dụ docker pull kong), Docker sẽ mặc định tải kong:latest — tức là phiên bản mới nhất.
+
+				Việc chỉ định tag (như 3.9) giúp đảm bảo môi trường ổn định, tránh bị thay đổi khi Kong phát hành phiên bản mới.		
 		
 		- cmd: helm repo add kong https://charts.konghq.com
 		
-		
+			Lệnh helm repo add kong https://charts.konghq.com dùng để thêm (add) một Helm chart repository mới — cụ thể là repository
+			chính thức của Kong — vào cấu hình của Helm trên máy của bạn.
+
+			Cú pháp chung:
+			
+				helm repo add <tên_repo> <đường_dẫn_repo>
+
+			Giải thích từng phần trong lệnh:
+			
+				helm repo add kong https://charts.konghq.com
+
+				Thành phần					Ý nghĩa
+				
+				helm						Công cụ quản lý package (chart) cho Kubernetes
+				repo						Từ khóa chỉ hành động làm việc với repositories (nơi chứa các chart)
+				add							Thao tác để thêm một repository mới
+				kong						Tên định danh (alias) bạn muốn đặt cho repository này — có thể dùng tên khác
+											nếu muốn (vd: kong-gateway)
+				https://charts.konghq.com	Đường dẫn (URL) đến repository chính thức của Kong trên Internet, nơi lưu trữ các Helm
+											charts cho Kong Gateway, Kong Ingress Controller, v.v.
+			
+			Khi bạn chạy lệnh này:
+
+				Helm sẽ kết nối tới URL https://charts.konghq.com.
+
+				Nó sẽ tải về metadata (index.yaml) mô tả các chart có sẵn trong repo đó.
+
+				Helm sẽ lưu lại repo này trong danh sách repo cục bộ của bạn.
+
+			Kiểm tra lại:
+
+				Sau khi thêm xong, bạn có thể kiểm tra:
+
+					helm repo list
+
+
+				Sẽ thấy dòng tương tự:
+
+					NAME    URL
+					kong    https://charts.konghq.com
+
+			Cập nhật danh sách chart:
+
+				Để đảm bảo Helm có danh sách chart mới nhất:
+
+					helm repo update
+
+			Sử dụng sau đó:
+
+				Sau khi đã add repo, bạn có thể cài đặt Kong Gateway vào Kubernetes bằng Helm:
+
+					helm install kong kong/kong
+
+				Ở đây:
+
+					kong/kong nghĩa là: cài chart kong từ repo kong.		
 		
 		- cmd: helm repo update	
 		
-		
+			Lệnh helm repo update được dùng để cập nhật (update) lại danh sách các Helm charts từ tất cả các
+			repository mà bạn đã thêm vào Helm trước đó.
+
+			Cú pháp:
+			
+				helm repo update
+
+			Giải thích chi tiết:
+			
+				Thành phần		Ý nghĩa
+				
+				helm			Lệnh chính của công cụ Helm
+				repo			Làm việc với các repository (kho chứa chart)
+				update			Hành động cập nhật thông tin (metadata) của các chart trong repo
+			
+			Khi bạn chạy lệnh này:
+
+				Helm sẽ duyệt qua toàn bộ danh sách các repo mà bạn đã thêm bằng helm repo add (ví dụ: kong, bitnami, prometheus-community, ...).
+
+				Nó sẽ tải lại file index.yaml từ mỗi repo đó.
+
+				File này chứa danh sách các chart, phiên bản, và metadata tương ứng.
+
+				Helm sẽ lưu dữ liệu mới nhất vào bộ nhớ cục bộ (~/.cache/helm hoặc ~/.config/helm tùy phiên bản).
+
+			Ví dụ:
+
+				Giả sử bạn đã thêm 2 repo:
+
+					helm repo add kong https://charts.konghq.com
+					
+					helm repo add bitnami https://charts.bitnami.com/bitnami
+
+				Khi bạn chạy:
+
+					helm repo update
+
+				Kết quả sẽ tương tự:
+
+					Hang tight while we grab the latest from your chart repositories...
+					...Successfully got an update from the "kong" chart repository
+					...Successfully got an update from the "bitnami" chart repository
+					Update Complete. ⎈Happy Helming!⎈
+
+			Tại sao cần chạy helm repo update?
+
+				Khi bạn vừa thêm repo mới (helm repo add ...), Helm chỉ biết URL, chưa tải danh sách chart.
+
+				Hoặc khi repo có chart mới / version mới, bạn cần update để thấy và cài được bản đó.
+
+				Nếu không chạy lệnh này, bạn có thể gặp lỗi như:
+
+					Error: chart "kong" not found in repo "kong"
+
+				→ Do Helm chưa có dữ liệu mới nhất từ repo.		
 		
 		- cmd: helm create eazybank-common	
 
+			Lệnh helm create eazybank-common được dùng để tạo một Helm chart mới có tên là eazybank-common — tức là một
+			bộ khung (template) sẵn cho bạn bắt đầu triển khai ứng dụng trên Kubernetes bằng Helm.
 
+			Cú pháp:
+			
+				helm create <tên_chart>
+
+			Giải thích từng phần:
+			
+				Thành phần			Ý nghĩa
+				
+				helm				Lệnh chính của công cụ Helm
+				create				Hành động để tạo mới một chart mẫu
+				eazybank-common		Tên chart mới mà bạn muốn tạo (thư mục sẽ có tên này)
+			
+			Khi bạn chạy:
+			
+				helm create eazybank-common
+
+
+				Helm sẽ:
+
+					Tạo một thư mục mới có tên eazybank-common
+
+					Bên trong thư mục đó là cấu trúc mặc định của một Helm chart
+
+			Cấu trúc thư mục được tạo:
+			
+				eazybank-common/
+				│
+				├── Chart.yaml           # Thông tin metadata của chart (tên, version, mô tả...)
+				├── values.yaml          # File cấu hình mặc định (giá trị có thể override)
+				│
+				├── charts/              # Nơi chứa các chart phụ (dependencies)
+				│
+				├── templates/           # Các file template YAML cho Kubernetes
+				│   ├── deployment.yaml
+				│   ├── service.yaml
+				│   ├── ingress.yaml
+				│   ├── _helpers.tpl     # Các hàm hoặc biến dùng chung
+				│   └── NOTES.txt        # Hướng dẫn hiển thị sau khi cài chart
+				│
+				└── .helmignore          # Giống .gitignore – bỏ qua file khi đóng gói chart
+
+			Ý nghĩa của từng phần chính:
+			
+				File / Thư mục				Chức năng
+				
+				Chart.yaml					Mô tả chart: tên (name), phiên bản (version), mô tả (description),...
+				values.yaml					Nơi bạn định nghĩa các giá trị có thể tùy chỉnh (VD: image, port, replicas, env variables...)
+				templates/					Chứa các file YAML được Helm render ra Kubernetes manifests thực tế
+				_helpers.tpl				Chứa các hàm dùng lại (ví dụ: đặt tên tài nguyên)
+				NOTES.txt					Hiển thị hướng dẫn sau khi người dùng cài chart (ví dụ URL truy cập app)
+			
+			Ví dụ:
+
+				Sau khi tạo xong, bạn có thể chỉnh sửa values.yaml:
+
+					replicaCount: 2
+					image:
+					  repository: eazybank/backend
+					  tag: "1.0.0"
+					service:
+					  type: ClusterIP
+					  port: 8080
+
+				Và triển khai chart đó lên Kubernetes:
+
+					helm install eazybank eazybank-common/
+
+			Khi nào dùng helm create
+
+				Khi bạn muốn tự tạo một chart mới cho ứng dụng của mình.
+
+				Khi bạn muốn chuẩn hóa cấu trúc triển khai giữa nhiều service (vd: eazybank-common dùng chung cho nhiều module: accounts, loans, cards,…).
 		
 		- cmd: helm dependencies build		
 		
-		
+			Lệnh helm dependencies build (hoặc viết đầy đủ là helm dependency build) được dùng để tải và cài đặt các chart
+			phụ thuộc (dependencies) được khai báo trong file Chart.yaml của Helm chart hiện tại.
+
+			Cú pháp:
+			
+				helm dependency build [đường_dẫn_đến_chart]
+
+
+				Nếu không chỉ định đường dẫn, Helm mặc định dùng thư mục hiện tại (.).
+
+			Ví dụ:
+
+				helm dependency build
+
+				hoặc
+
+					helm dependency build ./eazybank-common
+
+			Giải thích từng phần:
+			
+				Thành phần							Ý nghĩa
+				
+				helm								Công cụ quản lý Helm chart
+				dependency (hoặc dependencies)		Nhóm lệnh làm việc với các chart phụ thuộc
+				build								Hành động tải và xây dựng các chart phụ thuộc về local
+			
+			Khi bạn chạy lệnh này, Helm sẽ:
+
+				Đọc file Chart.yaml trong chart hiện tại.
+				
+				Trong đó có phần:
+
+					dependencies:
+					  - name: postgresql
+						version: 12.5.8
+						repository: https://charts.bitnami.com/bitnami
+					  - name: redis
+						version: 17.3.2
+						repository: https://charts.bitnami.com/bitnami
+
+
+				Helm sẽ:
+
+					Kết nối đến các repo tương ứng (bitnami, kong, v.v.)
+
+					Tải (download) các chart phụ thuộc được liệt kê ở trên.
+
+					Lưu chúng vào thư mục:
+
+						charts/
+
+
+					dưới dạng .tgz (ví dụ: postgresql-12.5.8.tgz, redis-17.3.2.tgz).
+
+					Nếu thư mục charts/ đã có file cũ, Helm sẽ xóa hoặc cập nhật lại cho đúng version.
+
+			Kết quả sau khi chạy:
+
+				Thư mục chart của bạn sẽ trông như sau:
+
+					eazybank-common/
+					├── Chart.yaml
+					├── values.yaml
+					├── templates/
+					└── charts/
+						├── postgresql-12.5.8.tgz
+						└── redis-17.3.2.tgz
+
+			So sánh với các lệnh khác:
+			
+				Lệnh						Mục đích
+				
+				helm dependency update		Tải hoặc cập nhật dependencies (giống build, nhưng không kiểm tra chart lock file)
+				helm dependency build		Dựa vào file Chart.lock nếu có để đảm bảo đúng phiên bản dependency
+				helm dependency list		Hiển thị danh sách các dependencies của chart
+			
+			Khi nào cần chạy helm dependency build:
+
+				Khi bạn mới clone một repo chart từ GitHub — vì chart phụ thuộc không được commit sẵn.
+
+				Khi bạn thêm hoặc thay đổi dependencies trong Chart.yaml.
+
+				Khi bạn muốn đảm bảo các chart phụ thuộc được tải đúng version (theo Chart.lock).		
 		
 		- cmd: helm template .	
 		
-		
+			Lệnh helm template . được dùng để render (biên dịch) các Helm templates trong chart hiện tại (thư mục .) thành các file
+			YAML thuần của Kubernetes, nhưng không triển khai lên cluster.
+
+			Cú pháp:
+			
+				helm template [RELEASE_NAME] [PATH_TO_CHART]
+
+			Ví dụ:
+
+				helm template .          # render chart hiện tại, không chỉ định tên release  
+				helm template eazybank . # render chart hiện tại, với tên release là "eazybank"
+
+			Giải thích từng phần:
+			
+				Thành phần				Ý nghĩa
+				
+				helm					Công cụ Helm
+				template				Subcommand dùng để biên dịch (render) các file template thành YAML thật
+				.						Nghĩa là chart nằm ở thư mục hiện tại (current directory)
+			
+			Khi bạn chạy lệnh này, Helm sẽ:
+
+				Đọc toàn bộ nội dung chart hiện tại, bao gồm:
+
+					Chart.yaml
+
+					values.yaml
+
+					Các file trong templates/
+
+					Bất kỳ chart phụ thuộc nào trong charts/
+
+				Áp dụng các giá trị từ values.yaml (và các giá trị bạn truyền thêm bằng --set hoặc -f file.yaml nếu có).
+
+				Render (thay thế biến, biểu thức) trong các file template YAML (templates/*.yaml) thành YAML hoàn chỉnh mà Kubernetes có thể hiểu.
+
+				In ra kết quả ra terminal (stdout) mà không triển khai gì lên cluster.
+
+			Ví dụ minh họa:
+
+				Giả sử bạn có trong templates/deployment.yaml:
+
+					apiVersion: apps/v1
+					kind: Deployment
+					metadata:
+					  name: {{ .Release.Name }}-{{ .Chart.Name }}
+					spec:
+					  replicas: {{ .Values.replicaCount }}
+
+				và trong values.yaml:
+
+					replicaCount: 2
+
+				Khi bạn chạy:
+
+					helm template eazybank .
+
+				Kết quả hiển thị sẽ là:
+
+					---
+					# Source: eazybank/templates/deployment.yaml
+					apiVersion: apps/v1
+					kind: Deployment
+					metadata:
+					  name: eazybank-eazybank
+					spec:
+					  replicas: 2
+
+			Khi nào nên dùng helm template:
+			
+				Mục đích							Mô tả
+				
+				Kiểm tra trước khi triển khai		Xem Kubernetes YAML được sinh ra có đúng không (giúp tránh lỗi)
+				Debug								Dễ dàng phát hiện lỗi cú pháp hoặc biến không tồn tại
+				Xuất YAML để dùng ngoài Helm		Ví dụ: xuất file YAML ra để áp dụng thủ công bằng kubectl apply -f
+				Dùng trong CI/CD					Render YAML ra trước khi deploy trong pipeline
+			
+			Ví dụ nâng cao:
+
+				Render chart với file values riêng:
+
+					helm template eazybank . -f prod-values.yaml
+
+				Xuất ra file YAML:
+
+					helm template eazybank . > output.yaml		
 		
 		- cmd: helm install keycloak keycloak	
 
+			Lệnh helm install keycloak keycloak được dùng để cài đặt (deploy) ứng dụng Keycloak lên Kubernetes bằng
+			Helm chart, với tên release là keycloak.
+
+			Cú pháp chung:
+			
+				helm install <tên_release> <tên_chart_hoặc_đường_dẫn>
+
+			Trong trường hợp này:
+
+				helm install keycloak keycloak
+
+			Giải thích từng phần:
+			
+				Thành phần				Ý nghĩa
+				
+				helm					Công cụ quản lý Helm chart
+				install					Hành động cài đặt chart lên Kubernetes cluster
+				keycloak (thứ nhất)		Tên release bạn muốn đặt (tức là tên “bản cài đặt”)
+				keycloak (thứ hai)		Tên chart mà Helm sẽ dùng để cài đặt
+			
+			Khi bạn chạy lệnh này, Helm sẽ:
+
+				Tìm chart có tên keycloak:
+
+					Nếu bạn đã thêm repo Keycloak (ví dụ: bitnami hoặc codecentric), Helm sẽ tìm trong đó.
+
+					Hoặc nếu có thư mục ./keycloak trong máy, Helm sẽ cài từ thư mục đó.
+
+				Đọc cấu hình từ:
+
+					Chart.yaml, values.yaml của chart Keycloak
+
+					Bất kỳ file giá trị nào bạn truyền thêm bằng -f hoặc --set
+
+				Render (biên dịch) các template YAML
+				
+					→ thành các manifest Kubernetes thật (Deployment, Service, Ingress, Secret, ...)
+
+				Gửi chúng đến API Server của Kubernetes
+				
+					→ để tạo ra toàn bộ tài nguyên cho Keycloak trong cluster.
+
+			Sau khi cài, bạn có thể kiểm tra:
+			
+				helm list
+
+				→ Sẽ thấy:
+
+					NAME       NAMESPACE   REVISION   UPDATED        STATUS    CHART            APP VERSION
+					keycloak   default     1          1m ago         deployed  keycloak-22.3.0  24.0.3
+
+				Hoặc kiểm tra pod đang chạy:
+
+					kubectl get pods
+
+			Ví dụ cụ thể:
+			
+				Cài Keycloak từ repo Bitnami:
+				
+					helm repo add bitnami https://charts.bitnami.com/bitnami
+					
+					helm repo update
+					
+					helm install keycloak bitnami/keycloak
+
+				Cài Keycloak từ thư mục chart local:
+				
+					helm install keycloak ./keycloak
+
+			Sau khi cài:
+
+				Helm sẽ tạo ra các tài nguyên như:
+
+					Deployment: chạy container Keycloak
+
+					Service: mở port cho các pod Keycloak
+
+					Secret / ConfigMap: lưu username, password, cấu hình DB
+
+					Ingress (nếu cấu hình): cho phép truy cập qua domain
+
+			Tùy chọn phổ biến khi cài:
+			
+				Tùy chọn						Mô tả						Ví dụ
+				-f <file>						Dùng file cấu hình riêng	-f values-prod.yaml
+				--set key=value					Ghi đè cấu hình nhanh		--set replicaCount=2
+				--namespace <ns>				Cài vào namespace khác		--namespace keycloak
+				
+				Ví dụ thực tế:
+				
+					helm install keycloak bitnami/keycloak \
+					  --set auth.adminUser=admin \
+					  --set auth.adminPassword=admin123 \
+					  --set service.type=LoadBalancer
 
 		
 		- cmd: helm list -A		
 		
-		
+			Lệnh helm list -A (hoặc viết đầy đủ là helm list --all-namespaces) được dùng để liệt kê tất cả các release Helm đang
+			được cài đặt trên toàn bộ các namespace trong cluster Kubernetes.
+
+			Cú pháp:
+			
+				helm list -A
+
+				hoặc tương đương:
+
+					helm list --all-namespaces
+
+			Giải thích từng phần:
+			
+				Thành phần					Ý nghĩa
+				
+				helm						Công cụ quản lý Helm chart
+				list						Lệnh dùng để liệt kê (xem danh sách) các release đã cài
+				-A hoặc --all-namespaces	Hiển thị tất cả release ở mọi namespace (thay vì chỉ namespace hiện tại)
+			
+			Khi bạn chạy lệnh này, Helm sẽ:
+
+				Kết nối đến Kubernetes cluster hiện tại (theo context của kubectl).
+
+				Tìm trong mọi namespace xem có release Helm nào đang được quản lý không.
+
+				In ra bảng danh sách các release kèm thông tin chi tiết.
+
+			Kết quả ví dụ:
+			
+				$ helm list -A
+				
+				NAME        	NAMESPACE    	REVISION	UPDATED                             	STATUS  	CHART              		APP VERSION
+				keycloak    	default      	1       	2025-10-29 16:03:47.012345 +0700 +07	deployed	keycloak-22.3.0     	24.0.3
+				kong        	kong         	2       	2025-10-29 15:57:10.987654 +0700 +07	deployed	kong-3.9.0          	3.9
+				prometheus  	monitoring   	1       	2025-10-28 09:40:12.123456 +0700 +07	deployed	kube-prometheus-51.1.0	v0.67.0
+
+			Ý nghĩa các cột:
+			
+				Cột						Giải thích
+				
+				NAME					Tên release (do bạn đặt khi helm install)
+				NAMESPACE				Namespace mà release đó được cài vào
+				REVISION				Số lần nâng cấp / thay đổi chart (mỗi helm upgrade tăng 1)
+				UPDATED					Thời gian cài đặt hoặc cập nhật gần nhất
+				STATUS					Trạng thái hiện tại (ví dụ: deployed, failed, pending-upgrade, uninstalled)
+				CHART					Tên và phiên bản của Helm chart được dùng
+				APP VERSION				Phiên bản thực tế của ứng dụng (ví dụ: Keycloak 24.0.3, Kong 3.9, v.v.)
+			
+			Nếu không dùng -A thì sao?
+
+				Mặc định:
+
+					helm list
+
+					→ Chỉ hiển thị các release trong namespace hiện tại (namespace mà kubectl đang dùng).
+					
+				Bạn có thể kiểm tra namespace hiện tại bằng:
+
+					kubectl config view --minify --output 'jsonpath={..namespace}'
+
+			Một vài ví dụ hữu ích:
+			
+				Mục đích								Lệnh
+				
+				Liệt kê tất cả release trong cluster	helm list -A
+				Liệt kê release trong namespace cụ thể	helm list -n kong
+				Xem 									release cụ thể	helm status keycloak -n default
+				Xóa 									release	helm uninstall keycloak -n default		
 		
 		- cmd: helm uninstall keycloak		
 		
-		
+			Lệnh helm uninstall keycloak được dùng để gỡ bỏ (xóa) Helm release có tên là keycloak khỏi Kubernetes cluster.
+			
+			Nói cách khác: lệnh này xóa toàn bộ tài nguyên Kubernetes (Deployment, Service, Secret, v.v.) mà Helm đã
+			cài khi bạn chạy helm install keycloak ....
+
+			Cú pháp:
+			
+				helm uninstall <tên_release> [tùy_chọn]
+
+			Ví dụ:
+
+				helm uninstall keycloak
+
+			Giải thích từng phần:
+			
+				Thành phần				Ý nghĩa
+				
+				helm					Công cụ quản lý Helm chart
+				uninstall				Hành động xóa một release đã được cài bằng Helm
+				keycloak				Tên release bạn muốn gỡ bỏ (tên bạn đã dùng khi cài đặt, ví dụ helm install keycloak bitnami/keycloak)
+			
+			Khi bạn chạy lệnh này, Helm sẽ:
+
+				Kết nối đến Kubernetes cluster hiện tại.
+
+				Tìm release có tên keycloak (ví dụ trong namespace default).
+
+				Xóa toàn bộ tài nguyên mà release đó đã tạo ra:
+
+					Deployments
+
+					Services
+
+					Secrets / ConfigMaps
+
+					Ingresses
+
+					v.v.
+
+				Gỡ bỏ release ra khỏi danh sách Helm (helm list sẽ không còn hiển thị nữa).
+
+				Lưu thông tin gỡ bỏ trong Helm history (có thể khôi phục nếu muốn, trừ khi xóa hoàn toàn dữ liệu Helm).
+
+			Ví dụ minh họa:
+
+				Giả sử bạn đã cài Keycloak:
+
+					helm install keycloak bitnami/keycloak
+
+				Khi muốn gỡ bỏ:
+
+					helm uninstall keycloak
+
+				Kết quả:
+
+					release "keycloak" uninstalled
+
+			Sau khi gỡ bỏ:
+
+				Các tài nguyên Kubernetes (pods, service, secret, configmap, ingress, ...) được xóa khỏi cluster.
+
+				Tuy nhiên, nếu chart có tạo PersistentVolumeClaims (PVCs), thì dữ liệu trong volume thường không bị xóa (để tránh mất dữ liệu).
+
+					Bạn có thể xóa thủ công bằng:
+
+						kubectl delete pvc -l app.kubernetes.io/instance=keycloak
+
+			Nếu bạn cài ở namespace khác:
+
+				Bạn cần chỉ rõ namespace bằng -n:
+
+					helm uninstall keycloak -n kong
+
+			Các tùy chọn hữu ích:
+			
+				Tùy chọn				Mô tả
+				
+				-n, --namespace <ns>	Gỡ release trong namespace cụ thể
+				--keep-history			Giữ lại lịch sử release (để sau có thể xem lại bằng helm history)
+				--dry-run				Chạy thử, không thật sự xóa gì (chỉ mô phỏng)
+			
+			So sánh nhanh:
+			
+				Lệnh										Chức năng
+				
+				helm install keycloak bitnami/keycloak		Cài Keycloak vào cluster
+				helm list									Xem danh sách release đã cài
+				helm uninstall keycloak						Gỡ bỏ release Keycloak
+				helm history keycloak						Xem lịch sử các bản cài/upgrade của release Keycloak		
 		
 		- cmd: helm ls		
 		
-		
+			Lệnh helm ls (viết tắt của helm list) được dùng để liệt kê tất cả các Helm release đang được cài đặt
+			trong namespace hiện tại của Kubernetes.
+
+			Cú pháp:
+			
+				helm ls
+
+			hoặc đầy đủ:
+
+				helm list
+
+			Giải thích từng phần:
+			
+				Thành phần			Ý nghĩa
+				
+				helm				Công cụ quản lý Helm chart
+				ls					Viết tắt của list — dùng để liệt kê các release đã được cài đặt
+			
+			Khi bạn chạy lệnh này, Helm sẽ:
+
+				Kết nối tới Kubernetes cluster (dựa trên kubectl config current-context)
+
+				Xác định namespace hiện tại (thường là default, trừ khi bạn chỉ định namespace khác)
+
+				Lấy danh sách tất cả Helm release trong namespace đó
+
+				Hiển thị thông tin chi tiết của từng release (tên, trạng thái, version chart, v.v.)
+
+			Kết quả ví dụ:
+			
+				$ helm ls
+				
+				NAME      	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART              		APP VERSION
+				keycloak  	default  	1        	2025-10-29 16:03:47.012345 +0700 +07 	deployed	keycloak-22.3.0     	24.0.3
+				kong      	default  	2        	2025-10-29 15:57:10.987654 +0700 +07 	deployed	kong-3.9.0          	3.9
+
+			Ý nghĩa các cột:
+			
+				Cột							Giải thích
+				
+				NAME						Tên release (do bạn đặt khi helm install)
+				NAMESPACE					Namespace chứa release đó
+				REVISION					Số lần release được nâng cấp (mỗi lần helm upgrade sẽ tăng 1)
+				UPDATED						Thời gian cài đặt hoặc cập nhật gần nhất
+				STATUS						Trạng thái của release (deployed, failed, pending-upgrade, uninstalled, …)
+				CHART						Tên và version của chart được dùng
+				APP VERSION					Phiên bản thực tế của ứng dụng bên trong chart
+			
+			Nếu bạn muốn xem tất cả các namespace:
+			
+				helm ls -A
+
+			hoặc
+
+				helm list --all-namespaces
+
+			Một vài ví dụ hữu ích:
+			
+				Mục đích								Lệnh
+				
+				Xem release trong namespace hiện tại	helm ls
+				Xem release trong namespace cụ thể		helm ls -n kong
+				Xem tất cả release trong cluster		helm ls -A
+				Xem chi tiết release					helm status keycloak
+			
+			Mẹo nhỏ:
+
+				Namespace mặc định mà Helm dùng chính là namespace mà kubectl đang trỏ tới.
+				Bạn có thể kiểm tra bằng:
+
+					kubectl config view --minify --output 'jsonpath={..namespace}'		
 		
 		- cmd: helm seach hub wordpress	
 		
-		
+			Lệnh helm search hub wordpress được dùng để tìm (search) các Helm chart có liên quan đến WordPress trong Helm
+			Hub (Artifact Hub) — tức là kho lưu trữ trung tâm chứa hàng ngàn Helm chart công khai.
+
+			Cú pháp:
+			
+				helm search hub <từ_khóa>
+
+
+			Ví dụ:
+
+				helm search hub wordpress
+
+			Giải thích từng phần:
+			
+				Thành phần					Ý nghĩa
+				
+				helm						Công cụ quản lý Helm chart
+				search						Nhóm lệnh dùng để tìm kiếm chart
+				hub							Chỉ định tìm trên Helm Hub (Artifact Hub) — trang web tập hợp hàng ngàn chart từ nhiều nhà phát triển khác nhau
+				wordpress					Từ khóa bạn muốn tìm — ở đây là các chart liên quan đến WordPress
+			
+			Khi bạn chạy lệnh này, Helm sẽ:
+
+				Kết nối tới Artifact Hub (https://artifacthub.io
+				).
+
+				Gửi truy vấn tìm kiếm với từ khóa wordpress.
+
+				Hiển thị danh sách các chart phù hợp từ nhiều repo khác nhau (Bitnami, Groundhog, …).
+
+			Ví dụ kết quả:
+			
+				$ helm search hub wordpress
+				
+				URL                                                			CHART VERSION	APP 			VERSION	DESCRIPTION
+				
+				https://artifacthub.io/packages/helm/bitnami/wordpress		16.3.4        	6.5.4       	Web publishing platform for building blogs and websites.
+				https://artifacthub.io/packages/helm/groundhog/wordpress	0.3.2         	6.2.0       	WordPress for Kubernetes.
+			
+			Ý nghĩa các cột:
+			
+				Cột					Giải thích
+				
+				URL					Đường dẫn đến trang chi tiết chart trên Artifact Hub
+				CHART VERSION		Phiên bản của Helm chart
+				APP VERSION			Phiên bản ứng dụng WordPress thực tế
+				DESCRIPTION			Mô tả ngắn gọn về chart
+				
+			Bước tiếp theo sau khi tìm thấy chart mong muốn:
+
+					Giả sử bạn muốn cài chart WordPress của Bitnami, bạn sẽ:
+
+					Thêm repo Bitnami:
+
+						helm repo add bitnami https://charts.bitnami.com/bitnami
+						
+						helm repo update
+
+					Cài đặt WordPress:
+
+						helm install my-wordpress bitnami/wordpress
+
+			So sánh nhanh:
+			
+				Lệnh						Nơi tìm kiếm					Mô tả
+				
+				helm search hub <keyword>	Artifact Hub (trực tuyến)		Tìm chart công khai trên Internet
+				helm search repo <keyword>	Repo cục bộ (đã helm repo add)	Tìm chart có sẵn trong các repo bạn đã thêm vào máy		
 		
 		- cmd: helm repo add bitnami https://charts.bitnami.com/bitnami		
 		
-		
+			Lệnh helm repo add bitnami https://charts.bitnami.com/bitnami dùng để thêm kho Helm chart chính thức của
+			Bitnami vào danh sách các repository trên máy của bạn.
+
+			Cú pháp tổng quát:
+			
+				helm repo add <tên_repo> <đường_dẫn_repo>
+
+			Giải thích từng phần trong lệnh:
+			
+				helm repo add bitnami https://charts.bitnami.com/bitnami
+
+				Thành phần							Ý nghĩa
+							
+				helm								Công cụ quản lý Helm chart (package manager cho Kubernetes)
+				repo								Nhóm lệnh làm việc với Helm repositories (kho lưu trữ chart)
+				add									Hành động thêm một repository mới
+				bitnami								Tên (alias) bạn đặt cho repository — ở đây là bitnami
+				https://charts.bitnami.com/bitnami	Đường dẫn URL đến kho chart chính thức của Bitnami
+			
+			Bitnami là gì?
+
+				Bitnami là một nhà phát triển cung cấp Helm chart tiêu chuẩn hóa, đáng tin cậy cho hàng trăm ứng dụng phổ biến như:
+
+					WordPress
+
+					MySQL
+
+					PostgreSQL
+
+					MongoDB
+
+					Redis
+
+					Nginx
+
+					Jenkins, GitLab, v.v.
+
+				Các chart của Bitnami được dùng rất rộng rãi vì:
+
+					Được cập nhật thường xuyên
+
+					Có cấu hình an toàn & dễ dùng
+
+					Tương thích tốt với nhiều nền tảng Kubernetes khác nhau (GKE, AKS, EKS, Minikube, v.v.)
+
+			Khi bạn chạy lệnh này:
+
+				Helm sẽ:
+
+					Kết nối đến https://charts.bitnami.com/bitnami
+
+					Tải file index.yaml (danh sách các chart và phiên bản)
+
+					Lưu thông tin đó trong cấu hình Helm trên máy bạn (thường ở ~/.config/helm/repositories.yaml)
+
+			Kiểm tra lại sau khi thêm:
+			
+				helm repo list
+
+			Kết quả sẽ có dòng như:
+
+				NAME    	URL
+				bitnami 	https://charts.bitnami.com/bitnami
+
+			Cập nhật danh sách chart mới nhất:
+			
+				helm repo update
+
+			Giúp Helm tải về danh sách chart mới hoặc version mới từ Bitnami.
+
+			Ví dụ sử dụng sau đó:
+
+				Sau khi đã thêm repo Bitnami, bạn có thể dễ dàng cài ứng dụng từ đó:
+
+					helm install my-wordpress bitnami/wordpress
+
+				→ Helm sẽ lấy chart wordpress từ repo bitnami và triển khai vào Kubernetes cluster của bạn.		
 		
 		- cmd: helm install happy-panda bitnami/wordpress		
 		
-		
+			Lệnh helm install happy-panda bitnami/wordpress được dùng để cài đặt ứng dụng WordPress lên Kubernetes cluster bằng Helm chart của Bitnami.
+
+			Cú pháp chung:
+			
+				helm install <tên_release> <repo/chart> [tùy_chọn]
+
+			Giải thích từng phần trong lệnh:
+			
+				helm install happy-panda bitnami/wordpress
+
+				Thành phần				Ý nghĩa
+				
+				helm					Công cụ quản lý Helm chart
+				install					Hành động cài đặt một chart (triển khai ứng dụng vào Kubernetes)
+				happy-panda				Tên release mà bạn đặt cho lần cài đặt này (tên tùy chọn, có thể đặt tùy ý, ví dụ: wordpress-prod, myblog, v.v.)
+				bitnami/wordpress		Tên chart cần cài: chart wordpress lấy từ repo bitnami (đã được thêm bằng helm repo add bitnami https://charts.bitnami.com/bitnami)
+			
+			Khi bạn chạy lệnh này, Helm sẽ:
+
+				Tải chart wordpress từ repository Bitnami về.
+
+				Tạo ra các manifest YAML (Deployment, Service, Secret, PVC, ConfigMap, v.v.) tương ứng với WordPress.
+
+				Gửi các manifest này lên Kubernetes API để tạo các resource thật trong cluster.
+
+				Theo dõi tiến trình triển khai (cho đến khi tất cả pod, service, PVC được tạo thành công).
+
+			Kết quả sau khi chạy:
+
+				Helm sẽ hiển thị thông tin tương tự như sau:
+
+					NAME: happy-panda
+					LAST DEPLOYED: Wed Oct 29 16:30:45 2025
+					NAMESPACE: default
+					STATUS: deployed
+					REVISION: 1
+					NOTES:
+					CHART NAME: wordpress
+					CHART VERSION: 16.3.4
+					APP VERSION: 6.5.4
+
+			Các tài nguyên được tạo trong Kubernetes:
+
+				Chart bitnami/wordpress sẽ tự động triển khai:
+
+					Pod WordPress (chạy container web WordPress)
+
+					Pod MariaDB (cơ sở dữ liệu backend)
+
+					Service (mở port truy cập cho WordPress)
+
+					PersistentVolumeClaim (PVC) (lưu trữ dữ liệu website)
+
+					Secrets (lưu mật khẩu admin, DB, v.v.)
+
+			Kiểm tra lại:
+
+				Bạn có thể kiểm tra release vừa cài:
+
+					helm ls
+
+				hoặc:
+
+					kubectl get pods
+
+				Xem chi tiết cấu hình:
+
+					helm status happy-panda
+
+			Tùy chọn mở rộng:
+			
+				Cài trong namespace riêng:
+					
+					helm install happy-panda bitnami/wordpress -n blog --create-namespace
+
+				Tùy chỉnh cấu hình (ví dụ thay đổi mật khẩu, storage):
+					
+					helm install happy-panda bitnami/wordpress --set wordpressUsername=admin,wordpressPassword=secret123
+
+				Cài với file cấu hình riêng:
+				
+					helm install happy-panda bitnami/wordpress -f values.yaml		
 		
 		- cmd: helm env		
 		
+			============================================================
+			LỆNH: helm env
+			============================================================
+
+			1. MỤC ĐÍCH:
+			   - Lệnh `helm env` dùng để hiển thị danh sách các biến môi trường (environment variables)
+				 mà Helm đang sử dụng trong hệ thống.
+			   - Giúp người dùng biết Helm đang lưu cache, cấu hình, plugin, và các file registry ở đâu.
+
+			------------------------------------------------------------
+			2. CÚ PHÁP:
+			
+			   helm env
+
+			------------------------------------------------------------
+			3. KHI CHẠY LỆNH, KẾT QUẢ SẼ HIỂN THỊ NHƯ SAU (ví dụ):
+
+			   HELM_BIN="helm"
+			   HELM_DEBUG="false"
+			   HELM_KUBEAPISERVER=""
+			   HELM_KUBECAFILE=""
+			   HELM_KUBECONTEXT=""
+			   HELM_KUBETOKEN=""
+			   HELM_NAMESPACE="default"
+			   HELM_PLUGINS="/home/user/.local/share/helm/plugins"
+			   HELM_REGISTRY_CONFIG="/home/user/.config/helm/registry.json"
+			   HELM_REPOSITORY_CACHE="/home/user/.cache/helm/repository"
+			   HELM_REPOSITORY_CONFIG="/home/user/.config/helm/repositories.yaml"
+			   HELM_HISTORY_MAX="10"
+
+			------------------------------------------------------------
+			4. GIẢI THÍCH TỪNG BIẾN:
+
+			   HELM_BIN
+				   → Đường dẫn hoặc tên file thực thi (binary) của Helm.
+
+			   HELM_DEBUG
+				   → Trạng thái bật/tắt chế độ debug (true hoặc false).
+
+			   HELM_KUBEAPISERVER
+				   → URL của Kubernetes API Server (nếu được chỉ định thủ công).
+
+			   HELM_KUBECAFILE
+				   → Đường dẫn đến file CA certificate dùng để xác thực cluster.
+
+			   HELM_KUBECONTEXT
+				   → Tên context trong kubeconfig mà Helm đang sử dụng.
+
+			   HELM_KUBETOKEN
+				   → Token xác thực để truy cập cluster Kubernetes (nếu có).
+
+			   HELM_NAMESPACE
+				   → Namespace mặc định mà Helm sẽ thao tác nếu không chỉ định bằng cờ `-n`.
+
+			   HELM_PLUGINS
+				   → Thư mục lưu các plugin đã cài đặt cho Helm.
+
+			   HELM_REGISTRY_CONFIG
+				   → File cấu hình registry (OCI registry / container registry) mà Helm dùng để lưu thông tin đăng nhập.
+
+			   HELM_REPOSITORY_CACHE
+				   → Thư mục cache lưu các file index.yaml được tải về từ các repository Helm.
+
+			   HELM_REPOSITORY_CONFIG
+				   → File cấu hình liệt kê danh sách các repository mà Helm đã thêm (`helm repo add`).
+
+			   HELM_HISTORY_MAX
+				   → Số lượng tối đa các bản ghi (revision) mà Helm sẽ lưu cho mỗi release.
+
+			------------------------------------------------------------
+			5. TÓM TẮT:
+			   - `helm env` giúp bạn xem toàn bộ các đường dẫn và thiết lập môi trường mà Helm đang sử dụng.
+			   - Lệnh này hữu ích khi cần kiểm tra hoặc xử lý lỗi liên quan đến cache, repo, hoặc cấu hình của Helm.
+			============================================================
 		
 		
 		- cmd: helm uninstall kubernetes-dashboard -n kubernetes-dashboard		
 		
+			============================================================
+			LỆNH: helm uninstall kubernetes-dashboard -n kubernetes-dashboard
+			============================================================
+
+			1. MỤC ĐÍCH:
+			   - Lệnh này dùng để gỡ cài đặt (xóa) một Helm release tên là "kubernetes-dashboard"
+				 ra khỏi Kubernetes cluster.
+			   - Release này được cài đặt trong namespace "kubernetes-dashboard".
+
+			------------------------------------------------------------
+			2. CÚ PHÁP CHUNG:
+			   helm uninstall <tên_release> [các_tùy_chọn]
+
+			------------------------------------------------------------
+			3. GIẢI THÍCH CỤ THỂ:
+
+			   helm
+				   → Công cụ quản lý Helm chart, dùng để cài đặt, nâng cấp hoặc gỡ ứng dụng trên Kubernetes.
+
+			   uninstall
+				   → Hành động gỡ bỏ một Helm release (xóa toàn bộ các tài nguyên do release đó tạo ra).
+
+			   kubernetes-dashboard
+				   → Tên của release cần gỡ bỏ. Đây là tên bạn đã đặt khi cài bằng lệnh:
+					 helm install kubernetes-dashboard <chart_name>
+
+			   -n kubernetes-dashboard
+				   → Tùy chọn `-n` (hoặc `--namespace`) chỉ định namespace chứa release.
+					 Ở đây release nằm trong namespace có tên là "kubernetes-dashboard".
+
+			------------------------------------------------------------
+			4. KHI CHẠY LỆNH NÀY, HELM SẼ THỰC HIỆN:
+			   - Kết nối đến Kubernetes cluster theo context hiện tại.
+			   - Xác định release "kubernetes-dashboard" trong namespace "kubernetes-dashboard".
+			   - Xóa tất cả các tài nguyên Kubernetes được tạo ra bởi release đó, bao gồm:
+				   • Deployment
+				   • Service
+				   • Secret
+				   • ConfigMap
+				   • Role / RoleBinding
+				   • ServiceAccount
+				   • PersistentVolumeClaim (nếu có)
+			   - Cập nhật lại lịch sử Helm (xóa bản ghi release khỏi danh sách `helm ls`).
+
+			------------------------------------------------------------
+			5. KẾT QUẢ SAU KHI THỰC THI (VÍ DỤ):
+			   Release "kubernetes-dashboard" uninstalled
+
+			   → Nghĩa là Helm đã gỡ bỏ release thành công.
+
+			------------------------------------------------------------
+			6. LƯU Ý:
+			   - Nếu bạn không chỉ định namespace bằng `-n`, Helm sẽ mặc định tìm release trong namespace `default`.
+			   - Lệnh này **chỉ xóa các tài nguyên do Helm quản lý**, không ảnh hưởng đến các tài nguyên khác trong namespace.
+			   - Bạn có thể kiểm tra lại bằng:
+				   helm ls -A
+				 để đảm bảo release đã được gỡ bỏ hoàn toàn.
+
+			------------------------------------------------------------
+			7. TÓM TẮT:
+			   → Lệnh `helm uninstall kubernetes-dashboard -n kubernetes-dashboard`
+				 dùng để xóa release "kubernetes-dashboard" và toàn bộ các tài nguyên liên quan
+				 trong namespace "kubernetes-dashboard".
+			============================================================
 		
 		
 		- cmd: helm install prometheus kube-prometheus --skip-crds
 		
+			============================================================
+			LỆNH: helm install prometheus kube-prometheus --skip-crds
+			============================================================
+
+			1. MỤC ĐÍCH CHUNG:
+			   - Dùng Helm để **cài đặt một Helm release** có tên là "prometheus" từ chart "kube-prometheus".
+			   - Sử dụng tùy chọn `--skip-crds` để **bỏ qua bước cài đặt các CRD (Custom Resource Definitions)** mà chart có thể định nghĩa.
+
+			------------------------------------------------------------
+			2. CÚ PHÁP CHUNG:
+			   helm install <tên_release> <chart> [các_tùy_chọn]
+
+			   Ví dụ cụ thể:
+			   helm install prometheus kube-prometheus --skip-crds
+
+			   Giải thích các phần:
+				 • helm               → công cụ quản lý Helm chart
+				 • install            → hành động cài đặt (triển khai) chart lên Kubernetes
+				 • prometheus         → tên release bạn đặt (tên tùy ý)
+				 • kube-prometheus    → tên chart (có thể là chart trong repo đã add hoặc thư mục local)
+				 • --skip-crds        → cờ cho Helm **không cài** các CRD được định nghĩa trong chart
+
+			------------------------------------------------------------
+			3. VỀ CHART "kube-prometheus":
+			   - "kube-prometheus" thường là một chart thu thập các thành phần giám sát Prometheus/Kube (Prometheus server, Alertmanager, node-exporter, kube-state-metrics, ServiceMonitors, PrometheusRules, ...)
+			   - Chart này **thường** đi kèm với nhiều CRD (ví dụ: ServiceMonitor, PrometheusRule, PodMonitor, ThanosRuler, ...), những CRD cho phép Prometheus Operator / kube-prometheus quản lý tài nguyên mở rộng.
+
+			------------------------------------------------------------
+			4. Ý NGHĨA CỤ THỂ CỦA --skip-crds:
+			   - `--skip-crds` = **bảo Helm bỏ qua việc áp dụng các CRD** mà chart cung cấp.
+			   - Khi dùng `--skip-crds`, Helm sẽ **vẫn tạo các resource khác** (Deployment, Service, ConfigMap, Secret, RBAC, v.v.), nhưng **không** tạo các CRD nằm trong thư mục `crds/` của chart.
+			   - Lý do hay dùng `--skip-crds`:
+				   • Bạn đã **cài CRD trước đó** (thường khi dùng nhiều lần hoặc nhiều release cùng dùng chung CRD).
+				   • Muốn **quản lý CRD riêng biệt** (ví dụ: áp dụng CRD qua GitOps hoặc một kịch bản riêng, hoặc trước khi nâng cấp).
+				   • Tránh việc Helm cố gắng **ghi đè / cập nhật CRD** trong khi bạn muốn kiểm soát việc đó thủ công.
+
+			------------------------------------------------------------
+			5. HẬU QUẢ VÀ LƯU Ý KỸ THUẬT:
+			   - Nếu CRD **chưa tồn tại** trên cluster và bạn dùng `--skip-crds`, thì các tài nguyên mà chart tạo ra **có thể thất bại** khi chúng tham chiếu tới các CustomResource (ví dụ: Prometheus, ServiceMonitor) vì Kubernetes chưa biết định nghĩa resource đó.
+			   - CRD thường chỉ cần được cài **một lần cho toàn cluster** (không cần cài lại cho mỗi release). Vì vậy việc cài CRD tách (ngoài helm) hay dùng `--skip-crds` tuỳ thuộc cách bạn quản lý hạ tầng.
+			   - Khi bạn muốn **cài CRD thủ công**, thường sẽ làm:
+				   • Tìm file CRD (thường ở `charts/<chart>/crds/` hoặc trên repo chart) và áp dụng:
+					 kubectl apply -f path/to/crds.yaml
+				   • Hoặc lấy trực tiếp từ repo/charts upstream:
+					 kubectl apply -f https://raw.githubusercontent.com/<repo>/.../crds.yaml
+			   - Nếu sau này cần nâng cấp CRD, phải làm **thủ công** (kubectl apply) hoặc dùng công cụ quản lý CRD chuyên biệt — vì Helm mặc định không cập nhật CRD qua `helm upgrade` (trừ khi chart viết logic khác).
+
+			------------------------------------------------------------
+			6. VÍ DỤ KỊCH BẢN THỰC TẾ:
+			   A) Cài toàn bộ (kèm CRD) — nếu bạn muốn Helm tự cài CRD:
+				  helm install prometheus kube-prometheus
+			   B) Cài tách CRD trước, sau đó cài release (an toàn cho nhiều release):
+				  # 1) Cài CRD một lần
+				  kubectl apply -f ./kube-prometheus/crds/
+				  # 2) Cài chart (bỏ qua CRD vì đã có)
+				  helm install prometheus kube-prometheus --skip-crds
+			   C) Cài trong namespace cụ thể và tạo namespace nếu chưa có:
+				  helm install prometheus kube-prometheus -n monitoring --create-namespace --skip-crds
+
+			------------------------------------------------------------
+			7. LỆNH KIỂM TRA SAU KHI CÀI:
+			   - Kiểm tra release Helm:
+				 helm ls -n <namespace>
+				 helm status prometheus -n <namespace>
+			   - Kiểm tra pod / deployment:
+				 kubectl get pods -n <namespace>
+				 kubectl get deploy,svc,sts -n <namespace>
+			   - Kiểm tra CRD (nếu bạn mong chúng tồn tại):
+				 kubectl get crd | grep -E "servicemonitors|prometheusrules|podmonitors"
+			   - Nếu resource tạo lỗi do CRD thiếu, bạn sẽ thấy các error kiểu "no matches for kind \"Prometheus\" in version \"monitoring.coreos.com/v1\"" — báo rằng CRD chưa được cài.
+
+			------------------------------------------------------------
+			8. LƯU Ý VỀ BẢO TRÌ & NÂNG CẤP:
+			   - CRD là thành phần nhạy cảm: khi nâng cấp chart có thay đổi CRD, bạn **phải đọc release notes** và thực hiện các bước nâng cấp CRD cẩn trọng.
+			   - Nếu bạn đang chạy nhiều release hoặc chart khác nhau dùng chung CRD (ví dụ Prometheus Operator), nên cài/upgrade CRD một lần, tách riêng khỏi lifecycle của từng release.
+
+			------------------------------------------------------------
+			9. TÓM TẮT NGẮN GỌN:
+			   - `helm install prometheus kube-prometheus --skip-crds`:
+				   • Cài chart `kube-prometheus` thành release `prometheus`.
+				   • Bỏ qua việc cài các CRD; bạn cần **tự đảm bảo CRD đã có** (hoặc cài sau).
+			   - Dùng `--skip-crds` khi bạn đã quản lý CRD riêng (an toàn cho môi trường production hoặc đa-release).
+			   - Nếu chưa có CRD, **không dùng** `--skip-crds` hoặc hãy cài CRD trước thủ công.
+
+			============================================================
 		
 		
 		- cmd: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/ # Add kubernetes-dashboard repository
 		
+			============================================================
+			LỆNH: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+			============================================================
+
+			1. MỤC ĐÍCH CHUNG
+			   - Thêm một Helm chart repository mới vào cấu hình Helm cục bộ của bạn.
+			   - Repository này là kho chứa Helm chart cho Kubernetes Dashboard (official chart).
+			   - Sau khi thêm, bạn có thể tìm, cập nhật và cài chart từ repo này bằng các lệnh Helm khác.
+
+			------------------------------------------------------------
+			2. CÚ PHÁP CHUNG
+			   helm repo add <tên_repo> <url_repo>
+
+			   Trong ví dụ này:
+			   helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+
+			   Giải thích các phần:
+				 • helm               → công cụ quản lý Helm chart
+				 • repo add           → lệnh thêm repository
+				 • kubernetes-dashboard → tên alias (bạn đặt) cho repo này
+				 • https://kubernetes.github.io/dashboard/ → URL tới kho chart (index.yaml sẽ được tải từ đây)
+
+			------------------------------------------------------------
+			3. ĐIỀU GÌ XẢY RA KHI CHẠY LỆNH NÀY
+			   - Helm lưu lại entry cho repo trong file cấu hình repo cục bộ (thường ở ~/.config/helm/repositories.yaml).
+			   - Helm không tải toàn bộ chart ngay lập tức; nó chỉ ghi nhớ URL. (index.yaml được tải khi chạy `helm repo update` hoặc một số lệnh tìm kiếm).
+			   - Sau khi add, bạn thường chạy `helm repo update` để kéo index.yml mới nhất từ repo và cache nó.
+
+			------------------------------------------------------------
+			4. LỆNH THƯỜNG DÙNG SAU KHI ADD
+			   # Cập nhật cache/metadata từ tất cả repo đã thêm
+			   helm repo update
+
+			   # Kiểm tra repo đã thêm
+			   helm repo list
+
+			   # Tìm chart trong repo vừa thêm (ví dụ)
+			   helm search repo kubernetes-dashboard
+
+			   # Cài chart (ví dụ cài kubernetes-dashboard vào namespace riêng)
+			   helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+				   -n kubernetes-dashboard --create-namespace
+
+			------------------------------------------------------------
+			5. LÝ DO VÌ SAO PHẢI DÙNG "helm repo add"
+			   - Tiện lợi: cho phép cài chart bằng cú pháp <repo>/<chart>.
+			   - Quản lý: Helm sẽ biết repo để tìm và tải chart khi cài.
+			   - Phù hợp cho CI/CD: scripts chỉ cần gọi helm install <repo>/<chart>.
+
+			------------------------------------------------------------
+			6. LƯU Ý VỀ URL
+			   - URL phải trỏ tới một Helm repo hợp lệ có file index.yaml tại gốc hoặc subpath.
+			   - Dấu `/` ở cuối URL (trailing slash) thường không gây lỗi; Helm xử lý cả hai dạng.
+			   - Repo public như https://kubernetes.github.io/dashboard/ thường không cần authentication.
+
+			------------------------------------------------------------
+			7. KIỂM TRA SAU KHI THÊM
+			   # 1) Xem danh sách repo
+			   helm repo list
+			   # bạn sẽ thấy một dòng tương tự:
+			   # NAME                      URL
+			   # kubernetes-dashboard      https://kubernetes.github.io/dashboard/
+
+			   # 2) Cập nhật và tải index
+			   helm repo update
+			   # Kiểm tra xem Helm có lấy index thành công không (output báo Successfully got an update...)
+
+			   # 3) Tìm chart trong cache
+			   helm search repo kubernetes-dashboard
+
+			------------------------------------------------------------
+			8. VẤN ĐỀ THƯỜNG GẶP VÀ CÁCH KHẮC PHỤC
+			   - Lỗi kết nối / timeout:
+				 • Kiểm tra Internet, proxy, firewall.
+				 • Nếu dùng proxy, đảm bảo biến môi trường HTTP_PROXY/HTTPS_PROXY được set cho shell.
+			   - SSL / Certificate errors:
+				 • Nếu gặp lỗi chứng chỉ (rare với GitHub Pages), kiểm tra cài đặt CA trên máy.
+			   - "index.yaml not found" hoặc 404:
+				 • Kiểm tra URL có đúng không; mở URL trong trình duyệt để kiểm tra index.yaml tồn tại.
+			   - Repo đã tồn tại:
+				 • Nếu đã add cùng tên, bạn có thể xóa trước bằng `helm repo remove <name>` rồi add lại.
+			   - Phiên bản Helm quá cũ:
+				 • Một số tính năng repo/oci khác cần Helm 3+. Dùng `helm version` để kiểm tra.
+
+			------------------------------------------------------------
+			9. BẢO MẬT & QUẢN TRỊ
+			   - Repo public (không cần auth): an toàn để add nhưng tuỳ policy tổ chức.
+			   - Với repo private (cần username/password), Helm hỗ trợ credentials khi add (cú pháp phức tạp hơn hoặc qua file cấu hình).
+			   - Đối với chart quan trọng (như các component cluster), hãy audit chart hoặc pin version cụ thể trước khi cài vào production.
+
+			------------------------------------------------------------
+			10. EXAMPLES THỰC TIỄN (copy-paste)
+			   # 1. Thêm repo
+			   helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+
+			   # 2. Cập nhật metadata từ tất cả repo
+			   helm repo update
+
+			   # 3. Xem repo đã add
+			   helm repo list
+
+			   # 4. Tìm chart 'kubernetes-dashboard' trong repo đã add
+			   helm search repo kubernetes-dashboard
+
+			   # 5. Cài dashboard vào namespace 'kubernetes-dashboard'
+			   helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+				   -n kubernetes-dashboard --create-namespace
+
+			   # 6. Gỡ cài nếu cần
+			   helm uninstall kubernetes-dashboard -n kubernetes-dashboard
+
+			------------------------------------------------------------
+			11. TÓM TẮT NGẮN GỌN
+			   - Lệnh `helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/`:
+				 + Thêm repo chứa Helm chart cho Kubernetes Dashboard với alias 'kubernetes-dashboard'.
+				 + Sau khi add, chạy `helm repo update` để tải index và có thể cài chart bằng `helm install`.
+			   - Đây là thao tác cần thiết để Helm biết nơi lấy chart khi bạn muốn cài hoặc tìm chart theo cú pháp <repo>/<chart>.
+
+			============================================================
 
 
 		- cmd: helm install eazybank prod-env
 
+			============================================================
+			LỆNH: helm install eazybank prod-env
+			============================================================
+
+			1. MỤC ĐÍCH CHUNG
+			   - Dùng Helm để **cài đặt (deploy)** một Helm chart lên Kubernetes cluster.
+			   - Trong ví dụ này:
+				   • "eazybank"  → tên release (tên phiên bản triển khai do bạn đặt).
+				   • "prod-env"  → chart sẽ được cài; có thể là:
+						- một chart nằm trong một repo đã add (ví dụ: <repo>/prod-env), hoặc
+						- một thư mục chart local (ví dụ ./prod-env nếu bạn chạy từ thư mục cha).
+
+			------------------------------------------------------------
+			2. CÚ PHÁP CƠ BẢN
+			   helm install <tên_release> <chart> [các_tùy_chọn]
+
+			   Ví dụ:
+			   helm install eazybank prod-env
+
+			   Các thành phần:
+				 • helm        → CLI Helm.
+				 • install     → hành động cài đặt.
+				 • eazybank    → tên release (dùng để quản lý: upgrade, uninstall, status,...).
+				 • prod-env    → chart (tên chart trong repo hoặc đường dẫn tới thư mục chart).
+
+			------------------------------------------------------------
+			3. TRƯỜNG HỢP NGUỒN CHART
+			   - Nếu "prod-env" là chart trong repo:
+				   • Phải đảm bảo repo đã được add: helm repo add <name> <url>
+				   • Và đã cập nhật index: helm repo update
+				   • Khi đó cú pháp cài có thể là: helm install eazybank <repo>/prod-env
+			   - Nếu "prod-env" là thư mục local:
+				   • Sử dụng đường dẫn rõ ràng hoặc chạy từ thư mục cha:
+					 helm install eazybank ./prod-env
+
+			------------------------------------------------------------
+			4. QUÁ TRÌNH HELM THỰC HIỆN
+			   - Đọc chart: Chart.yaml, values.yaml, templates/, charts/ (dependencies).
+			   - Kết hợp giá trị: dùng values mặc định + các giá trị override (--set/-f).
+			   - Render templates -> sinh ra Kubernetes manifests (Deployment, Service, ConfigMap,...).
+			   - Gửi manifests tới Kubernetes API để tạo tài nguyên.
+			   - Ghi metadata release vào Helm storage (tùy backend, thường là Secret trong namespace).
+
+			------------------------------------------------------------
+			5. TÙY CHỌN THƯỜNG DÙNG
+			   - -n, --namespace <ns>
+				   → Cài vào namespace cụ thể. Kết hợp --create-namespace nếu namespace chưa tồn tại.
+				   Ví dụ: -n production --create-namespace
+
+			   - -f, --values <file>
+				   → Dùng file values để override cấu hình mặc định.
+				   Ví dụ: -f values-prod.yaml
+
+			   - --set key=value
+				   → Ghi đè nhanh trên CLI.
+				   Ví dụ: --set image.tag=1.2.3 --set replicaCount=3
+
+			   - --wait
+				   → Chờ cho đến khi các resource quan trọng sẵn sàng (pods ready, PVC bound,...).
+
+			   - --timeout <duration>
+				   → Thời gian chờ tối đa khi dùng --wait (ví dụ 5m, 10m).
+
+			   - --atomic
+				   → Nếu cài thất bại thì tự động rollback.
+
+			   - --version <chart-version>
+				   → Cài phiên bản chart cụ thể (khi cài từ repo).
+
+			   - --skip-crds
+				   → Bỏ qua cài CRD (nếu chart kèm CRD). Dùng khi CRD đã được cài riêng.
+
+			------------------------------------------------------------
+			6. KẾT QUẢ MẪU SAU KHI CÀI THÀNH CÔNG
+			   - Thông tin hiển thị (ví dụ):
+				   NAME: eazybank
+				   LAST DEPLOYED: <date>
+				   NAMESPACE: default (hoặc bạn chỉ định)
+				   STATUS: deployed
+				   REVISION: 1
+				   NOTES: (hướng dẫn truy cập nếu chart cung cấp)
+
+			   - Tài nguyên tương ứng sẽ xuất hiện trong cluster: Pod, Deployment, Service, PVC, Secret,...
+
+			------------------------------------------------------------
+			7. LỆNH KIỂM TRA & XỬ LÝ
+			   - Xem release:
+				   helm ls -n <namespace>
+				   helm status eazybank -n <namespace>
+
+			   - Kiểm tra Kubernetes resources:
+				   kubectl get pods,svc,deploy,sts -n <namespace>
+				   kubectl describe pod <pod-name> -n <namespace>
+				   kubectl logs <pod-name> -n <namespace>
+
+			   - Nếu dùng --wait: lệnh sẽ chỉ kết thúc khi resource trở nên ready hoặc timeout.
+
+			------------------------------------------------------------
+			8. LỖI THƯỜNG GẶP VÀ CÁCH KHẮC PHỤC
+			   - Chart không tìm thấy:
+				   • Chưa add repo hoặc chưa helm repo update.
+				   • Sai đường dẫn (nếu local, thiếu ./).
+			   - Thiếu quyền (RBAC):
+				   • Kiểm tra kubeconfig, context, quyền user/service account.
+			   - ImagePullBackOff:
+				   • Kiểm tra image name/tag và credentials (imagePullSecrets).
+			   - PVC không bind:
+				   • Kiểm tra StorageClass, quota, PV.
+			   - Thiếu CRD:
+				   • Lỗi "no matches for kind ..." → CRD chưa cài. Cài CRD trước bằng kubectl apply -f <crd-files> hoặc bỏ --skip-crds.
+			   - Resource crash (CrashLoopBackOff):
+				   • Xem logs, kiểm tra env vars, secrets, kết nối DB.
+
+			------------------------------------------------------------
+			9. QUẢN LÝ SAU KHI CÀI
+			   - Nâng cấp:
+				   helm upgrade eazybank prod-env -f values-prod.yaml -n <namespace>
+
+			   - Xem lịch sử:
+				   helm history eazybank -n <namespace>
+
+			   - Rollback:
+				   helm rollback eazybank <revision> -n <namespace>
+
+			   - Gỡ:
+				   helm uninstall eazybank -n <namespace>
+
+			------------------------------------------------------------
+			10. BEST PRACTICES
+			   - Lưu values-prod.yaml trong VCS (versioned).
+			   - Pin version chart bằng --version để tránh thay đổi bất ngờ.
+			   - Dùng --wait --timeout trong CI/CD để đảm bảo deploy hoàn tất.
+			   - Cài CRD một lần cho cluster (nếu nhiều release dùng chung), quản lý CRD tách khỏi lifecycle release.
+			   - Sử dụng namespace riêng cho môi trường (production, staging).
+			   - Giữ release name có ý nghĩa (ví dụ eazybank-prod nếu có nhiều môi trường).
+
+			------------------------------------------------------------
+			11. EXAMPLES (COPY-PASTE)
+			   # 1) Cài với file values vào namespace production:
+			   helm install eazybank prod-env -f values-prod.yaml -n production --create-namespace
+
+			   # 2) Cài, chờ hoàn tất, rollback nếu lỗi:
+			   helm install eazybank prod-env -n production --create-namespace --wait --timeout 10m --atomic -f values-prod.yaml
+
+			   # 3) Nếu prod-env là thư mục local:
+			   helm install eazybank ./prod-env -n production --create-namespace
+
+			   # 4) Upgrade:
+			   helm upgrade eazybank prod-env -f values-prod.yaml -n production
+
+			   # 5) Uninstall:
+			   helm uninstall eazybank -n production
+
+			------------------------------------------------------------
+			12. TÓM TẮT NGẮN GỌN
+			   - `helm install eazybank prod-env`:
+				   • Tạo release tên "eazybank" từ chart "prod-env".
+				   • Helm render templates và tạo resource trên cluster.
+			   - Nên kết hợp thêm: --namespace, -f/--set, --wait/--timeout/--atomic, và quản lý CRD cẩn thận.
+
+			============================================================
 
 
 		- cmd: help upgrade eazybank prod-env			
 
+			============================================================
+			LỆNH (HIỂU): helm upgrade eazybank prod-env
+			============================================================
+
+			1. MỤC ĐÍCH CHUNG
+			   - Dùng Helm để **nâng cấp (upgrade)** một release đã tồn tại tên "eazybank"
+				 bằng chart "prod-env".
+			   - Nếu chart hoặc giá trị cấu hình thay đổi, lệnh này sẽ render template mới
+				 và áp thay đổi đó lên cluster (k8s resources).
+			   - Bạn cũng có thể dùng một vài tùy chọn để tự động cài nếu release chưa tồn tại,
+				 kiểm soát hành vi rollback, chờ ready, v.v.
+
+			------------------------------------------------------------
+			2. SỰ KHÁC NHAU GIỮA install VÀ upgrade
+			   - `helm install` tạo một release mới.
+			   - `helm upgrade` thay đổi release đã có (tạo revision mới trong history).
+			   - `helm upgrade --install` (viết tắt `helm upgrade -i`) = upgrade nếu tồn tại, 
+				 nếu không tồn tại thì sẽ cài mới (useful cho idempotent CI/CD).
+
+			------------------------------------------------------------
+			3. CÚ PHÁP CƠ BẢN
+			   helm upgrade [RELEASE] [CHART] [flags]
+
+			   Ví dụ:
+			   helm upgrade eazybank prod-env
+
+			   Giải thích:
+				 • RELEASE (eazybank) → tên release Helm đã được cài trước đó.
+				 • CHART (prod-env)    → chart dùng để upgrade (có thể là repo/chart hoặc đường dẫn local).
+
+			------------------------------------------------------------
+			4. NGUỒN CHART
+			   - Nếu CHART là repo/chart: đảm bảo repo đã add & update:
+				   helm repo add <name> <url>
+				   helm repo update
+				 Ví dụ cài từ repo: helm upgrade eazybank myrepo/prod-env
+			   - Nếu CHART là folder local: dùng đường dẫn hoặc ./prod-env:
+				   helm upgrade eazybank ./prod-env
+
+			------------------------------------------------------------
+			5. HÀNH VI KHI CHẠY upgrade
+			   - Helm đọc chart mới và values (mặc định + override).
+			   - Helm render templates và so sánh với manifests hiện có.
+			   - Helm gửi API requests để patch/create/delete resources tương ứng.
+			   - Helm ghi lại revision mới trong history của release.
+			   - Tùy option (ví dụ --wait) Helm có thể chờ cho resources sẵn sàng.
+
+			------------------------------------------------------------
+			6. TÙY CHỌN THƯỜNG DÙNG (và ý nghĩa)
+			   - -i, --install
+				   → Nếu release không tồn tại thì cài mới (upgrade or install).
+
+			   - -f, --values <file>
+				   → Sử dụng file values để override. Có thể truyền nhiều -f.
+				   Ví dụ: -f values-prod.yaml
+
+			   - --set key=value[,key2=val2]
+				   → Ghi đè nhanh trên CLI.
+
+			   - --reuse-values
+				   → Giữ lại các giá trị hiện tại (từ revision trước) và chỉ ghi đè
+					 những giá trị bạn cung cấp trong command này.
+
+			   - --reset-values
+				   → Bỏ hết values cũ, chỉ dùng values từ chart + -f/--set mới.
+
+			   - --atomic
+				   → Nếu upgrade thất bại, Helm tự động rollback về revision trước.
+
+			   - --cleanup-on-fail
+				   → Nếu upgrade thất bại, xóa release (thay vì giữ trạng thái failed).
+
+			   - --force
+				   → Thực hiện “recreate” hoặc update các trường không thể patch,
+					 ví dụ khi cần replace immutable field (kết hợp tạo lại resource).
+					 Cẩn trọng: có thể gây downtime.
+
+			   - --wait
+				   → Chờ cho các resource quan trọng trở nên Ready (pods, PVC bound, deployments).
+					 Thường phối hợp với --timeout.
+
+			   - --timeout <duration>
+				   → Thời gian tối đa chờ khi dùng --wait (ví dụ 5m, 10m, 600s).
+
+			   - --dry-run
+				   → Render templates và mô phỏng upgrade mà không gửi thay đổi tới cluster.
+
+			   - --no-hooks / --replace
+				   → --no-hooks: bỏ qua hook lifecycle; --replace: thay thế release nếu trước đó đã bị xóa (rare).
+
+			   - --description "text"
+				   → Thêm mô tả cho revision mới trong history.
+
+			   - --version <chart-version>
+				   → Dùng version chart cụ thể (khi cài từ repo).
+
+			   - --reuse-values vs --reset-values
+				   → Chọn một trong hai: reuse giữ giá trị cũ; reset loại bỏ giá trị cũ.
+
+			------------------------------------------------------------
+			7. KHI NÀO NÊN DÙNG NHỮNG TÙY CHỌN TRÊN (GỢI Ý)
+			   - CI/CD: helm upgrade --install -f values-prod.yaml --atomic --wait --timeout 10m
+			   - Thử nghiệm: helm upgrade --dry-run --debug eazybank prod-env -f values-test.yaml
+			   - Giữ config cũ và chỉ đổi image: helm upgrade eazybank prod-env --reuse-values --set image.tag=1.2.3
+			   - Thay đổi cấu trúc lớn (muốn bắt đầu từ values mới): helm upgrade eazybank prod-env --reset-values -f new-values.yaml
+
+			------------------------------------------------------------
+			8. LƯU Ý VỀ CRD VÀ CUSTOM RESOURCES
+			   - Nếu chart định nghĩa CRD trong thư mục crds/, Helm không tự động update CRD khi upgrade.
+			   - Nếu upgrade cần thay đổi CRD, bạn phải apply CRD thủ công (kubectl apply) trước hoặc quản lý CRD riêng.
+			   - Nếu các tài nguyên mới phụ thuộc CRD mà chưa tồn tại, upgrade sẽ lỗi ("no matches for kind ...").
+
+			------------------------------------------------------------
+			9. HOOKS VÀ TÁC ĐỘNG
+			   - Chart có thể định nghĩa hooks (pre-upgrade, post-upgrade, pre-install...).
+			   - Hooks sẽ chạy tương ứng (trừ khi dùng --no-hooks).
+			   - Hooks có thể thất bại và ảnh hưởng tới status; kiểm tra logs và sự kiện pod nếu cần.
+
+			------------------------------------------------------------
+			10. KIỂM TRA SAU KHI UPGRADE
+			   - Xem lịch sử và status:
+				   helm history eazybank -n <namespace>
+				   helm status eazybank -n <namespace>
+
+			   - Kiểm tra resources:
+				   kubectl get pods,deploy,sts,svc -n <namespace>
+				   kubectl describe pod <pod> -n <namespace>
+				   kubectl logs <pod> -n <namespace>
+
+			   - Nếu gặp vấn đề: rollback:
+				   helm rollback eazybank <revision> -n <namespace>
+
+			------------------------------------------------------------
+			11. LỖI THƯỜNG GẶP VÀ GIẢI PHÁP
+			   - Chart không tìm thấy:
+				   • Chưa helm repo update hoặc sai đường dẫn (nếu là local, cần ./).
+			   - Thiếu quyền (RBAC):
+				   • Kiểm tra kubeconfig và quyền user.
+			   - Upgrade tạo resource nhưng pod CrashLoopBackOff:
+				   • Xem logs, kiểm tra env vars, secrets, kết nối DB.
+			   - Immutable field error:
+				   • Một số fields (ví dụ spec.template.spec.containers[].name?) không thể patch — dùng --force để recreate.
+			   - Thiếu CRD:
+				   • "no matches for kind ..." → cài CRD trước bằng kubectl apply.
+			   - Hook thất bại:
+				   • Kiểm tra pod/job tương ứng với hook; sửa input hoặc bỏ hook bằng --no-hooks (cẩn trọng).
+
+			------------------------------------------------------------
+			12. EXAMPLES (COPY-PASTE)
+			   # 1) Nâng cấp đơn giản (chart trong repo hoặc local)
+			   helm upgrade eazybank prod-env
+
+			   # 2) Nâng cấp với file values, đợi đến khi hoàn tất, nếu lỗi rollback tự động
+			   helm upgrade eazybank prod-env -f values-prod.yaml --wait --timeout 10m --atomic
+
+			   # 3) Upgrade nếu tồn tại, nếu chưa có thì cài mới
+			   helm upgrade --install eazybank prod-env -f values-prod.yaml -n production --create-namespace --wait --atomic
+
+			   # 4) Chỉ đổi image tag, giữ các giá trị khác
+			   helm upgrade eazybank prod-env --reuse-values --set image.tag=2.0.1
+
+			   # 5) Thực hiện dry-run để kiểm tra thay đổi trước khi apply
+			   helm upgrade eazybank prod-env -f values-prod.yaml --dry-run --debug
+
+			   # 6) Force recreate nếu gặp immutable field errors (cẩn trọng)
+			   helm upgrade eazybank prod-env -f values-prod.yaml --force
+
+			   # 7) Reset toàn bộ values về mặc định chart, dùng file mới
+			   helm upgrade eazybank prod-env --reset-values -f new-values.yaml
+
+			------------------------------------------------------------
+			13. QUẢN LÝ LỊCH SỬ & KHÔI PHỤC
+			   - Xem history:
+				   helm history eazybank -n <namespace>
+			   - Rollback:
+				   helm rollback eazybank <revision> -n <namespace>
+				 → quay về revision cũ (có thể phối hợp với --wait).
+
+			------------------------------------------------------------
+			14. BEST PRACTICES
+			   - Luôn test upgrade bằng --dry-run trong môi trường staging.
+			   - Lưu tất cả file values (versioned) trong VCS.
+			   - Dùng --atomic trong CI để tự rollback khi thất bại.
+			   - Pin chart version bằng --version để tránh thay đổi đột ngột.
+			   - Quản lý CRD tách khỏi release lifecycle nếu nhiều release dùng chung.
+			   - Giữ tên release và namespace rõ ràng (eazybank-prod, namespace=production).
+
+			------------------------------------------------------------
+			15. TÓM TẮT NGẮN GỌN
+			   - `helm upgrade eazybank prod-env`:
+				   • Tạo một revision mới cho release "eazybank" bằng chart "prod-env".
+				   • Áp các thay đổi manifest vào Kubernetes.
+				   • Sử dụng các flag như --install, --wait, --atomic, --reuse-values để điều khiển hành vi.
+			   - Trước khi upgrade: kiểm tra chart source, values, CRD, và test với --dry-run nếu cần.
+
+			============================================================
 
 
 		
 		- cmd: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard # Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart	
 		
+			============================================================
+			LỆNH: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+			============================================================
+
+			1. MỤC ĐÍCH CHUNG
+			   - Dùng Helm để **nâng cấp (upgrade)** release có tên "kubernetes-dashboard" nếu đã tồn tại,
+				 hoặc **cài mới (install)** nếu release chưa tồn tại.
+			   - Chart dùng để cài là `kubernetes-dashboard` lấy từ repo `kubernetes-dashboard` (cú pháp repo/chart).
+			   - Tự động **tạo namespace `kubernetes-dashboard`** nếu namespace chưa tồn tại (--create-namespace).
+			   - Tất cả thao tác sẽ được thực hiện trong namespace `kubernetes-dashboard` (--namespace).
+
+			------------------------------------------------------------
+			2. GIẢI THÍCH CÁC THÀNH PHẦN TRONG LỆNH
+
+			   helm
+				   → CLI của Helm, công cụ quản lý package (chart) cho Kubernetes.
+
+			   upgrade
+				   → Lệnh nâng cấp một release hiện có bằng chart mới / values mới.
+
+			   --install  (hoặc -i)
+				   → Nếu release không tồn tại thì **tự động cài mới** (kết hợp upgrade và install). 
+					 Đây là pattern phổ biến trong CI/CD để đảm bảo tính idempotent.
+
+			   kubernetes-dashboard
+				   → **Tên release** (tên bạn đặt cho lần triển khai này). Dùng để quản lý (status, upgrade, uninstall).
+
+			   kubernetes-dashboard/kubernetes-dashboard
+				   → **Chart** được dùng để upgrade/install.
+					 Cú pháp `<repo>/<chart>` nghĩa là chart `kubernetes-dashboard` trong repo đã add có tên `kubernetes-dashboard`.
+					 (Bạn cần `helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/`
+					  và `helm repo update` trước nếu chưa add.)
+
+			   --create-namespace
+				   → Nếu namespace đích không tồn tại thì Helm sẽ tự tạo namespace đó trước khi cài.
+
+			   --namespace kubernetes-dashboard  (hoặc -n)
+				   → Chỉ định namespace để cài/upgrade release. Trong trường hợp này là `kubernetes-dashboard`.
+
+			------------------------------------------------------------
+			3. YÊU CẦU TIỀN QUÁN (PRE-REQUISITES)
+			   - Đã có Helm 3.x cài trên máy và kết nối tới Kubernetes cluster (kubeconfig).
+			   - Repo `kubernetes-dashboard` đã được thêm hoặc chart có thể truy xuất:
+				   helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+				   helm repo update
+			   - Quyền (RBAC) của user/service account đang dùng phải đủ để:
+				   • Tạo Namespace (nếu dùng --create-namespace)
+				   • Tạo Deployment, Service, RBAC, ServiceAccount, RoleBinding, ConfigMap, Secret, v.v.
+			   - Nếu cluster policy yêu cầu, chuẩn bị imagePullSecrets hoặc network/policy tương ứng.
+
+			------------------------------------------------------------
+			4. HÀNH VI KHI CHẠY LỆNH
+			   - Helm kiểm tra xem release `kubernetes-dashboard` đã tồn tại trong namespace `kubernetes-dashboard` chưa.
+				   • Nếu không tồn tại → thực hiện cài (install).
+				   • Nếu tồn tại → thực hiện upgrade (tạo revision mới).
+			   - Nếu namespace chưa tồn tại và bạn dùng --create-namespace, Helm sẽ tạo namespace đó.
+			   - Helm lấy chart từ cache repo (nếu cần sẽ tải index/chart), kết hợp values mặc định và các override (nếu bạn truyền).
+			   - Helm render templates thành manifests Kubernetes và gửi lên Kubernetes API để tạo/cập nhật resources.
+			   - Helm ghi metadata release vào store (thường là Secret trong namespace của release).
+
+			------------------------------------------------------------
+			5. CÁC TÙY CHỌN THƯỜNG KẾT HỢP VỚI LỆNH NÀY
+			   - -f values.yaml
+				   → Dùng file values để override cấu hình chart.
+			   - --set key=value
+				   → Ghi đè cấu hình nhanh trên CLI.
+			   - --wait
+				   → Chờ cho các resource thiết yếu ready (pods, PVCs,...).
+			   - --timeout <duration>
+				   → Thời gian chờ tối đa khi dùng --wait (ví dụ 5m, 10m).
+			   - --atomic
+				   → Nếu upgrade/install thất bại, Helm tự rollback.
+			   - --dry-run --debug
+				   → Mô phỏng (dry-run) và in debug output để kiểm tra trước khi apply.
+			   - --version <chart-version>
+				   → Dùng version chart cụ thể từ repo.
+
+			------------------------------------------------------------
+			6. CÁC TÁC VỤ/RESOURCE THƯỜNG ĐƯỢC TẠO CHO KUBERNETES DASHBOARD
+			   - Namespace: kubernetes-dashboard (nếu tạo)
+			   - ServiceAccount, ClusterRole / ClusterRoleBinding hoặc Role / RoleBinding tùy chart
+			   - Deployment / StatefulSet cho dashboard
+			   - Services (ClusterIP/NodePort/LoadBalancer) để truy cập dashboard
+			   - ConfigMap / Secret cho cấu hình
+			   - Ingress (nếu chart có cấu hình)
+			   - ServiceMonitor/PrometheusRule (nếu chart hỗ trợ và CRD tồn tại)
+
+			------------------------------------------------------------
+			7. KIỂM TRA SAU KHI CHẠY
+			   - Kiểm tra release Helm:
+				   helm ls -n kubernetes-dashboard
+				   helm status kubernetes-dashboard -n kubernetes-dashboard
+			   - Kiểm tra namespace và pod:
+				   kubectl get ns
+				   kubectl get pods -n kubernetes-dashboard
+			   - Kiểm tra logs nếu pod crash:
+				   kubectl logs <pod-name> -n kubernetes-dashboard
+			   - Kiểm tra service/ingress để biết cách truy cập:
+				   kubectl get svc,ing -n kubernetes-dashboard
+
+			------------------------------------------------------------
+			8. LỖI THƯỜNG GẶP VÀ CÁCH XỬ LÝ
+			   - Chart không tìm thấy:
+				   • Chưa add repo hoặc chưa `helm repo update`.
+				   • Nếu chart local thì dùng `./path/to/chart`.
+			   - Quyền insufficient:
+				   • Kiểm tra role/cluster-role của user trong kubeconfig.
+			   - Namespace creation failed:
+				   • User không có quyền tạo namespace → tạo namespace thủ công trước hoặc yêu cầu quyền.
+			   - ServiceAccount/ClusterRoleBinding bị từ chối:
+				   • Kiểm tra policy RBAC và PodSecurityPolicy / Admission controllers.
+			   - ImagePullBackOff:
+				   • Kiểm tra image name/tag, registry credentials (imagePullSecrets).
+			   - CrashLoopBackOff:
+				   • Xem logs và events, kiểm tra biến môi trường, secret, kết nối tới API server (nếu cần).
+			   - Hook/Job thất bại:
+				   • Chart có thể chạy các Job/hook (pre-install/pre-upgrade); kiểm tra job/pod logs và events.
+
+			------------------------------------------------------------
+			9. ROLLBACK & GHI CHÚ VỀ HISTORY
+			   - Xem lịch sử release:
+				   helm history kubernetes-dashboard -n kubernetes-dashboard
+			   - Rollback về revision trước:
+				   helm rollback kubernetes-dashboard <revision> -n kubernetes-dashboard
+			   - Nếu dùng --atomic, trong trường hợp lỗi Helm sẽ tự rollback (nếu có hỗ trợ).
+
+			------------------------------------------------------------
+			10. BẢO MẬT & BEST PRACTICES
+			   - Thêm repo và pin version chart:
+				   helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+				   helm repo update
+				   helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --version X.Y.Z ...
+			   - Cấu hình RBAC cẩn thận: Dashboard thường cần quyền để đọc/hiển thị thông tin cluster — hạn chế quyền theo nguyên tắc least privilege.
+			   - Dùng values file (ví dụ values-prod.yaml) và lưu trong VCS.
+			   - Kiểm tra trước với --dry-run --debug trên môi trường staging.
+			   - Nếu deploy trong CI/CD, dùng --wait --timeout và --atomic để đảm bảo idempotency và rollback khi lỗi.
+			   - Không expose dashboard public mà không có xác thực/ingress rule; cân nhắc dùng Proxy hoặc RBAC token.
+
+			------------------------------------------------------------
+			11. LỆNH THỰC TIỄN (COPY-PASTE) – CÁC KỊCH BẢN PHỔ BIẾN
+
+			   # 1) Thêm repo (nếu chưa add) và cập nhật
+			   helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+			   helm repo update
+
+			   # 2) Cài hoặc upgrade (tạo namespace nếu cần)
+			   helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+				 --create-namespace --namespace kubernetes-dashboard
+
+			   # 3) Cài/upgrade với file values và chờ hoàn tất, rollback nếu thất bại
+			   helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+				 -f dashboard-values.yaml --create-namespace --namespace kubernetes-dashboard \
+				 --wait --timeout 10m --atomic
+
+			   # 4) Dry-run để kiểm tra trước khi apply thật
+			   helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+				 -f dashboard-values.yaml --create-namespace --namespace kubernetes-dashboard \
+				 --dry-run --debug
+
+			   # 5) Gỡ cài
+			   helm uninstall kubernetes-dashboard -n kubernetes-dashboard
+
+			------------------------------------------------------------
+			12. TÓM TẮT NGẮN GỌN
+			   - Lệnh `helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard`
+				 → đảm bảo release `kubernetes-dashboard` được cài hoặc nâng cấp trong namespace `kubernetes-dashboard`, tạo namespace nếu cần.
+			   - Thích hợp dùng trong scripts/CI để triển khai idempotent.
+			   - Trước khi chạy: kiểm tra repo, quyền, và chuẩn bị file values nếu cần.
+
+			============================================================
 		
 		
 		
