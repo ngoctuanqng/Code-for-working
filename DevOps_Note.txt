@@ -18709,6 +18709,21 @@ sudo updatedb
 	Chưa chạy được mkfs
 
 		Tuy nhiên lại chạy được lệnh mkfs.t4 /dev/nvme1n1p1
+		
+	Khi thêm file vào /var/www/html thì cần khởi động lại webserver để cập nhật
+	
+		systemctl restart apache2
+	
+	Mount ổ đĩa trong EC2 bằng lệnh cmd
+	
+	Tạo snapshot từ volume
+	
+	Tạo image (AMI) từ EC2 instance
+	
+	Tạo launch template từ AMI
+	
+	Launch instance từ launch template
+	
 	
 	
 	
@@ -19400,6 +19415,10 @@ sudo updatedb
 		- EC2 -> AMIs -> Launch instance from AMI
 		- EC2 -> Auto Scaling groups
 		- EC2 -> Instances -> Vao instance -> Actions -> Security -> Modify IAM role
+		- EC2 -> Elastic IPs -> Allocate Elastis IP address
+		- EC2 -> Elastic IPs -> instance -> Associate Elastic IP address
+		- EC2 -> Elastic IPs -> instance -> Dissociate Elastic IP address
+		- EC2 -> Elastic IPs -> instance -> Release Elastic IP address
 		- CloudWatch -> All alarms -> Create alarm
 		- Amazon EFS -> Access points
 		- Amazon S3 -> Buckets
