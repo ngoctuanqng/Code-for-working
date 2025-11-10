@@ -1,0 +1,422 @@
+As developers and software engineers, our aim is to always design ways to obtain maximum efficiency and if
+we need to write less code for it, then that's a blessing.
+
+In Java, a record is a special type of class declaration aimed at reducing the boilerplate code. Java records
+were introduced with the intention to be used as a fast way to create data carrier classes, i.e. the classes whose
+objective is to simply contain data and carry it between modules, also known as POJOs (Plain Old Java Objects) and
+DTOs (Data Transfer Objects). Record was introduced in Java SE 14 as a preview feature, which is a feature whose design,
+implementation, and specification are complete but it is not a permanent addition to the language, which means that the
+feature may or may not exist in the future versions of the language. Java SE 15 extends the preview feature with additional
+capabilities such as local record classes.
+
+Illustration
+
+	Consider a simple class Employee, whose objective is to contain an employee's data such as its ID and name and
+	act as a data carrier to be transferred across modules. To create such a simple class, you'd need to define its
+	constructor, getter, and setter methods, and if you want to use the object with data structures like HashMap or
+	print the contents of its objects as a string, we would need to override methods such as equals(), hashCode(),\
+	and toString().
+	
+		// Java Program Illustrating Program Without usage of
+		// Records
+
+		// A sample Employee class
+		class Employee {
+
+			// Member variables of this class
+			private String firstName;
+			private String lastName;
+			private int Id;
+
+			// Constructor of this class
+			public Employee(String firstName, String lastName,
+							int Id)
+			{
+
+				// This keyword refers to current instance itself
+				this.firstName = firstName;
+				this.lastName = lastName;
+				this.Id = Id;
+			}
+
+			// Setter and Getter methods
+
+			// Setter-getter Method 1
+			public void setFirstName(String firstName)
+			{
+				this.firstName = firstName;
+			}
+
+			// Setter-getter Method 2
+			// to get the first name of employee
+			public String getFirstName() { return firstName; }
+
+			// Setter-getter Method 3
+			// To set  the last name of employees
+			public void setLastName(String lasstName)
+			{
+
+				// This keyword refers to current object itself
+				this.lastName = lastName;
+			}
+
+			// Setter-getter Method 3
+			// To set  the last name of employees
+			public String getLastName() { return lastName; }
+
+			// Setter-getter Method 4
+			// To set  the last name of employees
+			public void setId(int Id) { this.Id = Id; }
+
+			// Setter-getter Method 5
+			// To set  the last name of employees
+			public int getId() { return Id; }
+
+			// Setter-getter Method 6
+			public String toString()
+			{
+
+				// Return the attributes
+				return "Employee [firstName=" + firstName
+					+ ", lastName=" + lastName + ", Id=" + Id + "]";
+			}
+
+			// Method 7
+			// Overriding hashCode method
+			@Override public int hashCode()
+			{
+
+				// Final variable
+				final int prime = 31;
+				int result = 1;
+
+				result = prime * result + Id;
+				result = prime * result
+						 + ((firstName == null)
+								? 0
+								: firstName.hashCode());
+				result
+					= prime * result
+					  + ((lastName == null) ? 0
+											: lastName.hashCode());
+
+				return result;
+			}
+
+			// Method 8
+			// Overriding equals method to
+			// implement with data structures
+			@Override public boolean equals(Object obj)
+			{
+
+				// This refers to current instance itself
+				if (this == obj)
+					return true;
+
+				if (obj == null)
+					return false;
+
+				if (getClass() != obj.getClass())
+					return false;
+
+				Employee other = (Employee)obj;
+
+				if (Id != other.Id)
+					return false;
+
+				if (firstName == null) {
+					if (other.firstName != null)
+						return false;
+				}
+
+				else if (!firstName.equals(other.firstName))
+					return false;
+
+				if (lastName == null) {
+					if (other.lastName != null)
+						return false;
+				}
+
+				else if (!lastName.equals(other.lastName))
+					return false;
+
+				return true;
+			}
+		}
+		
+Some more Properties of Records
+
+		You can use nested classes and interfaces inside a record.
+		
+		You can have nested records too, which will implicitly be static.
+		
+		A record can implement interfaces.
+		
+		You can create a generic record class.
+		
+		It is possible to use local record classes (since Java SE 15).
+		
+		Records are serializable.
+		
+		As tempting as it might be to use records for data carrier objects, records are still a preview
+		feature in Java. Furthermore, as they are intended to be used only as a carrier of data, defining
+		our own access methods and other instance methods would defy the purpose. Records can be used to reduce
+		the work done by the developer, but internally the performance difference between a record and a class
+		is not that wide
+		
+			public record Employee(int id, String firstName, String lastName) {}
+			
+		That's it! Only 2 lines of code, that is all you need to implement those 80 lines of code using
+		Record. To know how Java implements such a feature, we are going to learn how to set it up ourselves
+		first. Now let us discuss the steps with visual aids demonstrating java records. Since Records is a
+		feature of Java SE 14 we would need JDK 14 on our machine. Download Oracle JDK 14 from this archive
+		for your machine. After downloading and installing JDK-14 to the Java folder along with any other java
+		versions follow the below steps.
+
+Steps in setting up java records
+
+	Step 1
+	
+		Create a new Java project and select JavaSE-14 as the execution environment.
+	
+	Step 2
+		
+		If this is your first time using JDK-14 then there will be some more steps that you'll need to follow in order to configure for records to work. You might see this type of exception mark on your project folder.
+	
+	Step 3
+		
+		To fix that, on the top, go to Window -> Preferences.
+	
+	Step 4
+		
+		In the Preferences window, click on Installed JREs and then click on Add as shown below:
+	
+	Step 5
+		
+		Now on the Add JRE window that opens, select Standard VM and click Next. You'll see a new window open to select a JRE, now click on Directory and navigate to where your jdk-14 is installed and select that folder. Click on Finish.
+	
+	Step 6
+		
+		Checkmark the JDK-14 that you just added and Apply it.
+	
+	Step 7
+		
+		We are not done yet. Since records are a preview feature, we need to enable them to use it. On your Project Explorer window on the left side, select your project and right-click and go to its Properties.
+	
+	Step 8
+		
+		On the window that opens, to the right of it, from the various options select Java Compiler. After that on the left side, uncheck the settings marked with red arrows in the image, and check mark the setting highlighted with green. Doing that will enable the preview features.
+	
+	Step 9
+		
+		After clicking on Apply and Close, you'll see a prompt asking whether you want to rebuild the project. Select Yes.
+
+Implementation
+
+	After configuring the environment we can now proceed to write code for records.
+	Coding Records are declared by writing records instead of class in the class declaration. While defining
+	a record, all the instance fields are written as parameters. The constructor, getter methods, toString(),
+	equals(), and hashCode() are generated by the Java compiler during compile time. One thing to note here is
+	that records do not provide setter methods, as it is expected that the value to instance variables is provided
+	while creating the object.
+	
+		// A simple Employee class to be used as a DTO
+
+		public record Employee(int id, String firstName,
+							   String lastName) {
+		}
+			Example 1
+				// Creating Employee object and showcasing its use cases
+
+		// Main class
+		class GFG {
+
+		  // Main driver method
+		  public static void main(String args[]) {
+
+			// Creating object with default constructor
+			Employee e1 = new Employee(1001, "Derok", "Dranf");
+
+			// Auto generated getter methods
+			System.out.println(e1.id() + " " + e1.firstName()
+							   + " " + e1.lastName());
+
+			// Auto-generated toString() method
+			System.out.println(e1.toString());
+		  }
+		}
+		
+		Output
+		
+			1001 Derok Dranf
+			Employee[id=1001, firstName=Derok, lastName=Dranf]
+	
+	We will notice that the getter methods are not similar in naming convention to the normal getter methods
+	that are created (ex: getFirstName()), instead they are simply denoted by the name of the field (ex: firstName()).
+	Now let us expand our previous example to test out these functionalities.
+	
+	That is not all that a record can do. Records also provide us the capability to:
+	
+		Create our own constructors. In records, you can create a parameterized constructor, which calls the default
+		constructor with the provided parameters inside its body. You can also create compact constructors which are
+		similar to default constructors with the twist that you can add some extra functionality such as checks inside
+		the constructor body.
+		
+		Create instance methods. Like any other class, you can create and call instance methods for the record class.
+		
+		Create static fields. Records restrict us to write the instance variables only as parameters but enable the use of
+		static variables and static methods.
+		
+	Example 2
+	
+		// Java Program Illustrating a Record class
+		// defining constructors, instance methods
+		// and static fields
+
+		// Record class
+		public record Employee(int id, String firstName,
+							   String lastName)
+		{
+
+			// Instance fields need to be present in the record's
+			// parameters but record can define static fields.
+			static int empToken;
+
+			// Constructor 1 of this class
+			// Compact Constructor
+			public Employee
+			{
+				if (id < 100) {
+					throw new IllegalArgumentException(
+						"Employee Id cannot be below 100.");
+				}
+				if (firstName.length() < 2) {
+					throw new IllegalArgumentException(
+						"First name must be 2 characters or more.");
+				}
+			}
+
+			// Constructor 2 of this class
+			// Alternative Constructor
+			public Employee(int id, String firstName)
+			{
+				this(id, firstName, null);
+			}
+
+			// Instance methods
+			public void getFullName()
+			{
+				if (lastName == null)
+					System.out.println(firstName());
+
+				else
+					System.out.println(firstName() + " "
+									   + lastName());
+			}
+
+			// Static methods
+			public static int generateEmployeeToken()
+			{
+				return ++empToken;
+			}
+		}
+		
+	Example 3
+	
+		// Java Program to Illustrate Record's functionalities
+
+		// Main class
+		class GFG {
+
+		  // Main driver method
+		  public static void main(String args[]) {
+
+			// Creating object with default constructor
+			Employee e1 = new Employee(1001, "Derok", "Dranf");
+
+			// auto generated getter methods
+			System.out.println(e1.id() + " " + e1.firstName()
+							   + " " + e1.lastName());
+
+			// Auto-generated toString() method
+			System.out.println(e1.toString());
+
+			// Creating object with parameterized constructor
+			Employee e2 = new Employee(1002, "Seren");
+
+			// Using instance methods
+			e2.getFullName();
+
+			// Using static methods
+			System.out.println("Employee " + e2.id()
+							   + " Token = "
+							   + e2.generateEmployeeToken());
+
+			// Using the equals() method
+			System.out.print("Is e1 equal to e2: "
+							 + e1.equals(e2));
+		  }
+		}
+		
+		Output
+		
+			1001 Derok Dranf
+			Employee[id=1001, firstName=Derok, lastName=Dranf]
+			Seren
+			Employee 1002 Token = 1
+			Is e1 equal to e2: false
+			
+	Geek, have you ever wondered what magic does the Compiler does?
+	
+		As discussed above record is just a special declaration of a class and internally the compiler converts it
+		into a normal class with some restrictions, which makes it different from the typical classes. When the Java
+		file is compiled by the Java compiler to the bytecode, the .class file produced contains the extended declaration
+		of the record class. By looking at that file we can make out more about records. Bytecode produced for the Employee
+		record that we created above is as follows:
+		
+		public final class Employee extends java.lang.Record {
+		   private final int id;
+		   private final java.lang.String firstName;
+		   private final java.lang.String lastName;
+		   static int empToken;
+
+		   public Employee(int id, java.lang.String firstName, java.lang.String lastName) { /* compiled code */ }
+
+		   public Employee(int id, java.lang.String firstName) { /* compiled code */ }
+
+		   public void getFullName() { /* compiled code */ }
+
+		   public static int generateEmployeeToken() { /* compiled code */ }
+
+		   public int id() { /* compiled code */ }
+
+		   public java.lang.String firstName() { /* compiled code */ }
+
+		   public java.lang.String lastName() { /* compiled code */ }
+
+		   public java.lang.String toString() { /* compiled code */ }
+
+		   public final int hashCode() { /* compiled code */ }
+
+		   public final boolean equals(java.lang.Object o) { /* compiled code */ }
+		}
+		
+Conclusion
+
+	If we take some time to observe the bytecode, you will notice the following:
+	
+		The record has been replaced by class.
+		
+		The class and its data members have been declared as final. This implies that this class cannot be
+		extended, i.e. cannot be inherited, and is immutable as well.
+		
+		The class extends java.lang.Record. This means that all records are a subclass of Record defined
+		in java.lang package.
+		
+		There is a default constructor and a parameterized constructor. You'll notice that there is no separate declaration
+		for the compact constructor that we defined. This is because the compact constructor does not generate a separate
+		constructor but adds its code to the start of the default constructor's body.
+		
+		The instance and static methods are declared as they were.
+		
+		The toString(), hashCode(), and equals() methods have been auto-generated by the compiler.

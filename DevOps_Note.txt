@@ -18724,9 +18724,15 @@ sudo updatedb
 	
 	Launch instance từ launch template
 	
+	Elastic file system
 	
+	Tạo target group, load balancer, sau đó tạo auto scaling groups
 	
+	Có thể truy cập tài nguyên S3 public với ACLs enabled và bỏ block all public access
 	
+	Tạo lifecycle rules và replication rules trong S3
+	
+	Tạo 1 RDS, 1 EC2. Từ EC2 cài mysql, sau đó truy cập vào RDS thông qua tên và password của RDS
 	
 	
 	
@@ -19712,7 +19718,7 @@ sudo updatedb
 
 	
 			
--- AWS Cloud For Project Set Up or Lift and Shift:
+--- AWS Cloud For Project Set Up or Lift and Shift:
 
 	Flow chính:
 	
@@ -19798,6 +19804,36 @@ sudo updatedb
 				
 	Từ EC2 instance -> Tạo image -> Tạo launch template và thêm image mới tạo vào -> tao auto scaling group
 	và thêm launch template mới tạo vào
+	
+	NGINX ở đây đóng vai trò là Reverse Proxy / Load Balancer, Tomcat không chỉ là web server mà còn là\
+	application server (Java Servlet Container).
+	
+	EC2 của tomcat dùng sg app, EC2 của rabbitmq, db, memcache dùng sg backend
+	
+	Security group của load balancer sẽ mở all cho port 80 và 443
+	Security group của app sẽ thêm sg của load balancer với port 8080
+	Security group của backend sẽ thêm sg của app với port 3306 cho MYSQL/Aurora, tiếp tục sg của app cho
+	port 11211, 5672, 22, và all port cho sg backend
+	
+	Tạo hosted zone ở Route 53, lấy địa chỉ private của các ec2 để thêm record cho hosted zone vừa tạo
+	
+	Tạo bucket cho S3
+	
+	Tạo role với AmazoneS3FullAccess rồi thêm role vào cho các EC2
+	
+	Tạo target group
+	
+	Tạo load balancer với security group load balancer. Sau đó thêm địa chỉ của load balancer vừa tạo vào record trên
+	Go Daddy với type là cname
+	
+	Tại image từ EC2 instance. Tạo launch template từ image vừa tạo với security group app. IAM instance profile với role
+	tạo trước đó
+	
+	Tạo auto scaling group từ launch template vừa tạo, target group load balancer
+	
+	AWS Certificate Manager
+	
+	-- source: hkhcoder/vprofile-project (awsliftandshift)
 
 	- Command:
 	
@@ -20127,11 +20163,55 @@ sudo updatedb
 			Cache server để tăng tốc truy vấn (giảm tải cho MySQL).
 
 			Lưu trữ tạm thời dữ liệu hay dùng (session, query result).
+			
+	Tạo sg rearch backend với cho phép tất cả truy cập từ reacrch backend
+	
+	Tạo parameter group trong RDS
+	
+	Tạo DB subnet group trong RDS
+	
+	Tạo RDS có sg rearch backend, parameter group, DB subnet group tạo ở trên
+	
+	Tạo parameter group trong ElasticCache
+	
+	Tạo subnet groups trong ElasticCache
+	
+	Tạo Memcached từ Elasticcache với subnet group, parameter group đã tạo ở trên, sg backend
+	
+	Tạo broker RabbitMQ trong Amazone MQ với sg backend
+	
+	Tạo EC2 có tên mysql-client có sg ssh port 22 cho My IP, cài đặt mysql-client và git trên này
+	
+	Chỉnh sửa sg backend để thêm MYSQL/Aurora port 3306 cho sg mysql-client
+	
+	Từ EC2 mysql-client, truy cập vào RDS. Sau đó clone source git về EC2
+	
+	Tạo role trong IAM về beanstalk
+	
+	Tạo Elastic Beanstalk, thêm role của IAM vừa tạo ở trên
+	
+	Sửa sg backend với all traffice cho sg của elastic beanstalk vừa tạo
+	
+	Từ source code build thành file war, sau đó upload file war này lên elastic beanstalk instance
+	
+	Kiểm tra các target group có healthy không
+	
+	Add listener port 443 cho elastic beanstalk, sau đó thêm link của beantalk domain vào record với type cname trong Go Daddy
+	
+	Tạo cloudfront với doamin đã thêm vào Go Daddy trước đó
+	
+	
+	
+	
+	
+	-- Source: github hkhcoder (awsrefactor)
 		
 	- Command:
 	
 		- cmd: apt update && apt install mysql-client git -y
 		- cmd: mysql -h vprofile-rds-reach.cvrzecdaz2zy.us-east-1.rds.amazonaws.com -u admin -pxUScYu55cFzH5NxM8Zc5 accounts < src/main/resources/db_backup.sql
+		
+		
 		
 --- Continuous Integration with Jenkins:
 
@@ -20183,19 +20263,130 @@ sudo updatedb
 	
 	Google search:
 	
+		jenkins environment variables
+	
 		sonar scanner pipiline script
 		
 		nexusartifactuploader
 		
 		slack login
 		
-		wget for git hash how to add more utilities
+		add apps to slack
+		
+		wget for git bash how to add more utilities
 		
 	Git Weebhook, Poll SCM
 	
 	LDAP
 	
+	Tạo 1 EC2 Jenkins-Server, sg có port 22 với My IP, port 8080 với My IP. Cài openjdk-21-jdk, jenkin trên EC2. Đăng nhập vào
+	url của EC2 sẽ mở ra trang Jenkins, port 8080 với sg sonar
 	
+	Thiết lập tool:
+	
+		Jenkins url
+	
+		Add maven, add JDK (có thể add nhiều jdk, trong mỗi job có trong sẽ chọn jdk phù hợp)
+		
+		Add SonarQube Scanner
+		
+	Thiết lập system:
+	
+		Add SonarQube với server url là private IPv4 address của EC2 Sonar-server, add server
+		authentication token từ token lấy ở trang web khi mở EC2 Sonar với domain là global
+		credentials (unrestricted), kind là secret test
+		
+		Thêm slack
+		
+	Cài đặt plugins:
+	
+		S3 publisher
+		
+		Build timestamp
+		
+		Nexus Artifact Uploader
+		
+		SonarQube Scanner
+		
+		Pipiline Maven Intergration
+		
+		Pipeline Utility Steps
+		
+		Slack Notification
+		
+		Amazon Web Service SDK::All
+		
+		Amazon ECR
+		
+		Docker Pipeline
+		
+		CloudBees Docker Build and Publish
+		
+		Pipeline: AWS Steps
+		
+		Role-based Authorization Strategy
+		
+	Tạo job với build steps thực thi theo shell
+	
+	Tạo job với liên quan đến git, build steps với invoke top-level maven targets
+	
+	Tạo job với post build actions:
+	
+		Archive the artifacts
+		
+		Publish artifacts to S3 Bucket
+	
+	Workspace trong jenkins
+	
+	Tạo EC2 Nexus-server (Amazon Linux) có port 22 cho My IP, port 8081 cho My IP và sg Jenkins
+	
+	Tạo EC2  Sonar-server (Ubuntu) có port 22 My IP, port 80 My IP và sg jenkins
+	
+	Cài đặt JenkinsFile JenkinsFile Support extension trong vs code
+	
+	Tạo mới item với type là pipeline
+	
+	Thêm quality gate và webhook trong sonarqube, với webhook có url là private
+	ipv4 của ec2 jenkins (http://172.31.94.65:8080/sonarqube-webhook)
+	
+	Thêm global credentials trên jenkins cho nexus
+	
+	Cài đặt aws-cli, docker trong ec2 jenkins
+	
+	Tạo user trong IAM với role là AmazonECS_FullAccess
+	
+	Tạo repository cho Amazon ECR
+	
+	Thêm credentials trong jenkins cho aws credential với IAM đã tạo trước đó
+	
+	Tạo cluster, task definitions trong Amazon Elastic Container Service
+	
+	Trong task definitions instance của Amazon Elastic Container Service, thêm role CloudWatchLogsFullAccess
+	cho task execution role
+	
+	Tạo service cho cluster instance của Amazon Elastic Container Service
+	
+	Thêm Git Host Key Verification Strategy
+	
+	Thêm url của jenkins vào webhook payload url trong github
+	
+	Thêm Build triggers là Github hook trigger for GITScm polling trong configure
+	
+	Thêm Build triggers là Poll SCM trong configure
+	
+	Thêm Build triggers là Build periodically trong configure
+	
+	Thêm Build triggers là Build trigger build remote (e.g from scripts) trong configure
+	
+	Thêm Build triggers là Build after other projects are built trong configure
+	
+	Tạo ec2 slave-jenkins, sau đó thêm địa chỉ ip của nó vào node trong jenkins
+	
+	Trong configure tại jenkins add new api token
+	
+	jenkins security với configure global security, manage and assign roles và manage user
+	
+	-- Source: github hkhcoder (atom)
 	
 	
 		
@@ -23480,6 +23671,260 @@ sudo updatedb
 
 			Dùng để kết nối VPC của team khác, môi trường dev/staging, hoặc hệ thống on-premises (khi không dùng VPN).
 			
+	AWS Part -2 - Subnet mask:
+
+		Định nghĩa:
+
+			Subnet Mask (mặt nạ mạng con) là một giá trị 32-bit dùng để phân tách địa chỉ IP thành 2 phần:
+
+				Phần Network (mạng): xác định mạng mà máy tính thuộc về.
+
+				Phần Host (máy chủ): xác định các thiết bị (máy tính, router, v.v...) trong cùng mạng đó.
+
+			Subnet Mask giúp thiết bị biết địa chỉ IP nào nằm trong cùng mạng nội bộ (LAN) và địa chỉ nào nằm
+			ở mạng khác (phải gửi ra gateway).
+
+		Cấu trúc:
+
+			Subnet Mask cũng gồm 32 bit (giống IP), được chia thành 4 octet, ví dụ:
+
+				255.255.255.0
+
+			Dạng nhị phân:
+
+				11111111.11111111.11111111.00000000
+
+			Các bit “1” đại diện cho phần Network, còn các bit “0” đại diện cho phần Host.
+
+		Cách hoạt động:
+
+			Khi một máy tính muốn giao tiếp với địa chỉ IP khác, nó so sánh phần Network của địa chỉ IP đích và IP của chính nó.
+
+			Việc so sánh được thực hiện bằng phép toán AND giữa IP và Subnet Mask.
+
+				Nếu kết quả giống nhau → cùng mạng → gửi trực tiếp.
+
+				Nếu khác nhau → khác mạng → gửi qua Gateway.
+
+			Ví dụ:
+
+				IP máy A:      192.168.1.10
+				Subnet Mask:   255.255.255.0
+				IP máy B:      192.168.1.20
+
+			Cả hai đều có phần mạng là 192.168.1, nên chúng thuộc cùng mạng và có thể giao tiếp trực tiếp.
+
+			Nếu máy B có IP 192.168.2.20, thì phần mạng khác (192.168.2 ≠ 192.168.1), nên phải qua Gateway.
+
+		Một số Subnet Mask phổ biến:
+
+			Subnet Mask				Dạng CIDR			Số địa chỉ khả dụng		Giải thích
+			
+			255.0.0.0				/8					~16 triệu				Dùng cho mạng lớn (Class A)
+			255.255.0.0				/16					~65 nghìn				Dùng cho mạng trung bình (Class B)
+			255.255.255.0			/24					254						Dùng phổ biến cho LAN nhỏ
+			255.255.255.128			/25					126						Chia mạng nhỏ hơn từ /24
+			255.255.255.192			/26					62						Dùng trong subnetting chi tiết
+
+		Ký hiệu CIDR (Classless Inter-Domain Routing):
+
+			Thay vì viết Subnet Mask đầy đủ, ta dùng ký hiệu /n, trong đó n là số bit 1.
+
+			Ví dụ:
+
+				/24 tương đương 255.255.255.0
+
+				/16 tương đương 255.255.0.0
+
+				/8 tương đương 255.0.0.0
+
+		Ứng dụng của Subnet Mask:
+
+			Chia nhỏ mạng lớn (subnetting): giúp tối ưu việc quản lý IP và giảm broadcast.
+
+			Tăng cường bảo mật: cô lập các nhóm thiết bị trong các subnet riêng.
+
+			Tối ưu hiệu năng: giảm lưu lượng broadcast không cần thiết.
+
+			Định tuyến chính xác: router sử dụng Subnet Mask để quyết định gói tin đi đâu.
+
+		Ví dụ tổng hợp:
+
+			IP Address:   192.168.10.25
+			Subnet Mask:  255.255.255.0 (/24)
+			Network:      192.168.10.0
+			Broadcast:    192.168.10.255
+			Host Range:   192.168.10.1 – 192.168.10.254
+
+				=> Có 254 địa chỉ IP khả dụng cho thiết bị (máy tính, camera, router, ...).
+
+		Tóm tắt dễ nhớ:
+
+			Subnet Mask = “Khuôn mẫu” để tách phần mạng và phần host của IP.
+
+			Bit “1” = phần mạng.
+
+			Bit “0” = phần host.
+
+			Cùng phần mạng → cùng subnet.
+
+			Khác phần mạng → khác subnet → cần gateway.
+			
+	AWS Part -2 - NETWORK IP VÀ BROADCAST IP:
+	
+		Network IP (Địa chỉ mạng)
+
+			Định nghĩa:
+
+				Network IP là địa chỉ đầu tiên trong một mạng (subnet).
+
+				Nó được dùng để đại diện cho toàn bộ mạng, không gán cho bất kỳ thiết bị nào.
+
+				Router và các thiết bị mạng dùng địa chỉ này để xác định ranh giới của mạng.
+
+			Đặc điểm:
+
+				Tất cả các bit của phần Host trong địa chỉ IP đều bằng 0.
+
+				Không thể dùng Network IP làm địa chỉ của thiết bị (máy tính, server...).
+
+				Ví dụ:
+
+					IP:           192.168.1.10
+					Subnet Mask:  255.255.255.0
+
+						Subnet Mask /24 nghĩa là 24 bit đầu là phần mạng → 192.168.1
+
+						Các bit host (8 bit cuối) = 0 → Network IP là:
+
+						192.168.1.0
+
+						=> Network IP: 192.168.1.0
+
+		Broadcast IP (Địa chỉ quảng bá)
+
+			Định nghĩa:
+
+				Broadcast IP là địa chỉ cuối cùng trong một mạng (subnet).
+
+				Nó được dùng để gửi thông điệp tới tất cả các thiết bị trong cùng mạng (broadcast message).
+
+				Dùng trong các giao thức như ARP, DHCP, v.v…
+
+			Đặc điểm:
+
+				Tất cả các bit của phần Host trong địa chỉ IP đều bằng 1.
+
+				Không thể gán Broadcast IP cho thiết bị.
+
+			Ví dụ:
+
+				IP:           192.168.1.10
+				Subnet Mask:  255.255.255.0
+
+					Phần mạng: 192.168.1
+
+					Các bit host (8 bit cuối) = 1 → Broadcast IP là:
+
+					192.168.1.255
+
+					=> Broadcast IP: 192.168.1.255
+
+		Phân biệt Network IP, Broadcast IP và Host IP
+		
+			Loại địa chỉ		Ý nghĩa chính								Có thể gán cho thiết bị?	Ví dụ (/24)
+			
+			Network IP			Đại diện cho toàn mạng						Không						192.168.1.0
+			Host IP				Dành cho thiết bị trong mạng				Có							192.168.1.1 → 192.168.1.254
+			Broadcast IP		Gửi dữ liệu đến tất cả thiết bị trong mạng	Không						192.168.1.255
+		
+		Ví dụ minh họa chi tiết:
+
+			Giả sử có cấu hình:
+
+				IP Address:   192.168.10.25
+				Subnet Mask:  255.255.255.0 (/24)
+
+
+				Ta tính được:
+
+					Thành phần			Giá trị
+					
+					Network IP			192.168.10.0
+					Broadcast IP		192.168.10.255
+					Host khả dụng		192.168.10.1 – 192.168.10.254
+					Số lượng Host		254 thiết bị
+			
+		Nguyên tắc tính nhanh:
+
+			Công thức tổng quát:
+
+				Network IP = (IP AND Subnet Mask)
+
+				Broadcast IP = (Network IP) + (Số địa chỉ trong subnet - 1)
+
+			Ví dụ:
+
+				IP:           192.168.1.77
+				Subnet Mask:  255.255.255.192 (/26)
+
+					/26 → có 64 địa chỉ (từ 0 đến 63, 64 đến 127, ...).
+
+					Network IP của subnet chứa 192.168.1.77 là 192.168.1.64
+
+					Broadcast IP là 192.168.1.127
+
+					Host khả dụng: 192.168.1.65 → 192.168.1.126
+
+		Tóm tắt dễ nhớ:
+
+			Network IP = địa chỉ đầu (mọi bit host = 0)
+
+			Broadcast IP = địa chỉ cuối (mọi bit host = 1)
+
+			Host IP = các địa chỉ nằm giữa hai địa chỉ trên
+
+			Không thể dùng Network và Broadcast IP để gán cho máy tính.
+			
+	Tạo mới 1 VPC
+	
+	Tạo subnet theo VPC vừa tạo trước đó
+	
+	Tạo internet gateway và attach vào VPC đã tạo trước đó
+	
+	Tạo pub route table theo VPC đã tạo trước đó, edit subnet association để thêm 2 pub subnet đã tạo vào,
+	edit route để thêm internet gateway vào. Sau đó edit pub subnet để enable auto-assign public ipv4 address
+	
+	Allocate Elastic IP address
+	
+	Tạo nat gateway có subnet là pub subnet 1, dit subnet association để thêm 2 private subnet đã tạo vào,
+	edit route để thêm nat gateway vào. Sau đó edit pub subnet để enable auto-assign public ipv4 address
+	
+	Tạo mới thêm 1 route table theo VPC đã tạo trước đó
+	
+	Trong EC2 tạo 1 security group bastion với VPC đã tạo trước đó, port 22 với My IP
+	
+	Tạo mới 1 ec2 instance bastion (Ubuntu Server) có sg bastion với vpc đã tạo trước đó
+	
+	Tạo mới 1 ec2 web01-priv (Amazon Linux) với port 22 sg bastion với vpc đã tạo trước đó
+	
+	Từ ec2 bastion, ssh để truy cập vào web01-priv, sau đó cài đặt httpd, wget, unzip
+	
+	Tạo target group theo ec2 web01-priv với vpc đã tạo trước đó
+	
+	Tạo target group elb với port 80 all cho ipv4, ipv6 với vpc đã tạo trước đó
+	
+	Sửa security group web01 để thêm port 80 với sg elb
+	
+	Ở zone Oregon tạo VPC vpro-db có route table là vprodb-rt
+	
+	Tạo peering connection, lựa chọn local VPC to peer with là VPC ở zone hiện tại, anathor VPC to peer with
+	là VPC ở 1 zone khác. Xong rồi sang VPC ở zone khác để accept request của peering connection
+	
+	Trong routube tables ở cả 2 zone, điều chỉnh routes với target là peering connection
+	
+	Tạo load balancer
+			
 	- Google search:
 	
 		online subnet calculator
@@ -23559,6 +24004,48 @@ sudo updatedb
 	- Bitbucket -> Settings -> Personal Bitbucket settings -> SSH keys -> Add key
 	- Bitbucket -> Settings -> Personal Bitbucket settings -> App passwords
 	
+	Tạo beanstalk
+	
+	Tạo rds
+	
+	Trong security group chỉnh sửa inbound cho sg rds với port 3306 sg khi tạo beanstalk
+	
+	Trong ec2 khi tạo beanstalk, cài đặt mariadb105. Sau đó truy cập vào rds bằng endpoint, username,
+	password của rds
+	
+	Đăng nhập vào bitbucket. Tạo repository, tao ssh-keygen trên máy local, sau đó thêm vào ssh key trên bitbucket, đẩy code
+	lên bitbucket
+	
+	Tạo project trong CodeBuild, source sẽ connect to bitbucket, using Oauth
+	
+	Start build
+	
+	Tạo pipeline trong AWS CodePipeline, connect to bitbucket, attach policies cho service role ARN là AdministratorAccess-AWSElasticBeanstalk
+	
+	Tạo S3
+	
+	Mối quan hệ giữa CodeBuild và Elastic Beanstalk
+	
+		Cùng nằm trong chuỗi CI/CD (Continuous Integration / Continuous Deployment)
+		
+		Giai đoạn					Dịch vụ AWS thường dùng		Vai trò
+		
+			Source (mã nguồn)			AWS CodeCommit / GitHub		Lưu trữ code
+			Build (biên dịch & test)	AWS CodeBuild				Build app, test, tạo artifact
+			Deploy (triển khai)			AWS Elastic Beanstalk		Nhận artifact → triển khai lên EC2
+			Pipeline (quản lý luồng)	AWS CodePipeline			Tự động hóa toàn bộ quy trình
+			
+		Mối quan hệ thực tế
+
+			CodeBuild tạo ra file build (ví dụ app.zip hoặc Docker image).
+
+			Elastic Beanstalk lấy file build đó để triển khai thành ứng dụng web.
+
+			Hai dịch vụ này thường được kết nối qua CodePipeline.	
+	
+	-- Source: github hkhcoder vprofile-project (aws-ci)
+	
+	
 	- Google search:
 	
 		bitbucket
@@ -23596,6 +24083,10 @@ sudo updatedb
 			  IdentityFile ~/.ssh/vprobit_rsa
 			  
 --- Docker:
+
+	Tạo EC2 Docker-Engine (Ubuntu) và cài docker trên này, pull nginx image về
+	
+	EC2 Docker-Engine có security group mở cho truy cập all port với My IP
 
 	- Commands:
 	
