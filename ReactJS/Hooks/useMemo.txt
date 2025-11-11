@@ -1,21 +1,110 @@
 useMemo--REACTJS:
 
-		- useMemo is a React Hook that lets you cache the result of a calculation between re-renders.
-		- useMemo giúp ta kiểm soát được việc render dư thừa của các component con, nó khá giống với hàm shouldComponentUpdate trong LifeCycle. Bằng cách truyền vào 1 tham số thứ 2 thì chỉ khi
-		tham số này thay đổi thì thằng useMemo mới được thực thi.
-		- useMemo là một react hooks giúp mình tạo ra một memoized value và chỉ tính toán ra value mới khi dependencies thay đổi.
-		- useMemo giúp chúng ta hạn chế việc thực hiện những tính toán phức tạp mỗi lần component re-render. Bằng cách truyền dependencies ở đối số thứ 2, chỉ khi giá trị một trong các
-		dependencies thay đổi thì việc tính toán mới thực hiện lại.
-		- useMemo(calculateValue, dependencies)
-				On the initial render, useMemo returns the result of calling calculateValue with no arguments.
-				During next renders, it will either return an already stored value from the last render (if the dependencies haven’t changed), or call calculateValue again, and return the result
-				that calculateValue has returned.
+	- useMemo is a React Hook that lets you cache the result of a calculation between re-renders.
+	- useMemo giúp ta kiểm soát được việc render dư thừa của các component con, nó khá giống với hàm shouldComponentUpdate trong LifeCycle. Bằng cách truyền vào 1 tham số thứ 2 thì chỉ khi
+	tham số này thay đổi thì thằng useMemo mới được thực thi.
+	- useMemo là một react hooks giúp mình tạo ra một memoized value và chỉ tính toán ra value mới khi dependencies thay đổi.
+	- useMemo giúp chúng ta hạn chế việc thực hiện những tính toán phức tạp mỗi lần component re-render. Bằng cách truyền dependencies ở đối số thứ 2, chỉ khi giá trị một trong các
+	dependencies thay đổi thì việc tính toán mới thực hiện lại.
+	- useMemo(calculateValue, dependencies)
+			On the initial render, useMemo returns the result of calling calculateValue with no arguments.
+			During next renders, it will either return an already stored value from the last render (if the dependencies haven’t changed), or call calculateValue again, and return the result
+			that calculateValue has returned.
+	
+	import { useMemo } from 'react';
+	function TodoList({ todos, tab }) {
+	  const visibleTodos = useMemo(
+		() => filterTodos(todos, tab),
+		[todos, tab]
+	  );
+	  // ...
+	}
+		
+	useMemo là một React hook giúp ghi nhớ kết quả đầu ra của một hàm. useMemo cho phép truyền vào 2 tham số: callback và
+	dependencies. useMemo sẽ gọi hàm và trả về giá trị trả về của nó. Sau đó, mỗi khi bạn gọi lại useMemo, nó sẽ kiểm tra
+	nếu bất kì khi nào dependencies thay đổi nó sẽ gọi lại callback để thực thi nó. Nếu không, nó sẽ trả về giá trị cũ đã
+	được lưu trong bộ nhớ cache, không gọi hàm callback.
+	
+	Nếu giá trị truyền vào dependencies thay đổi, chúng ta gọi lại hàm đã được cung cấp để thực thi các logic bên
+	trong. Đó là cách hoạt động của useMemo.
+	
+	By default, React will re-run the entire body of your component every time that it re-renders.
+	
+	useMemo is a React Hook that lets you cache the result of a calculation between re-renders.
 		
 		import { useMemo } from 'react';
-		function TodoList({ todos, tab }) {
+		import { filterTodos } from './utils.js'
+
+		export default function TodoList({ todos, theme, tab }) {
 		  const visibleTodos = useMemo(
 			() => filterTodos(todos, tab),
 			[todos, tab]
 		  );
-		  // ...
+		  return (
+			<div className={theme}>
+			  <p><b>Note: <code>filterTodos</code> is artificially slowed down!</b></p>
+			  <ul>
+				{visibleTodos.map(todo => (
+				  <li key={todo.id}>
+					{todo.completed ?
+					  <s>{todo.text}</s> :
+					  todo.text
+					}
+				  </li>
+				))}
+			  </ul>
+			</div>
+		  );
 		}
+
+	Điều này sẽ nhắc nhở bạn về useEffect, cả useMemo và useEffect đều chấp nhận nhóm dependencies. Sự khác biệt
+	duy nhất là useEffect được dành cho side-effects, trong khi các chức năng của useMemo được cho là tinh khiết
+	(pure) và không có side-effects.
+	
+	Khi nào chúng ta nên sử dụng useMemo ?
+	
+		Đầu tiên, việc này rất quan trọng, mã của bạn không phụ thuộc vào useMemo. Nói cách khác, bạn nên thay thế
+		useMemo bằng các hàm gọi trực tiếp và không thay đổi bất kì điều gì ảnh hưởng đến ứng dụng, trừ khi nó ảnh hưởng
+		nhiều đến hiệu năng. Cách dễ nhất để làm điều này là hãy suy nghĩ cách viết mã mà không cần dùng đến useMemo
+		trước. Sau đó, hãy thêm nó vào nếu cần thiết.
+	
+	Vì sao tính toán lại?
+	
+		Bất kể khi nào functional component đó re-render, các hàm và logic tính toán khai báo bên trong component sẽ được tính toán lại.
+		Vì đây là cách hoạt động của functional component. Mọi thứ trong thế giới của Functional component đều xoay quanh closures.
+		Nói ngắn gọn thì việc tạo mới các funtion hay logic tính toán ở mỗi lần re-render là bắt buộc, bằng cách làm như vậy thì các funtion hay các hàm tính toán đó mới có khả năng access được các giá trị mới nhất của các biến state.
+		Vì ở mỗi lần re-render, functional component kia sẽ tạo ra một closure khác nhau (một vỏ bọc, chứa tất cả hàm, biến của component đó). Nếu một hàm khai báo bên trong component có sử dụng một biến state bất kỳ để tính toán, mà bản thân hàm này không được tạo mới ứng với mỗi lần re-render, thì nó sẽ chỉ refer tới biến state cũ của lần render trước đó, dẫn đến tính toán sai.
+	
+	
+	Vì sao re-render?
+		Vì function cũng là object, ở mỗi lần re-render, hàm được tạo mới, tương đương một object được tạo mới. Trong trường hợp object hay function này được pass xuống component con, thì component con sẽ bị re-render, mặc cho component con đó có áp dụng React.memo hay React.PureComponent.
+	
+	Tại sao phải hạn chế tối đa?
+	
+		Vì với các UI library có animation, sẽ xảy ra tình trạng animation flicking.
+		
+		Với các tác vụ tính toán sort, filter nặng nề, nó sẽ chạy đi chạy lại gây hao tốn performance.
+	
+	useCallback:
+		
+		Trả ra một memoized function
+	
+	useMemo:
+		
+		Trả ra một memoized value
+	
+	useMemo dùng thay thế useCallback cũng được
+		
+		Như đã nói phía trên, useMemo sẽ thực thi hàm được pass vào và trả ra kết quả. Nếu khéo léo, return ra function như là một kết quả, thì lúc này useMemo sẽ có vai trò và tác dụng giống hệt useCallback.
+	
+	Caching return values like this is also known as memoization, which is why this Hook is called useMemo.
+	
+	You need to pass two things to useMemo:
+		
+		A calculation function that takes no arguments, like () =>, and returns what you wanted to calculate.
+		
+		A list of dependencies including every value within your component that’s used inside your calculation.
+	
+	On the initial render, the value you’ll get from useMemo will be the result of calling your calculation.
+
+	On every subsequent render, React will compare the dependencies with the dependencies you passed during the last render. If none of the dependencies have changed (compared with Object.is), useMemo will return the value you already calculated before. Otherwise, React will re-run your calculation and return the new value.

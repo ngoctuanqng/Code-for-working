@@ -1,17 +1,23 @@
 useCallback--REACTJS:
 
-		- useCallback is a React Hook that lets you cache a function definition between re-renders.
-		- useCallback có nhiệm vụ tương tự như useMemo nhưng khác ở chỗ function truyền vào useMemo bắt buộc phải ở trong quá
-		trình render trong khi đối với useCallback đó lại là function callback của 1 event nào đó như là
-		onClick chẳng hạn.
-		- useCallback sử dụng cơ chế memorization – ghi nhớ kết quả của một function vào trong memory và sẽ trả về function được
-		ghi nhớ trong trường hợp các dependencies này không thay đổi.
-		- Tương tự như useMemo, nhưng useCallback có tác dụng là ngăn chặn việc một hàm bị khởi tạo lại mỗi lần re-render.
-		- useCallback(fn, dependencies)
-						On the initial render, useCallback returns the fn function you have passed.
-						During subsequent renders, it will either return an already stored fn function from the last render
-						(if the dependencies haven’t changed), or return the fn function you have passed during this render
-		
+	- useCallback is a React Hook that lets you cache a function definition between re-renders.
+	
+	- useCallback có nhiệm vụ tương tự như useMemo nhưng khác ở chỗ function truyền vào useMemo bắt buộc phải ở trong quá
+	trình render trong khi đối với useCallback đó lại là function callback của 1 event nào đó như là onClick chẳng hạn.
+	
+	- useCallback sử dụng cơ chế memorization – ghi nhớ kết quả của một function vào trong memory và sẽ trả về function được
+	ghi nhớ trong trường hợp các dependencies này không thay đổi.
+	
+	- Tương tự như useMemo, nhưng useCallback có tác dụng là ngăn chặn việc một hàm bị khởi tạo lại mỗi lần re-render.
+	
+	- useCallback(fn, dependencies)
+					
+		On the initial render, useCallback returns the fn function you have passed.
+		During subsequent renders, it will either return an already stored fn function from the last render
+		(if the dependencies haven’t changed), or return the fn function you have passed during this render
+	
+	- Example:
+	
 		import { useCallback } from 'react';
 		function ProductPage({ productId, referrer, theme }) {
 		  const handleSubmit = useCallback((orderDetails) => {

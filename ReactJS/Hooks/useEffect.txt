@@ -1,15 +1,135 @@
 useEffect--REACTJS:
+
+	- Không có dependency: luôn luôn gọi sau mỗi lần render.
+	
+	- Dependency là mảng rỗng: phần setup chỉ được gọi 1 lần duy nhất khi component mounted.
+	
+	- Dependency là 1 mảng đầy đủ: setup sẽ được gọi khi component mounted và được gọi lại khi dependency thay đổi
+	
+	- Phần setup trong useEffect được chạy sau mỗi lần render của component khi các dependency thay đổi, bao gồm cả lần render
+	đầu tiên. Nó chạy ngay sau khi component đã được render lại hoặc lần đầu tiên khi component được mount lên DOM.
+	
+	- Phần cleanup trong useEffect được chạy trước khi component bị unmount hoặc trước khi nó chạy lại lần tiếp theo. Nó chạy
+	trước khi phần setup mới của useEffect được thực thi.
+	
+	- Hàm trong useEffect không nằm trong return là hàm setup, hàm nằm trong return là hàm cleanup
+	
+	- Your cleanup code runs one final time after your component is removed from the page (unmounts).
+	
+	- set up code luôn luôn chạy, không có dependency thì luôn chạy, có dependency rỗng thì chỉ chạy duy nhất 1
+	lần sau khi component được mount, có dependency với biến thì chạy khi mount lần đầu, các lần sau khi dependency
+	thay đổi thì chạy lại
+	
+	- Với mảng rỗng thì hàm cleanup chỉ chạy duy nhất 1 lần khi unmount
+	
+	- Unmount nghĩa là component bị gỡ khỏi cây DOM ảo (Virtual DOM) của React — nói cách khác, React không còn render component đó nữa.
+	Khi unmount xảy ra, React sẽ xoá nó khỏi DOM thật và gọi cleanup trong useEffect (nếu có).
+	
+	- Component bị unmount khi React ngừng render nó, cụ thể là:
+
+		Không còn xuất hiện trong JSX (bị loại khỏi cây component).
+
+		Chuyển trang (component ở route cũ bị gỡ bỏ).
+
+		Key thay đổi (React coi là component mới, nên unmount cái cũ).
 						
-		- useEffect is a React Hook that lets you synchronize a component with an external system. If you’re not trying to synchronize with some external system, you probably don’t need an Effect.
-		- useEffect() là function nắm bắt tất cả các sự thay đổi của code. Nó giúp chúng ta xử lý các side effects, useEffect sẽ tương đương với các hàm componentDidMount, componentDidUpdate và
-		componentWillUnMount trong LifeCycle
-		- Để quản lý các tác dụng phụ như lệnh gọi API, đăng ký, bộ tính giờ, đột biến, v.v.
-		- Không có dependency: luôn luôn gọi sau khi render.
-		- Dependency là mảng rỗng: phần setup chỉ được gọi 1 lần duy nhất khi component mounted.
-		- Dependency là 1 mảng đầy đủ: setup sẽ được gọi khi component mounted và được gọi lại khi dependency thay đổi
-		- Phần setup trong useEffect được chạy sau mỗi lần render của component, bao gồm cả lần render đầu tiên. Nó chạy ngay sau khi component đã được render lại hoặc lần đầu tiên khi component
-		được mount lên DOM.
-		- Phần cleanup trong useEffect được chạy trước khi component bị unmount hoặc trước khi nó chạy lại lần tiếp theo. Nó chạy trước khi phần setup mới của useEffect được thực thi.
+	- useEffect is a React Hook that lets you synchronize a component with an external system. If you’re not trying to
+	synchronize with some external system, you probably don’t need an Effect.
+	
+	- useEffect() là function nắm bắt tất cả các sự thay đổi của code. Nó giúp chúng ta xử lý các side effects, useEffect sẽ
+	tương đương với các hàm componentDidMount, componentDidUpdate và componentWillUnMount trong LifeCycle
+	
+	- Để quản lý các tác dụng phụ như lệnh gọi API, đăng ký, bộ tính giờ, đột biến, v.v.
+
+	- useEffect được sử dụng để quản lý "side effects - hiệu ứng phụ" trong các component React. "Side effects" là những thứ
+	không thuộc về việc render giao diện, nhưng có thể ảnh hưởng đến trạng thái của ứng dụng hoặc tương tác với bên ngoài, chẳng
+	hạn như gọi API, đọc hoặc ghi vào localStorage, đăng ký các sự kiện, và các công việc tương tự.
+	
+	- useEffect is a React Hook that lets you synchronize a component with an external system.
+	
+	- Trong ví dụ về chat room ta có thể sử dụng useEffect để thực hiện connect và disconnect với connect là hàm setup, disconnect là
+	hàm cleanup. Khi chuyển sang phòng khác sẽ đảm bảo được việc hàm cleanup sẽ xóa dữ liệu của state và props cũ rồi chạy với hàm
+	setup với state và props mới
+	
+	- Notice that you can’t “choose” the dependencies of your Effect. Every reactive value used by your Effect’s code must be
+	declared as a dependency. Your Effect’s dependency list is determined by the surrounding code. Reactive values include
+	props and all variables and functions declared directly inside of your component. (biến được định nghĩa trong component
+	và được sử dụng trong useEffect, không tính các biến được định nghĩa trong useEffect)
+	
+	- Chú ý các component khi render xong thì phần JSX vẫn còn ở trên cây DOM cũng như giá trị state vẫn còn chứ không
+	mất để khi thay đổi sau này sẽ compare rồi thực hiện update UI
+	
+	- If your Effect depends on an object or a function created during rendering, it might run too often (vì mỗi lần render ta
+	sẽ có 1 đối tượng hoặc 1 function khác)
+	
+	- Avoid using an object, function created during rendering as a dependency. Instead, create the object inside the Effect
+	
+	- Now that you’re passing c => c + 1 instead of count + 1, your Effect no longer needs to depend on count. As a result of this
+	fix, it won’t need to cleanup and setup the interval again every time the count changes.
+	
+		useEffect(() => {
+		  const intervalId = setInterval(() => {
+			setCount(c => c + 1); // ✅ Pass a state updater
+		}, 1000);
+	
+	- An Effect lets you keep your component synchronized with some external system (like a chat service). Here, external
+	system means any piece of code that’s not controlled by React, such as:
+	
+		A timer managed with setInterval() and clearInterval().
+		
+		An event subscription using window.addEventListener() and window.removeEventListener().
+		
+		A third-party animation library with an API like animation.start() and animation.reset().
+	
+	- After every re-render of your component where the dependencies have changed:
+		
+		First, your cleanup code runs with the old props and state.
+		
+		Then, your setup code runs with the new props and state.
+		
+		Chú ý phân biệt giữa render và rerender
+			
+			"render" là quá trình ban đầu khi component được hiển thị, trong khi "rerender" là quá trình khi component
+			cần được render lại sau khi đã được mount, thường là do sự thay đổi trong state hoặc props.
+			
+	- Your setup code runs when your component is added to the page (mounts).
+	
+	- Some components need to stay connected to the network, some browser API, or a third-party library, while they are
+	displayed on the page. These systems aren’t controlled by React, so they are called external.
+	
+	- If your Effect wasn’t caused by an interaction (like a click), React will let the browser paint the updated
+	screen first before running your Effect. If your Effect is doing something visual (for example,
+	positioning a tooltip), and the delay is noticeable (for example, it flickers), replace useEffect with useLayoutEffect.
+	
+	- If you’re not connecting to any external system, you probably don’t need an Effect
+	
+	- You can use an Effect to fetch data for your component.
+	
+	- Since count is a reactive value, it must be specified in the list of dependencies. However, that
+	causes the Effect to cleanup and setup again every time the count changes. This is not ideal.
+		
+		useEffect(() => {
+		  const intervalId = setInterval(() => {
+			setCount(count + 1); // You want to increment the counter every second...
+		}, 1000)
+		
+	- What if you want to log a new page visit after every url change, but not if only the shoppingCart changes? You can’t
+	exclude shoppingCart from dependencies without breaking the reactivity rules. However, you can express that you don’t
+	want a piece of code to “react” to changes even though it is called from inside an Effect. Declare an Effect Event with
+	the useEffectEvent Hook, and move the code reading shoppingCart inside of it:
+		
+		function Page({ url, shoppingCart }) {
+		  const onVisit = useEffectEvent(visitedUrl => {
+			logVisit(visitedUrl, shoppingCart.length)
+		  });
+
+		  useEffect(() => {
+			onVisit(url);
+		  }, [url]); // ✅ All dependencies declared
+		  // ...
+		}
+		
+	- Example:
 		
 		import { useEffect } from 'react';
 		import { createConnection } from './chat.js';
@@ -26,3 +146,4 @@ useEffect--REACTJS:
 		  }, [serverUrl, roomId]);
 		  // ...
 		}
+		

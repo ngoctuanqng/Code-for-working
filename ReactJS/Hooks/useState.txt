@@ -1,29 +1,42 @@
 useState--REACTJS:
-		- The set function only updates the state variable for the next render. If you read the state variable after calling the set function, you will still get the old value
-		that was on the screen before your call.
-		- If the new value you provide is identical to the current state, as determined by an Object.is comparison, React will skip re-rendering the component and its
-		children. This is an optimization. Although in some cases React may still need to call your component before skipping the children, it shouldn’t affect your code.
-		- React batches state updates. It updates the screen after all the event handlers have run and have called their set functions. This prevents multiple re-renders
-		during a single event. In the rare case that you need to force React to update the screen earlier, for example to access the DOM, you can use flushSync.
-		- Calling the set function during rendering is only allowed from within the currently rendering component. React will discard its output and immediately attempt to
-		render it again with the new state. This pattern is rarely needed, but you can use it to store information from the previous renders.
-		- Trong quá trình phát triển ứng dụng React, React có thể gọi các "updaters" (các hàm cập nhật) của bạn hai lần để kiểm tra xem chúng có đủ "pure" không. Trong ngữ cảnh của React, một hàm được
-		coi là "pure" nếu nó không gây ra các hiệu ứng phụ (side effects) và trả về kết quả dựa trên đầu vào của nó mà không thay đổi trạng thái của ứng dụng. Điều này giúp đảm bảo rằng việc gọi các hàm
-		cập nhật sẽ không gây ra sự thay đổi không mong muốn đối với trạng thái của ứng dụng.
+
+		- The set function only updates the state variable for the next render. If you read the state variable after
+		calling the set function, you will still get the old value that was on the screen before your call.
+		
+		- If the new value you provide is identical to the current state, as determined by an Object.is comparison,
+		React will skip re-rendering the component and its children. This is an optimization. Although in some cases
+		React may still need to call your component before skipping the children, it shouldn’t affect your code.
+		
+		- React batches state updates. It updates the screen after all the event handlers have run and have called their set
+		functions. This prevents multiple re-renders during a single event. In the rare case that you need to force React
+		to update the screen earlier, for example to access the DOM, you can use flushSync.
+		
+		- Calling the set function during rendering is only allowed from within the currently rendering component. React will
+		discard its output and immediately attempt to render it again with the new state. This pattern is rarely needed,
+		but you can use it to store information from the previous renders.
+		
+		- Trong quá trình phát triển ứng dụng React, React có thể gọi các "updaters" (các hàm cập nhật) của bạn hai lần để
+		kiểm tra xem chúng có đủ "pure" không. Trong ngữ cảnh của React, một hàm được coi là "pure" nếu nó không gây ra các hiệu
+		ứng phụ (side effects) và trả về kết quả dựa trên đầu vào của nó mà không thay đổi trạng thái của ứng dụng. Điều này giúp đảm
+		bảo rằng việc gọi các hàm cập nhật sẽ không gây ra sự thay đổi không mong muốn đối với trạng thái của ứng dụng.
+		
 		- If you do multiple updates within the same event, updaters can be helpful
-		- If you pass a function as initialState, it will be treated as an initializer function. It should be pure, should take no arguments, and should return a value of any
-		type. React will call your initializer function when initializing the component, and store its return value as the initial state.
+		
+		- If you pass a function as initialState, it will be treated as an initializer function. It should be pure, should take no
+		arguments, and should return a value of any type. React will call your initializer function when initializing the component,
+		and store its return value as the initial state.
+		
 		- The set function returned by useState lets you update the state to a different value and trigger a re-render.
 
-		const [name, setName] = useState('Edward'); // Edward là giá trị khởi tạo cho state. This argument is ignored after the initial render.
-		function handleClick() {
-			setName('Taylor');
-		// ...
-		}
-		
-		const increment = () => {
-			setCount(count + 1); // Đây là updaters
-		};
+			const [name, setName] = useState('Edward'); // Edward là giá trị khởi tạo cho state. This argument is ignored after the initial render.
+			function handleClick() {
+				setName('Taylor');
+			// ...
+			}
+			
+			const increment = () => {
+				setCount(count + 1); // Đây là updaters
+			};
 							
 	Updating state based on the previous state--useState:
 	
@@ -155,19 +168,21 @@ useState--REACTJS:
 			  
 	Avoiding recreating the initial state--useState:
 			
-			  React saves the initial state once and ignores it on the next renders.
-			  function TodoList() {
-				  const [todos, setTodos] = useState(createInitialTodos());
-				  // ...
-			  }
-			  
-			  To solve this, you may pass it as an initializer function to useState instead:
-			  function TodoList() {
-				  const [todos, setTodos] = useState(createInitialTodos); // React will only call it during initialization. 
-				  // ...
-			  }
-			  
-			  React may call your initializers twice in development to verify that they are pure.
+		React saves the initial state once and ignores it on the next renders.
+		
+			function TodoList() {
+			  const [todos, setTodos] = useState(createInitialTodos());
+			  // ...
+			}
+		
+		To solve this, you may pass it as an initializer function to useState instead:
+		
+			function TodoList() {
+			  const [todos, setTodos] = useState(createInitialTodos); // React will only call it during initialization. 
+			  // ...
+			}
+		
+		React may call your initializers twice in development to verify that they are pure.
 														  
 	Storing information from previous renders--useState:
 	
