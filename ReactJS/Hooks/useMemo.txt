@@ -11,14 +11,14 @@ useMemo--REACTJS:
 			During next renders, it will either return an already stored value from the last render (if the dependencies haven’t changed), or call calculateValue again, and return the result
 			that calculateValue has returned.
 	
-	import { useMemo } from 'react';
-	function TodoList({ todos, tab }) {
-	  const visibleTodos = useMemo(
-		() => filterTodos(todos, tab),
-		[todos, tab]
-	  );
-	  // ...
-	}
+		import { useMemo } from 'react';
+		function TodoList({ todos, tab }) {
+		  const visibleTodos = useMemo(
+			() => filterTodos(todos, tab),
+			[todos, tab]
+		  );
+		  // ...
+		}
 		
 	useMemo là một React hook giúp ghi nhớ kết quả đầu ra của một hàm. useMemo cho phép truyền vào 2 tham số: callback và
 	dependencies. useMemo sẽ gọi hàm và trả về giá trị trả về của nó. Sau đó, mỗi khi bạn gọi lại useMemo, nó sẽ kiểm tra

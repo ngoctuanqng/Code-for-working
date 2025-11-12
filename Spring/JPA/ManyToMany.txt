@@ -1,830 +1,907 @@
 @ManyToMany--SPRING:
 
-													
-							- Cần tạo 1 table trung gian trong code sql cũng như code java (@JoinTable)
-							- The joinColumn attribute will connect to the owner side of the relationship, and the inverseJoinColumn to the other side
-							- Keep in mind that since a many-to-many relationship doesn’t have an owner side in the database, we could configure
-							the join table in the Course class and reference it from the Student class.
-							- Chú ý từ @JoinTable ta mới tạo 1 biến để link đến bảng đối diện
-							- Sử dụng bảng trung gian chứa các khóa ngoại tham chiếu đến khóa chính của cả hai bảng chính.
+	- Tại sao cần bảng trung gian
+
+		Nếu bạn chỉ có hai bảng student và course,
+		thì không thể lưu trực tiếp thông tin “ai học môn nào” trong một cột duy nhất.
+
+		Vì:
+
+			Một student có thể có nhiều course_id — không thể nhét hết vào một cột.
+
+			Một course có thể có nhiều student_id — cũng không thể nhét hết vào một cột.
+
+		Giải pháp: tạo một bảng trung gian (join table) để liên kết hai bảng chính.
+		
+	- Nếu cố “nhét hết vào một cột”
+
+		Nhiều người mới học hay nghĩ tới việc làm như sau:
+
+		student_id	name	course_id
+		
+		1			Nam		101,102,103
+
+		Cách này vi phạm nguyên tắc chuẩn hoá dữ liệu (database normalization).
+		
+		Cụ thể:
+
+			Dữ liệu course_id trở thành danh sách, không còn dạng atomic (đơn trị).
+
+			Không thể dùng SQL JOIN hoặc foreign key đúng cách.
+
+			Khó lọc, khó truy vấn
+			
+	- Giả sử bạn làm như sau:
 	
-	Theo quy tắc thiết kế Cơ sở dữ liệu, khi có Quan hệ Nhiều - Nhiều (N-N) xuất hiện, Cơ sở dữ liệu sẽ:
+		student_id	name	course_id
+		
+		1			Nam		101
+		1			Nam		102
+		1			Nam		103
+		
+		Vấn đề lớn: bảng student không còn là bảng “sinh viên” nữa
+
+		Bảng student vốn dĩ phải mô tả thông tin riêng của sinh viên:
+
+		student_id, name, email, dob, address, v.v.
+
+		→ Mỗi sinh viên phải là một dòng duy nhất trong bảng này.
+		
+	- Theo quy tắc thiết kế Cơ sở dữ liệu, khi có Quan hệ Nhiều - Nhiều (N-N) xuất hiện, Cơ sở dữ liệu sẽ:
 	
-							- Sinh thêm Bảng (table) Trung gian.
-							- Bảng (table) Trung gian sẽ có tên là tên của Mối quan hệ Nhiều - Nhiều (N-N).
-							- Trong bảng (table) Trung gian sẽ có đầy đủ khóa ngoại (Foreign key - FK) liên kết đến table Master.
-							- Trong bảng (table) Trung gian sẽ có thêm các cột dùng để lưu trữ thông tin bổ sung/làm rõ nghĩa Mối quan hệ
-							Nhiều - Nhiều (N-N). Tuy nhiên, các cột này không bắt buộc (tùy vào thiết kế của bạn)
+		- Sinh thêm Bảng (table) Trung gian.
+		
+		- Bảng (table) Trung gian sẽ có tên là tên của Mối quan hệ Nhiều - Nhiều (N-N).
+		
+		- Trong bảng (table) Trung gian sẽ có đầy đủ khóa ngoại (Foreign key - FK) liên kết đến table Master.
+		
+		- Trong bảng (table) Trung gian sẽ có thêm các cột dùng để lưu trữ thông tin bổ sung/làm rõ nghĩa Mối quan hệ
+		Nhiều - Nhiều (N-N). Tuy nhiên, các cột này không bắt buộc (tùy vào thiết kế của bạn)
+		
+	- Trong một entity class:
+			
+		@JoinTable:
+		
+			Xác định bảng trung gian
+		
+		joinColumns:
+		
+			Cột trong bảng trung gian trỏ tới entity hiện tại
+			“Join” = nối giữa các bảng
+			“Join column” = cột dùng để nối
+			→ joinColumns là những cột trong bảng trung gian dùng để nối với entity hiện tại.
+			“Cột nối với chính mình”, FK → entity hiện tại
+		
+		inverseJoinColumns:
+		
+			Cột trong bảng trung gian trỏ tới entity bên kia
+			“Cột nối với bên kia”, FK → entity đối tác
+		
+	- Many-to-Many nghĩa là:
+	
+		Một bản ghi (record) ở bảng A có thể liên kết với nhiều bản ghi ở bảng B,
+		và ngược lại, một bản ghi ở bảng B cũng có thể liên kết với nhiều bản ghi ở bảng A.
+												
+	- Cần tạo 1 table trung gian trong code sql cũng như code java (@JoinTable)
+	
+	- The joinColumn attribute will connect to the owner side of the relationship, and the inverseJoinColumn to the other side
+	
+	- Keep in mind that since a many-to-many relationship doesn’t have an owner side in the database, we could configure
+	the join table in the Course class and reference it from the Student class.
+	
+	- Chú ý từ @JoinTable ta mới tạo 1 biến để link đến bảng đối diện
+	
+	- Sử dụng bảng trung gian chứa các khóa ngoại tham chiếu đến khóa chính của cả hai bảng chính.
 	
 	Ví dụ Many-To-Many Unidirectional Relationship
 							
-							package com.example.springdatajpa.entities;
-							import jakarta.persistence.*;
-							import lombok.Data;
-							import java.util.HashSet;
-							import java.util.Set;
-							@Entity
-							@Data
-							public class Student
-							{
-								@Id
-								@GeneratedValue(strategy = GenerationType.IDENTITY)
-								private Long studentId;
-								private String name;
-								@ManyToMany(fetch = FetchType.EAGER)
-								@JoinTable(
-										name = "student_courses",
-										joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "studentId"),
-										inverseJoinColumns = @JoinColumn(name = "course_id", referencedColumnName = "courseId"))
-								private Set<Course> courses = new HashSet<>();
-							}
-							
-							package com.example.springdatajpa.entities;
-							import jakarta.persistence.Entity;
-							import jakarta.persistence.GeneratedValue;
-							import jakarta.persistence.GenerationType;
-							import jakarta.persistence.Id;
-							import lombok.Data;
-							@Entity
-							@Data
-							public class Course
-							{
-								@Id
-								@GeneratedValue(strategy = GenerationType.SEQUENCE)
-								private Long courseId;
-								private String name;
-								private String courseCode;
-							}
-							
-							package com.example.springdatajpa;
-							import com.example.springdatajpa.entities.*;
-							import com.example.springdatajpa.repositories.*;
-							import lombok.extern.slf4j.Slf4j;
-							import org.springframework.boot.SpringApplication;
-							import org.springframework.boot.autoconfigure.SpringBootApplication;
-							import org.springframework.context.ApplicationContext;
-							@SpringBootApplication
-							@Slf4j
-							public class SpringDataJpaApplication
-							{
-							 public static void main(String[] args)
-							 {
-							  ApplicationContext context = SpringApplication.run(SpringDataJpaApplication.class, args);
-							  StudentRepository studentRepository = context.getBean(StudentRepository.class);
-							  CourseRepository courseRepository = context.getBean(CourseRepository.class);
-							  // Create and save sample courses
-							  Course course1 = new Course();
-							  course1.setName("Course 101");
-							  course1.setCourseCode("Python");
-							  courseRepository.save(course1);
-							  Course course2 = new Course();
-							  course2.setName("Course 102");
-							  course2.setCourseCode("Javascript");
-							  courseRepository.save(course2);
-							  // Create and save sample students
-							  Student student1 = new Student();
-							  student1.setName("Ravi");
-							  student1.getCourses().add(course1);
-							  studentRepository.save(student1);
-							  Student student2 = new Student();
-							  student2.setName("Deepak");
-							  student2.getCourses().add(course1);
-							  student2.getCourses().add(course2);
-							  studentRepository.save(student2);
-							  // Retrieve and print saved Students (optional)
-							  System.out.println("Saved Departments:");
-							  studentRepository.findAll().forEach(System.out::println);
-							 }
-							}
+		package com.example.springdatajpa.entities;
+		import jakarta.persistence.*;
+		import lombok.Data;
+		import java.util.HashSet;
+		import java.util.Set;
+		@Entity
+		@Data
+		public class Student
+		{
+			@Id
+			@GeneratedValue(strategy = GenerationType.IDENTITY)
+			private Long studentId;
+			private String name;
+			@ManyToMany(fetch = FetchType.EAGER)
+			@JoinTable(
+					name = "student_courses",
+					joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "studentId"),
+					inverseJoinColumns = @JoinColumn(name = "course_id", referencedColumnName = "courseId"))
+			private Set<Course> courses = new HashSet<>();
+		}
+		
+		package com.example.springdatajpa.entities;
+		import jakarta.persistence.Entity;
+		import jakarta.persistence.GeneratedValue;
+		import jakarta.persistence.GenerationType;
+		import jakarta.persistence.Id;
+		import lombok.Data;
+		@Entity
+		@Data
+		public class Course
+		{
+			@Id
+			@GeneratedValue(strategy = GenerationType.SEQUENCE)
+			private Long courseId;
+			private String name;
+			private String courseCode;
+		}
+		
+		package com.example.springdatajpa;
+		import com.example.springdatajpa.entities.*;
+		import com.example.springdatajpa.repositories.*;
+		import lombok.extern.slf4j.Slf4j;
+		import org.springframework.boot.SpringApplication;
+		import org.springframework.boot.autoconfigure.SpringBootApplication;
+		import org.springframework.context.ApplicationContext;
+		@SpringBootApplication
+		@Slf4j
+		public class SpringDataJpaApplication
+		{
+		 public static void main(String[] args)
+		 {
+		  ApplicationContext context = SpringApplication.run(SpringDataJpaApplication.class, args);
+		  StudentRepository studentRepository = context.getBean(StudentRepository.class);
+		  CourseRepository courseRepository = context.getBean(CourseRepository.class);
+		  // Create and save sample courses
+		  Course course1 = new Course();
+		  course1.setName("Course 101");
+		  course1.setCourseCode("Python");
+		  courseRepository.save(course1);
+		  Course course2 = new Course();
+		  course2.setName("Course 102");
+		  course2.setCourseCode("Javascript");
+		  courseRepository.save(course2);
+		  // Create and save sample students
+		  Student student1 = new Student();
+		  student1.setName("Ravi");
+		  student1.getCourses().add(course1);
+		  studentRepository.save(student1);
+		  Student student2 = new Student();
+		  student2.setName("Deepak");
+		  student2.getCourses().add(course1);
+		  student2.getCourses().add(course2);
+		  studentRepository.save(student2);
+		  // Retrieve and print saved Students (optional)
+		  System.out.println("Saved Departments:");
+		  studentRepository.findAll().forEach(System.out::println);
+		 }
+		}
 	
 	Ví dụ Many-To-Many Bidirectional Relationship
 	
-							package com.example.springdatajpa.entities;
-							import jakarta.persistence.*;
-							import lombok.Data;
-							import java.util.HashSet;
-							import java.util.Set;
-							@Entity
-							@Data
-							public class Student
-							{
-								@Id
-								@GeneratedValue(strategy = GenerationType.IDENTITY)
-								private Long studentId;
-								private String name;
-								@ManyToMany(fetch = FetchType.EAGER)
-								@JoinTable(
-										name = "student_courses",
-										joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "studentId"),
-										inverseJoinColumns = @JoinColumn(name = "course_id", referencedColumnName = "courseId"))
-								private Set<Course> courses = new HashSet<>();
-							}
-							
-							package com.example.springdatajpa.entities;
-							import jakarta.persistence.*;
-							import lombok.Data;
-							import java.util.HashSet;
-							import java.util.Set;
-							@Entity
-							@Data
-							public class Course
-							{
-								@Id
-								@GeneratedValue(strategy = GenerationType.SEQUENCE)
-								private Long courseId;
-								private String name;
-								private String courseCode;
-								@ManyToMany(mappedBy = "courses")
-								private Set<Student> students = new HashSet<>();
-							}
-							
-							package com.example.springdatajpa;
-							import com.example.springdatajpa.entities.*;
-							import com.example.springdatajpa.repositories.*;
-							import lombok.extern.slf4j.Slf4j;
-							import org.springframework.boot.SpringApplication;
-							import org.springframework.boot.autoconfigure.SpringBootApplication;
-							import org.springframework.context.ApplicationContext;
-							@SpringBootApplication
-							@Slf4j
-							public class SpringDataJpaApplication
-							{
-							 public static void main(String[] args)
-							 {
-							  ApplicationContext context = SpringApplication.run(SpringDataJpaApplication.class, args);
-							  StudentRepository studentRepository = context.getBean(StudentRepository.class);
-							  CourseRepository courseRepository = context.getBean(CourseRepository.class);
-							  // Create students
-							  Student student1 = new Student();
-							  Student student2 = new Student();
-							  student1.setName("James Smith");
-							  student2.setName("Shane Wanes");
-							  // Create courses
-							  Course course1 = new Course();
-							  Course course2 = new Course();
-							  course1.setCourseCode("ME");
-							  course1.setName("Mechanical");
-							  course2.setCourseCode("CSE");
-							  course2.setName("Computers");
-							  // Associate students with courses
-							  student1.getCourses().add(course1);
-							  student1.getCourses().add(course2);
-							  student2.getCourses().add(course2);
-							  // Save students and courses
-							  courseRepository.save(course1);
-							  courseRepository.save(course2);
-							  studentRepository.save(student1);
-							  studentRepository.save(student2);
-							  // Retrieve and print saved Students (optional)
-							  System.out.println("Saved Students:");
-							  studentRepository.findAll().forEach(System.out::println);
-							 }
-							}		
+		package com.example.springdatajpa.entities;
+		import jakarta.persistence.*;
+		import lombok.Data;
+		import java.util.HashSet;
+		import java.util.Set;
+		@Entity
+		@Data
+		public class Student
+		{
+			@Id
+			@GeneratedValue(strategy = GenerationType.IDENTITY)
+			private Long studentId;
+			private String name;
+			@ManyToMany(fetch = FetchType.EAGER)
+			@JoinTable(
+					name = "student_courses",
+					joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "studentId"),
+					inverseJoinColumns = @JoinColumn(name = "course_id", referencedColumnName = "courseId"))
+			private Set<Course> courses = new HashSet<>();
+		}
+		
+		package com.example.springdatajpa.entities;
+		import jakarta.persistence.*;
+		import lombok.Data;
+		import java.util.HashSet;
+		import java.util.Set;
+		@Entity
+		@Data
+		public class Course
+		{
+			@Id
+			@GeneratedValue(strategy = GenerationType.SEQUENCE)
+			private Long courseId;
+			private String name;
+			private String courseCode;
+			@ManyToMany(mappedBy = "courses")
+			private Set<Student> students = new HashSet<>();
+		}
+		
+		package com.example.springdatajpa;
+		import com.example.springdatajpa.entities.*;
+		import com.example.springdatajpa.repositories.*;
+		import lombok.extern.slf4j.Slf4j;
+		import org.springframework.boot.SpringApplication;
+		import org.springframework.boot.autoconfigure.SpringBootApplication;
+		import org.springframework.context.ApplicationContext;
+		@SpringBootApplication
+		@Slf4j
+		public class SpringDataJpaApplication
+		{
+		 public static void main(String[] args)
+		 {
+		  ApplicationContext context = SpringApplication.run(SpringDataJpaApplication.class, args);
+		  StudentRepository studentRepository = context.getBean(StudentRepository.class);
+		  CourseRepository courseRepository = context.getBean(CourseRepository.class);
+		  // Create students
+		  Student student1 = new Student();
+		  Student student2 = new Student();
+		  student1.setName("James Smith");
+		  student2.setName("Shane Wanes");
+		  // Create courses
+		  Course course1 = new Course();
+		  Course course2 = new Course();
+		  course1.setCourseCode("ME");
+		  course1.setName("Mechanical");
+		  course2.setCourseCode("CSE");
+		  course2.setName("Computers");
+		  // Associate students with courses
+		  student1.getCourses().add(course1);
+		  student1.getCourses().add(course2);
+		  student2.getCourses().add(course2);
+		  // Save students and courses
+		  courseRepository.save(course1);
+		  courseRepository.save(course2);
+		  studentRepository.save(student1);
+		  studentRepository.save(student2);
+		  // Retrieve and print saved Students (optional)
+		  System.out.println("Saved Students:");
+		  studentRepository.findAll().forEach(System.out::println);
+		 }
+		}		
 	
 	Example 1:
 	
-													@Entity
-													@Table(name="course")
-													public class Course {
-														…
-														@ManyToMany
-														@JoinTable(
-															name="course_student",
-															joinColumns=@JoinColumn(name="course_id"),
-															inverseJoinColumns=@JoinColumn(name="student_id")
-														)
-														private List<Student> students;
-														// getter / setters
-														…
-													}
-													
-													@Entity
-													@Table(name="student")
-													public class Student {
-														…
-														@ManyToMany
-														@JoinTable(
-															name="course_student",
-															joinColumns=@JoinColumn(name="student_id"),
-															inverseJoinColumns=@JoinColumn(name="course_id")
-														)
-														private List<Course> courses;
-														// getter / setters
-														…
-													}
+		@Entity
+		@Table(name="course")
+		public class Course {
+			…
+			@ManyToMany
+			@JoinTable(
+				name="course_student",
+				joinColumns=@JoinColumn(name="course_id"),
+				inverseJoinColumns=@JoinColumn(name="student_id")
+			)
+			private List<Student> students;
+			// getter / setters
+			…
+		}
+		
+		@Entity
+		@Table(name="student")
+		public class Student {
+			…
+			@ManyToMany
+			@JoinTable(
+				name="course_student",
+				joinColumns=@JoinColumn(name="student_id"),
+				inverseJoinColumns=@JoinColumn(name="course_id")
+			)
+			private List<Course> courses;
+			// getter / setters
+			…
+		}
 	
 	Example 2:
 	
-													@Entity
-													class Student {
-														@Id
-														Long id;
-														@ManyToMany
-														Set<Course> likedCourses;
-														// additional properties
-														// standard constructors, getters, and setters
-													}
-													@Entity
-													class Course {
-														@Id
-														Long id;
-														@ManyToMany
-														Set<Student> likes;
-														// additional properties
-														// standard constructors, getters, and setters
-													}
-													
-													@ManyToMany
-													@JoinTable(
-													  name = "course_like", 
-													  joinColumns = @JoinColumn(name = "student_id"), 
-													  inverseJoinColumns = @JoinColumn(name = "course_id"))
-													Set<Course> likedCourses;
+		@Entity
+		class Student {
+			@Id
+			Long id;
+			@ManyToMany
+			Set<Course> likedCourses;
+			// additional properties
+			// standard constructors, getters, and setters
+		}
+		@Entity
+		class Course {
+			@Id
+			Long id;
+			@ManyToMany
+			Set<Student> likes;
+			// additional properties
+			// standard constructors, getters, and setters
+		}
+		
+		@ManyToMany
+		@JoinTable(
+		  name = "course_like", 
+		  joinColumns = @JoinColumn(name = "student_id"), 
+		  inverseJoinColumns = @JoinColumn(name = "course_id"))
+		Set<Course> likedCourses;
 													
 	Example 3:
 	
 		Course.java:
 
-													package com.luv2code.cruddemo.entity;
-													import jakarta.persistence.*;
-													import java.util.ArrayList;
-													import java.util.List;
-													@Entity
-													@Table(name="course")
-													public class Course {
-														// define our fields
-														// define constructors
-														// define getter setters
-														// define toString
-														// annotate fields
-														@Id
-														@GeneratedValue(strategy = GenerationType.IDENTITY)
-														@Column(name="id")
-														private int id;
-														@Column(name="title")
-														private String title;
-														@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE,
-																			  CascadeType.DETACH, CascadeType.REFRESH})
-														@JoinColumn(name="instructor_id")
-														private Instructor instructor;
-														@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-														@JoinColumn(name = "course_id")
-														private List<Review> reviews;
-														@ManyToMany(fetch = FetchType.LAZY,
-																cascade = {CascadeType.PERSIST, CascadeType.MERGE,
-																CascadeType.DETACH, CascadeType.REFRESH})
-														@JoinTable(
-																name = "course_student",
-																joinColumns = @JoinColumn(name = "course_id"),
-																inverseJoinColumns = @JoinColumn(name = "student_id")
-														)
-														private List<Student> students;
-														public Course() {
-														}
-														public Course(String title) {
-															this.title = title;
-														}
-														public int getId() {
-															return id;
-														}
-														public void setId(int id) {
-															this.id = id;
-														}
-														public String getTitle() {
-															return title;
-														}
-														public void setTitle(String title) {
-															this.title = title;
-														}
-														public Instructor getInstructor() {
-															return instructor;
-														}
-														public void setInstructor(Instructor instructor) {
-															this.instructor = instructor;
-														}
-														public List<Review> getReviews() {
-															return reviews;
-														}
-														public void setReviews(List<Review> reviews) {
-															this.reviews = reviews;
-														}
-														// add a convenience method
-														public void addReview(Review theReview) {
-															if (reviews == null) {
-																reviews = new ArrayList<>();
-															}
-															reviews.add(theReview);
-														}
-														public List<Student> getStudents() {
-															return students;
-														}
-														public void setStudents(List<Student> students) {
-															this.students = students;
-														}
-														// add a convenience method
-														public void addStudent(Student theStudent) {
-															if (students == null) {
-																students = new ArrayList<>();
-															}
-															students.add(theStudent);
-														}
-														@Override
-														public String toString() {
-															return "Course{" +
-																	"id=" + id +
-																	", title='" + title + '\'' +
-																	'}';
-														}
-													}
+			package com.luv2code.cruddemo.entity;
+			import jakarta.persistence.*;
+			import java.util.ArrayList;
+			import java.util.List;
+			@Entity
+			@Table(name="course")
+			public class Course {
+				// define our fields
+				// define constructors
+				// define getter setters
+				// define toString
+				// annotate fields
+				@Id
+				@GeneratedValue(strategy = GenerationType.IDENTITY)
+				@Column(name="id")
+				private int id;
+				@Column(name="title")
+				private String title;
+				@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+									  CascadeType.DETACH, CascadeType.REFRESH})
+				@JoinColumn(name="instructor_id")
+				private Instructor instructor;
+				@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+				@JoinColumn(name = "course_id")
+				private List<Review> reviews;
+				@ManyToMany(fetch = FetchType.LAZY,
+						cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+						CascadeType.DETACH, CascadeType.REFRESH})
+				@JoinTable(
+						name = "course_student",
+						joinColumns = @JoinColumn(name = "course_id"),
+						inverseJoinColumns = @JoinColumn(name = "student_id")
+				)
+				private List<Student> students;
+				public Course() {
+				}
+				public Course(String title) {
+					this.title = title;
+				}
+				public int getId() {
+					return id;
+				}
+				public void setId(int id) {
+					this.id = id;
+				}
+				public String getTitle() {
+					return title;
+				}
+				public void setTitle(String title) {
+					this.title = title;
+				}
+				public Instructor getInstructor() {
+					return instructor;
+				}
+				public void setInstructor(Instructor instructor) {
+					this.instructor = instructor;
+				}
+				public List<Review> getReviews() {
+					return reviews;
+				}
+				public void setReviews(List<Review> reviews) {
+					this.reviews = reviews;
+				}
+				// add a convenience method
+				public void addReview(Review theReview) {
+					if (reviews == null) {
+						reviews = new ArrayList<>();
+					}
+					reviews.add(theReview);
+				}
+				public List<Student> getStudents() {
+					return students;
+				}
+				public void setStudents(List<Student> students) {
+					this.students = students;
+				}
+				// add a convenience method
+				public void addStudent(Student theStudent) {
+					if (students == null) {
+						students = new ArrayList<>();
+					}
+					students.add(theStudent);
+				}
+				@Override
+				public String toString() {
+					return "Course{" +
+							"id=" + id +
+							", title='" + title + '\'' +
+							'}';
+				}
+			}
 													
 		Student.java:
 		
-													package com.luv2code.cruddemo.entity;
-													import jakarta.persistence.*;
-													import java.util.ArrayList;
-													import java.util.List;
-													@Entity
-													@Table(name = "student")
-													public class Student {
-														@Id
-														@GeneratedValue(strategy = GenerationType.IDENTITY)
-														@Column(name = "id")
-														private int id;
-														@Column(name = "first_name")
-														private String firstName;
-														@Column(name = "last_name")
-														private String lastName;
-														@Column(name = "email")
-														private String email;
-														@ManyToMany(fetch = FetchType.LAZY,
-																cascade = {CascadeType.PERSIST, CascadeType.MERGE,
-																		CascadeType.DETACH, CascadeType.REFRESH})
-														@JoinTable(
-																name = "course_student",
-																joinColumns = @JoinColumn(name = "student_id"),
-																inverseJoinColumns = @JoinColumn(name = "course_id")
-														)
-														private List<Course> courses;
-														public Student() {
-														}
-														public Student(String firstName, String lastName, String email) {
-															this.firstName = firstName;
-															this.lastName = lastName;
-															this.email = email;
-														}
-														public int getId() {
-															return id;
-														}
-														public void setId(int id) {
-															this.id = id;
-														}
-														public String getFirstName() {
-															return firstName;
-														}
-														public void setFirstName(String firstName) {
-															this.firstName = firstName;
-														}
-														public String getLastName() {
-															return lastName;
-														}
-														public void setLastName(String lastName) {
-															this.lastName = lastName;
-														}
-														public String getEmail() {
-															return email;
-														}
-														public void setEmail(String email) {
-															this.email = email;
-														}
-														public List<Course> getCourses() {
-															return courses;
-														}
-														public void setCourses(List<Course> courses) {
-															this.courses = courses;
-														}
-														// add convenience method
-														public void addCourse(Course theCourse) {
-															if (courses == null) {
-																courses = new ArrayList<>();
-															}
-															courses.add(theCourse);
-														}
-														@Override
-														public String toString() {
-															return "Student{" +
-																	"id=" + id +
-																	", firstName='" + firstName + '\'' +
-																	", lastName='" + lastName + '\'' +
-																	", email='" + email + '\'' +
-																	'}';
-														}
-													}
+			package com.luv2code.cruddemo.entity;
+			import jakarta.persistence.*;
+			import java.util.ArrayList;
+			import java.util.List;
+			@Entity
+			@Table(name = "student")
+			public class Student {
+				@Id
+				@GeneratedValue(strategy = GenerationType.IDENTITY)
+				@Column(name = "id")
+				private int id;
+				@Column(name = "first_name")
+				private String firstName;
+				@Column(name = "last_name")
+				private String lastName;
+				@Column(name = "email")
+				private String email;
+				@ManyToMany(fetch = FetchType.LAZY,
+						cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+								CascadeType.DETACH, CascadeType.REFRESH})
+				@JoinTable(
+						name = "course_student",
+						joinColumns = @JoinColumn(name = "student_id"),
+						inverseJoinColumns = @JoinColumn(name = "course_id")
+				)
+				private List<Course> courses;
+				public Student() {
+				}
+				public Student(String firstName, String lastName, String email) {
+					this.firstName = firstName;
+					this.lastName = lastName;
+					this.email = email;
+				}
+				public int getId() {
+					return id;
+				}
+				public void setId(int id) {
+					this.id = id;
+				}
+				public String getFirstName() {
+					return firstName;
+				}
+				public void setFirstName(String firstName) {
+					this.firstName = firstName;
+				}
+				public String getLastName() {
+					return lastName;
+				}
+				public void setLastName(String lastName) {
+					this.lastName = lastName;
+				}
+				public String getEmail() {
+					return email;
+				}
+				public void setEmail(String email) {
+					this.email = email;
+				}
+				public List<Course> getCourses() {
+					return courses;
+				}
+				public void setCourses(List<Course> courses) {
+					this.courses = courses;
+				}
+				// add convenience method
+				public void addCourse(Course theCourse) {
+					if (courses == null) {
+						courses = new ArrayList<>();
+					}
+					courses.add(theCourse);
+				}
+				@Override
+				public String toString() {
+					return "Student{" +
+							"id=" + id +
+							", firstName='" + firstName + '\'' +
+							", lastName='" + lastName + '\'' +
+							", email='" + email + '\'' +
+							'}';
+				}
+			}
 													
 		AppDAOImpl.java:
 		
-													package com.luv2code.cruddemo.dao;
-													import com.luv2code.cruddemo.entity.Course;
-													import com.luv2code.cruddemo.entity.Instructor;
-													import com.luv2code.cruddemo.entity.InstructorDetail;
-													import com.luv2code.cruddemo.entity.Student;
-													import jakarta.persistence.EntityManager;
-													import jakarta.persistence.TypedQuery;
-													import org.springframework.beans.factory.annotation.Autowired;
-													import org.springframework.stereotype.Repository;
-													import org.springframework.transaction.annotation.Transactional;
-													import java.util.List;
-													@Repository
-													public class AppDAOImpl implements AppDAO {
-														// define field for entity manager
-														private EntityManager entityManager;
-														// inject entity manager using constructor injection
-														@Autowired
-														public AppDAOImpl(EntityManager entityManager) {
-															this.entityManager = entityManager;
-														}
-														@Override
-														@Transactional
-														public void save(Instructor theInstructor) {
-															entityManager.persist(theInstructor);
-														}
-														@Override
-														public Instructor findInstructorById(int theId) {
-															return entityManager.find(Instructor.class, theId);
-														}
-														@Override
-														@Transactional
-														public void deleteInstructorById(int theId) {
-															// retrieve the instructor
-															Instructor tempInstructor = entityManager.find(Instructor.class, theId);
-															// get the courses
-															List<Course> courses = tempInstructor.getCourses();
-															// break association of all courses for the instructor
-															for (Course tempCourse : courses) {
-																tempCourse.setInstructor(null);
-															}
-															// delete the instructor
-															entityManager.remove(tempInstructor);
-														}
-														@Override
-														public InstructorDetail findInstructorDetailById(int theId) {
-															return entityManager.find(InstructorDetail.class, theId);
-														}
-														@Override
-														@Transactional
-														public void deleteInstructorDetailById(int theId) {
-															// retrieve instructor detail
-															InstructorDetail tempInstructorDetail = entityManager.find(InstructorDetail.class, theId);
-															// remove the associated object reference
-															// break bi-directional link
-															//
-															tempInstructorDetail.getInstructor().setInstructorDetail(null);
-															// delete the instructor detail
-															entityManager.remove(tempInstructorDetail);
-														}
-														@Override
-														public List<Course> findCoursesByInstructorId(int theId) {
-															// create query
-															TypedQuery<Course> query = entityManager.createQuery(
-																						"from Course where instructor.id = :data", Course.class);
-															query.setParameter("data", theId);
-															// execute query
-															List<Course> courses = query.getResultList();
-															return courses;
-														}
-														@Override
-														public Instructor findInstructorByIdJoinFetch(int theId) {
-															// create query
-															TypedQuery<Instructor> query = entityManager.createQuery(
-																									"select i from Instructor i "
-																										+ "JOIN FETCH i.courses "
-																										+ "JOIN FETCH i.instructorDetail "
-																										+ "where i.id = :data", Instructor.class);
-															query.setParameter("data", theId);
-															// execute query
-															Instructor instructor = query.getSingleResult();
-															return instructor;
-														}
-														@Override
-														@Transactional
-														public void update(Instructor tempInstructor) {
-															entityManager.merge(tempInstructor);
-														}
-														@Override
-														@Transactional
-														public void update(Course tempCourse) {
-															entityManager.merge(tempCourse);
-														}
-														@Override
-														public Course findCourseById(int theId) {
-															return entityManager.find(Course.class, theId);
-														}
-														@Override
-														@Transactional
-														public void deleteCourseById(int theId) {
-															// retrieve the course
-															Course tempCourse = entityManager.find(Course.class, theId);
-															// delete the course
-															entityManager.remove(tempCourse);
-														}
-														@Override
-														@Transactional
-														public void save(Course theCourse) {
-															entityManager.persist(theCourse);
-														}
-														@Override
-														public Course findCourseAndReviewsByCourseId(int theId) {
-															// create query
-															TypedQuery<Course> query = entityManager.createQuery(
-																	"select c from Course c "
-																	+ "JOIN FETCH c.reviews "
-																	+ "where c.id = :data", Course.class);
-															query.setParameter("data", theId);
-															// execute query
-															Course course = query.getSingleResult();
-															return course;
-														}
-														@Override
-														public Course findCourseAndStudentsByCourseId(int theId) {
-															// create query
-															TypedQuery<Course> query = entityManager.createQuery(
-																	"select c from Course c "
-																			+ "JOIN FETCH c.students "
-																			+ "where c.id = :data", Course.class);
-															query.setParameter("data", theId);
-															// execute query
-															Course course = query.getSingleResult();
-															return course;
-														}
-														@Override
-														public Student findStudentAndCoursesByStudentId(int theId) {
-															// create query
-															TypedQuery<Student> query = entityManager.createQuery(
-																	"select s from Student s "
-																			+ "JOIN FETCH s.courses "
-																			+ "where s.id = :data", Student.class);
-															query.setParameter("data", theId);
-															// execute query
-															Student student = query.getSingleResult();
-															return student;
-														}
-														@Override
-														@Transactional
-														public void update(Student tempStudent) {
-															entityManager.merge(tempStudent);
-														}
-														@Override
-														@Transactional
-														public void deleteStudentById(int theId) {
-															// retrieve the student
-															Student tempStudent = entityManager.find(Student.class, theId);
-															// delete the student
-															entityManager.remove(tempStudent);
-														}
-													}
+			package com.luv2code.cruddemo.dao;
+			import com.luv2code.cruddemo.entity.Course;
+			import com.luv2code.cruddemo.entity.Instructor;
+			import com.luv2code.cruddemo.entity.InstructorDetail;
+			import com.luv2code.cruddemo.entity.Student;
+			import jakarta.persistence.EntityManager;
+			import jakarta.persistence.TypedQuery;
+			import org.springframework.beans.factory.annotation.Autowired;
+			import org.springframework.stereotype.Repository;
+			import org.springframework.transaction.annotation.Transactional;
+			import java.util.List;
+			@Repository
+			public class AppDAOImpl implements AppDAO {
+				// define field for entity manager
+				private EntityManager entityManager;
+				// inject entity manager using constructor injection
+				@Autowired
+				public AppDAOImpl(EntityManager entityManager) {
+					this.entityManager = entityManager;
+				}
+				@Override
+				@Transactional
+				public void save(Instructor theInstructor) {
+					entityManager.persist(theInstructor);
+				}
+				@Override
+				public Instructor findInstructorById(int theId) {
+					return entityManager.find(Instructor.class, theId);
+				}
+				@Override
+				@Transactional
+				public void deleteInstructorById(int theId) {
+					// retrieve the instructor
+					Instructor tempInstructor = entityManager.find(Instructor.class, theId);
+					// get the courses
+					List<Course> courses = tempInstructor.getCourses();
+					// break association of all courses for the instructor
+					for (Course tempCourse : courses) {
+						tempCourse.setInstructor(null);
+					}
+					// delete the instructor
+					entityManager.remove(tempInstructor);
+				}
+				@Override
+				public InstructorDetail findInstructorDetailById(int theId) {
+					return entityManager.find(InstructorDetail.class, theId);
+				}
+				@Override
+				@Transactional
+				public void deleteInstructorDetailById(int theId) {
+					// retrieve instructor detail
+					InstructorDetail tempInstructorDetail = entityManager.find(InstructorDetail.class, theId);
+					// remove the associated object reference
+					// break bi-directional link
+					//
+					tempInstructorDetail.getInstructor().setInstructorDetail(null);
+					// delete the instructor detail
+					entityManager.remove(tempInstructorDetail);
+				}
+				@Override
+				public List<Course> findCoursesByInstructorId(int theId) {
+					// create query
+					TypedQuery<Course> query = entityManager.createQuery(
+												"from Course where instructor.id = :data", Course.class);
+					query.setParameter("data", theId);
+					// execute query
+					List<Course> courses = query.getResultList();
+					return courses;
+				}
+				@Override
+				public Instructor findInstructorByIdJoinFetch(int theId) {
+					// create query
+					TypedQuery<Instructor> query = entityManager.createQuery(
+															"select i from Instructor i "
+																+ "JOIN FETCH i.courses "
+																+ "JOIN FETCH i.instructorDetail "
+																+ "where i.id = :data", Instructor.class);
+					query.setParameter("data", theId);
+					// execute query
+					Instructor instructor = query.getSingleResult();
+					return instructor;
+				}
+				@Override
+				@Transactional
+				public void update(Instructor tempInstructor) {
+					entityManager.merge(tempInstructor);
+				}
+				@Override
+				@Transactional
+				public void update(Course tempCourse) {
+					entityManager.merge(tempCourse);
+				}
+				@Override
+				public Course findCourseById(int theId) {
+					return entityManager.find(Course.class, theId);
+				}
+				@Override
+				@Transactional
+				public void deleteCourseById(int theId) {
+					// retrieve the course
+					Course tempCourse = entityManager.find(Course.class, theId);
+					// delete the course
+					entityManager.remove(tempCourse);
+				}
+				@Override
+				@Transactional
+				public void save(Course theCourse) {
+					entityManager.persist(theCourse);
+				}
+				@Override
+				public Course findCourseAndReviewsByCourseId(int theId) {
+					// create query
+					TypedQuery<Course> query = entityManager.createQuery(
+							"select c from Course c "
+							+ "JOIN FETCH c.reviews "
+							+ "where c.id = :data", Course.class);
+					query.setParameter("data", theId);
+					// execute query
+					Course course = query.getSingleResult();
+					return course;
+				}
+				@Override
+				public Course findCourseAndStudentsByCourseId(int theId) {
+					// create query
+					TypedQuery<Course> query = entityManager.createQuery(
+							"select c from Course c "
+									+ "JOIN FETCH c.students "
+									+ "where c.id = :data", Course.class);
+					query.setParameter("data", theId);
+					// execute query
+					Course course = query.getSingleResult();
+					return course;
+				}
+				@Override
+				public Student findStudentAndCoursesByStudentId(int theId) {
+					// create query
+					TypedQuery<Student> query = entityManager.createQuery(
+							"select s from Student s "
+									+ "JOIN FETCH s.courses "
+									+ "where s.id = :data", Student.class);
+					query.setParameter("data", theId);
+					// execute query
+					Student student = query.getSingleResult();
+					return student;
+				}
+				@Override
+				@Transactional
+				public void update(Student tempStudent) {
+					entityManager.merge(tempStudent);
+				}
+				@Override
+				@Transactional
+				public void deleteStudentById(int theId) {
+					// retrieve the student
+					Student tempStudent = entityManager.find(Student.class, theId);
+					// delete the student
+					entityManager.remove(tempStudent);
+				}
+			}
 													
 		CruddemoApplication.java:
 		
-													package com.luv2code.cruddemo;
-													import com.luv2code.cruddemo.dao.AppDAO;
-													import com.luv2code.cruddemo.entity.*;
-													import org.springframework.boot.CommandLineRunner;
-													import org.springframework.boot.SpringApplication;
-													import org.springframework.boot.autoconfigure.SpringBootApplication;
-													import org.springframework.context.annotation.Bean;
-													import java.util.List;
-													@SpringBootApplication
-													public class CruddemoApplication {
-														public static void main(String[] args) {
-															SpringApplication.run(CruddemoApplication.class, args);
-														}
-														@Bean
-														public CommandLineRunner commandLineRunner(AppDAO appDAO) {
-															return runner -> {
-																// createCourseAndStudents(appDAO);
-																// findCourseAndStudents(appDAO);
-																// findStudentAndCourses(appDAO);
-																// addMoreCoursesForStudent(appDAO);
-																// deleteCourse(appDAO);
-																deleteStudent(appDAO);
-															};
-														}
-														private void deleteStudent(AppDAO appDAO) {
-															int theId = 1;
-															System.out.println("Deleting student id: " + theId);
-															appDAO.deleteStudentById(theId);
-															System.out.println("Done!");
-														}
-														private void addMoreCoursesForStudent(AppDAO appDAO) {
-															int theId = 2;
-															Student tempStudent = appDAO.findStudentAndCoursesByStudentId(theId);
-															// create more courses
-															Course tempCourse1 = new Course("Rubik's Cube - How to Speed Cube");
-															Course tempCourse2 = new Course("Atari 2600 - Game Development");
-															// add courses to student
-															tempStudent.addCourse(tempCourse1);
-															tempStudent.addCourse(tempCourse2);
-															System.out.println("Updating student: " + tempStudent);
-															System.out.println("associated courses: " + tempStudent.getCourses());
-															appDAO.update(tempStudent);
-															System.out.println("Done!");
-														}
-														private void findStudentAndCourses(AppDAO appDAO) {
-															int theId = 2;
-															Student tempStudent = appDAO.findStudentAndCoursesByStudentId(theId);
-															System.out.println("Loaded student: " + tempStudent);
-															System.out.println("Courses: " + tempStudent.getCourses());
-															System.out.println("Done!");
-														}
-														private void findCourseAndStudents(AppDAO appDAO) {
-															int theId = 10;
-															Course tempCourse = appDAO.findCourseAndStudentsByCourseId(theId);
-															System.out.println("Loaded course: " + tempCourse);
-															System.out.println("Students: " + tempCourse.getStudents());
-															System.out.println("Done!");
-														}
-														private void createCourseAndStudents(AppDAO appDAO) {
-															// create a course
-															Course tempCourse = new Course("Pacman - How To Score One Million Points");
-															// create the students
-															Student tempStudent1 = new Student("John", "Doe", "john@luv2code.com");
-															Student tempStudent2 = new Student("Mary", "Public", "mary@luv2code.com");
-															// add students to the course
-															tempCourse.addStudent(tempStudent1);
-															tempCourse.addStudent(tempStudent2);
-															// save the course and associated students
-															System.out.println("Saving the course: " + tempCourse);
-															System.out.println("associated students: " + tempCourse.getStudents());
-															appDAO.save(tempCourse);
-															System.out.println("Done!");
-														}
-														private void retrieveCourseAndReviews(AppDAO appDAO) {
-															// get the course and reviews
-															int theId = 10;
-															Course tempCourse = appDAO.findCourseAndReviewsByCourseId(theId);
-															// print the course
-															System.out.println(tempCourse);
-															// print the reviews
-															System.out.println(tempCourse.getReviews());
-															System.out.println("Done!");
-														}
-														private void createCourseAndReviews(AppDAO appDAO) {
-															// create a course
-															Course tempCourse = new Course("Pacman - How To Score One Million Points");
-															// add some reviews
-															tempCourse.addReview(new Review("Great course ... loved it!"));
-															tempCourse.addReview(new Review("Cool course, job well done."));
-															tempCourse.addReview(new Review("What a dumb course, you are an idiot!"));
-															// save the course ... and leverage the cascade all
-															System.out.println("Saving the course");
-															System.out.println(tempCourse);
-															System.out.println(tempCourse.getReviews());
-															appDAO.save(tempCourse);
-															System.out.println("Done!");
-														}
-														private void deleteCourse(AppDAO appDAO) {
-															int theId = 10;
-															System.out.println("Deleting course id: " + theId);
-															appDAO.deleteCourseById(theId);
-															System.out.println("Done!");
-														}
-														private void updateCourse(AppDAO appDAO) {
-															int theId = 10;
-															// find the course
-															System.out.println("Finding course id: " + theId);
-															Course tempCourse = appDAO.findCourseById(theId);
-															// update the course
-															System.out.println("Updating course id: " + theId);
-															tempCourse.setTitle("Enjoy the Simple Things");
-															appDAO.update(tempCourse);
-															System.out.println("Done!");
-														}
-														private void updateInstructor(AppDAO appDAO) {
-															int theId = 1;
-															// find the instructor
-															System.out.println("Finding instructor id: " + theId);
-															Instructor tempInstructor = appDAO.findInstructorById(theId);
-															// update the instructor
-															System.out.println("Updating instructor id: " + theId);
-															tempInstructor.setLastName("TESTER");
-															appDAO.update(tempInstructor);
-															System.out.println("Done!");
-														}
-														private void findInstructorWithCoursesJoinFetch(AppDAO appDAO) {
-															int theId = 1;
-															// find the instructor
-															System.out.println("Finding instructor id: " + theId);
-															Instructor tempInstructor = appDAO.findInstructorByIdJoinFetch(theId);
-															System.out.println("tempInstructor: " + tempInstructor);
-															System.out.println("the associated courses: " + tempInstructor.getCourses());
-															System.out.println("Done!");
-														}
-														private void findCoursesForInstructor(AppDAO appDAO) {
-															int theId = 1;
-															// find instructor
-															System.out.println("Finding instructor id: " + theId);
-															Instructor tempInstructor = appDAO.findInstructorById(theId);
-															System.out.println("tempInstructor: " + tempInstructor);
-															// find courses for instructor
-															System.out.println("Finding courses for instructor id: " + theId);
-															List<Course> courses = appDAO.findCoursesByInstructorId(theId);
-															// associate the objects
-															tempInstructor.setCourses(courses);
-															System.out.println("the associated courses: " + tempInstructor.getCourses());
-															System.out.println("Done!");
-														}
-														private void findInstructorWithCourses(AppDAO appDAO) {
-															int theId = 1;
-															System.out.println("Finding instructor id: " + theId);
-															Instructor tempInstructor = appDAO.findInstructorById(theId);
-															System.out.println("tempInstructor: " + tempInstructor);
-															System.out.println("the associated courses: " + tempInstructor.getCourses());
-															System.out.println("Done!");
-														}
-														private void createInstructorWithCourses(AppDAO appDAO) {
-															// create the instructor
-															Instructor tempInstructor =
-																	new Instructor("Susan", "Public", "susan.public@luv2code.com");
-															// create the instructor detail
-															InstructorDetail tempInstructorDetail =
-																	new InstructorDetail(
-																			"http://www.youtube.com",
-																			"Video Games");
-															// associate the objects
-															tempInstructor.setInstructorDetail(tempInstructorDetail);
-															// create some courses
-															Course tempCourse1 = new Course("Air Guitar - The Ultimate Guide");
-															Course tempCourse2 = new Course("The Pinball Masterclass");
-															// add courses to instructor
-															tempInstructor.add(tempCourse1);
-															tempInstructor.add(tempCourse2);
-															// save the instructor
-															//
-															// NOTE: this will ALSO save the courses
-															// because of CascadeType.PERSIST
-															//
-															System.out.println("Saving instructor: " + tempInstructor);
-															System.out.println("The courses: " + tempInstructor.getCourses());
-															appDAO.save(tempInstructor);
-															System.out.println("Done!");
-														}
-														private void deleteInstructorDetail(AppDAO appDAO) {
-															int theId = 3;
-															System.out.println("Deleting instructor detail id: " + theId);
-															appDAO.deleteInstructorDetailById(theId);
-															System.out.println("Done!");
-														}
-														private void findInstructorDetail(AppDAO appDAO) {
-															// get the instructor detail object
-															int theId = 2;
-															InstructorDetail tempInstructorDetail = appDAO.findInstructorDetailById(theId);
-															// print the instructor detail
-															System.out.println("tempInstructorDetail: " + tempInstructorDetail);
-															// print the associated instructor
-															System.out.println("the associated instructor: " + tempInstructorDetail.getInstructor());
-															System.out.println("Done!");
-														}
-														private void deleteInstructor(AppDAO appDAO) {
-															int theId = 1;
-															System.out.println("Deleting instructor id: " + theId);
-															appDAO.deleteInstructorById(theId);
-															System.out.println("Done!");
-														}
-														private void findInstructor(AppDAO appDAO) {
-															int theId = 2;
-															System.out.println("Finding instructor id: " + theId);
-															Instructor tempInstructor = appDAO.findInstructorById(theId);
-															System.out.println("tempInstructor: " + tempInstructor);
-															System.out.println("the associated instructorDetail only: " + tempInstructor.getInstructorDetail());
+			package com.luv2code.cruddemo;
+			import com.luv2code.cruddemo.dao.AppDAO;
+			import com.luv2code.cruddemo.entity.*;
+			import org.springframework.boot.CommandLineRunner;
+			import org.springframework.boot.SpringApplication;
+			import org.springframework.boot.autoconfigure.SpringBootApplication;
+			import org.springframework.context.annotation.Bean;
+			import java.util.List;
+			@SpringBootApplication
+			public class CruddemoApplication {
+				public static void main(String[] args) {
+					SpringApplication.run(CruddemoApplication.class, args);
+				}
+				@Bean
+				public CommandLineRunner commandLineRunner(AppDAO appDAO) {
+					return runner -> {
+						// createCourseAndStudents(appDAO);
+						// findCourseAndStudents(appDAO);
+						// findStudentAndCourses(appDAO);
+						// addMoreCoursesForStudent(appDAO);
+						// deleteCourse(appDAO);
+						deleteStudent(appDAO);
+					};
+				}
+				private void deleteStudent(AppDAO appDAO) {
+					int theId = 1;
+					System.out.println("Deleting student id: " + theId);
+					appDAO.deleteStudentById(theId);
+					System.out.println("Done!");
+				}
+				private void addMoreCoursesForStudent(AppDAO appDAO) {
+					int theId = 2;
+					Student tempStudent = appDAO.findStudentAndCoursesByStudentId(theId);
+					// create more courses
+					Course tempCourse1 = new Course("Rubik's Cube - How to Speed Cube");
+					Course tempCourse2 = new Course("Atari 2600 - Game Development");
+					// add courses to student
+					tempStudent.addCourse(tempCourse1);
+					tempStudent.addCourse(tempCourse2);
+					System.out.println("Updating student: " + tempStudent);
+					System.out.println("associated courses: " + tempStudent.getCourses());
+					appDAO.update(tempStudent);
+					System.out.println("Done!");
+				}
+				private void findStudentAndCourses(AppDAO appDAO) {
+					int theId = 2;
+					Student tempStudent = appDAO.findStudentAndCoursesByStudentId(theId);
+					System.out.println("Loaded student: " + tempStudent);
+					System.out.println("Courses: " + tempStudent.getCourses());
+					System.out.println("Done!");
+				}
+				private void findCourseAndStudents(AppDAO appDAO) {
+					int theId = 10;
+					Course tempCourse = appDAO.findCourseAndStudentsByCourseId(theId);
+					System.out.println("Loaded course: " + tempCourse);
+					System.out.println("Students: " + tempCourse.getStudents());
+					System.out.println("Done!");
+				}
+				private void createCourseAndStudents(AppDAO appDAO) {
+					// create a course
+					Course tempCourse = new Course("Pacman - How To Score One Million Points");
+					// create the students
+					Student tempStudent1 = new Student("John", "Doe", "john@luv2code.com");
+					Student tempStudent2 = new Student("Mary", "Public", "mary@luv2code.com");
+					// add students to the course
+					tempCourse.addStudent(tempStudent1);
+					tempCourse.addStudent(tempStudent2);
+					// save the course and associated students
+					System.out.println("Saving the course: " + tempCourse);
+					System.out.println("associated students: " + tempCourse.getStudents());
+					appDAO.save(tempCourse);
+					System.out.println("Done!");
+				}
+				private void retrieveCourseAndReviews(AppDAO appDAO) {
+					// get the course and reviews
+					int theId = 10;
+					Course tempCourse = appDAO.findCourseAndReviewsByCourseId(theId);
+					// print the course
+					System.out.println(tempCourse);
+					// print the reviews
+					System.out.println(tempCourse.getReviews());
+					System.out.println("Done!");
+				}
+				private void createCourseAndReviews(AppDAO appDAO) {
+					// create a course
+					Course tempCourse = new Course("Pacman - How To Score One Million Points");
+					// add some reviews
+					tempCourse.addReview(new Review("Great course ... loved it!"));
+					tempCourse.addReview(new Review("Cool course, job well done."));
+					tempCourse.addReview(new Review("What a dumb course, you are an idiot!"));
+					// save the course ... and leverage the cascade all
+					System.out.println("Saving the course");
+					System.out.println(tempCourse);
+					System.out.println(tempCourse.getReviews());
+					appDAO.save(tempCourse);
+					System.out.println("Done!");
+				}
+				private void deleteCourse(AppDAO appDAO) {
+					int theId = 10;
+					System.out.println("Deleting course id: " + theId);
+					appDAO.deleteCourseById(theId);
+					System.out.println("Done!");
+				}
+				private void updateCourse(AppDAO appDAO) {
+					int theId = 10;
+					// find the course
+					System.out.println("Finding course id: " + theId);
+					Course tempCourse = appDAO.findCourseById(theId);
+					// update the course
+					System.out.println("Updating course id: " + theId);
+					tempCourse.setTitle("Enjoy the Simple Things");
+					appDAO.update(tempCourse);
+					System.out.println("Done!");
+				}
+				private void updateInstructor(AppDAO appDAO) {
+					int theId = 1;
+					// find the instructor
+					System.out.println("Finding instructor id: " + theId);
+					Instructor tempInstructor = appDAO.findInstructorById(theId);
+					// update the instructor
+					System.out.println("Updating instructor id: " + theId);
+					tempInstructor.setLastName("TESTER");
+					appDAO.update(tempInstructor);
+					System.out.println("Done!");
+				}
+				private void findInstructorWithCoursesJoinFetch(AppDAO appDAO) {
+					int theId = 1;
+					// find the instructor
+					System.out.println("Finding instructor id: " + theId);
+					Instructor tempInstructor = appDAO.findInstructorByIdJoinFetch(theId);
+					System.out.println("tempInstructor: " + tempInstructor);
+					System.out.println("the associated courses: " + tempInstructor.getCourses());
+					System.out.println("Done!");
+				}
+				private void findCoursesForInstructor(AppDAO appDAO) {
+					int theId = 1;
+					// find instructor
+					System.out.println("Finding instructor id: " + theId);
+					Instructor tempInstructor = appDAO.findInstructorById(theId);
+					System.out.println("tempInstructor: " + tempInstructor);
+					// find courses for instructor
+					System.out.println("Finding courses for instructor id: " + theId);
+					List<Course> courses = appDAO.findCoursesByInstructorId(theId);
+					// associate the objects
+					tempInstructor.setCourses(courses);
+					System.out.println("the associated courses: " + tempInstructor.getCourses());
+					System.out.println("Done!");
+				}
+				private void findInstructorWithCourses(AppDAO appDAO) {
+					int theId = 1;
+					System.out.println("Finding instructor id: " + theId);
+					Instructor tempInstructor = appDAO.findInstructorById(theId);
+					System.out.println("tempInstructor: " + tempInstructor);
+					System.out.println("the associated courses: " + tempInstructor.getCourses());
+					System.out.println("Done!");
+				}
+				private void createInstructorWithCourses(AppDAO appDAO) {
+					// create the instructor
+					Instructor tempInstructor =
+							new Instructor("Susan", "Public", "susan.public@luv2code.com");
+					// create the instructor detail
+					InstructorDetail tempInstructorDetail =
+							new InstructorDetail(
+									"http://www.youtube.com",
+									"Video Games");
+					// associate the objects
+					tempInstructor.setInstructorDetail(tempInstructorDetail);
+					// create some courses
+					Course tempCourse1 = new Course("Air Guitar - The Ultimate Guide");
+					Course tempCourse2 = new Course("The Pinball Masterclass");
+					// add courses to instructor
+					tempInstructor.add(tempCourse1);
+					tempInstructor.add(tempCourse2);
+					// save the instructor
+					//
+					// NOTE: this will ALSO save the courses
+					// because of CascadeType.PERSIST
+					//
+					System.out.println("Saving instructor: " + tempInstructor);
+					System.out.println("The courses: " + tempInstructor.getCourses());
+					appDAO.save(tempInstructor);
+					System.out.println("Done!");
+				}
+				private void deleteInstructorDetail(AppDAO appDAO) {
+					int theId = 3;
+					System.out.println("Deleting instructor detail id: " + theId);
+					appDAO.deleteInstructorDetailById(theId);
+					System.out.println("Done!");
+				}
+				private void findInstructorDetail(AppDAO appDAO) {
+					// get the instructor detail object
+					int theId = 2;
+					InstructorDetail tempInstructorDetail = appDAO.findInstructorDetailById(theId);
+					// print the instructor detail
+					System.out.println("tempInstructorDetail: " + tempInstructorDetail);
+					// print the associated instructor
+					System.out.println("the associated instructor: " + tempInstructorDetail.getInstructor());
+					System.out.println("Done!");
+				}
+				private void deleteInstructor(AppDAO appDAO) {
+					int theId = 1;
+					System.out.println("Deleting instructor id: " + theId);
+					appDAO.deleteInstructorById(theId);
+					System.out.println("Done!");
+				}
+				private void findInstructor(AppDAO appDAO) {
+					int theId = 2;
+					System.out.println("Finding instructor id: " + theId);
+					Instructor tempInstructor = appDAO.findInstructorById(theId);
+					System.out.println("tempInstructor: " + tempInstructor);
+					System.out.println("the associated instructorDetail only: " + tempInstructor.getInstructorDetail());
 
-														}
-														private void createInstructor(AppDAO appDAO) {
-															/*
-															// create the instructor
-															Instructor tempInstructor =
-																	new Instructor("Chad", "Darby", "darby@luv2code.com");
-															// create the instructor detail
-															InstructorDetail tempInstructorDetail =
-																	new InstructorDetail(
-																			"http://www.luv2code.com/youtube",
-																			"Luv 2 code!!!");
-															*/
-															// create the instructor
-															Instructor tempInstructor =
-																	new Instructor("Madhu", "Patel", "madhu@luv2code.com");
-															// create the instructor detail
-															InstructorDetail tempInstructorDetail =
-																	new InstructorDetail(
-																			"http://www.luv2code.com/youtube",
-																			"Guitar");
-															// associate the objects
-															tempInstructor.setInstructorDetail(tempInstructorDetail);
-															// save the instructor
-															//
-															// NOTE: this will ALSO save the details object
-															// because of CascadeType.ALL
-															//
-															System.out.println("Saving instructor: " + tempInstructor);
-															appDAO.save(tempInstructor);
-															System.out.println("Done!");
-														}
-													}
+				}
+				private void createInstructor(AppDAO appDAO) {
+					/*
+					// create the instructor
+					Instructor tempInstructor =
+							new Instructor("Chad", "Darby", "darby@luv2code.com");
+					// create the instructor detail
+					InstructorDetail tempInstructorDetail =
+							new InstructorDetail(
+									"http://www.luv2code.com/youtube",
+									"Luv 2 code!!!");
+					*/
+					// create the instructor
+					Instructor tempInstructor =
+							new Instructor("Madhu", "Patel", "madhu@luv2code.com");
+					// create the instructor detail
+					InstructorDetail tempInstructorDetail =
+							new InstructorDetail(
+									"http://www.luv2code.com/youtube",
+									"Guitar");
+					// associate the objects
+					tempInstructor.setInstructorDetail(tempInstructorDetail);
+					// save the instructor
+					//
+					// NOTE: this will ALSO save the details object
+					// because of CascadeType.ALL
+					//
+					System.out.println("Saving instructor: " + tempInstructor);
+					appDAO.save(tempInstructor);
+					System.out.println("Done!");
+				}
+			}

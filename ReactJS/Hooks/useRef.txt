@@ -1,69 +1,190 @@
 useRef--REACTJS:
-			- useRef is a React Hook that lets you reference a value that’s not needed for rendering.
-			- useRef hook là một function trả về một object với thuộc tính current được khởi tạo thông qua tham số truyền vào. Object được trả về này có thể mutate và sẽ tồn tại xuyên suốt vòng đời của
-			component. Nó chủ yếu được sử dụng để truy cập một cách ngầm định một thành phần con.
-			- Thuộc tính ref sẽ tham chiếu đến chính xác element cần dùng.
-			- Giả dụ tình huống là thế này, bạn làm gì đó mà nó ko liên quan đến UI, không cần re-render, nhưng vẫn muốn giá trị này cố định giữa các lần render? useState có thể cố định giá trị,
-			nhưng ngặt nỗi nó sẽ trigger re-render nếu bị thay đổi.
+
+	- useRef is a React Hook that lets you reference a value that’s not needed for rendering.
+	
+	- useRef hook là một function trả về một object với thuộc tính current được khởi tạo thông qua tham
+	số truyền vào. Object được trả về này có thể mutate và sẽ tồn tại xuyên suốt vòng đời của
+	component. Nó chủ yếu được sử dụng để truy cập một cách ngầm định một thành phần con.
+	
+	- Thuộc tính ref sẽ tham chiếu đến chính xác element cần dùng.
+	
+	- Giả dụ tình huống là thế này, bạn làm gì đó mà nó ko liên quan đến UI, không cần re-render, nhưng
+	vẫn muốn giá trị này cố định giữa các lần render? useState có thể cố định giá trị,
+	nhưng ngặt nỗi nó sẽ trigger re-render nếu bị thay đổi.
+	
+		import { useRef } from 'react';
+		export default function Counter() {
+		  let ref = useRef(0);
+		  function handleClick() {
+			ref.current = ref.current + 1;
+			alert('You clicked ' + ref.current + ' times!');
+		}
+		return (
+		  <button onClick={handleClick}>
+			Click me!
+		  </button>
+		  );
+		}
+	
+	
+		import React, { useRef, useEffect } from 'react';
+		function ExampleComponent() {
+		  const myRef = useRef(null);
+		  useEffect(() => {									
+			myRef.current.focus(); // Gán thuộc tính focus cho element khi component được mount
+		  }, []);
+		  return (
+			<div>
+			  <input type="text" ref={myRef} /> //Sử dụng useRef để tạo ra một ref
+			  <button onClick={() => myRef.current.focus()}>Focus Input</button>
+			</div>
+		  );
+		}
+		export default ExampleComponent;
+	
+	
+	- Trong useEffect với dependency array rỗng (đánh dấu quá trình initialization), việc ghi vào ref.current là an
+	toàn, vì nó chỉ xảy ra một lần khi component được khởi tạo.
+	
+	- Tuy nhiên, trong phần return của component, việc ghi vào ref.current trong JSX hoặc đọc ref.current trong hàm render
+	không nên được thực hiện. Việc này có thể dẫn đến hành vi không đoán được hoặc các vấn đề khác nhau khi React tái
+	render component. Thay vào đó, các thao tác này nên được thực hiện trong các hàm lifecycle hoặc useEffect hook.
+	
+		import React, { useRef, useEffect } from 'react';
+		function ExampleComponent() {
+		  const ref = useRef(null);							  
+		  useEffect(() => {
+			// Trong phần initialization, việc ghi vào ref.current là an toàn
+			ref.current = 'Initialized';
+		  }, []);
+		  // Trong quá trình rendering, đọc hoặc ghi vào ref.current không nên được thực hiện
+		  console.log(ref.current); // Không nên đọc trong quá trình rendering
+		  return (
+			<div ref={ref}>
+			  {/* Ghi vào ref.current trong JSX cũng không được khuyến khích */}
+			</div>
+		  );
+		}
+	
+	- .current.contains trong useRef:
+	
+		Là một phương thức của một tham chiếu DOM (thông qua .current) và được sử dụng để kiểm tra xem một phần tử DOM
+		có nằm trong phạm vi của một phần tử khác không. Phương thức này trả về giá trị boolean true nếu phần tử DOM
+		được xem xét nằm trong phạm vi của phần tử khác, và false nếu không.
+									
+	- Kiểm tra việc người dùng đã nhấp chuột bên ngoài phần tử:
+									
+		Kiểm tra xem phần tử hiện tại được tham chiếu bởi ref.current có chứa phần tử mà sự kiện mousedown xảy
+		ra hay không (!ref.current.contains(e.target)). Nếu phần tử không chứa phần tử mà sự kiện xảy ra, tức là
+		người dùng đã nhấp chuột bên ngoài phần tử
+	
+			if (ref.current && !ref.current.contains(e.target))
 			
-			import { useRef } from 'react';
+			
+	- useRef is a React Hook that lets you reference a value that’s not needed for rendering.
+		
+	- useRef returns an object with a single property:
+		current: Initially, it’s set to the initialValue you have passed. You can later set
+		it to something else. If you pass the ref object to React as a ref attribute to a
+		JSX node, React will set its current property.
+		
+	- By using a ref, you ensure that:
+		
+		You can store information between re-renders (unlike regular variables, which reset on every render).
+		
+		Changing it does not trigger a re-render (unlike state variables, which trigger a re-render).
+		
+		The information is local to each copy of your component (unlike the variables outside, which are shared).
+		
+	- Có thể xem ref và state như nhau, chỉ khác nhau ở chỗ 1 cái không render khi thay đổi, một cái sẽ render lại khi thay đổi
+	
+	- On the next renders, useRef will return the same object. You can change its current property to store information and read
+	it later. This might remind you of state, but there is an important difference
+	
+	- Changing a ref does not trigger a re-render. This means refs are perfect for storing information that doesn’t
+	affect the visual output of your component.
+		
+	- You can mutate the ref.current property. Unlike state, it is mutable.
+	
+	- When you change the ref.current property, React does not re-render your component.
+	
+	- Do not write or read ref.current during rendering, except for initialization. This makes your component’s behavior
+	unpredictable.
+	
+		Ví dụ useRef để lưu giá trị sau các lần render
+		
 			export default function Counter() {
 			  let ref = useRef(0);
+
 			  function handleClick() {
 				ref.current = ref.current + 1;
 				alert('You clicked ' + ref.current + ' times!');
-			}
-			return (
-			  <button onClick={handleClick}>
-				Click me!
-			  </button>
-			  );
-			}
-			
-			
-			import React, { useRef, useEffect } from 'react';
-			function ExampleComponent() {
-			  const myRef = useRef(null);
-			  useEffect(() => {									
-				myRef.current.focus(); // Gán thuộc tính focus cho element khi component được mount
-			  }, []);
+			  }
+
 			  return (
-				<div>
-				  <input type="text" ref={myRef} /> //Sử dụng useRef để tạo ra một ref
-				  <button onClick={() => myRef.current.focus()}>Focus Input</button>
-				</div>
+				<button onClick={handleClick}>
+				  Click me!
+				</button>
 			  );
 			}
-			export default ExampleComponent;
 			
+		Ví dụ về tạo stopwatch
+		
+			Tạo 2 biến state là startTime và now bằng useState
 			
-			Trong useEffect với dependency array rỗng (đánh dấu quá trình initialization), việc ghi vào ref.current là an toàn, vì nó chỉ xảy ra một lần khi component được khởi tạo.
-			Tuy nhiên, trong phần return của component, việc ghi vào ref.current trong JSX hoặc đọc ref.current trong hàm render không nên được thực hiện. Việc này có thể dẫn đến hành vi không đoán
-			được hoặc các vấn đề khác nhau khi React tái render component. Thay vào đó, các thao tác này nên được thực hiện trong các hàm lifecycle hoặc useEffect hook.
-			import React, { useRef, useEffect } from 'react';
-			function ExampleComponent() {
-			  const ref = useRef(null);							  
-			  useEffect(() => {
-				// Trong phần initialization, việc ghi vào ref.current là an toàn
-				ref.current = 'Initialized';
-			  }, []);
-			  // Trong quá trình rendering, đọc hoặc ghi vào ref.current không nên được thực hiện
-			  console.log(ref.current); // Không nên đọc trong quá trình rendering
-			  return (
-				<div ref={ref}>
-				  {/* Ghi vào ref.current trong JSX cũng không được khuyến khích */}
-				</div>
-			  );
-			}
+			Tạo 1 hàm handleStart để gán giá trị Date.now() cho 2 biến state startTime và now, sau đó sử dụng setInterval
+			để update liên tục giá trị của now với Data.now() cứ sau 10 ms, sau đó gán setInterval này cho intervalRef.current
+			(được khởi tạo null bằng useRef)
+			
+			Tạo 1 hàm handleStop để clearInterval với đối số là intervalRef.current
+			
+			Thiết lập 1 biến để đếm sự chênh lệch thời gian giữa startTime và now, biến này sẽ chia cho 1000 để lấy kết quả
+			hiển thị cuối cùng
 	
-	.current.contains trong useRef:
+	- Reading or writing a ref during rendering breaks these expectations.
 	
-			Là một phương thức của một tham chiếu DOM (thông qua .current) và được sử dụng để kiểm tra xem một phần tử DOM có nằm trong phạm vi của một phần tử khác không. Phương thức này trả về giá trị boolean true nếu phần tử DOM
-			được xem xét nằm trong phạm vi của phần tử khác, và false nếu không.
-									
-	Kiểm tra việc người dùng đã nhấp chuột bên ngoài phần tử:
-									
-			Kiểm tra xem phần tử hiện tại được tham chiếu bởi ref.current có chứa phần tử mà sự kiện mousedown xảy ra hay không (!ref.current.contains(e.target)). Nếu phần tử không chứa phần tử mà sự kiện xảy ra, tức là người dùng
-			đã nhấp chuột bên ngoài phần tử
+		function MyComponent() {
+		  // ...
+		  //  Don't write a ref during rendering
+		  myRef.current = 123;
+		  // ...
+		  //  Don't read a ref during rendering
+		  return <h1>{myOtherRef.current}</h1>;
+		}
+			You can read or write refs from event handlers or effects instead.
+				useEffect(() => {
+		  // ✅ You can read or write refs in effects
+		  myRef.current = 123;
+		});
+		
+	- If you have to read or write something during rendering, use state instead.
+		
+	- It’s particularly common to use a ref to manipulate the DOM. React has builtin support for this.
+			
+			const inputRef = useRef(null);
+			// ...
+			return <input ref={inputRef} />;
+			
+	- After React creates the DOM node and puts it on the screen, React will set the current property of your
+	ref object to that DOM node. Now you can access the <input>’s DOM node and call methods like focus():
+			
+		function handleClick() {
+		  inputRef.current.focus();
+		}
+		
+			Như này là cách để focus vào thẻ input
+		
+	- React will set the current property back to null when the node is removed from the screen.
+		
+	- Ví dụ về sử dụng ref để play/pause video
+		
+		Dùng useState để tạo 1 biến là isPlaying
 	
-			if (ref.current && !ref.current.contains(e.target))
+		Tạo 1 hàm handleClick để nghịch đảo giá trị của isPlaying và check khi mà isPlaying là false
+		thì nó sẽ chạy ref.current.play();, ngược lại nó sẽ chạy ref.current.pause();
+	
+		Tạo 1 thẻ <video> trong đó có ref={ref}, onPlay sẽ chạy handleClick với đối số là true, onPause
+		sẽ chạy với đối số là false.Mục tiêu của cái này là update để cái ref.current.play() hay
+		là ref.current.pause()
+		
+	- React saves the initial ref value once and ignores it on the next renders. (khởi tạo bằng useRef thì chỉ chạy một lần)

@@ -1,19 +1,37 @@
 useContext--REACTJS:
 
-		- Tóm tắt:
-						Tạo 1 biến với createContext, ví dụ biến A,
-						Trong 1 component cha khi render 1 component con khác (trong phần return) thì có thể truyền biến này qua thông qua <A.Provider value={...}>.
-						Trong component con được gọi để sử dụng được biến này cần gọi useContext, tên biến giữa biến truyền và biến gán phải giống nhau, chú ý không phải là biến tạo bằng createContext
-		- useContext là một hook được cung cấp bởi React để truy cập vào Context. Context là một cơ chế trong React cho phép truyền dữ liệu qua các thành phần con trong cây thành phần mà không cần truyền props qua từng cấp con.
-		- React context API là một cách cơ bản để tạo các biến toàn cục có thể được truyền qua trong ứng dụng React. đây là phương pháp thay thế cho “prop drilling”, hoặc truyền props từ ông nội sang cha và sang con, v..v..
-		Context thường được coi là đơn giản hơn, nhẹ nhàng hơn thay vì sử dụng Redux cho quản lý state.
-		- Bạn có thể tạo một context để thêm những shared state và sau đó component nào cần thì bạn gọi context đó ra xài, không cần phải truyền từ cha xuống con nữa. Nó cũng giống như biến global được chia sẻ và sử dụng ở
-		nhiều nơi
-		- Trong React, để các component con có thể sử dụng Context thông qua useContext, thì các component con phải là con trực tiếp hoặc con của các component mà đã sử dụng Provider để cung cấp Context.
-		- useContext() call in a component is not affected by providers returned from the same component. The corresponding <Context.Provider> needs to be above the component doing the useContext() call.
-		- React automatically re-renders all the children that use a particular context starting from the provider that receives a different value. The previous and the next values are compared with the Object.is comparison.
-		Skipping rerenders with memo does not prevent the children receiving fresh context values.
+	- Tóm tắt:
+					
+		Tạo 1 biến với createContext, ví dụ biến A,
 		
+		Trong 1 component cha khi render 1 component con khác (trong phần return) thì có thể
+		truyền biến này qua thông qua <A.Provider value={...}>.
+		
+		Trong component con được gọi để sử dụng được biến này cần gọi useContext, tên biến giữa
+		biến truyền và biến gán phải giống nhau, chú ý không phải là biến tạo bằng createContext
+	
+	- useContext là một hook được cung cấp bởi React để truy cập vào Context. Context là một cơ chế trong
+	React cho phép truyền dữ liệu qua các thành phần con trong cây thành phần mà không cần truyền props qua
+	từng cấp con.
+	
+	- React context API là một cách cơ bản để tạo các biến toàn cục có thể được truyền qua trong ứng dụng
+	React. đây là phương pháp thay thế cho “prop drilling”, hoặc truyền props từ ông nội sang cha và sang con, v..v..
+	Context thường được coi là đơn giản hơn, nhẹ nhàng hơn thay vì sử dụng Redux cho quản lý state.
+	
+	- Bạn có thể tạo một context để thêm những shared state và sau đó component nào cần thì bạn gọi context đó
+	ra xài, không cần phải truyền từ cha xuống con nữa. Nó cũng giống như biến global được chia sẻ và sử dụng ở
+	nhiều nơi
+	
+	- Trong React, để các component con có thể sử dụng Context thông qua useContext, thì các component con phải
+	là con trực tiếp hoặc con của các component mà đã sử dụng Provider để cung cấp Context.
+	
+	- useContext() call in a component is not affected by providers returned from the same component. The
+	corresponding <Context.Provider> needs to be above the component doing the useContext() call.
+	
+	- React automatically re-renders all the children that use a particular context starting from the provider that
+	receives a different value. The previous and the next values are compared with the Object.is comparison.
+	Skipping rerenders with memo does not prevent the children receiving fresh context values.
+	
 		import React, { useContext } from 'react';								
 		const ThemeContext = React.createContext('light'); // Khởi tạo context
 		// Component cha cung cấp context
@@ -44,3 +62,410 @@ useContext--REACTJS:
 		  );
 		}
 		export default App;
+		
+	- Data trong ứng dụng React thường truyền đến component thông qua prop.Khi sử dụng prop thì data được
+	truyền từ component cha đến component con.
+
+	- Tuy nhiên, chúng ta có thể truyền data trong toàn bộ app mà không phải truyền prop qua từng tầng
+	component khi sử dụng React Context.
+	
+	- useContext is a React Hook that lets you read and subscribe to context from your component.
+	
+	- Nếu không có React Context, chúng ta sẽ sử dụng kỹ thuật là “prop drilling” trong đó chúng ta sẽ phải truyền data
+	xuống các component mặc dù một số component không cần dữ liệu đó.
+	
+	- Chia sẻ state giữa các component là bài toán phổ biến trong React App. Giải pháp tốt nhất là bạn phải lifting
+	state (đẩy state từ component con lên component cha). Nhưng nó yêu cầu bạn phải truyền props xuống cho các component
+	con. Điều đó không phải là vấn đề quá lớn, nhưng trong một số trường hợp truyền props xuống quá nhiều cấp component
+	lại rất khó khăn và tốn nhiều thời gian.
+	
+	- Để tránh được vấn đề này, bạn có thể tạo một context để thêm những shared state và sau đó component nào cần thì bạn
+	gọi context đó ra xài, không cần phải truyền từ cha xuống con nữa. Nó cũng giống như biến global được chia sẻ và sử dụng
+	ở nhiều nơi, nhưng context được quản lí tốt hơn để maintain code dễ hơn.
+	
+	- Đối với useContext thì biến nhận từ useContext nên cùng tên với biến tạo từ createContext
+	
+	- To pass context to a Button, wrap it or one of its parent components into the corresponding context provider:
+		
+		function MyPage() {
+		  return (
+			<ThemeContext.Provider value="dark">
+			  <Form />
+			</ThemeContext.Provider>
+		  );
+		}
+
+		function Form() {
+		  // ... renders buttons inside ...
+		}
+	
+	- Often, you’ll want the context to change over time. To update context, combine it with state. Declare a state variable
+	in the parent component, and pass the current state down as the context value to the provider.
+				
+		function MyPage() {
+		  const [theme, setTheme] = useState('dark');
+		  return (
+			<ThemeContext.Provider value={theme}>
+			  <Form />
+			  <Button onClick={() => {
+				setTheme('light');
+			  }}>
+				Switch to light theme
+			  </Button>
+			</ThemeContext.Provider>
+		  );
+		}
+		
+			Now any Button inside of the provider will receive the current theme value. If you call setTheme to update
+			the theme value that you pass to the provider, all Button components will re-render with the new 'light' value.
+	
+	- If React can’t find any providers of that particular context in the parent tree, the context value returned
+	by useContext() will be equal to the default value that you specified when you created that context:
+		
+		const ThemeContext = createContext(null);
+	
+	- Tạo 1 biến context, provider sẽ quy định phạm vi làm việc của biến context, trong phạm vi nếu muốn dùng thì sẽ thông qua useContext
+	
+	- You can override the context for a part of the tree by wrapping that part in a provider with a different value.
+		
+		<ThemeContext.Provider value="dark">
+		  ...
+		  <ThemeContext.Provider value="light">
+			<Footer />
+		  </ThemeContext.Provider>
+		  ...
+		</ThemeContext.Provider>
+	
+	
+	- useContext() call in a component is not affected by providers returned from the same component. The
+	corresponding <Context.Provider> needs to be above the component doing the useContext() call.
+	
+	- React automatically re-renders all the children that use a particular context starting from the provider
+	that receives a different value. The previous and the next values are compared with the Object.is
+	comparison. Skipping re-renders with memo does not prevent the children receiving fresh context values.
+	
+	- useContext returns the context value for the calling component. It is determined as the value passed to the
+	closest SomeContext.Provider above the calling component in the tree. If there is no such provider, then the
+	returned value will be the defaultValue you have passed to createContext for that context. The returned value
+	is always up-to-date. React automatically re-renders components that read some context if it changes.
+	
+	- useContext returns the context value for the context you passed. To determine the context value, React searches
+	the component tree and finds the closest context provider above for that particular context.
+	
+	- It doesn’t matter how many layers of components there are between the provider and the Button. When a Button anywhere
+	inside of Form calls useContext(ThemeContext), it will receive "dark" as the value.
+	
+	- useContext() always looks for the closest provider above the component that calls it. It searches upwards and does
+	not consider providers in the component from which you’re calling useContext().
+	
+	- Biến context này có thể hiểu là nó sẽ lan truyền từ provider xuống các component con, theo lan truyền trong component
+	con đó có các component nào khác nữa thì cũng nhận được giá trị này thông qua useContext
+	
+	- Ví dụ về bật tắt dark mode sử dụng useContext (mở file edrawmind để xem chi tiết)
+		
+		In this example, there is a currentUser state variable which holds an object. You combine { currentUser, setCurrentUser } into
+		a single object and pass it down through the context inside the value={}. This lets any component below, such as LoginButton,
+		read both currentUser and setCurrentUser, and then call setCurrentUser when needed.
+			
+			import { createContext, useContext, useState } from 'react';
+
+			const CurrentUserContext = createContext(null);
+
+			export default function MyApp() {
+			  const [currentUser, setCurrentUser] = useState(null);
+			  return (
+				<CurrentUserContext.Provider
+				  value={{
+					currentUser,
+					setCurrentUser
+				  }}
+				>
+				  <Form />
+				</CurrentUserContext.Provider>
+			  );
+			}
+
+			function Form({ children }) {
+			  return (
+				<Panel title="Welcome">
+				  <LoginButton />
+				</Panel>
+			  );
+			}
+
+			function LoginButton() {
+			  const {
+				currentUser,
+				setCurrentUser
+			  } = useContext(CurrentUserContext);
+
+			  if (currentUser !== null) {
+				return <p>You logged in as {currentUser.name}.</p>;
+			  }
+
+			  return (
+				<Button onClick={() => {
+				  setCurrentUser({ name: 'Advika' })
+				}}>Log in as Advika</Button>
+			  );
+			}
+
+			function Panel({ title, children }) {
+			  return (
+				<section className="panel">
+				  <h1>{title}</h1>
+				  {children}
+				</section>
+			  )
+			}
+
+			function Button({ children, onClick }) {
+			  return (
+				<button className="button" onClick={onClick}>
+				  {children}
+				</button>
+			  );
+			}
+
+	- Một ví dụ về todo list, nắm được cái này thì sẽ ok về phần này (mở edrawmind để mở ví dụ này lên)
+		
+		App.js
+		
+			import AddTask from './AddTask.js';
+			import TaskList from './TaskList.js';
+			import { TasksProvider } from './TasksContext.js';
+
+			export default function TaskApp() {
+			  return (
+				<TasksProvider>
+				  <h1>Day off in Kyoto</h1>
+				  <AddTask />
+				  <TaskList />
+				</TasksProvider>
+			  );
+			}
+
+					TasksContext.js
+						import { createContext, useContext, useReducer } from 'react';
+
+			const TasksContext = createContext(null);
+
+			const TasksDispatchContext = createContext(null);
+
+			export function TasksProvider({ children }) {
+			  const [tasks, dispatch] = useReducer(
+				tasksReducer,
+				initialTasks
+			  );
+
+			  return (
+				<TasksContext.Provider value={tasks}>
+				  <TasksDispatchContext.Provider value={dispatch}>
+					{children}
+				  </TasksDispatchContext.Provider>
+				</TasksContext.Provider>
+			  );
+			}
+
+			export function useTasks() {
+			  return useContext(TasksContext);
+			}
+
+			export function useTasksDispatch() {
+			  return useContext(TasksDispatchContext);
+			}
+
+			function tasksReducer(tasks, action) {
+			  switch (action.type) {
+				case 'added': {
+				  return [...tasks, {
+					id: action.id,
+					text: action.text,
+					done: false
+				  }];
+				}
+				case 'changed': {
+				  return tasks.map(t => {
+					if (t.id === action.task.id) {
+					  return action.task;
+					} else {
+					  return t;
+					}
+				  });
+				}
+				case 'deleted': {
+				  return tasks.filter(t => t.id !== action.id);
+				}
+				default: {
+				  throw Error('Unknown action: ' + action.type);
+				}
+			  }
+			}
+
+			const initialTasks = [
+			  { id: 0, text: 'Philosopher’s Path', done: true },
+			  { id: 1, text: 'Visit the temple', done: false },
+			  { id: 2, text: 'Drink matcha', done: false }
+			];
+
+					AddTask.js
+						import { useState, useContext } from 'react';
+			import { useTasksDispatch } from './TasksContext.js';
+
+			export default function AddTask() {
+			  const [text, setText] = useState('');
+			  const dispatch = useTasksDispatch();
+			  return (
+				<>
+				  <input
+					placeholder="Add task"
+					value={text}
+					onChange={e => setText(e.target.value)}
+				  />
+				  <button onClick={() => {
+					setText('');
+					dispatch({
+					  type: 'added',
+					  id: nextId++,
+					  text: text,
+					}); 
+				  }}>Add</button>
+				</>
+			  );
+			}
+
+			let nextId = 3;
+
+					TaskList.js
+						import { useState, useContext } from 'react';
+			import { useTasks, useTasksDispatch } from './TasksContext.js';
+
+			export default function TaskList() {
+			  const tasks = useTasks();
+			  return (
+				<ul>
+				  {tasks.map(task => (
+					<li key={task.id}>
+					  <Task task={task} />
+					</li>
+				  ))}
+				</ul>
+			  );
+			}
+
+			function Task({ task }) {
+			  const [isEditing, setIsEditing] = useState(false);
+			  const dispatch = useTasksDispatch();
+			  let taskContent;
+			  if (isEditing) {
+				taskContent = (
+				  <>
+					<input
+					  value={task.text}
+					  onChange={e => {
+						dispatch({
+						  type: 'changed',
+						  task: {
+							...task,
+							text: e.target.value
+						  }
+						});
+					  }} />
+					<button onClick={() => setIsEditing(false)}>
+					  Save
+					</button>
+				  </>
+				);
+			  } else {
+				taskContent = (
+				  <>
+					{task.text}
+					<button onClick={() => setIsEditing(true)}>
+					  Edit
+					</button>
+				  </>
+				);
+			  }
+			  return (
+				<label>
+				  <input
+					type="checkbox"
+					checked={task.done}
+					onChange={e => {
+					  dispatch({
+						type: 'changed',
+						task: {
+						  ...task,
+						  done: e.target.checked
+						}
+					  });
+					}}
+				  />
+				  {taskContent}
+				  <button onClick={() => {
+					dispatch({
+					  type: 'deleted',
+					  id: task.id
+					});
+				  }}>
+					Delete
+				  </button>
+				</label>
+			  );
+			}
+
+	- Optimizing re-renders when passing objects and functions
+		
+		You can pass any values via context, including objects and functions.
+			function MyApp() {
+			  const [currentUser, setCurrentUser] = useState(null);
+
+			  function login(response) {
+				storeCredentials(response.credentials);
+				setCurrentUser(response.user);
+			  }
+
+			  return (
+				<AuthContext.Provider value={{ currentUser, login }}>
+				  <Page />
+				</AuthContext.Provider>
+			  );
+			}
+			
+				Here, the context value is a JavaScript object with two properties, one of which is a function. Whenever
+				MyApp re-renders (for example, on a route update), this will be a different object pointing at a different
+				function, so React will also have to re-render all components deep in the tree that call useContext(AuthContext).
+			
+				Khi bạn sử dụng useContext(AuthContext) để truy cập context trong React, mỗi khi giá trị của context thay đổi,
+				các thành phần sử dụng useContext sẽ được thông báo rằng có một sự thay đổi và cần phải re-render để phản ánh
+				những thay đổi này. Điều này xảy ra vì cơ chế re-render trong React là cách để đảm bảo rằng giao diện người
+				dùng luôn được đồng bộ với trạng thái dữ liệu hiện tại.
+		
+		In smaller apps, this is not a problem. However, there is no need to re-render them if the underlying data, like
+		currentUser, has not changed. To help React take advantage of that fact, you may wrap the login function with
+		useCallback and wrap the object creation into useMemo. This is a performance optimization:
+			
+			import { useCallback, useMemo } from 'react';
+
+			function MyApp() {
+			  const [currentUser, setCurrentUser] = useState(null);
+
+			  const login = useCallback((response) => {
+				storeCredentials(response.credentials);
+				setCurrentUser(response.user);
+			  }, []);
+
+			  const contextValue = useMemo(() => ({
+				currentUser,
+				login
+			  }), [currentUser, login]);
+
+			  return (
+				<AuthContext.Provider value={contextValue}>
+				  <Page />
+				</AuthContext.Provider>
+			  );
+			}
+			
+				As a result of this change, even if MyApp needs to re-render, the components calling useContext(AuthContext)
+				won’t need to re-render unless currentUser has changed.
