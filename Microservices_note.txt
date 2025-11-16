@@ -8342,6 +8342,281 @@
 
 				kubectl run <pod-name> --image=<image-name> --restart=Never --command -- <command>
 
+--- Container Orchestration using Kubernetes:
+
+	Từ docker desktop, turn on kubernetes
+	
+	Cài đặt chocolatey, sau đó cài đặt helm bằng chocolatey
+	
+	Deploy và truy cập vào kubernetes dashboard bằng helm
+	
+	ClusteringRoleBindding
+	
+	Tạo token rồi thêm token này vào để truy cập vào kubernetes dashboard
+	
+--- Deep dive on Helm:
+
+	Với kubenetes thì mỗi cái 1 file riêng, helm xử lý việc gom mấy cái liên quan thành 1
+	file chung, dùng biến để thay đổi
+	
+	Cài đặt helm
+	
+	Chèn biến sẽ ở dạng {{ .Values... }}
+	
+	Cấu trúc folder:
+	
+		eazybank-common:
+		
+			templates: sẽ có các file configmap, deployment, service
+			
+		eazybank-services:
+		
+			accounts:
+			
+				values.yaml: định nghĩa giá trị cho các biến dưới dạng key-value
+				
+				Chart.yaml: thêm các dependency lấy từ eazybank-common
+				
+				templates: sẽ có các file deployment, service
+				
+				charts: nơi chứa file sau khi build bằng helm dependencies build
+				
+			cards:
+			
+				values.yaml: định nghĩa giá trị cho các biến dưới dạng key-value
+				
+				Chart.yaml: thêm các dependency lấy từ eazybank-common
+				
+				templates: sẽ có các file deployment, service
+				
+				charts: nơi chứa file sau khi build bằng helm dependencies build
+
+			configserver:
+				...
+			eurekaserver:
+				...
+			gatewayserver:
+				...
+			loans:
+				...
+			message:
+				...
+		
+		environments:
+			
+			dev-env:
+			
+				values.yaml: định nghĩa giá trị cho các biến dưới dạng key-value
+			
+				Chart.yaml: thêm tất cả các dependencies từ eazybank-common, eazybank-services/accounts, eazybank-services/configserver...
+				
+				templates: sẽ có các file configmap
+				
+				charts: nơi chứa file sau khi build bằng helm dependencies build, tất cả các file .tgz sẽ có ở đây
+				
+			dev-env:
+			
+				values.yaml: định nghĩa giá trị cho các biến dưới dạng key-value
+			
+				Chart.yaml: thêm tất cả các dependencies từ eazybank-common, eazybank-services/accounts, eazybank-services/configserver...
+				
+				templates: sẽ có các file configmap
+				
+				charts: nơi chứa file sau khi build bằng helm dependencies build, tất cả các file .tgz sẽ có ở đây
+
+			prod-env:
+			
+				...
+				
+		keycloak:
+		
+			Trong file values.yaml, service.type từ ClusterIP chuyển thành LoadBalancer, auth.adminPassword
+			từ ** chuyển thành "password"
+			
+		kafka:
+		
+			Trong file values.yaml, controller.replicaCount từ 3 chuyển thành 1, listeners.client.protocol
+			từ SASL_PLAINTEXT chuyển thành PLAINTEXT. Tương tự cho listeners.controller.protocol,
+			listeners.interbroker.protocol, listeners.external.protocol
+			
+		kube-prometheus:
+		
+			Trong file values.yaml, additionalScrapeConfigs.type từ external chuyển thành internal,
+			thêm giá trị vào mảng của additionalScrapeConfigs.internal.jobList
+			
+		grafana-loki:
+		
+			Giữ nguyên từ cái ban đầu
+		
+		grafana-tempo
+			
+			Trong file values.yaml, oltp.http từ false chuyển thành true
+			
+		grafana:
+		
+			Trong file values.yaml, chỉnh sửa giá trị cho datasources.secretDefinition
+
+			
+
+	Chú ý thêm các đường dẫn của các service đã tạo vào environments/prod-env/values.yaml
+	
+	Google search:
+	
+		bitnami helm chart installation
+		
+		bitnami helm charts github
+		
+--- Server-side service discovery and load balancing using Kubernetes:
+
+	Cần add code của phần này vào
+
+	Google search:
+	
+		Spring cloud kubernetes
+		
+		spring-cloud-kubernetes-discoveryserver docker hub
+		
+	cards:
+		
+		pom.xml:
+		
+			spring-cloud-starter-kubernetes-discoveryclient
+			
+		application.yml:
+		
+			spring:
+			  cloud:
+				kubernetes:
+				  discovery:
+					all-namespaces: true
+		
+		CardsApplication.java:
+		
+			@EnableDiscoveryClient
+			
+		LoansFeignClient.java:
+		
+			@FeignClient(name="loans", url="http://loans:8090", fallback = LoansFallback.class)
+			
+	gatewayserver:
+	
+		GatewayserverApplication.java:
+		
+			Sửa route từ .uri("lb://ACCOUNTS") -> .uri("http://accounts:8080")
+			
+		application.yml:
+		
+			spring:
+			  cloud:
+			    gateway:
+				  httpclient:
+				    connect-timeout: 1000
+					response-timeout: 10s
+			  kubernetes:
+			    discovery:
+				  enabled: true
+				  all-namespaces: true
+			  discovery:
+			    client:
+				  health-indicator:
+				    enabled: false
+					
+		pom.xml:
+		
+			spring-cloud-starter-kubernetes-discoveryclient
+			
+	Bor import dependency cuar eurekaserver trong dev-env/Chart.yaml
+		
+	Kubernetes ServiceAccount
+	
+	
+--- Deploying microservices into cloud Kubernetes cluster:
+
+	- cmd: gcloud --version
+	- cmd: gcloud init
+	- cmd: gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project stellar-merket-389904
+
+	Trên google cloud enable cho Kubernetes engine API
+	
+	Tạo kubernetes cluster trên gg cloud
+
+--- Introduction to Kubernetes Ingress, Service Mesh (Istio) and mTLS:
+
+	Ingress
+	
+	Istio
+	
+	mTLS
+	
+--- Tips for the microservices developers:
+
+	Cầm add code của phần này vào
+	
+	IntelliJ plugins:
+	
+		Atom Material Icons
+
+	Tạo mới 1 module eazy-bom
+	
+		eazy-bom:
+	
+			pom.xml:
+			
+				dependencyManagement
+				
+				Định nghĩa giá trị version trong properties
+				
+		accounts:
+		
+			pom.xml:
+			
+				import artifactId là eazy-bom có relativePath là ../eazy-bom/pom.xml
+				
+				Có thể sử dụng giá trị version định nghĩa trong properties từ eazy-bom
+				
+				dependencyManagement
+				
+	Tạo package common trong module eazy-bom
+	
+		eazy-bom:
+		
+			pom.xml:
+			
+				<modules>	
+					<module>common</module>	
+				</modules>
+				
+		pom.xml trong common có thể sử dụng các properties định nghĩa trong pom.xml của eazy-pom
+		
+		Lúc này trong common định nghĩa các dto, trong accounts, cards...có thể sử dụng dto này
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 services:
   accounts:
 services: Phần này định nghĩa các dịch vụ mà Docker Compose sẽ quản lý. Mỗi dịch vụ sẽ chạy trong một container riêng biệt.

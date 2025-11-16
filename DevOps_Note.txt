@@ -15353,47 +15353,2815 @@ sudo updatedb
 	- Commands:
 	
 		- cmd: git init
+		
+Giải thích chi tiết về: git init
+
+MỤC TIÊU
+
+* Giải thích "git init" một cách chi tiết, rõ ràng, và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không chứa ký hiệu markdown phức tạp) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git init
+
+1. Định nghĩa ngắn gọn
+   git init là lệnh khởi tạo một kho Git (repository) mới trong thư mục hiện tại. Lệnh này tạo ra thư mục con .git chứa toàn bộ dữ liệu cần thiết để Git theo dõi lịch sử thay đổi (commit, branch, config, objects...). Sau khi chạy git init, thư mục hiện tại trở thành một repository Git (local repository).
+
+2. Khi nào dùng
+
+* Khi bạn muốn bắt đầu theo dõi phiên bản mã nguồn của một dự án mới.
+* Khi bạn muốn chuyển một thư mục hiện có (chứa mã) sang một Git repository để bắt đầu commit lịch sử.
+* Khi bạn cần khởi tạo một repository cục bộ trước khi kết nối tới remote (ví dụ: GitHub, GitLab).
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Tạo thư mục ẩn .git trong thư mục hiện tại.
+* Tạo file cấu hình ban đầu (.git/config), refs (nguồn tham chiếu cho branch), và cơ sở dữ liệu object (objects/), cùng hệ thống lưu trữ metadata khác.
+* Không tự động thêm file vào index/staging area; bạn vẫn phải dùng git add để đưa file vào staging, và git commit để ghi lại lịch sử.
+
+4. Cú pháp cơ bản
+
+* git init
+  -> Khởi tạo repository trong thư mục hiện tại.
+* git init <tên-thư-mục>
+  -> Tạo thư mục mới có tên <tên-thư-mục> và khởi tạo repository trong đó (tùy vào shell, có thể cần tạo trước thư mục rồi cd vào).
+
+5. Ví dụ thực tế (dùng trong terminal)
+   Ví dụ 1: Khởi tạo repository trong thư mục hiện tại
+   $ cd /duong/dan/du-an
+   $ git init
+   Initialized empty Git repository in /duong/dan/du-an/.git/
+
+Ví dụ 2: Khởi tạo repository trong thư mục mới
+$ git init new-project
+Initialized empty Git repository in /.../new-project/.git/
+$ cd new-project
+
+6. Sau khi git init, thường làm gì tiếp theo
+
+* Kiểm tra trạng thái
+  $ git status
+* Thêm file vào staging area
+  $ git add file1.txt
+  hoặc thêm tất cả
+  $ git add .
+* Tạo commit đầu tiên
+  $ git commit -m "Initial commit"
+* Thiết lập remote (nếu cần, ví dụ GitHub)
+  $ git remote add origin [git@github.com](mailto:git@github.com):username/repo.git
+  $ git push -u origin main
+
+7. Tùy chọn và biến thể
+
+* git init --bare
+  -> Tạo repository ở dạng "bare" (không có working directory), thường dùng để làm remote repository trên server. Không dùng để phát triển trực tiếp trong thư mục đó.
+* git init --separate-git-dir=<dir>
+  -> Lưu thư mục .git ở nơi khác, hữu ích nếu bạn muốn tách metadata Git ra khỏi working tree.
+
+8. Làm việc với thư mục đã có file (một workflow phổ biến)
+
+1) Tạo hoặc vào thư mục dự án:
+   $ mkdir myproject && cd myproject
+2) Khởi tạo git
+   $ git init
+3) Thêm file (ví dụ README)
+   $ echo "# My Project" > README.md
+4) Đưa file vào staging
+   $ git add README.md
+5) Commit
+   $ git commit -m "Add README"
+6) (Tùy chọn) Thêm remote và push
+   $ git remote add origin [git@github.com](mailto:git@github.com):you/myproject.git
+   $ git push -u origin main
+
+9. Những điều cần lưu ý
+
+* git init chỉ ảnh hưởng tới thư mục hiện tại (và các thư mục con) — nó không đụng tới file ngoài thư mục đó.
+* Nếu thư mục đã chứa một thư mục .git (đã là repo), chạy git init sẽ không xóa lịch sử; nó có thể tái tạo file cài đặt Git hoặc sửa một số cấu hình, nhưng hầu hết thời gian không nên chạy lại trừ khi bạn biết rõ lý do.
+* Quyền truy cập: nếu dùng --bare để làm remote trên server, cần cấu hình quyền truy cập (SSH, HTTPS) phù hợp.
+* Nếu bạn chỉ muốn thử nghiệm local và không muốn tạo .git trong thư mục gốc, có thể dùng git init trong một thư mục con.
+
+10. Câu hỏi thường gặp (FAQ)
+    Q: git init có tạo branch mặc định không?
+    A: Git khởi tạo repository với branch mặc định; ở các phiên bản Git cũ là master, các phiên bản mới hơn (tùy cấu hình) có thể mặc định là main. Bạn có thể kiểm tra hoặc đổi bằng git branch -M main.
+
+Q: Có thể khởi tạo repository nếu đang trong project của người khác không?
+A: Có, nhưng cẩn thận: thêm .git làm repository trong một thư mục có thể làm lộn lịch sử nếu thư mục trước đó là một submodule hoặc managed bởi hệ thống khác.
+
+Q: Tôi thấy thư mục .git/ — có nên xóa không?
+A: Xóa .git sẽ xóa toàn bộ lịch sử Git và làm thư mục trở thành thư mục bình thường. Hãy backup trước khi xóa.
+
+11. Tài nguyên tham khảo nhanh (lệnh hữu ích sau git init)
+
+* git status
+* git add <file>
+* git commit -m "message"
+* git branch -M main
+* git remote add origin <url>
+* git push -u origin main
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: ls -a
+		
+Giải thích chi tiết về: ls -a
+
+MỤC TIÊU
+
+* Giải thích lệnh "ls -a" một cách chi tiết, rõ ràng, và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không chứa ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: ls -a
+
+1. Định nghĩa ngắn gọn
+   ls là lệnh liệt kê nội dung thư mục trong hệ điều hành loại Unix/Linux. Tùy chọn -a (viết tắt của --all) cho phép hiển thị tất cả các file và thư mục, bao gồm các file ẩn (những file bắt đầu bằng dấu chấm "."), và cũng hiển thị " . " (thư mục hiện tại) và " .. " (thư mục cha).
+
+2. Khi nào dùng
+
+* Khi bạn muốn xem cả file ẩn trong một thư mục (ví dụ: .git, .bashrc, .env).
+* Khi cần kiểm tra cấu trúc thư mục đầy đủ trước khi xóa, di chuyển, hoặc chỉnh sửa.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Thông thường ls không hiển thị các file bắt đầu bằng dấu chấm.
+* Khi thêm -a, ls sẽ quét tất cả mục trong thư mục và xuất danh sách bao gồm cả những mục ẩn.
+
+4. Cú pháp cơ bản
+
+* ls -a
+  -> Liệt kê toàn bộ mục trong thư mục hiện tại, bao gồm file ẩn và các entry . và .. .
+* ls -a <đường-dẫn>
+  -> Liệt kê tất cả mục trong thư mục được chỉ định.
+
+5. Các biến thể hay dùng (kết hợp với các tùy chọn khác)
+
+* ls -la hoặc ls -al
+  -> Kết hợp -l (long format) và -a để hiển thị chi tiết quyền, chủ sở hữu, kích thước, thời gian sửa, đồng thời bao gồm file ẩn.
+* ls -A
+  -> Tương tự -a nhưng bỏ qua hai entry đặc biệt . và .. (không liệt kê thư mục hiện tại và thư mục cha).
+* ls -lah
+  -> Thường dùng: -l: chi tiết, -a: tất cả, -h: human-readable cho kích thước (ví dụ 4.0K, 1.2M).
+
+6. Ví dụ thực tế (dùng trong terminal)
+   Ví dụ 1: Liệt kê tất cả trong thư mục hiện tại
+   $ ls -a
+   .  ..  .bashrc  .git  README.md  src  .env
+
+Ví dụ 2: Liệt kê chi tiết mọi mục trong thư mục project
+$ ls -la /home/user/myproject
+total 56
+drwxr-xr-x  7 user user  4096 Jan 01 12:00 .
+drwxr-xr-x 10 user user  4096 Jan 01 11:00 ..
+-rw-r--r--  1 user user   220 Jan 01 10:00 .bashrc
+drwxr-xr-x  8 user user  4096 Jan 01 12:00 .git
+-rw-r--r--  1 user user   512 Jan 01 09:00 README.md
+
+Ví dụ 3: Dùng ls -A để không thấy . và ..
+$ ls -A
+.bashrc  .git  README.md  src  .env
+
+7. Ý nghĩa của các entry đặc biệt
+
+* "." : thư mục hiện tại (dùng khi chạy lệnh liên quan tới đường dẫn, ví dụ ./script.sh).
+* ".." : thư mục cha (dùng để di chuyển lên cấp trên, ví dụ cd ..).
+  Lệnh ls -a hiển thị cả hai nên danh sách sẽ bao gồm chúng.
+
+8. Những điều cần lưu ý
+
+* File ẩn (bắt đầu bằng ".") không đồng nghĩa là bảo mật; chúng chỉ ẩn trong hiển thị thông thường. Bạn vẫn có thể truy cập và đọc nếu có quyền.
+* Nếu chỉ muốn xem file ẩn mà không cần . và .., dùng -A thay vì -a.
+* Kết quả ls có thể khác nhau tùy shell, alias, hoặc biến môi trường LS_COLORS; kiểm tra alias bằng: $ alias ls
+* Trên một số hệ thống, ls có thể được bọc bằng alias mặc định như ls --color=auto; điều này chỉ ảnh hưởng tới màu hiển thị, không ảnh hưởng tới -a.
+
+9. Kết hợp với các lệnh khác (pipe/redirect)
+
+* ls -la | less
+  -> Xem danh sách dài theo trang với less.
+* ls -a > filelist.txt
+  -> Ghi danh sách tất cả file (kể cả ẩn) vào file filelist.txt.
+
+10. Mẹo thực tế
+
+* Muốn nhanh chóng thấy file cấu hình ẩn trong home:
+  $ ls -a ~
+* Muốn tìm file ẩn cụ thể ví dụ .env:
+  $ ls -a | grep "^.env$"   (hoặc dùng ls -a | grep ".env")
+* Để tránh hiển thị quá nhiều thông tin, thường dùng ls -A hoặc ls -la <thư-mục-cụ-thể>.
+
+11. Câu hỏi thường gặp (FAQ)
+    Q: Tại sao file .bashrc không xuất hiện khi tôi gõ ls?
+    A: Vì ls mặc định không hiển thị file bắt đầu bằng dấu chấm. Sử dụng ls -a hoặc ls -A để thấy nó.
+
+Q: Sự khác biệt giữa -a và -A là gì?
+A: -a hiển thị tất cả, bao gồm . và ..; -A hiển thị hầu hết các mục ẩn nhưng bỏ qua . và .. .
+
+Q: ls -a có hiển thị file ẩn trong thư mục con không?
+A: ls -a chỉ liệt kê mục trong thư mục được yêu cầu (hiện tại hoặc đường dẫn được chỉ định). Để liệt kê đệ quy, dùng ls -aR.
+
+12. Các lệnh liên quan
+
+* ls (không có -a): liệt kê không hiển thị file ẩn.
+* ls -l: định dạng dài (chi tiết).
+* ls -R: liệt kê đệ quy trong các thư mục con.
+* find . -maxdepth 1 -name ".*" : tìm file ẩn trong cấp hiện tại bằng find.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: touch saturn{1..10}.py
+		
+Giải thích chi tiết về: touch saturn{1..10}.py
+
+MỤC TIÊU
+
+* Giải thích lệnh "touch saturn{1..10}.py" một cách chi tiết, rõ ràng, và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không chứa ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: touch saturn{1..10}.py
+
+1. Định nghĩa ngắn gọn
+   Lệnh touch saturn{1..10}.py sử dụng tính năng "brace expansion" của shell để tạo (hoặc cập nhật timestamp) 10 file có tên saturn1.py, saturn2.py, ..., saturn10.py trong thư mục hiện tại. Nếu file chưa tồn tại, touch sẽ tạo file rỗng; nếu file đã tồn tại, touch sẽ chỉ cập nhật thời gian truy cập/sửa đổi (access/modify timestamps).
+
+2. Khi nào dùng
+
+* Khi bạn muốn nhanh chóng tạo nhiều file rỗng với tên tuần tự (ví dụ tạo nhiều file test, mẫu code, hoặc cấu trúc file ban đầu).
+* Khi bạn muốn cập nhật timestamp của nhiều file.
+
+3. Cách hoạt động (giải thích từng phần)
+
+* touch: lệnh Unix dùng để thay đổi thời gian truy cập/sửa đổi của file; nếu file không tồn tại, touch sẽ tạo file rỗng (với quyền mặc định của umask).
+* saturn{1..10}.py: phần trong dấu ngoặc nhọn là "brace expansion". Shell (ví dụ bash) mở rộng biểu thức này thành một dãy ký tự: saturn1.py saturn2.py ... saturn10.py trước khi chạy lệnh touch.
+* Toàn bộ lệnh được thực hiện sau khi shell đã mở rộng danh sách file, tức là touch nhận một danh sách 10 đối số tương ứng 10 tên file.
+
+4. Cú pháp cơ bản và ví dụ
+
+* Cú pháp bạn gõ:
+  $ touch saturn{1..10}.py
+* Sau khi chạy, các file tạo ra (hoặc cập nhật) là:
+  saturn1.py
+  saturn2.py
+  ...
+  saturn10.py
+
+Ví dụ minh họa toàn bộ thao tác trong terminal:
+$ pwd
+/home/user/projects
+$ ls -1
+(no output nếu thư mục trống)
+$ touch saturn{1..10}.py
+$ ls -1
+saturn1.py
+saturn10.py
+saturn2.py
+saturn3.py
+saturn4.py
+saturn5.py
+saturn6.py
+saturn7.py
+saturn8.py
+saturn9.py
+
+Lưu ý: ls hiển thị theo thứ tự tên, nên saturn10.py có thể xuất hiện trước saturn2.py trong một số sắp xếp; dùng ls -v để sắp xếp tự nhiên (numeric):
+$ ls -1v
+saturn1.py
+saturn2.py
+...
+saturn10.py
+
+5. Một số biến thể hữu ích
+
+* Zero-padded (thêm số 0 phía trước để sắp xếp chữ số đúng):
+  $ touch saturn{01..10}.py
+  -> Tạo saturn01.py ... saturn10.py
+* Thay đổi phạm vi số hoặc bước nhảy:
+  $ touch saturn{5..15}.py   -> saturn5.py ... saturn15.py
+  $ touch saturn{1..10..2}.py -> saturn1.py saturn3.py saturn5.py ... (tùy shell hỗ trợ step)
+* Kết hợp tên khác nhau:
+  $ touch saturn{A,B,C}.py    -> saturnA.py saturnB.py saturnC.py
+* Tạo file trong thư mục con cùng lúc:
+  $ mkdir -p src && touch src/saturn{1..3}.py
+  -> Tạo src/saturn1.py, src/saturn2.py, src/saturn3.py
+
+6. Shell/Portability: nơi brace expansion hoạt động
+
+* Brace expansion hỗ trợ trên bash, zsh, ksh. Trong shell rất đơn giản (sh dash) hoặc một số shell khác không có brace expansion mặc định; khi đó lệnh sẽ không được mở rộng và có thể tạo file tên nguyên gốc có dấu ngoặc (tùy shell).
+* Nếu bạn đặt ngoặc nhọn trong dấu nháy ("" hoặc ''), shell sẽ không mở rộng:
+  $ touch 'saturn{1..3}.py'   -> Tạo một file tên đúng là saturn{1..3}.py (không mở rộng)
+
+7. Hành vi khi file đã tồn tại
+
+* Nếu file đã tồn tại, touch chỉ cập nhật timestamps (thời gian access và modify) chứ không ghi đè nội dung.
+* Để không tạo file mới nếu file chưa tồn tại, dùng tùy chọn -c (no create):
+  $ touch -c nonexisting.txt
+  -> Không tạo file mới, không báo lỗi.
+
+8. Quyền tạo file
+
+* File mới được tạo với quyền dựa trên umask hiện tại. Ví dụ umask mặc định 0022 dẫn tới file có quyền 0644 (rw-r--r--).
+* Nếu user không có quyền ghi vào thư mục, touch sẽ thất bại và báo lỗi permission denied.
+
+9. Thao tác kiểm tra và xác thực
+
+* Kiểm tra file vừa tạo:
+  $ ls -1v saturn*.py
+  $ stat saturn1.py   (xem timestamps và quyền)
+* Nếu muốn nội dung mặc định ngay khi tạo, có thể dùng here-doc hoặc redirect:
+  $ for i in {1..10}; do echo "# saturn$i" > saturn${i}.py; done
+  -> Tạo file với dòng comment đầu tiên.
+
+10. Cảnh báo và lỗi thường gặp
+
+* Không có brace expansion nếu dùng shell không hỗ trợ -> lệnh không hoạt động như mong đợi.
+* Nếu bạn quên escape hoặc quote sai, có thể tạo ra file với tên chứa dấu ngoặc thay vì nhiều file.
+* Việc tạo nhiều file với tên giống nhau do typo có thể ghi đè nội dung nếu dùng > thay vì touch.
+
+11. Các lệnh thay thế khi shell không hỗ trợ
+
+* Dùng vòng for trong POSIX sh:
+  $ i=1; while [ $i -le 10 ]; do touch "saturn${i}.py"; i=$((i+1)); done
+* Dùng seq (nhiều hệ thống):
+  $ for n in $(seq 1 10); do touch "saturn${n}.py"; done
+
+12. Câu hỏi thường gặp (FAQ)
+    Q: touch saturn{1..10}.py có tạo thư mục không?
+    A: Không. touch chỉ tạo file rỗng. Để tạo thư mục, dùng mkdir.
+
+Q: Tại sao tôi thấy một file tên saturn{1..10}.py thay vì 10 file riêng?
+A: Có thể bạn đã đặt dấu nháy quanh biểu thức hoặc đang dùng shell không hỗ trợ brace expansion. Hãy dùng bash hoặc zsh, hoặc bỏ dấu nháy.
+
+Q: Làm sao để tên file sắp xếp tự nhiên (saturn1, saturn2, ..., saturn10) khi ls?
+A: Dùng ls -v để sắp xếp theo số tự nhiên: ls -1v
+
+Q: Tôi cần tạo file với số 3 chữ số (001..010). Làm thế nào?
+A: Dùng zero-padding trong brace expansion nếu shell hỗ trợ, ví dụ {001..010}. Nếu shell không hỗ trợ bước này, dùng printf trong vòng lặp:
+$ for i in $(seq -f "%03g" 1 10); do touch "saturn${i}.py"; done
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git status
+		
+Giải thích chi tiết về: git status
+
+MỤC TIÊU
+
+* Giải thích lệnh "git status" một cách chi tiết, dễ hiểu và chuẩn để sao chép vào file .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git status
+
+1. Định nghĩa ngắn gọn
+   git status hiển thị trạng thái hiện tại của working directory và staging area (index) trong repository Git. Nó cho biết file nào đã được thay đổi, file nào đã được thêm vào staging (sẵn sàng commit), file nào chưa được theo dõi (untracked), cũng như thông tin về branch hiện tại và trạng thái so với remote (nếu có).
+
+2. Khi nào dùng
+
+* Kiểm tra thay đổi trước khi commit hoặc push.
+* Xác minh file đã được git add hay chưa.
+* Xem branch hiện tại và xem repository đang ahead/behind remote như thế nào.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* So sánh ba vùng: working directory (tập tin trên đĩa), staging area (index), và repository (HEAD — commit cuối cùng). git status tổng hợp và in ra những khác biệt giữa các vùng này.
+
+4. Cú pháp cơ bản
+
+* git status
+  -> Hiển thị trạng thái chi tiết (mặc định ở dạng "human-readable").
+* git status -s
+  -> Hiển thị ở dạng ngắn (short) — tiện cho đọc nhanh.
+* git status --porcelain
+  -> Dạng máy (stable output) để dùng trong script; định dạng giữ ổn định giữa các phiên bản Git.
+* git status -b
+  -> Hiển thị branch hiện tại cùng với thông tin upstream (ví dụ "ahead" hoặc "behind").
+* git status --ignored
+  -> Thêm mục đã bị ignored vào danh sách.
+
+5. Ví dụ và giải thích đầu ra (human-readable)
+   Ví dụ 1: Không có thay đổi
+   $ git status
+   On branch main
+   Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+
+Giải thích:
+
+* On branch main: bạn đang ở branch main.
+* Your branch is up to date with 'origin/main': local branch đã cập nhật so với remote.
+* nothing to commit, working tree clean: không có file thay đổi hoặc untracked.
+
+Ví dụ 2: File đã staged và file chưa staged
+$ git status
+On branch feature
+Changes to be committed:
+(use "git restore --staged <file>..." to unstage)
+modified:   a.txt
+new file:   b.txt
+
+Changes not staged for commit:
+(use "git add <file>..." to update what will be committed)
+(use "git restore <file>..." to discard changes in working directory)
+modified:   c.txt
+
+Untracked files:
+(use "git add <file>..." to include in what will be committed)
+d.log
+
+Giải thích:
+
+* "Changes to be committed": các file đã được git add (staged), sẽ được ghi vào commit tiếp theo.
+* "Changes not staged for commit": file đã bị sửa nhưng chưa git add, cần add nếu muốn commit.
+* "Untracked files": file mới chưa được Git theo dõi; dùng git add để bắt đầu theo dõi.
+
+6. Dạng ngắn (short) và ký hiệu
+   Dạng -s hoặc --short in ra mỗi file với hai ký tự trạng thái trước tên file: XY <file>
+
+* X: trạng thái trên index (staged)
+* Y: trạng thái trên working tree (unstaged)
+  Một số giá trị phổ biến của X và Y:
+* ' ' (space): không thay đổi
+* M: modified
+* A: added
+* D: deleted
+* R: renamed
+* C: copied
+* U: updated but unmerged (conflict)
+* ?: untracked
+* !: ignored
+
+Bảng ví dụ (X Y) -> ý nghĩa
+" M" (space M): file modified but not staged
+"M " (M space): file staged (modified in index)
+"A " : staged as new file
+"D " : staged for deletion
+"R " : staged as renamed
+"??": untracked file
+"UU": file có xung đột merge (unmerged)
+
+Ví dụ
+$ git status -s
+M c.txt
+A  b.txt
+?? d.log
+
+7. Các lệnh thường dùng kèm theo (tiếp theo khi nhìn thấy trạng thái)
+
+* git add <file>             : đưa file vào staging area (Changes to be committed)
+* git restore --staged <file>: bỏ file ra khỏi staging (unstage)
+* git restore <file>         : khôi phục file từ HEAD, hủy thay đổi chưa staged (cẩn thận, mất thay đổi)
+* git checkout -- <file>     : tương tự git restore trước đây (các phiên bản Git cũ)
+* git commit -m "message"    : tạo commit từ những file đã staged
+* git reset HEAD <file>      : unstage (cách cũ hơn, tương đương git restore --staged)
+* git clean -n               : giả lập xóa file untracked (dry-run)
+* git clean -f               : xóa file untracked (thực hiện)
+* git status --porcelain=v2  : định dạng máy nâng cao, dễ parse hơn cho script
+
+8. Thông tin branch và upstream (ahead/behind)
+
+* Khi bạn thấy: "Your branch is ahead of 'origin/main' by 2 commits.", nghĩa là local có 2 commit chưa push lên remote.
+* Khi thấy: "Your branch is behind 'origin/main' by 3 commits.", nghĩa là remote có 3 commit mới hơn; nên git pull trước khi push hoặc rebase.
+* git status -sb hiển thị tóm tắt: ví dụ "## feature...origin/feature [ahead 1]"
+
+9. Trường hợp xung đột merge (merge conflicts)
+
+* Khi merge dẫn tới xung đột, git status sẽ liệt kê file unmerged và chỉ dẫn cách giải quyết.
+* Ví dụ đầu ra:
+  Both modified: file.txt
+  Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+Cách giải quyết cơ bản:
+
+1. Mở file, giải quyết conflict bằng tay.
+
+2. git add <file> để đánh dấu đã giải quyết.
+
+3. git commit để hoàn tất merge.
+
+4. Lưu ý và mẹo
+
+* git status không thay đổi repository; nó chỉ đọc thông tin và in ra.
+* Sử dụng git status --porcelain trong script vì định dạng văn bản mặc định có thể thay đổi giữa phiên bản Git.
+* Nếu thường xuyên gõ git status, bạn có thể dùng alias ngắn: git config --global alias.st "status -sb" và sau đó gõ git st.
+* Màu sắc output (nếu bật) giúp phân biệt trạng thái; nhưng khi redirect đầu ra sang file thì màu sẽ không có.
+
+11. Câu hỏi thường gặp (FAQ)
+    Q: "git status" nói "nothing to commit, working tree clean" nhưng tôi thấy file mới trên thư mục. Tại sao?
+    A: Có thể file đó bị ignore (nằm trong .gitignore) hoặc bạn chưa ở đúng thư mục repo hay nhánh. Dùng git status --ignored để kiểm tra file ignored.
+
+Q: Tôi đã git add file nhưng git status vẫn liệt kê nó trong "Changes not staged for commit".
+A: Có thể bạn đã chỉnh sửa file sau khi git add. Lúc này file đã được staged ở trạng thái cũ; nếu muốn cập nhật staging với thay đổi mới, chạy git add lại.
+
+Q: Làm sao biết file nào sẽ bị xóa khi chạy git clean?
+A: Dùng git clean -n để mô phỏng sẽ xóa file nào (dry-run) trước khi chạy git clean -f.
+
+12. Tóm tắt nhanh các lệnh hữu ích
+
+* Kiểm tra trạng thái: git status
+* Dạng ngắn: git status -s hoặc git status --porcelain
+* Xem branch và upstream: git status -b
+* Thêm file vào staging: git add <file>
+* Bỏ staging: git restore --staged <file>
+* Hủy thay đổi (về HEAD): git restore <file>
+* Xoá file untracked: git clean -n  (dry run)  -> git clean -f  (thực hiện)
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git add .
+		
+Giải thích chi tiết về: git add .
+
+MỤC TIÊU
+
+* Giải thích lệnh "git add ." một cách chi tiết, rõ ràng, dễ hiểu và chuẩn để sao chép vào file .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git add .
+
+1. Định nghĩa ngắn gọn
+   git add . là lệnh dùng để thêm các thay đổi trong thư mục hiện tại (và các thư mục con) vào staging area (index) của Git, chuẩn bị để commit. Dấu chấm "." chỉ thư mục hiện tại; khi dùng với git add, nó nói với Git: "thêm mọi thay đổi trong cây thư mục hiện tại vào staging".
+
+2. Khi nào dùng
+
+* Khi bạn đã sửa nhiều file trong một project và muốn nhanh chóng đưa tất cả các thay đổi (trừ những file bị .gitignore) vào staging để commit.
+* Khi bạn tạo nhiều file mới hoặc xóa file và muốn họ đều được ghi nhận cho commit tiếp theo.
+
+3. Phân biệt khái niệm
+
+* Working directory: nơi bạn đang làm việc, chứa file thực tế.
+* Staging area (index): nơi tạm giữ các thay đổi đã được chọn để commit.
+* Repository (HEAD): commit cuối cùng.
+  git add . chuyển các thay đổi từ working directory vào staging area.
+
+4. Cú pháp cơ bản
+
+* git add .
+  -> Thêm mọi thay đổi (new, modified) trong thư mục hiện tại và con vào index, TRỪ những file bị ignore.
+* git add <đường-dẫn>   (ví dụ git add src/)
+  -> Chỉ thêm thay đổi trong đường dẫn cụ thể.
+* git add -A hoặc git add --all
+  -> Thêm tất cả thay đổi trong repository (bao gồm xóa file) — tương tự git add . khi gọi từ root repo, nhưng khác khi gọi từ một subdirectory.
+* git add -u
+  -> Cập nhật index cho các file đã tracked (modified hoặc deleted) nhưng không thêm file untracked mới.
+
+5. Hành vi chi tiết
+
+* Thêm file mới (untracked): nếu file không bị .gitignore, git add . sẽ đánh dấu file đó là staged (sẵn sàng commit).
+* Thêm file đã sửa: git add . lấy nội dung hiện tại của file và lưu vào index để commit.
+* Xóa file: nếu bạn xóa file trong working directory, git add . sẽ stage việc xóa đó (tương tự git rm --cached nếu bạn chỉ muốn unstage). Lưu ý: trong một số trường hợp, git add . ở subfolder có thể không stage xóa ở ngoài phạm vi.
+* File bị ignore (.gitignore): git add . bỏ qua file match quy tắc .gitignore (không thêm chúng trừ khi dùng --force).
+
+6. Ví dụ thực tế (terminal)
+   Ví dụ 1: Trong root của repo
+   $ git status
+   On branch main
+   Changes not staged for commit:
+   modified: a.txt
+   deleted:  b.log
+   Untracked files:
+   newfile.py
+
+$ git add .
+$ git status
+Changes to be committed:
+modified: a.txt
+deleted:  b.log
+new file: newfile.py
+
+Ví dụ 2: Trong thư mục con
+$ cd src/components
+$ git add .
+-> Chỉ stage thay đổi nằm trong src/components và các con; thay đổi ở src/ khác hoặc ở root có thể không bị ảnh hưởng.
+
+7. So sánh git add . vs git add -A vs git add -u
+
+* git add .    : Thêm new/modified trong thư mục hiện tại và con; cũng stage deletions trong cùng phạm vi khi gọi từ root sẽ bao gồm toàn repo.
+* git add -A  (or --all): Thêm tất cả thay đổi trong toàn bộ repository (new, modified, deleted), bất kể bạn đang ở thư mục nào (vì -A áp dụng repository-wide khi được Git phiên bản mới hỗ trợ).
+* git add -u   : Chỉ cập nhật các file đã được tracked (modified hoặc deleted), không thêm file untracked mới.
+
+8. Tùy chọn hữu ích
+
+* git add -p   : Chạy interactive patch mode — bạn có thể chọn những thay đổi (hunks) cụ thể trong file để thêm vào staging.
+* git add -A    hoặc git add --all: thêm tất cả (như đã nêu).
+* git add --force (hoặc -f): thêm file bị ignore (bắt buộc), ví dụ khi bạn cần commit file đã bị .gitignore.
+* git add -n hoặc --dry-run: mô phỏng sẽ thêm những file nào, không thực hiện thay đổi.
+
+9. Unstage và sửa lỗi
+
+* Nếu bạn đã git add . nhưng muốn bỏ staging cho toàn bộ hoặc từng file:
+  $ git restore --staged <file>
+  hoặc bỏ staging toàn bộ:
+  $ git restore --staged .
+* Cách cũ tương đương (các phiên bản Git cũ): git reset HEAD <file>
+
+10. Tương tác với .gitignore
+
+* File match .gitignore sẽ không bị thêm bởi git add . trừ khi dùng --force.
+* Để thêm file đã lỡ đặt trong .gitignore, cần dùng git add -f <file>.
+* Nếu file đã từng được tracked trước đó và sau đó thêm vào .gitignore, Git vẫn sẽ track tiếp cho tới khi bạn remove nó khỏi index (git rm --cached <file>), vì .gitignore chỉ ảnh hưởng tới file untracked.
+
+11. Mẹo và lưu ý thực tế
+
+* Trước khi chạy git add ., tốt nhất chạy git status để biết bạn sẽ thêm gì.
+* Tránh commit file nhạy cảm (ví dụ khóa API, credentials): đảm bảo .gitignore đã loại trừ hoặc kiểm tra danh sách trước khi commit.
+* Dùng git add -p khi bạn muốn chia commit thành nhiều phần nhỏ, logic hơn.
+* Sử dụng git add . từ root repo nếu bạn muốn stage tất cả thay đổi trong toàn bộ project. Nếu đang ở subfolder và muốn ảnh hưởng toàn repo, dùng git add -A từ root hoặc cd về root.
+
+12. Các lỗi thường gặp và cách khắc phục
+
+* "permission denied" khi thêm file: kiểm tra quyền ghi thư mục.
+* Thấy file vẫn ở "untracked" sau khi git add .: có thể do file match .gitignore hoặc bạn đang ở nhánh/subdir khác. Kiểm tra .gitignore.
+* Lỡ commit file nhạy cảm: bạn cần xóa lịch sử (git rm --cached file; commit; sau đó dùng git filter-branch hoặc BFG để loại file khỏi history nếu cần).
+
+13. Câu hỏi thường gặp (FAQ)
+    Q: git add . có thêm file bị .gitignore không?
+    A: Không, trừ khi dùng --force.
+
+Q: Tôi chạy git add . nhưng git status vẫn báo untracked. Tại sao?
+A: Có thể file match .gitignore hoặc bạn đang ở thư mục khác. Dùng git status --ignored để kiểm tra file bị ignore.
+
+Q: Tôi muốn chỉ thêm file đã chỉnh sửa và xóa, không thêm file mới. Dùng gì?
+A: Dùng git add -u để chỉ cập nhật các file đã tracked (modified/deleted) mà không thêm untracked file.
+
+Q: Tôi muốn chọn một phần thay đổi trong file để stage. Làm thế nào?
+A: Dùng git add -p để vào interactive patch mode và chọn hunks từng phần.
+
+14. Tóm tắt nhanh
+
+* git add . : stage mọi thay đổi (new/modified/deleted trong phạm vi hiện tại) để chuẩn bị commit.
+* Dùng git status trước, git restore --staged để unstage nếu cần.
+* Dùng -p để chọn hunk, -A để áp dụng toàn repo, -u để chỉ cập nhật file đã tracked.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git commit -m "new files commited"
+		
+Giải thích chi tiết về: git commit -m "new files commited"
+
+MỤC TIÊU
+
+* Giải thích lệnh "git commit -m "new files commited"" một cách chi tiết, rõ ràng và chính xác để sao chép vào file .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git commit -m "new files commited"
+
+1. Định nghĩa ngắn gọn
+   git commit là lệnh để tạo một commit mới trong Git — tức là ghi lại snapshot (bản chụp) của những thay đổi đã được đưa vào staging area (index). Tùy chọn -m "message" cho phép bạn cung cấp thông điệp commit trực tiếp trên dòng lệnh, ở đây message là "new files commited".
+
+2. Khi nào dùng
+
+* Sau khi đã dùng git add để đưa các thay đổi (file mới, file sửa, file xóa) vào staging area, bạn dùng git commit để ghi lại các thay đổi đó vào lịch sử repository.
+* Sử dụng -m khi bạn muốn viết thông điệp commit ngắn gọn ngay trong command line (không mở editor).
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Git lấy nội dung hiện có trong staging area và tạo một đối tượng commit chứa: con trỏ tới cây (tree) các file, metadata (author, date), và thông điệp commit. Commit này được nối vào đầu branch hiện tại (HEAD).
+* Nếu staging area rỗng, chạy git commit sẽ báo "nothing to commit" hoặc tương tự.
+
+4. Cú pháp cơ bản
+
+* git commit -m "thông điệp ngắn"
+  -> Tạo commit với thông điệp cung cấp.
+* git commit -a -m "msg"
+  -> Tùy chọn -a tự động stage (giống git add) các file đã tracked (modified/deleted) trước khi commit; không thêm file untracked mới.
+* git commit --amend -m "new message"
+  -> Sửa commit cuối cùng (thay đổi thông điệp hoặc thêm thay đổi mới) — cẩn thận nếu commit đã được push.
+* git commit --verbose
+  -> Hiển thị diff trong editor khi soạn commit message (hữu ích khi dùng editor để viết message).
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Quy trình cơ bản
+   $ git status
+   On branch main
+   Changes to be committed:
+   new file:  file1.txt
+   modified:  file2.py
+
+$ git commit -m "new files commited"
+[main a1b2c3d] new files commited
+2 files changed, 10 insertions(+), 0 deletions(-)
+
+Giải thích:
+
+* Dòng [main a1b2c3d] cho biết branch và hash rút gọn của commit mới.
+* Thông tin phía sau mô tả số file và thay đổi.
+
+Ví dụ 2: Thêm thay đổi tracked tự động trước commit
+$ git commit -a -m "update configs"
+-> Tự động stage các file đã tracked sau đó commit; file mới (untracked) không được thêm.
+
+6. Viết thông điệp commit tốt
+
+* Ngắn gọn tóm tắt hành động (dòng tiêu đề ~50 ký tự)
+* Nếu cần, thêm dòng trống rồi mô tả chi tiết hơn (body). Khi cần body, không dùng -m cho toàn bộ; mở editor hoặc dùng -m nhiều lần: git commit -m "tiêu đề" -m "mô tả chi tiết".
+* Ví dụ tiêu đề tốt: "Add user authentication"; ví dụ kém: "fix".
+
+7. Các tùy chọn quan trọng
+
+* --amend : sửa commit cuối (kết hợp thay đổi staged hoặc chỉ sửa message). Lưu ý: rewrite history; không amend nếu commit đã push đúng cách cho team.
+* -a : tương tự git add các file đã tracked trước khi commit.
+* -v hoặc --verbose : show diff trong editor.
+* -q hoặc --quiet : giảm output.
+* --no-edit : khi dùng --amend để sửa commit sử dụng message cũ (không mở editor).
+
+8. Tình huống hay gặp và cách xử lý
+
+* "nothing to commit, working tree clean": không có thay đổi staged — hãy dùng git add để stage file hoặc git commit -a nếu muốn tự động stage tracked.
+* Muốn thêm một file quên chưa được staged vào commit vừa tạo: dùng git commit --amend --no-edit sau khi git add <file>, để thêm vào commit cuối cùng.
+* Nếu commit đã push rồi và bạn amend, sẽ phải force push (git push --force) — điều này có thể gây vấn đề với người khác. Tránh rewrite history ở branch chia sẻ.
+
+9. Quyền tác giả và thông tin thời gian
+
+* Git lưu author và committer (thông thường là cùng người). Bạn có thể thiết lập tên và email toàn cục hoặc cho repo:
+  $ git config --global user.name "Your Name"
+  $ git config --global user.email "[you@example.com](mailto:you@example.com)"
+* Commit sẽ lưu timestamp tạo commit.
+
+10. Unstage hoặc hủy commit
+
+* Nếu bạn muốn bỏ commit cuối cùng (vẫn giữ thay đổi trong working tree):
+  $ git reset --soft HEAD~1   (bỏ commit nhưng giữ staged)
+  $ git reset --mixed HEAD~1  (bỏ commit và bỏ staging, giữ thay đổi trong working tree)
+  $ git reset --hard HEAD~1   (bỏ commit và xóa thay đổi — **cẩn thận**)
+* Nếu commit đã push, để undo an toàn nên tạo commit mới đảo ngược hoặc thảo luận với team trước khi force push.
+
+11. Thông báo lỗi phổ biến
+
+* "empty commit message": nếu dùng -m "" (rỗng) Git có thể từ chối tùy cấu hình.
+* "please tell me who you are": xảy ra nếu user.name hoặc user.email chưa được cấu hình.
+* "Your branch is ahead of 'origin/main' by X commits": commit thành công ở local nhưng chưa push lên remote.
+
+12. Mẹo thực tế
+
+* Dùng git commit -m "short summary" -m "detailed description" để có tiêu đề và body khi commit từ dòng lệnh.
+* Dùng git commit --amend để sửa lỗi nhỏ ngay sau commit nhưng trước khi push.
+* Tạo commit nhỏ, có ý nghĩa, mỗi commit làm một việc rõ ràng giúp review và revert dễ hơn.
+
+13. Câu hỏi thường gặp (FAQ)
+    Q: Tôi đã quên -m và chỉ gõ git commit — mở editor. Làm sao thoát?
+    A: Viết message rồi lưu và đóng editor. Nếu editor là vim: gõ :wq rồi Enter.
+
+Q: Tôi muốn commit chỉ file mới, không commit file sửa khác. Làm sao?
+A: Dùng git add <file> chỉ với file mới, sau đó git commit -m "message".
+
+Q: Commit có thể chứa nhiều file. Làm sao biết file nào nằm trong commit?
+A: Dùng git show --name-only <commit-hash> hoặc git log -p để xem thay đổi chi tiết.
+
+14. Tóm tắt nhanh
+
+* git commit -m "new files commited": tạo commit mới từ những thay đổi đã stage với thông điệp "new files commited".
+* Kiểm tra git status trước khi commit, dùng git add để stage, dùng --amend nếu cần sửa commit cuối.
+* Tránh rewrite history đã đẩy lên remote mà không thảo luận.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git config --global user.email "ngoctuanqng1@gmail.com"
+		
+Giải thích chi tiết về: git config --global user.email "[ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)"
+
+MỤC TIÊU
+
+* Giải thích lệnh "git config --global user.email "[ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)"" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git config --global user.email "[ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)"
+
+1. Định nghĩa ngắn gọn
+   Lệnh này thiết lập địa chỉ email mặc định cho các commit Git do người dùng hiện tại thực hiện trên máy tính, và lưu thiết lập ở phạm vi toàn cục (global) — tức là áp dụng cho tất cả repository của user trên hệ thống. Email được lưu trong file cấu hình Git toàn cục (thường là ~/.gitconfig).
+
+2. Khi nào dùng
+
+* Khi bạn lần đầu cài đặt Git trên máy tính và cần chỉ định tên và email để Git ghi vào metadata của commit.
+* Khi muốn thay đổi email được ghi vào commit (ví dụ đổi email công việc, email cá nhân).
+* Khi bạn muốn đảm bảo commit có thông tin tác giả chính xác để hiển thị trên dịch vụ remote như GitHub, GitLab.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* git config: lệnh dùng để đọc/ghi cấu hình Git.
+* --global: chỉ thị rằng thay đổi được lưu ở file cấu hình toàn cục (~/.gitconfig) cho user hiện tại. Nếu bỏ --global, cấu hình sẽ được lưu ở file .git/config của repository hiện tại (phạm vi repo-local).
+* user.email: khóa cấu hình chứa địa chỉ email sẽ được dùng khi tạo commit (field author/committer).
+* "[ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)": giá trị email bạn cung cấp.
+
+4. Cú pháp cơ bản
+
+* Thiết lập global email:
+  $ git config --global user.email "[you@example.com](mailto:you@example.com)"
+* Thiết lập email cho repository hiện tại (cục bộ):
+  $ git config user.email "[you@example.com](mailto:you@example.com)"
+* Xem giá trị đã cấu hình:
+  $ git config --global user.email
+  hoặc
+  $ git config user.email   (nếu muốn kiểm tra trong repo)
+* Xem toàn bộ file cấu hình global:
+  $ git config --list --global
+  hoặc đọc file: cat ~/.gitconfig
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Thiết lập email toàn cục
+   $ git config --global user.email "[ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)"
+
+Kiểm tra:
+$ git config --global user.email
+[ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)
+
+Khi bạn tạo commit sau đó, Git sẽ dùng email này để điền vào metadata của commit.
+
+Ví dụ 2: Thiết lập email chỉ cho repo hiện tại
+$ cd /duong/dan/repo
+$ git config user.email "[work@company.com](mailto:work@company.com)"
+$ git config user.email
+[work@company.com](mailto:work@company.com)
+
+Trong ví dụ 2, email này chỉ áp dụng cho repo đó; các repo khác vẫn dùng email global.
+
+6. Tại sao email quan trọng?
+
+* Email xuất hiện trong metadata commit (author và committer) giúp truy vết ai đã thực hiện thay đổi.
+* Dịch vụ remote (GitHub/GitLab/Bitbucket) dùng email để liên kết commit với tài khoản người dùng (nếu email khớp với email đăng ký trên dịch vụ đó, commit sẽ hiển thị dưới tài khoản của bạn).
+* Email chính xác giúp audit, liên hệ, và lịch sử đóng góp rõ ràng.
+
+7. Bảo mật và quyền riêng tư
+
+* Nếu không muốn lộ địa chỉ email thật trên public repo, bạn có thể dùng email ẩn của GitHub (ví dụ [123456+username@users.noreply.github.com](mailto:123456+username@users.noreply.github.com)) hoặc cấu hình để sử dụng email chuyên dụng.
+* Tránh commit file chứa thông tin nhạy cảm cùng với email nếu không muốn công khai.
+
+8. Một số tùy chọn liên quan
+
+* git config --global user.name "Your Name"
+  -> Thiết lập tên tác giả (cùng phạm vi global).
+* git config --system ...
+  -> Thiết lập cấu hình ở cấp hệ thống (áp dụng cho tất cả user trên máy; cần quyền admin).
+* git config --local ...
+  -> Thiết lập trong repo (mặc định khi bạn không dùng --global).
+
+9. Thay đổi email cho commit đã tạo (đã commit)
+
+* Nếu bạn muốn sửa thông tin email trong commit đã tạo (vẫn chưa push):
+  $ git commit --amend --author="Your Name [newemail@example.com](mailto:newemail@example.com)" --no-edit
+* Nếu commit đã push và bạn cần sửa nhiều commit lịch sử: cần thao tác rewrite history (git rebase -i hoặc filter-branch / BFG) và sau đó force-push — cần thận trọng vì có thể ảnh hưởng tới người khác.
+
+10. Lưu ý và mẹo
+
+* Thiết lập user.name và user.email là bước cơ bản khi bắt đầu dùng Git trên máy mới.
+* Để kiểm tra tất cả cấu hình Git đang có hiệu lực (kể cả config repo, global và system), dùng:
+  $ git config --list --show-origin
+* Nếu bạn dùng nhiều tài khoản (ví dụ cá nhân và công ty), cân nhắc thiết lập email theo repo (local) hoặc sử dụng conditional includes trong .gitconfig để tự động chọn cấu hình dựa trên đường dẫn repo.
+
+11. Câu hỏi thường gặp (FAQ)
+    Q: Tôi đã set --global nhưng commit vẫn dùng email khác. Tại sao?
+    A: Có thể repo có cấu hình local (git config user.email) ghi đè giá trị global. Kiểm tra git config --list --show-origin để biết chính xác file nào thiết lập giá trị.
+
+Q: Tôi muốn ẩn email thật khi push lên GitHub. Làm thế nào?
+A: Dùng email noreply của GitHub hoặc bật tính năng "Keep my email address private" trên GitHub và dùng email [123456+username@users.noreply.github.com](mailto:123456+username@users.noreply.github.com). Sau đó cấu hình git config --global user.email "[123456+username@users.noreply.github.com](mailto:123456+username@users.noreply.github.com)".
+
+Q: Có thể dùng nhiều email cho các repo khác nhau không?
+A: Có, thiết lập user.email ở phạm vi repo (không dùng --global) cho từng repo.
+
+12. Tóm tắt nhanh
+
+* Lệnh: git config --global user.email "[ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)"
+* Tác dụng: lưu email dùng cho commit ở cấp người dùng (global), lưu trong ~/.gitconfig.
+* Kiểm tra: git config --global user.email
+* Thay đổi cho repo cụ thể: cd repo && git config user.email "email@domain"
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git config --global user.name  "ngoctuanqng1"
+		
+Giải thích chi tiết về: git config --global user.name "ngoctuanqng1"
+
+MỤC TIÊU
+
+* Giải thích lệnh "git config --global user.name "ngoctuanqng1"" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git config --global user.name "ngoctuanqng1"
+
+1. Định nghĩa ngắn gọn
+   Lệnh này thiết lập tên tác giả (user.name) mà Git sẽ gán vào metadata của các commit do người dùng hiện tại thực hiện trên máy. Tùy chọn --global lưu thiết lập ở phạm vi toàn cục cho user (thường trong file ~/.gitconfig), tức là áp dụng cho tất cả repository trên máy của user đó.
+
+2. Khi nào dùng
+
+* Khi bạn cài đặt Git lần đầu trên máy và cần cấu hình tên hiển thị cho commit.
+* Khi muốn thay đổi tên hiển thị (ví dụ chuyển từ tên viết tắt sang tên đầy đủ hoặc ngược lại).
+* Khi sử dụng nhiều máy và muốn tên commit đồng nhất (thiết lập --global trên mỗi máy hoặc dùng cùng file cấu hình).
+
+3. Cách hoạt động (một cách đơn giản)
+
+* git config là công cụ đọc/ghi các khóa cấu hình của Git.
+* --global chỉ định lưu vào file cấu hình toàn cục (~/.gitconfig) cho user hiện tại.
+* key user.name là trường chứa tên hiển thị của tác giả commit. Khi bạn commit, Git sẽ ghi tên này vào trường Author và Committer của commit.
+
+4. Cú pháp cơ bản
+
+* Thiết lập global:
+  $ git config --global user.name "Your Name"
+* Thiết lập cục bộ (chỉ cho repo hiện tại):
+  $ git config user.name "Your Name"
+* Kiểm tra giá trị đã thiết lập:
+  $ git config --global user.name
+  hoặc trong repo: git config user.name
+* Xem toàn bộ cấu hình đang có hiệu lực:
+  $ git config --list --show-origin
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Thiết lập tên global
+   $ git config --global user.name "ngoctuanqng1"
+
+Kiểm tra:
+$ git config --global user.name
+ngoctuanqng1
+
+Khi bạn tạo commit sau đó, thông tin Author sẽ hiển thị tên này kèm email (nếu đã cấu hình user.email).
+
+Ví dụ 2: Thiết lập tên chỉ cho repo hiện tại
+$ cd /duong/dan/repo
+$ git config user.name "Work User"
+$ git config user.name
+Work User
+
+6. Tại sao tên (user.name) quan trọng?
+
+* Git lưu tên này trong metadata commit để biết ai là tác giả.
+* Dịch vụ remote (GitHub, GitLab, Bitbucket) sử dụng tên/email để hiển thị người đóng góp; email thường quyết định liên kết tới tài khoản, nhưng tên giúp đọc lịch sử dễ hiểu.
+* Tên rõ ràng giúp audit và liên hệ khi cần thiết.
+
+7. Bảo mật và quyền riêng tư
+
+* Tên thường không nhạy cảm như email, nhưng nếu bạn muốn ẩn danh, có thể dùng bí danh.
+* Khi kết hợp với email công khai, commit sẽ dễ liên kết tới tài khoản thật; cân nhắc sử dụng email noreply nếu cần ẩn địa chỉ.
+
+8. Kết hợp với user.email
+
+* Thông thường bạn nên cấu hình cả user.name và user.email để commit có đầy đủ metadata:
+  $ git config --global user.name "Your Name"
+  $ git config --global user.email "[you@example.com](mailto:you@example.com)"
+* Dịch vụ như GitHub sẽ sử dụng email để map commit với tài khoản; tên là phần hiển thị.
+
+9. Thay đổi tên trong commit đã tạo
+
+* Nếu cần thay tên author trong commit vừa tạo (chưa push):
+  $ git commit --amend --author="New Name [email@example.com](mailto:email@example.com)" --no-edit
+* Để thay đổi nhiều commit đã push, cần rewrite history (git rebase -i, filter-branch hoặc BFG) và force-push — thận trọng vì ảnh hưởng tới cộng tác viên.
+
+10. Conditional configuration (nhiều tên cho nhiều repo)
+
+* Nếu bạn dùng nhiều tên (ví dụ cá nhân và công ty), có thể thiết lập user.name cục bộ cho từng repo.
+* Bạn cũng có thể dùng includeIf trong ~/.gitconfig để áp dụng config khác nhau dựa trên đường dẫn repo. Ví dụ (không phải lệnh, là nội dung .gitconfig):
+  [includeIf "gitdir:~/work/"]
+  path = ~/.gitconfig-work
+
+11. Lưu ý và mẹo
+
+* Nếu bạn thấy commit hiển thị tên không đúng, kiểm tra thứ tự override: repo-local > global > system.
+* Để biết file nào đang thiết lập giá trị, dùng: git config --list --show-origin | grep user.name
+* Bạn có thể tạo alias để nhanh cấu hình: git config --global alias.confname "config --global user.name"
+
+12. Câu hỏi thường gặp (FAQ)
+    Q: Tôi đã set --global nhưng commit vẫn hiển thị tên khác. Tại sao?
+    A: Có thể repo có cấu hình local (git config user.name) hoặc commit cũ đã tạo trước khi bạn đổi cấu hình. Kiểm tra bằng git config --list --show-origin để biết nguồn giá trị.
+
+Q: Tôi muốn dùng tên đầy đủ nhưng GitHub lại hiển thị username. Tại sao?
+A: GitHub liên kết commit với tài khoản dựa trên email; tên chỉ là trường hiển thị. Nếu email tương ứng với tài khoản, commit sẽ hiển thị dưới tài khoản đó nhưng tên trong commit vẫn là giá trị bạn thiết lập.
+
+Q: Tôi có thể đặt tên có dấu tiếng Việt không?
+A: Có, Git chấp nhận tên UTF-8, nhưng lưu ý hiển thị phụ thuộc terminal và dịch vụ remote.
+
+13. Tóm tắt nhanh
+
+* Lệnh: git config --global user.name "ngoctuanqng1"
+* Tác dụng: lưu tên tác giả cho commit ở phạm vi global (file ~/.gitconfig).
+* Kiểm tra: git config --global user.name
+* Thay đổi cho repo cụ thể: cd repo && git config user.name "Tên khác"
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git remote add origin https://github.com/ngoctuanqng/gitpractice.git
+		
+Giải thích chi tiết về: git remote add origin [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+
+MỤC TIÊU
+
+* Giải thích lệnh "git remote add origin [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git remote add origin [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+
+1. Định nghĩa ngắn gọn
+   Lệnh này thêm một remote mới tên là "origin" cho repository cục bộ, với URL trỏ tới kho từ xa (remote repository) trên GitHub: [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git). Remote là tên gọi cho một vị trí lưu trữ Git ở nơi khác (ví dụ GitHub, GitLab, server nội bộ) để bạn có thể push/pull/sync mã nguồn.
+
+2. Khi nào dùng
+
+* Khi bạn đã khởi tạo repository cục bộ (ví dụ bằng git init) và muốn kết nối nó với một repository trên GitHub để push code lên.
+* Khi clone không dùng (hoặc muốn thêm remote mới) — ví dụ bạn tạo repo local rồi tạo repo remote trên GitHub và cần liên kết.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* git remote add <tên> <url> ghi vào cấu hình Git (file .git/config) một entry remote với tên và URL tương ứng.
+* Sau khi thêm, bạn có thể dùng git push origin <branch> để đẩy commit lên remote này, hoặc git pull origin <branch> để kéo về.
+
+4. Cú pháp cơ bản và ý nghĩa từng phần
+
+* git remote: lệnh quản lý danh sách remote.
+* add: hành động thêm một remote mới.
+* origin: tên remote — đây là tên convention (mặc định) thường dùng cho remote chính; bạn có thể đặt tên khác (ví dụ upstream, github, origin2).
+* [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git): URL của remote repository. Có thể là URL HTTPS hoặc SSH (ví dụ [git@github.com](mailto:git@github.com):username/repo.git).
+
+5. Ví dụ thực tế (terminal)
+   Bước 1: Khởi tạo repo local và commit đầu tiên
+   $ git init
+   $ touch README.md
+   $ git add README.md
+   $ git commit -m "Initial commit"
+
+Bước 2: Thêm remote origin
+$ git remote add origin [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+
+Bước 3: Push branch main lên remote
+$ git branch -M main
+$ git push -u origin main
+
+Giải thích: -u (hoặc --set-upstream) thiết lập upstream tracking giữa branch local và branch origin/main, giúp sau này chỉ cần git push hoặc git pull.
+
+6. URL dạng HTTPS vs SSH
+
+* HTTPS: [https://github.com/username/repo.git](https://github.com/username/repo.git)
+  -> Dễ dùng, yêu cầu nhập user/password hoặc token khi push (nên dùng Personal Access Token cho GitHub thay password).
+* SSH: [git@github.com](mailto:git@github.com):username/repo.git
+  -> Dùng khóa SSH, thuận tiện khi đã cấu hình SSH keys, không cần nhập mật khẩu mỗi lần.
+
+7. Kiểm tra remote đã thêm
+
+* Liệt kê remote:
+  $ git remote
+  -> output: origin
+* Xem URL chi tiết:
+  $ git remote -v
+  -> origin  [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git) (fetch)
+  origin  [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git) (push)
+
+8. Thay đổi hoặc xóa remote
+
+* Thay đổi URL của origin:
+  $ git remote set-url origin [git@github.com](mailto:git@github.com):ngoctuanqng/gitpractice.git
+* Xóa remote origin:
+  $ git remote remove origin
+  hoặc
+  $ git remote rm origin
+
+9. Những lưu ý khi push lần đầu
+
+* Nếu remote rỗng và bạn chưa có branch cùng tên, khi push đầu tiên dùng:
+  $ git push -u origin main
+* Nếu remote đã có commit khác (ví dụ bạn tạo README trên GitHub lúc tạo repo), bạn có thể cần git pull --rebase origin main trước khi push để tránh xung đột lịch sử.
+* Nếu nhận lỗi "failed to push some refs" hoặc "non-fast-forward", thường do lịch sử khác nhau — hãy thực hiện pull hoặc rebase theo hướng dẫn.
+
+10. Trường hợp dùng multiple remotes
+
+* Bạn có thể thêm nhiều remote, ví dụ upstream trỏ tới upstream repository gốc và origin trỏ tới fork của bạn.
+  $ git remote add upstream [https://github.com/original/project.git](https://github.com/original/project.git)
+* Khi push, chỉ push tới remote mong muốn: git push origin main hoặc git push upstream main.
+
+11. Bảo mật và tokens
+
+* Với HTTPS, GitHub đã deprecated password authentication; khi push cần dùng Personal Access Token (PAT) hoặc credential helper để lưu token.
+* Với SSH, cần tạo SSH key (ssh-keygen) và thêm public key vào GitHub account.
+
+12. Câu hỏi thường gặp (FAQ)
+    Q: Tôi dùng git remote add origin nhưng git push báo lỗi authentication. Tại sao?
+    A: Có thể bạn chưa cấu hình credential (token) cho HTTPS, hoặc chưa cấu hình SSH key cho SSH URL. Với HTTPS, tạo PAT và sử dụng hoặc cấu hình credential helper; với SSH, thêm SSH public key vào GitHub.
+
+Q: Tôi đã add origin sai URL. Làm sao sửa?
+A: Dùng git remote set-url origin <new-url> để sửa, hoặc git remote remove origin rồi git remote add origin <new-url>.
+
+Q: Tôi muốn push tất cả branch lên origin. Làm sao?
+A: Dùng git push --all origin và git push --tags origin để push tag.
+
+13. Tóm tắt nhanh
+
+* Lệnh: git remote add origin [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+* Tác dụng: thêm remote tên origin trỏ tới URL repo trên GitHub.
+* Sau khi thêm: git remote -v để kiểm tra; git push -u origin main để push và thiết lập upstream.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: cat .git/config
+		
+Giải thích chi tiết về: cat .git/config
+
+MỤC TIÊU
+
+* Giải thích lệnh "cat .git/config" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: cat .git/config
+
+1. Định nghĩa ngắn gọn
+   Lệnh "cat .git/config" dùng để hiển thị nội dung của file cấu hình Git ở repository cục bộ. File này chứa các thiết lập repo-local, bao gồm thông tin về remote, branch, và các thiết lập Git khác chỉ áp dụng cho repository hiện tại.
+
+2. Khi nào dùng
+
+* Khi bạn muốn xem chi tiết cấu hình Git của repository hiện tại.
+* Khi kiểm tra URL của remote, branch mặc định, hoặc các tùy chọn riêng lẻ được thiết lập cho repository này.
+* Khi debug lỗi liên quan đến remote, push/pull, hoặc merge.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* "cat" là lệnh Unix/Linux dùng để hiển thị nội dung file.
+* .git/config là file nằm trong thư mục .git của repository Git, chứa các khóa và giá trị cấu hình dạng INI.
+* Khi thực thi cat .git/config, terminal sẽ in ra toàn bộ nội dung file này.
+
+4. Nội dung điển hình của file .git/config
+   Ví dụ một repository Git có file .git/config:
+
+[core]
+repositoryformatversion = 0
+filemode = true
+bare = false
+logallrefupdates = true
+
+[remote "origin"]
+url = [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+fetch = +refs/heads/*:refs/remotes/origin/*
+
+[branch "main"]
+remote = origin
+merge = refs/heads/main
+
+Giải thích:
+
+* [core]: chứa thiết lập cốt lõi, ví dụ bare repo hay không, quyền file, version repo.
+* [remote "origin"]: thông tin remote origin, bao gồm URL và refspec fetch.
+* [branch "main"]: thông tin branch, liên kết với remote và branch tương ứng.
+
+5. Các thao tác liên quan
+
+* Xem toàn bộ config cục bộ (tương tự cat):
+  $ git config --local --list
+* Xem config toàn cục:
+  $ git config --global --list
+* Thêm, sửa, hoặc xóa config:
+  $ git config --local key value
+  $ git config --global key value
+  $ git config --unset key
+
+6. Ví dụ thực tế (terminal)
+   $ cat .git/config
+   [core]
+   repositoryformatversion = 0
+   filemode = true
+   bare = false
+   logallrefupdates = true
+
+[remote "origin"]
+url = [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+fetch = +refs/heads/*:refs/remotes/origin/*
+
+[branch "main"]
+remote = origin
+merge = refs/heads/main
+
+* Kết quả hiển thị là các thiết lập cục bộ repo.
+* Bạn có thể dùng thông tin này để kiểm tra URL remote hoặc branch tracking.
+
+7. Lưu ý
+
+* Không sửa trực tiếp file .git/config bằng cat. Nếu muốn thay đổi config, nên dùng git config để đảm bảo tính toàn vẹn và tránh lỗi file.
+* File này có thể bị ẩn (.git) trong thư mục repo.
+* Các lệnh git remote, git branch, git config thực chất đọc dữ liệu từ file này và các file config khác (global, system).
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi muốn xem remote origin URL. Dùng cat .git/config được không?
+   A: Có, bạn sẽ thấy URL trong section [remote "origin"].
+
+Q: Tôi có thể sửa trực tiếp file .git/config không?
+A: Có thể, nhưng không khuyến nghị. Nên dùng git config để thay đổi vì Git sẽ validate và cập nhật cấu trúc đúng.
+
+Q: File này có ảnh hưởng đến toàn bộ repo hay chỉ local?
+A: Chỉ ảnh hưởng repo hiện tại (local repository).
+
+9. Tóm tắt nhanh
+
+* Lệnh: cat .git/config
+* Tác dụng: hiển thị nội dung file cấu hình Git cục bộ.
+* Dùng để kiểm tra remote, branch, và các thiết lập repo-local.
+* Thao tác thay đổi nên dùng git config thay vì sửa trực tiếp.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git branch -m main
+		
+Giải thích chi tiết về: git branch -m main
+
+MỤC TIÊU
+
+* Giải thích lệnh "git branch -m main" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git branch -m main
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git branch -m main" dùng để **đổi tên branch hiện tại** thành "main". Tùy chọn -m (hoặc --move) giúp di chuyển tên branch cũ sang tên mới, giữ nguyên lịch sử commit và các thay đổi.
+
+2. Khi nào dùng
+
+* Khi bạn muốn đổi tên branch mặc định từ "master" sang "main" (thường dùng trong các dự án hiện đại theo convention mới).
+* Khi muốn sửa tên branch cho rõ ràng, dễ hiểu hơn.
+* Khi branch đang làm việc nhưng muốn đặt tên phù hợp với naming convention của team.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Git đổi tên branch trong metadata repo cục bộ.
+* Nếu branch đã push lên remote, đổi tên cục bộ không tự động đổi tên trên remote. Bạn cần push branch mới và xóa branch cũ trên remote sau khi đổi tên.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git branch -m <new-name> : đổi tên branch hiện tại sang <new-name>
+* git branch -m <old-name> <new-name> : đổi tên branch <old-name> sang <new-name>, branch hiện tại không nhất thiết phải là <old-name>
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Đổi tên branch hiện tại thành main
+   $ git branch
+
+* master
+  develop
+  $ git branch -m main
+  $ git branch
+* main
+  develop
+
+Ví dụ 2: Đổi tên branch khác (không phải branch hiện tại)
+$ git branch -m develop dev
+$ git branch
+
+* main
+  dev
+
+6. Push branch mới lên remote sau khi đổi tên
+
+* Nếu branch mới chưa tồn tại trên remote:
+  $ git push -u origin main
+* Xóa branch cũ trên remote nếu muốn:
+  $ git push origin --delete master
+
+7. Kiểm tra branch
+
+* Liệt kê các branch cục bộ:
+  $ git branch
+* Liệt kê các branch remote:
+  $ git branch -r
+* Liệt kê cả cục bộ và remote:
+  $ git branch -a
+
+8. Lưu ý
+
+* Nếu branch mới trùng tên với branch đã tồn tại, Git sẽ báo lỗi.
+* Đổi tên branch cục bộ không thay đổi branch trên remote, cần push branch mới và xóa branch cũ nếu muốn đồng bộ.
+* Nếu đang làm việc trên branch cũ, tất cả commit và thay đổi vẫn giữ nguyên sau khi đổi tên.
+
+9. Câu hỏi thường gặp (FAQ)
+   Q: Tôi đã đổi tên branch cục bộ nhưng remote vẫn là master. Làm sao đồng bộ?
+   A: Push branch mới và xóa branch cũ trên remote:
+   $ git push -u origin main
+   $ git push origin --delete master
+
+Q: Tôi có đang ở branch khác mà vẫn muốn đổi tên branch master. Có được không?
+A: Có, dùng cú pháp git branch -m master main, Git sẽ đổi tên branch master mà không cần chuyển sang branch đó.
+
+Q: Việc đổi tên ảnh hưởng đến commit history không?
+A: Không, chỉ đổi tên branch, toàn bộ lịch sử commit và nội dung repo giữ nguyên.
+
+10. Tóm tắt nhanh
+
+* Lệnh: git branch -m main
+* Tác dụng: đổi tên branch hiện tại sang main.
+* Kiểm tra branch: git branch
+* Đồng bộ với remote: git push -u origin main và git push origin --delete <old-branch>
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git push -u origin main
+		
+Giải thích chi tiết về: git push -u origin main
+
+MỤC TIÊU
+
+* Giải thích lệnh "git push -u origin main" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git push -u origin main
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git push -u origin main" dùng để **đẩy (push) các commit từ branch cục bộ 'main' lên remote repository tên 'origin'**. Tùy chọn -u (hoặc --set-upstream) thiết lập branch 'main' cục bộ theo dõi branch 'main' trên remote, giúp bạn trong các lần push/pull sau chỉ cần dùng lệnh git push hoặc git pull mà không cần chỉ định remote và branch.
+
+2. Khi nào dùng
+
+* Khi push branch lần đầu từ local lên remote.
+* Khi muốn thiết lập upstream branch để đồng bộ branch cục bộ với branch trên remote.
+* Khi repo cục bộ và repo remote chưa có branch trùng tên.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Git so sánh branch cục bộ main với branch main trên origin.
+* Nếu có commit mới chưa có trên remote, Git sẽ đẩy commit đó lên remote.
+* Thiết lập tracking: branch cục bộ main sẽ biết rằng upstream là origin/main, giúp các lệnh git pull và git push tự động áp dụng mà không cần tên remote/branch.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git push: đẩy commit từ local lên remote.
+* -u hoặc --set-upstream: đặt branch upstream (tracking branch) cho branch hiện tại.
+* origin: tên remote (thường là remote chính, bạn có thể dùng tên khác).
+* main: tên branch cục bộ bạn muốn đẩy và thiết lập theo dõi.
+
+5. Ví dụ thực tế (terminal)
+   Bước 1: Kiểm tra branch hiện tại
+   $ git branch
+
+* main
+  develop
+
+Bước 2: Push branch main lên remote origin lần đầu
+$ git push -u origin main
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (5/5), 500 bytes | 500.00 KiB/s, done.
+Total 5 (delta 0), reused 0 (delta 0)
+To [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+
+* [new branch]      main -> main
+  Branch 'main' set up to track remote branch 'main' from 'origin'.
+
+Giải thích:
+
+* Git đẩy tất cả commit mới từ branch main lên remote.
+* Thông báo xác nhận branch mới được tạo trên remote.
+* Thiết lập tracking: branch local main theo dõi origin/main.
+
+6. Push branch lần sau
+
+* Sau khi thiết lập upstream, bạn chỉ cần:
+  $ git push
+  Git tự động đẩy branch main lên origin mà không cần chỉ định tên branch.
+
+7. Nếu remote đã có branch trùng tên
+
+* Git sẽ thực hiện push nếu local có commit mới chưa có trên remote.
+* Nếu có xung đột lịch sử, Git sẽ báo lỗi và yêu cầu pull/rebase trước khi push:
+  $ git pull --rebase origin main
+  $ git push
+
+8. Xóa branch remote (nếu cần)
+
+* Sau khi đổi tên branch hoặc không dùng nữa:
+  $ git push origin --delete <branch>
+
+9. Các lưu ý quan trọng
+
+* Khi push lần đầu trên HTTPS, cần nhập Personal Access Token nếu GitHub từ chối password.
+* Khi push SSH, cần cấu hình SSH key.
+* -u chỉ cần dùng lần đầu để thiết lập upstream; các lần push sau có thể bỏ.
+* Đảm bảo bạn đang ở branch muốn push, nếu không chỉ định branch sẽ đẩy branch hiện tại.
+
+10. Kiểm tra trạng thái upstream
+    $ git branch -vv
+
+* main  a1b2c3d [origin/main] Initial commit
+
+- Hiển thị branch cục bộ, commit hiện tại, và branch remote theo dõi.
+
+11. Câu hỏi thường gặp (FAQ)
+    Q: Tôi push lần đầu nhưng Git báo non-fast-forward. Phải làm sao?
+    A: Pull trước với git pull --rebase origin main, giải quyết xung đột nếu có, sau đó push lại.
+
+Q: Tôi muốn push branch khác với tên branch cục bộ, được không?
+A: Có, cú pháp: git push -u origin <local-branch>:<remote-branch>
+
+Q: Tôi có thể bỏ -u không?
+A: Có, nhưng lần push sau phải chỉ định remote và branch đầy đủ: git push origin main
+
+12. Tóm tắt nhanh
+
+* Lệnh: git push -u origin main
+* Tác dụng: đẩy branch cục bộ main lên remote origin và thiết lập tracking branch.
+* Lần push sau chỉ cần git push hoặc git pull.
+* Lưu ý: HTTPS cần token, SSH cần key, và xử lý xung đột nếu branch trên remote khác với local.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git add satural.py
+		
+Giải thích chi tiết về: git add satural.py
+
+MỤC TIÊU
+
+* Giải thích lệnh "git add satural.py" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git add satural.py
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git add satural.py" dùng để **thêm file satural.py vào staging area** của Git. Staging area là khu vực tạm thời lưu các thay đổi sẽ được commit, giúp bạn kiểm soát chính xác những gì sẽ được ghi vào commit tiếp theo.
+
+2. Khi nào dùng
+
+* Khi bạn đã tạo hoặc chỉnh sửa file satural.py và muốn chuẩn bị commit.
+* Khi bạn muốn commit một file cụ thể mà không ảnh hưởng đến các file khác.
+* Khi bạn muốn kiểm soát các thay đổi từng phần (ví dụ add file riêng biệt hoặc từng hunk).
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Git không tự động commit mọi thay đổi; bạn phải xác nhận các file cần commit.
+* git add đưa file vào staging area.
+* Khi thực hiện git commit, chỉ những file trong staging area mới được đưa vào commit.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git add <file>: thêm file cụ thể vào staging area.
+* git add . : thêm tất cả file đã thay đổi trong repo.
+* git add -p : thêm từng phần thay đổi (hunk) của file.
+* git add *.py : thêm tất cả file Python trong thư mục hiện tại.
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Thêm một file cụ thể
+   $ git status
+   On branch main
+   Changes not staged for commit:
+   (use "git add <file>..." to update what will be committed)
+   (use "git restore <file>..." to discard changes in working directory)
+   modified:   satural.py
+
+$ git add satural.py
+$ git status
+On branch main
+Changes to be committed:
+(use "git restore --staged <file>..." to unstage)
+modified:   satural.py
+
+Ví dụ 2: Thêm nhiều file
+$ git add satural.py helper.py
+$ git status
+Changes to be committed:
+modified:   satural.py
+modified:   helper.py
+
+6. Các lưu ý quan trọng
+
+* Nếu file chưa tồn tại trong repo, git add sẽ thêm file mới vào staging area và repo khi commit.
+* Nếu file đã tồn tại và có thay đổi, git add sẽ cập nhật các thay đổi trong staging area.
+* Bạn có thể hủy staging bằng:
+  $ git restore --staged satural.py
+
+7. Thao tác liên quan
+
+* Commit sau khi add:
+  $ git commit -m "Add satural.py or update changes"
+* Xem trạng thái trước và sau khi add:
+  $ git status
+* Xem chi tiết các thay đổi trước khi add:
+  $ git diff satural.py          # thay đổi chưa staging
+  $ git diff --staged satural.py  # thay đổi đã staging
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi muốn commit một phần của file, có được không?
+   A: Có, dùng git add -p satural.py để chọn từng hunk.
+
+Q: Tôi add file rồi nhưng muốn bỏ staging. Làm sao?
+A: Dùng git restore --staged satural.py.
+
+Q: Tôi add file nhưng không muốn commit ngay. Có được không?
+A: Có, bạn có thể add file vào staging và commit sau.
+
+9. Tóm tắt nhanh
+
+* Lệnh: git add satural.py
+* Tác dụng: thêm file satural.py vào staging area để chuẩn bị commit.
+* Kiểm tra trạng thái: git status
+* Bỏ staging nếu cần: git restore --staged satural.py
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git push origin main
+		
+Giải thích chi tiết về: git push origin main
+
+MỤC TIÊU
+
+* Giải thích lệnh "git push origin main" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git push origin main
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git push origin main" dùng để **đẩy các commit từ branch cục bộ 'main' lên remote repository tên 'origin'** mà không thiết lập upstream (tracking branch). Khác với `git push -u origin main`, lệnh này không thiết lập branch cục bộ theo dõi branch remote, nên lần push tiếp theo vẫn cần chỉ định đầy đủ remote và branch.
+
+2. Khi nào dùng
+
+* Khi bạn muốn đẩy commit từ branch cục bộ lên remote nhưng không cần thiết lập tracking.
+* Khi branch đã có upstream được thiết lập từ trước hoặc bạn muốn quản lý upstream theo cách thủ công.
+* Khi làm việc với nhiều remote và muốn push cụ thể tới một remote mà không ảnh hưởng tracking.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Git so sánh branch cục bộ main với branch main trên remote origin.
+* Nếu có commit mới chưa có trên remote, Git sẽ đẩy commit đó lên remote.
+* Lệnh này chỉ ảnh hưởng đến remote repository, không thay đổi branch local hoặc thiết lập upstream.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git push: đẩy commit từ local lên remote.
+* origin: tên remote, thường là remote chính (có thể là GitHub, GitLab, v.v.).
+* main: branch cục bộ muốn đẩy.
+* Khác với -u: không thiết lập tracking, nên lần push tiếp theo phải chỉ định đầy đủ: git push origin main.
+
+5. Ví dụ thực tế (terminal)
+   Bước 1: Kiểm tra branch hiện tại
+   $ git branch
+
+* main
+  develop
+
+Bước 2: Push branch main lên remote origin
+$ git push origin main
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (5/5), 500 bytes | 500.00 KiB/s, done.
+Total 5 (delta 0), reused 0 (delta 0)
+To [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+a1b2c3d..e4f5g6h  main -> main
+
+Giải thích:
+
+* Git đẩy tất cả commit mới từ branch main lên remote.
+* Không thiết lập upstream, nghĩa là lần push sau vẫn phải chỉ định git push origin main.
+
+6. Nếu remote đã có branch trùng tên
+
+* Git sẽ thực hiện push nếu local có commit mới chưa có trên remote.
+* Nếu có xung đột lịch sử, Git báo lỗi: cần pull/rebase trước khi push:
+  $ git pull --rebase origin main
+  $ git push origin main
+
+7. Xóa branch remote (nếu cần)
+   $ git push origin --delete <branch>
+
+8. Các lưu ý quan trọng
+
+* Khi push lần đầu trên HTTPS, cần nhập Personal Access Token nếu GitHub từ chối password.
+* Khi push SSH, cần cấu hình SSH key.
+* Không thiết lập tracking với -u; nếu muốn push đơn giản trong tương lai, dùng git push -u origin main lần đầu.
+* Đảm bảo đang ở branch muốn push, nếu không chỉ định branch sẽ đẩy branch hiện tại.
+
+9. Kiểm tra trạng thái remote
+
+* Liệt kê branch remote:
+  $ git branch -r
+* Liệt kê cả cục bộ và remote:
+  $ git branch -a
+
+10. Câu hỏi thường gặp (FAQ)
+    Q: Tôi muốn lần sau push chỉ cần gõ git push. Làm sao?
+    A: Dùng git push -u origin main để thiết lập upstream branch.
+
+Q: Tôi push branch khác với tên branch cục bộ? Có được không?
+A: Có, dùng cú pháp: git push origin <local-branch>:<remote-branch>
+
+Q: Tôi nhận lỗi non-fast-forward. Phải làm sao?
+A: Pull trước với git pull --rebase origin main, giải quyết xung đột nếu có, sau đó push lại.
+
+11. Tóm tắt nhanh
+
+* Lệnh: git push origin main
+* Tác dụng: đẩy branch cục bộ main lên remote origin.
+* Không thiết lập tracking, lần push sau phải chỉ định đầy đủ remote và branch.
+* Lưu ý: HTTPS cần token, SSH cần key, và xử lý xung đột nếu branch trên remote khác với local.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git log
+		
+Giải thích chi tiết về: git log
+
+MỤC TIÊU
+
+* Giải thích lệnh "git log" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git log
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git log" dùng để **hiển thị lịch sử các commit của repository Git**. Nó cho phép xem các commit đã thực hiện, bao gồm thông tin như hash commit, tác giả, ngày giờ và message commit.
+
+2. Khi nào dùng
+
+* Khi muốn kiểm tra lịch sử commit để hiểu các thay đổi đã thực hiện.
+* Khi muốn tìm commit cụ thể dựa trên thông tin tác giả, ngày tháng hoặc message.
+* Khi debug hoặc review code để hiểu tiến trình phát triển của project.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Git đọc dữ liệu commit từ repository cục bộ và hiển thị theo thứ tự gần nhất trước (newest first).
+* Mỗi commit hiển thị gồm các trường: commit hash, Author, Date, và commit message.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git log : hiển thị danh sách commit mặc định.
+* git log --oneline : hiển thị commit dưới dạng ngắn gọn, một dòng mỗi commit.
+* git log --graph : hiển thị commit dưới dạng biểu đồ nhánh.
+* git log --author="tên" : lọc commit theo tác giả.
+* git log --since="2025-01-01" : lọc commit sau một ngày nhất định.
+* git log --until="2025-01-31" : lọc commit trước một ngày nhất định.
+* git log -p : hiển thị chi tiết thay đổi của mỗi commit.
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Hiển thị log đầy đủ
+   $ git log
+   commit e4f5g6h7i8j9k0l1m2n3
+   Author: ngoctuanqng1 [ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)
+   Date:   Wed Nov 13 18:00:00 2025 +0700
+
+   Initial commit
+
+commit a1b2c3d4e5f6g7h8i9j0
+Author: ngoctuanqng1 [ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)
+Date:   Wed Nov 13 17:45:00 2025 +0700
+
+```
+Add satural.py
+```
+
+Ví dụ 2: Hiển thị log ngắn gọn
+$ git log --oneline
+e4f5g6h Initial commit
+a1b2c3d Add satural.py
+
+Ví dụ 3: Hiển thị log với biểu đồ nhánh
+$ git log --oneline --graph --all
+
+* e4f5g6h Initial commit
+* a1b2c3d Add satural.py
+
+6. Các lưu ý quan trọng
+
+* Git log chỉ hiển thị commit trên branch hiện tại trừ khi thêm --all.
+* commit hash là mã định danh duy nhất cho mỗi commit, có thể dùng để checkout hoặc revert.
+* git log không thay đổi trạng thái repository, chỉ hiển thị thông tin.
+* Có thể kết hợp nhiều option để lọc, sắp xếp, hiển thị commit.
+
+7. Thao tác liên quan
+
+* Xem log của file cụ thể:
+  $ git log satural.py
+* Xem số lượng commit gần nhất:
+  $ git log -n 5
+* Xem log với patch chi tiết:
+  $ git log -p
+* Xem log với thông tin commit gọn hơn:
+  $ git log --pretty=oneline
+* Xem log với định dạng tùy chỉnh:
+  $ git log --pretty=format:"%h - %an, %ar : %s"
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi muốn tìm commit theo message. Làm sao?
+   A: Dùng grep: git log --grep="message"
+
+Q: Tôi muốn xem commit của một tác giả cụ thể?
+A: Dùng --author: git log --author="ngoctuanqng1"
+
+Q: Tôi muốn xem các thay đổi từng file trong commit?
+A: Dùng -p: git log -p
+
+9. Tóm tắt nhanh
+
+* Lệnh: git log
+* Tác dụng: hiển thị lịch sử commit của repository.
+* Các option phổ biến: --oneline, --graph, --author, -p, --since, --until.
+* Không thay đổi trạng thái repo, chỉ xem lịch sử.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git log --oneline
+		
+Giải thích chi tiết về: git log --oneline
+
+MỤC TIÊU
+
+* Giải thích lệnh "git log --oneline" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git log --oneline
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git log --oneline" dùng để **hiển thị lịch sử commit của repository dưới dạng ngắn gọn**, mỗi commit chiếm một dòng, bao gồm một phần hash commit rút gọn và message commit.
+
+2. Khi nào dùng
+
+* Khi muốn xem nhanh lịch sử commit mà không cần quá nhiều chi tiết.
+* Khi muốn tổng quan về tiến trình phát triển của dự án.
+* Khi review các commit trước khi merge hoặc push.
+
+3. Cách hoạt động
+
+* Git rút gọn commit hash (thường 7 ký tự đầu) và chỉ hiển thị message commit.
+* Thứ tự hiển thị: commit mới nhất ở trên cùng, commit cũ hơn ở dưới.
+* Giúp dễ dàng scan các commit nhanh mà vẫn nhận biết được các thay đổi.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git log --oneline : hiển thị commit gọn, một dòng mỗi commit.
+* Kết hợp với --graph: hiển thị nhánh commit dưới dạng đồ thị.
+* Kết hợp với --all: hiển thị commit từ tất cả các nhánh.
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Hiển thị log ngắn gọn
+   $ git log --oneline
+   e4f5g6h Initial commit
+   a1b2c3d Add satural.py
+
+Ví dụ 2: Hiển thị log ngắn gọn với biểu đồ
+$ git log --oneline --graph
+
+* e4f5g6h Initial commit
+* a1b2c3d Add satural.py
+
+Ví dụ 3: Hiển thị log ngắn gọn tất cả nhánh
+$ git log --oneline --graph --all
+
+* e4f5g6h Initial commit (HEAD -> main, origin/main)
+* a1b2c3d Add satural.py (develop)
+
+6. Các lưu ý quan trọng
+
+* Commit hash rút gọn vẫn đủ để tham chiếu các commit (ví dụ checkout hoặc revert).
+* Không hiển thị Author, Date, chi tiết thay đổi; nếu cần, dùng git log hoặc git log -p.
+* Có thể kết hợp nhiều option để lọc commit, ví dụ --author, --since, --until.
+
+7. Thao tác liên quan
+
+* Hiển thị 5 commit gần nhất ngắn gọn:
+  $ git log --oneline -n 5
+* Lọc theo tác giả:
+  $ git log --oneline --author="ngoctuanqng1"
+* Xem commit của file cụ thể:
+  $ git log --oneline satural.py
+* Xem commit cùng patch chi tiết:
+  $ git log --oneline -p
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi muốn xem nhanh lịch sử mà vẫn biết nhánh nào đang theo dõi?
+   A: Dùng git log --oneline --graph --all
+
+Q: Tôi muốn rút gọn commit hash nhưng vẫn xem chi tiết message?
+A: git log --oneline hiển thị rút gọn hash kèm message commit đầy đủ.
+
+Q: Tôi muốn xem commit của file cụ thể ngắn gọn?
+A: git log --oneline <file>
+
+9. Tóm tắt nhanh
+
+* Lệnh: git log --oneline
+* Tác dụng: hiển thị lịch sử commit ngắn gọn, một dòng mỗi commit.
+* Kết hợp option: --graph, --all, --author, --since, --until để lọc hoặc hiển thị thêm.
+* Không thay đổi trạng thái repository, chỉ xem lịch sử.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git show 625b034
+		
+Giải thích chi tiết về: git show 625b034
+
+MỤC TIÊU
+
+* Giải thích lệnh "git show 625b034" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git show 625b034
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git show 625b034" dùng để **hiển thị thông tin chi tiết của một commit cụ thể** trong Git, bao gồm commit hash, tác giả, ngày giờ, message commit và các thay đổi (diff) trong commit đó. 625b034 là hash commit (có thể là hash rút gọn).
+
+2. Khi nào dùng
+
+* Khi bạn muốn xem chi tiết một commit cụ thể.
+* Khi debug, review code hoặc xác định nội dung và các file đã thay đổi trong commit.
+* Khi cần trích xuất patch từ một commit.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* Git tìm commit với hash 625b034 trong repository cục bộ.
+* Git hiển thị:
+
+  * Thông tin commit: hash, tác giả, ngày giờ
+  * Message commit
+  * Diff chi tiết từng file thay đổi trong commit
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git show <commit-hash> : hiển thị chi tiết commit cụ thể.
+* git show <branch-name> : hiển thị commit HEAD hiện tại của branch.
+* git show <tag-name> : hiển thị commit mà tag trỏ tới.
+* git show <commit-hash> --name-only : chỉ hiển thị tên file thay đổi.
+* git show <commit-hash> --stat : hiển thị tóm tắt thay đổi (số dòng thêm/bớt, file).
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Hiển thị commit đầy đủ
+   $ git show 625b034
+   commit 625b034abcd1234ef5678...
+   Author: ngoctuanqng1 [ngoctuanqng1@gmail.com](mailto:ngoctuanqng1@gmail.com)
+   Date:   Thu Nov 13 18:30:00 2025 +0700
+
+   Update satural.py function
+
+diff --git a/satural.py b/satural.py
+index a1b2c3d..e4f5g6h 100644
+--- a/satural.py
++++ b/satural.py
+@@ -1,4 +1,6 @@
+def main():
+
+* print("Hello World")
+
+- print("Hello Saturn")
+- return True
+
+Ví dụ 2: Hiển thị tóm tắt commit
+$ git show 625b034 --stat
+satural.py | 2 ++
+1 file changed, 2 insertions(+)
+
+6. Các lưu ý quan trọng
+
+* Commit hash có thể dùng hash đầy đủ hoặc rút gọn (ít nhất 7 ký tự để đảm bảo duy nhất).
+* Nếu commit không tồn tại trong repo cục bộ, Git sẽ báo lỗi.
+* git show không thay đổi trạng thái repository, chỉ hiển thị thông tin.
+* Có thể kết hợp với nhiều option như --name-only, --stat, --pretty để tùy chỉnh hiển thị.
+
+7. Thao tác liên quan
+
+* Xem log để lấy commit hash:
+  $ git log --oneline
+* Xem diff giữa hai commit:
+  $ git diff <hash1> <hash2>
+* Xuất patch từ commit:
+  $ git show 625b034 > patch.diff
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi chỉ muốn xem tên file đã thay đổi trong commit. Làm sao?
+   A: git show 625b034 --name-only
+
+Q: Tôi muốn xem tóm tắt số dòng thêm/bớt mà không cần diff chi tiết?
+A: git show 625b034 --stat
+
+Q: Tôi có thể xuất commit thành patch để áp dụng sau không?
+A: Có, git show 625b034 > patch.diff
+
+9. Tóm tắt nhanh
+
+* Lệnh: git show 625b034
+* Tác dụng: hiển thị chi tiết commit với thông tin commit và diff thay đổi.
+* Option hữu ích: --stat, --name-only, > patch.diff
+* Không thay đổi trạng thái repo, chỉ xem commit.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git pull
+		
+Giải thích chi tiết về: git pull
+
+MỤC TIÊU
+
+* Giải thích lệnh "git pull" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git pull
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git pull" dùng để **tải các thay đổi từ remote repository về branch hiện tại và tự động merge vào branch cục bộ**. Nó là sự kết hợp của hai lệnh: `git fetch` và `git merge`.
+
+2. Khi nào dùng
+
+* Khi muốn cập nhật branch cục bộ với các commit mới từ remote.
+* Trước khi bắt đầu làm việc để đảm bảo code cục bộ là mới nhất.
+* Khi đồng bộ với đồng nghiệp làm việc trên cùng branch.
+
+3. Cách hoạt động
+
+* Git kết nối với remote (mặc định là origin) để lấy các commit mới.
+* Tự động merge commit mới vào branch cục bộ hiện tại.
+* Nếu có xung đột merge, Git yêu cầu bạn giải quyết thủ công.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git pull : tải và merge từ remote mặc định của branch hiện tại.
+* git pull <remote> <branch> : chỉ định remote và branch muốn pull.
+* git pull --rebase : thay vì merge, Git sẽ rebase commit cục bộ lên commit mới từ remote.
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Pull từ remote mặc định (origin) trên branch main
+   $ git pull
+   remote: Enumerating objects: 5, done.
+   remote: Counting objects: 100% (5/5), done.
+   remote: Compressing objects: 100% (3/3), done.
+   Unpacking objects: 100% (5/5), done.
+   From [https://github.com/ngoctuanqng/gitpractice.git](https://github.com/ngoctuanqng/gitpractice.git)
+   a1b2c3d..e4f5g6h  main       -> origin/main
+   Updating a1b2c3d..e4f5g6h
+   Fast-forward
+   satural.py | 2 ++
+   1 file changed, 2 insertions(+)
+
+Ví dụ 2: Pull từ remote và branch cụ thể
+$ git pull origin develop
+
+Ví dụ 3: Pull với rebase để giữ lịch sử commit thẳng hàng
+$ git pull --rebase origin main
+
+6. Các lưu ý quan trọng
+
+* Nếu branch cục bộ có commit chưa push, git pull có thể tạo merge commit.
+* Sử dụng --rebase để tránh merge commit không cần thiết.
+* Nếu xung đột, Git yêu cầu giải quyết xung đột, sau đó commit hoặc rebase --continue.
+* Git pull ảnh hưởng trực tiếp đến branch hiện tại.
+
+7. Thao tác liên quan
+
+* Kiểm tra remote:
+  $ git remote -v
+* Xem trạng thái trước pull:
+  $ git status
+* Pull các thay đổi nhưng không merge ngay:
+  $ git fetch
+* Xem commit mới trước khi merge:
+  $ git log ..origin/main
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi muốn pull nhưng không muốn merge ngay. Làm sao?
+   A: Dùng git fetch để tải commit mới, sau đó merge hoặc rebase thủ công.
+
+Q: Tôi nhận lỗi conflict khi pull. Phải làm sao?
+A: Git báo xung đột, bạn cần sửa các file xung đột, sau đó:
+$ git add <file>
+$ git commit  (hoặc git rebase --continue nếu dùng rebase)
+
+Q: Pull có xóa branch cục bộ không?
+A: Không, git pull chỉ cập nhật branch hiện tại.
+
+9. Tóm tắt nhanh
+
+* Lệnh: git pull
+* Tác dụng: tải và merge commit từ remote về branch cục bộ.
+* Option hữu ích: <remote> <branch>, --rebase
+* Lưu ý: có thể xảy ra xung đột, ảnh hưởng trực tiếp đến branch hiện tại.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git branch -c sprintl
+		
+Giải thích chi tiết về: git branch -c sprintl
+
+MỤC TIÊU
+
+* Giải thích lệnh "git branch -c sprintl" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git branch -c sprintl
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git branch -c sprintl" dùng để **đổi tên branch hiện tại sang 'sprintl'**. Đây là cú pháp tương tự như `git branch --move sprintl`.
+
+2. Khi nào dùng
+
+* Khi bạn muốn đặt tên mới cho branch hiện tại.
+* Khi branch hiện tại có tên không rõ ràng hoặc cần tuân theo quy ước đặt tên.
+* Khi cần chuẩn hóa tên branch trước khi push lên remote.
+
+3. Cách hoạt động
+
+* Git xác nhận bạn đang ở branch nào.
+* Git thay đổi tên branch hiện tại sang 'sprintl'.
+* Nếu branch mới đã tồn tại, Git sẽ báo lỗi trừ khi bạn dùng tùy chọn force.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git branch -c <new-branch-name> : đổi tên branch hiện tại sang tên mới.
+* git branch --move <new-branch-name> : tương tự -c, đổi tên branch.
+* git branch -m <old> <new> : đổi tên branch cũ sang branch mới (khi không ở branch đó).
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Đổi tên branch hiện tại
+   $ git branch
+
+* main
+  develop
+
+$ git branch -c sprintl
+$ git branch
+
+* sprintl
+  develop
+
+Ví dụ 2: Đổi tên branch khác không phải branch hiện tại
+$ git branch -m develop feature/develop
+$ git branch
+sprintl
+
+* feature/develop
+
+6. Các lưu ý quan trọng
+
+* Khi đổi tên branch đã push lên remote, remote vẫn giữ tên cũ. Cần push branch mới và xóa branch cũ trên remote:
+  $ git push origin sprintl
+  $ git push origin --delete main
+* Đảm bảo không trùng tên branch đã tồn tại.
+* Không ảnh hưởng đến commit hoặc lịch sử, chỉ thay đổi tên branch.
+* Nếu đang trên branch hiện tại, -c hoặc -m đều được sử dụng.
+
+7. Thao tác liên quan
+
+* Xem branch hiện tại:
+  $ git branch
+* Xóa branch cũ trên remote:
+  $ git push origin --delete <old-branch>
+* Push branch mới lên remote:
+  $ git push origin <new-branch>
+* Thiết lập upstream branch cho branch mới:
+  $ git push -u origin sprintl
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi đổi tên branch rồi nhưng remote vẫn còn tên cũ. Làm sao?
+   A: Push branch mới và xóa branch cũ trên remote, sau đó cập nhật upstream.
+
+Q: Tôi có thể đổi tên branch mà không checkout vào branch đó không?
+A: Có, dùng git branch -m <old> <new> để đổi tên branch không phải branch hiện tại.
+
+Q: Đổi tên branch có mất commit không?
+A: Không, lịch sử commit vẫn nguyên vẹn.
+
+9. Tóm tắt nhanh
+
+* Lệnh: git branch -c sprintl
+* Tác dụng: đổi tên branch hiện tại sang sprintl.
+* Lưu ý: remote giữ tên cũ, cần push branch mới và xóa branch cũ nếu muốn đồng bộ.
+* Không ảnh hưởng đến commit hay lịch sử.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git branch -a
+		
+Giải thích chi tiết về: git branch -a
+
+MỤC TIÊU
+
+* Giải thích lệnh "git branch -a" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git branch -a
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git branch -a" dùng để **liệt kê tất cả các branch trong repository**, bao gồm cả branch cục bộ (local) và branch trên remote (remote-tracking branches).
+
+2. Khi nào dùng
+
+* Khi muốn kiểm tra tất cả branch hiện có trong repo.
+* Khi muốn biết branch remote để checkout hoặc đồng bộ.
+* Khi muốn quản lý branch cục bộ và remote.
+
+3. Cách hoạt động
+
+* Git liệt kê branch cục bộ bằng cách hiển thị tên branch hiện tại với dấu '*'.
+* Git liệt kê branch remote với tiền tố `remotes/<remote-name>/`.
+* Thông tin này giúp xác định branch nào có sẵn để checkout hoặc merge.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git branch : liệt kê branch cục bộ.
+* git branch -a : liệt kê tất cả branch, cả cục bộ và remote.
+* git branch -r : liệt kê branch remote.
+* git branch -v : hiển thị commit cuối cùng của mỗi branch.
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Liệt kê tất cả branch
+   $ git branch -a
+
+* main
+  develop
+  feature/login
+  remotes/origin/main
+  remotes/origin/develop
+  remotes/origin/feature/login
+
+Ví dụ 2: Liệt kê branch remote
+$ git branch -r
+origin/main
+origin/develop
+origin/feature/login
+
+6. Các lưu ý quan trọng
+
+* Dấu '*' chỉ branch hiện tại.
+* Tên branch remote có tiền tố remotes/<remote-name>/.
+* Git branch -a không thay đổi trạng thái repository, chỉ hiển thị thông tin.
+* Dùng thông tin branch remote để checkout branch mới:
+  $ git checkout -b <branch-local> <remote>/<branch-remote>
+
+7. Thao tác liên quan
+
+* Checkout branch remote về cục bộ:
+  $ git checkout -b develop origin/develop
+* Xóa branch cục bộ:
+  $ git branch -d feature/login
+* Xóa branch remote:
+  $ git push origin --delete feature/login
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tại sao tôi thấy branch remote mà không checkout được?
+   A: Vì branch remote chỉ là tham chiếu, cần checkout về branch cục bộ trước.
+
+Q: Tôi muốn chỉ liệt kê branch cục bộ có được không?
+A: Dùng git branch.
+
+Q: Tôi muốn xem commit cuối cùng của mỗi branch?
+A: Dùng git branch -v hoặc git branch -av.
+
+9. Tóm tắt nhanh
+
+* Lệnh: git branch -a
+* Tác dụng: liệt kê tất cả branch, bao gồm cục bộ và remote.
+* Lưu ý: dấu '*' là branch hiện tại, branch remote có tiền tố remotes/<remote>/.
+* Không thay đổi trạng thái repo, chỉ hiển thị thông tin.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git checkout sprintl
+		
+Giải thích chi tiết về: git checkout sprintl
+
+MỤC TIÊU
+
+* Giải thích lệnh "git checkout sprintl" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git checkout sprintl
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git checkout sprintl" dùng để **chuyển sang branch có tên 'sprintl'** trong repository Git. Nếu branch chưa tồn tại cục bộ nhưng có trên remote, có thể cần kết hợp với -b để tạo branch cục bộ từ remote.
+
+2. Khi nào dùng
+
+* Khi muốn làm việc trên branch sprintl.
+* Khi cần kiểm tra hoặc chỉnh sửa code trên branch khác.
+* Khi muốn đồng bộ công việc với branch sprintl trước khi commit hoặc push.
+
+3. Cách hoạt động
+
+* Git cập nhật HEAD để trỏ vào branch sprintl.
+* Nội dung thư mục làm việc được thay đổi để phản ánh commit cuối cùng của branch sprintl.
+* Nếu có thay đổi chưa commit trên branch hiện tại, Git có thể yêu cầu stash hoặc commit trước khi chuyển.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git checkout <branch> : chuyển sang branch cục bộ đã tồn tại.
+* git checkout -b <new-branch> : tạo branch mới và chuyển sang branch đó.
+* git checkout -t <remote>/<branch> : tạo branch cục bộ theo dõi branch remote.
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Chuyển sang branch cục bộ
+   $ git branch
+
+* main
+  develop
+  sprintl
+
+$ git checkout sprintl
+Switched to branch 'sprintl'
+$ git branch
+main
+develop
+
+* sprintl
+
+Ví dụ 2: Checkout branch remote về cục bộ
+$ git checkout -b sprintl origin/sprintl
+Branch 'sprintl' set up to track remote branch 'sprintl' from 'origin'.
+Switched to a new branch 'sprintl'
+
+6. Các lưu ý quan trọng
+
+* Nếu có thay đổi chưa commit trên branch hiện tại, Git có thể báo lỗi và yêu cầu stash hoặc commit.
+* Chuyển branch sẽ cập nhật thư mục làm việc theo commit cuối cùng của branch đó.
+* HEAD luôn trỏ tới branch hiện tại sau khi checkout.
+* Đối với branch remote, cần tạo branch cục bộ theo dõi nếu muốn làm việc và push.
+
+7. Thao tác liên quan
+
+* Xem branch hiện tại:
+  $ git branch
+* Tạo branch mới và chuyển sang branch đó:
+  $ git checkout -b feature/login
+* Chuyển branch và tự động track remote:
+  $ git checkout -t origin/feature/login
+* Stash thay đổi trước khi checkout:
+  $ git stash
+  $ git checkout sprintl
+  $ git stash pop
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi nhận lỗi khi checkout do thay đổi chưa commit. Làm sao?
+   A: Dùng git stash để lưu tạm thay đổi, sau đó checkout.
+
+Q: Tôi muốn checkout branch remote chưa có cục bộ. Làm sao?
+A: Dùng git checkout -b <branch> <remote>/<branch>
+
+Q: Checkout có xóa commit hoặc thay đổi không?
+A: Không, chỉ thay đổi HEAD và thư mục làm việc. Commit đã commit vẫn nguyên.
+
+9. Tóm tắt nhanh
+
+* Lệnh: git checkout sprintl
+* Tác dụng: chuyển sang branch sprintl.
+* Lưu ý: cần commit hoặc stash các thay đổi chưa commit trước khi checkout.
+* Nếu branch chỉ có trên remote, cần tạo branch cục bộ theo dõi.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git rm saturn6.py saturn7.py saturn8.py
+		
+Giải thích chi tiết về: git rm saturn6.py saturn7.py saturn8.py
+
+MỤC TIÊU
+
+* Giải thích lệnh "git rm saturn6.py saturn7.py saturn8.py" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git rm saturn6.py saturn7.py saturn8.py
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git rm" dùng để **xóa các file khỏi cả thư mục làm việc và staging area trong Git**. Khi bạn chạy `git rm saturn6.py saturn7.py saturn8.py`, Git sẽ xóa các file này và chuẩn bị để commit sự xóa đó.
+
+2. Khi nào dùng
+
+* Khi muốn xóa file khỏi dự án và từ repository Git.
+* Khi muốn loại bỏ file không cần thiết và muốn ghi nhận xóa trong commit.
+* Khi chuẩn bị dọn dẹp các file đã bị thay thế hoặc lỗi thời.
+
+3. Cách hoạt động
+
+* Git xóa file khỏi thư mục làm việc.
+* Git cũng xóa file khỏi staging area, nghĩa là lần commit tiếp theo sẽ ghi nhận sự xóa này.
+* Nếu muốn giữ file trong thư mục làm việc nhưng vẫn xóa khỏi Git, cần dùng `git rm --cached`.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git rm <file1> <file2> ... : xóa file khỏi Git và thư mục làm việc.
+* git rm --cached <file> : xóa file khỏi Git nhưng giữ trong thư mục làm việc.
+* git rm -f <file> : buộc xóa file đang có thay đổi chưa commit.
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Xóa nhiều file
+   $ git rm saturn6.py saturn7.py saturn8.py
+   rm 'saturn6.py'
+   rm 'saturn7.py'
+   rm 'saturn8.py'
+
+$ git status
+Changes to be committed:
+(use "git restore --staged <file>..." to unstage)
+
+deleted:    saturn6.py
+deleted:    saturn7.py
+deleted:    saturn8.py
+
+Ví dụ 2: Xóa file khỏi Git nhưng giữ trong thư mục làm việc
+$ git rm --cached saturn6.py
+
+6. Các lưu ý quan trọng
+
+* Sau khi xóa file, cần commit để lưu thay đổi:
+  $ git commit -m "Remove saturn6.py, saturn7.py, saturn8.py"
+* Nếu file đang có thay đổi chưa commit, Git sẽ báo lỗi trừ khi dùng -f.
+* Không thể undo xóa file đã commit nếu không có backup hoặc lịch sử Git.
+* Xóa file sẽ ảnh hưởng cả branch hiện tại.
+
+7. Thao tác liên quan
+
+* Kiểm tra trạng thái file trước khi xóa:
+  $ git status
+* Khôi phục file đã xóa trước khi commit:
+  $ git restore <file>
+* Khôi phục file đã xóa sau khi commit:
+  $ git checkout HEAD <file>
+
+8. Câu hỏi thường gặp (FAQ)
+   Q: Tôi chỉ muốn xóa file khỏi Git nhưng giữ file trong thư mục làm việc. Làm sao?
+   A: Dùng git rm --cached <file>
+
+Q: Tôi nhận lỗi file đã thay đổi khi xóa. Làm sao?
+A: Dùng git rm -f <file> hoặc commit/stash trước khi xóa.
+
+Q: Làm sao khôi phục file đã xóa nếu commit đã thực hiện?
+A: git checkout HEAD <file>
+
+9. Tóm tắt nhanh
+
+* Lệnh: git rm saturn6.py saturn7.py saturn8.py
+* Tác dụng: xóa các file khỏi Git và thư mục làm việc.
+* Option hữu ích: --cached, -f
+* Sau khi xóa cần commit để ghi nhận sự thay đổi.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git mv saturn1.py saturn11.py
+		
+Giải thích chi tiết về: git mv saturn1.py saturn11.py
+
+MỤC TIÊU
+
+* Giải thích lệnh "git mv saturn1.py saturn11.py" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: git mv saturn1.py saturn11.py
+
+1. Định nghĩa ngắn gọn
+   Lệnh "git mv saturn1.py saturn11.py" dùng để **đổi tên (move) file saturn1.py thành saturn11.py** trong repository Git, đồng thời cập nhật thay đổi này vào staging area để chuẩn bị commit. Đây là cách Git kết hợp thao tác hệ thống tệp (rename) và thao tác theo dõi (stage) trong một bước duy nhất.
+
+2. Khi nào dùng
+
+* Khi bạn muốn đổi tên file trong dự án và muốn Git theo dõi việc đổi tên này.
+* Khi muốn di chuyển file sang thư mục khác (ví dụ git mv file dir/).
+* Khi muốn giữ lịch sử thay đổi liên kết với file sau khi đổi tên.
+
+3. Cách hoạt động (một cách đơn giản)
+
+* git mv thực hiện ba bước nội bộ: xóa file cũ khỏi working directory, tạo file mới với tên mới, và stage cả xóa lẫn thêm đó vào index (staging area).
+* Khi commit, Git sẽ ghi nhận hành động rename bằng cách lưu diff: xóa saturn1.py và thêm saturn11.py; Git thường phát hiện đó là rename khi tính toán diff dựa trên nội dung.
+
+4. Cú pháp cơ bản và ý nghĩa
+
+* git mv <old> <new> : đổi tên hoặc di chuyển file/dir.
+* git mv <file> <dir/> : di chuyển file vào thư mục dir.
+* git mv -k <file> <new> : tiếp tục nếu có lỗi (tùy phiên bản Git hỗ trợ).
+
+5. Ví dụ thực tế (terminal)
+   Ví dụ 1: Đổi tên file
+   $ ls
+   saturn1.py  saturn2.py
+   $ git mv saturn1.py saturn11.py
+   $ ls
+   saturn11.py  saturn2.py
+   $ git status
+   Changes to be committed:
+   (use "git restore --staged <file>..." to unstage)
+   renamed:    saturn1.py -> saturn11.py
+
+Ví dụ 2: Di chuyển file vào thư mục mới
+$ mkdir -p src
+$ git mv saturn11.py src/
+$ git status
+Changes to be committed:
+renamed:    saturn11.py -> src/saturn11.py
+
+6. Lưu ý về lịch sử (history)
+
+* Git không lưu "rename" như một đối tượng riêng; nó lưu xóa và thêm. Khi hiển thị diff, Git cố gắng phát hiện rename dựa trên ngưỡng giống nhau giữa nội dung file cũ và mới.
+* Để Git dễ nhận diện rename trong log/diff, tránh thay đổi lớn nội dung file cùng lúc với rename.
+
+7. Trường hợp file đã tồn tại với tên mới
+
+* Nếu saturn11.py đã tồn tại, git mv sẽ ghi đè file mới bằng giá trị từ saturn1.py (tùy quyền hệ thống tệp) — Git có thể báo lỗi nếu tồn tại xung đột. Kiểm tra trước bằng ls hoặc git status.
+
+8. Khi không dùng git mv (thực hiện bằng tay)
+
+* Bạn có thể đổi tên bằng lệnh hệ thống: mv saturn1.py saturn11.py
+  Sau đó stage thay đổi:
+  $ git add saturn11.py
+  $ git rm saturn1.py
+* git mv đơn giản hóa thao tác này trong một lệnh và đảm bảo staging đúng cách.
+
+9. Khôi phục nếu đổi tên nhầm
+
+* Nếu đã git mv nhưng chưa commit và muốn hủy staging:
+  $ git restore --staged saturn11.py
+  $ git restore --source=HEAD --saturn11.py  (hoặc git checkout -- saturn1.py để khôi phục file cũ)
+* Nếu đã commit, có thể đổi tên lại hoặc dùng git revert/rehistory tùy tình huống.
+
+10. Tương tác với remote
+
+* Sau khi git mv và git commit -m "Rename saturn1.py to saturn11.py", push thay đổi lên remote:
+  $ git push origin main
+* Remote sẽ nhận commit có thay đổi xóa và thêm; trên dịch vụ như GitHub, diff thường hiển thị rename nếu nội dung đủ giống.
+
+11. Câu hỏi thường gặp (FAQ)
+    Q: Git có giữ lịch sử khi đổi tên file không?
+    A: Có — lịch sử vẫn tồn tại trong commit cũ; Git thường phát hiện rename khi so sánh nội dung. Tuy nhiên, Git không lưu rename như đối tượng riêng, nên việc detect phụ thuộc vào nội dung.
+
+Q: Tôi có thể đổi tên nhiều file cùng lúc không?
+A: Có, dùng git mv file1 file2 ... hoặc lặp qua nhiều lệnh git mv.
+
+Q: Tôi đã đổi tên bằng mv mà không dùng git mv. Có sao không?
+A: Không sao, nhưng bạn cần stage thay đổi bằng git add <new> và git rm <old> để Git theo dõi.
+
+12. Tóm tắt nhanh
+
+* Lệnh: git mv saturn1.py saturn11.py
+* Tác dụng: đổi tên file saturn1.py thành saturn11.py và stage thay đổi.
+* Sau lệnh: chạy git commit -m "Rename saturn1.py to saturn11.py" để lưu lịch sử.
+* Lưu ý: kiểm tra tồn tại file mới, và push để đồng bộ remote nếu cần.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: touch jupiter{1..4}.rb
+		
+Giải thích chi tiết về: touch jupiter{1..4}.rb
+
+MỤC TIÊU
+
+* Giải thích lệnh "touch jupiter{1..4}.rb" một cách chi tiết, rõ ràng và dễ sao chép vào tệp .txt.
+* Định dạng: plain text (không dùng ký hiệu markdown) để bạn có thể bôi chọn và sao chép toàn bộ nội dung.
+
+---
+
+TIÊU ĐỀ: touch jupiter{1..4}.rb
+
+1. Định nghĩa ngắn gọn
+   Lệnh "touch jupiter{1..4}.rb" sử dụng tính năng "brace expansion" của shell để tạo (hoặc chỉ cập nhật timestamp) 4 file có tên jupiter1.rb, jupiter2.rb, jupiter3.rb, jupiter4.rb trong thư mục hiện tại. Nếu file chưa tồn tại, touch sẽ tạo file rỗng; nếu file đã tồn tại, touch chỉ cập nhật thời gian truy cập/sửa đổi (access/modify timestamps).
+
+2. Khi nào dùng
+
+* Khi bạn muốn nhanh chóng tạo nhiều file rỗng với tên tuần tự (ví dụ tạo nhiều file Ruby để bắt đầu phát triển hoặc test).
+* Khi muốn cập nhật timestamp của nhiều file cùng lúc.
+
+3. Giải thích từng phần
+
+* touch: lệnh Unix để tạo file rỗng hoặc cập nhật timestamps của file.
+* jupiter{1..4}.rb: phần trong dấu ngoặc nhọn là "brace expansion". Shell mở rộng biểu thức thành jupiter1.rb jupiter2.rb jupiter3.rb jupiter4.rb trước khi gọi touch.
+* Toàn bộ lệnh được thực hiện sau khi shell đã mở rộng danh sách file.
+
+4. Cú pháp cơ bản và ví dụ
+
+* Gõ trong terminal:
+  $ touch jupiter{1..4}.rb
+* Kết quả: tạo hoặc cập nhật các file:
+  jupiter1.rb
+  jupiter2.rb
+  jupiter3.rb
+  jupiter4.rb
+* Kiểm tra:
+  $ ls -1v jupiter*.rb
+  jupiter1.rb
+  jupiter2.rb
+  jupiter3.rb
+  jupiter4.rb
+  (ls -v sắp xếp theo cách tự nhiên để jupiter10 không chen giữa jupiter1 và jupiter2 nếu có)
+
+5. Biến thể hữu ích
+
+* Zero-padding (nếu muốn số có độ dài cố định):
+  $ touch jupiter{01..04}.rb   -> jupiter01.rb ... jupiter04.rb
+* Thay đổi khoảng giá trị:
+  $ touch jupiter{3..6}.rb    -> jupiter3.rb ... jupiter6.rb
+* Bước nhảy (nhiều shell hỗ trợ):
+  $ touch jupiter{1..4..2}.rb  -> jupiter1.rb jupiter3.rb  (tùy shell)
+* Kết hợp tên khác nhau:
+  $ touch jupiter{a,b,c}.rb   -> jupitera.rb jupiterb.rb jupiterc.rb
+* Tạo trong thư mục con:
+  $ mkdir -p src && touch src/jupiter{1..4}.rb
+
+6. Shell và tính tương thích
+
+* Brace expansion hoạt động trên bash, zsh, ksh. Trên một số shell POSIX nhẹ (như dash), brace expansion có thể không có sẵn.
+* Nếu bạn đặt biểu thức trong dấu nháy đơn hoặc kép, shell sẽ KHÔNG mở rộng:
+  $ touch 'jupiter{1..4}.rb'   -> tạo một file tên đúng là jupiter{1..4}.rb
+
+7. Hành vi khi file đã tồn tại
+
+* Nếu file đã tồn tại, touch chỉ cập nhật timestamps mà không thay đổi nội dung.
+* Nếu muốn tạo file với nội dung mặc định ngay khi tạo, có thể kết hợp vòng lặp:
+  $ for i in {1..4}; do echo "# jupiter$i" > jupiter${i}.rb; done
+
+8. Quyền và umask
+
+* File mới được tạo với quyền dựa trên umask của hệ thống. Ví dụ umask 0022 thường tạo file với quyền 0644 (rw-r--r--).
+* Nếu bạn không có quyền ghi vào thư mục, touch sẽ báo lỗi permission denied.
+
+9. Kiểm tra và gỡ lỗi
+
+* Nếu bạn không thấy file mong muốn, kiểm tra:
+  $ echo $SHELL    # xem shell đang dùng
+  $ alias touch     # kiểm tra alias
+  $ ls -la | grep jupiter
+* Nếu bạn thấy một file có tên chứa dấu ngoặc, có thể bạn đã dùng dấu nháy.
+
+10. Thay thế khi shell không hỗ trợ brace expansion
+
+* Dùng vòng lặp POSIX sh:
+  $ i=1; while [ $i -le 4 ]; do touch "jupiter${i}.rb"; i=$((i+1)); done
+* Hoặc dùng seq:
+  $ for n in $(seq 1 4); do touch "jupiter${n}.rb"; done
+
+11. Câu hỏi thường gặp (FAQ)
+    Q: Tại sao tôi chỉ thấy một file jupiter{1..4}.rb?
+    A: Có thể bạn đã đặt biểu thức trong dấu nháy (single hoặc double) hoặc shell không hỗ trợ brace expansion. Hãy dùng bash hoặc zsh, hoặc bỏ dấu nháy.
+
+Q: Tôi muốn tạo 100 file, có cách nhanh không?
+A: Có. Ví dụ: touch jupiter{1..100}.rb hoặc for n in $(seq 1 100); do touch "jupiter${n}.rb"; done
+
+Q: Làm sao để các file sắp xếp tự nhiên khi dùng ls?
+A: Dùng ls -v để sắp xếp theo giá trị số tự nhiên: ls -1v jupiter*.rb
+
+12. Tóm tắt nhanh
+
+* Lệnh: touch jupiter{1..4}.rb
+* Tác dụng: tạo hoặc cập nhật timestamp cho jupiter1.rb ... jupiter4.rb bằng brace expansion.
+* Lưu ý: hoạt động trên bash/zsh/ksh; nếu dùng shell khác hoặc đặt trong dấu nháy thì sẽ không mở rộng.
+
+---
+
+HƯỚNG DẪN SỬ DỤNG: Bạn có thể bôi chọn toàn bộ nội dung này và sao chép vào tệp .txt. Nếu giao diện hiển thị nút "Copy" cho tài liệu, nhấn nút đó để sao chép toàn bộ nội dung một lần.
+
+---
+
+END OF DOCUMENT
+		
+		
 		- cmd: git push origin sprintl
+		
+		
+		
 		- cmd: touch sun earth venus mercury
+		
+		
+		
 		- cmd: git switch sprint1
+		
+		
+		
 		- cmd: git merge sprintl
+		
+		
+		
 		- cmd: git clone https://github.com/ngoctuanqng/gitpractice.git
+		
+		
+		
 		- cmd: git checkout jupiter1.rb
+		
+		
+		
 		- cmd: git diff
+		
+		
+		
 		- cmd: git diff --cached
+		
+		
+		
 		- cmd: git restore --staged jupiter1.rb
+		
+		
+		
 		- cmd: git diff 8dff644..cbb01a8
+		
+		
+		
 		- cmd: git revert HEAD
+		
+		
+		
 		- cmd: git reset --hard 8dff644
+		
+		
+		
 		- cmd: cat .git/config
+		
+		
+		
 		- cmd: rm -rf .ssh/*
+		
+		
+		
 		- cmd: cat .ssh/id_rsa.pub
+		
+		
+		
 		- cmd: git tag
+		
+		
+		
 		- cmd: git show v2.0.0
+		
+		
+		
 		- cmd: git tag -a v3.5.3 -m "Release 3.5.3"
+		
+		
+		
 		- cmd: systemctl restart httpd
 		
 		
@@ -24087,6 +26855,44 @@ sudo updatedb
 	Tạo EC2 Docker-Engine (Ubuntu) và cài docker trên này, pull nginx image về
 	
 	EC2 Docker-Engine có security group mở cho truy cập all port với My IP
+	
+	Tạo 1 file Dockerfile trong máy ảo, trong docker file này có 1 đoạn ADD nano.tar.gz /var/www/html
+	
+	Install compose on linux system
+	
+	Chỉnh sửa inbound của sg với việc mở tất cả cho My IP
+	
+	
+	
+	KHI BUILD IMAGE → ĐÚNG LÀ TA “CÀI ỨNG DỤNG” BÊN TRONG NÓ
+
+		Khi bạn viết trong Dockerfile:
+		
+			RUN apt install apache2 -y
+			
+			→ Docker sẽ chạy lệnh đó bên trong một môi trường Ubuntu (tạo từ FROM ubuntu:latest)
+			
+			→ Apache2 được cài vào filesystem của image.
+
+		Nghĩa là: image chứa sẵn các ứng dụng cần thiết giống như một hệ điều hành đã được cài phần mềm.
+
+	VẬY KHI NÀO IMAGE NÓ GIỐNG MÁY ẢO?
+
+		Giống:
+
+			Khi build, bạn phải tự cài ứng dụng vào (web server, python, node, java...).
+
+			Có filesystem riêng.
+
+			Chạy ứng dụng độc lập.
+
+		Không giống:
+
+			Không có kernel riêng.
+
+			Không có driver ảo, không boot như máy ảo.
+
+			Không chạy background service kiểu systemd (trừ khi bạn tự setup).		
 
 	- Commands:
 	
@@ -24328,6 +27134,44 @@ sudo updatedb
 --- Containerization:
 
 	Git bash không thể chạy nhiều lệnh 1 lúc được
+	
+	Docker là Container Runtime Environment
+	
+	Cài đặt docker engine trên ubuntu
+	
+	Tạo repository trên docker hub
+	
+	Tìm hiểu cách để máy ảo lấy file từ máy thật
+	
+	Từ máy ảo, chạy file docker-compose để tạo image, sau đó tạo container
+	
+	-- Source: hkhcoder (container)
+	
+	Service:
+	
+		Nginx => Web Service
+
+		Tomcat => Application Server
+
+		RabbitMQ => Broker/Queuing Agent
+
+		Memcache => DB Caching
+
+		ElasticSearch => Indexing/Search Service
+
+		MySQL => SQL Database
+
+		Setup should be done in below mentioned order:
+
+			MySQL (Database SVC)
+			
+			Memcache (DB Caching SVC)
+			
+			RabbitMQ (Broker/Queue SVC)
+			
+			Tomcat (Application SVC)
+			
+			Nginx (Web SVC)
 
 	- Google search:
 	
@@ -24757,6 +27601,54 @@ sudo updatedb
 
 	- Route 53 -> Dashboard -> Create hosted zone
 	- Amazon Elastic Kubernetes Service (Amazon EKS)
+	
+	-- Source: hkhcoder (kubernetes-setup)
+	-- Source: hkhcoder (terraform-eks)
+	
+	Kubernetes: Run containers for production. Orchestration tools
+	
+	Mỗi pod sẽ có 1 IP
+	
+	Cài đặt minikube kubernetes-cli trên máy local
+	
+	Cài đặt kubernetes với minikube
+	
+	Tạo EC2 kops
+	
+	Tạo IAM kopsadmin với policy là AdministratorAccess
+	
+	Truy cập vào EC2 kops, sau đó cài đặt aws-cli, sau đó đăng nhập với aws configure. Sau đps ssh-keygen
+	
+	Cài đặt kops trên EC2 kops, tiếp theo cài đặt kubectl
+	
+	Tạo s3 bucket kopsstate956
+	
+	Tạo hosted zone trên AWS Route 53 kubevpro.hkhinfoteck.xyz
+	
+	Chạy các file cấu hình yaml để tạo các nodeport, load balancer...có thể thấy trên aws
+	
+	configmap
+	
+	secret
+	
+	ingress
+	
+	install ingress nginx
+	
+	cheatsheet
+	
+	taints
+	
+	job
+	
+	cronJob
+	
+	daemonSet
+	
+	Tạo bucjet terraform-eks23
+	
+	Viết code terraform để tạo Amazon Elastic Kubernetes Service
+	
 
 	- Google search:
 	
@@ -24813,7 +27705,246 @@ sudo updatedb
 	Cần check code trong source từ git clone (emartapp)
 		
 		
-		
+	Minukue:
+
+		MINIKUBE LÀ GÌ?
+
+			Minikube là một công cụ giúp bạn chạy Kubernetes ngay trên máy cá nhân (Laptop, PC) trong một môi trường nhỏ gọn.
+
+			Nó tạo ra một cluster Kubernetes 1 node (single-node cluster) để bạn:
+
+				học Kubernetes
+
+				test ứng dụng
+
+				phát triển microservices
+
+				thử deploy mà không cần cloud (AWS, GCP, Azure…)
+
+			Hiểu đơn giản:
+			
+				Minikube = bản Kubernetes mini chạy ngay trên máy bạn.
+
+				Không cần server, không cần cloud.
+
+		MINIKUBE DÙNG ĐỂ LÀM GÌ?
+
+			Học và thực hành Kubernetes
+
+			Deploy thử ứng dụng (web, API, database…)
+
+			Test kubectl, pods, deployments, services
+
+			Tập viết file YAML (Deployment, Service, Ingress…)
+
+			Thử nghiệm CI/CD pipeline ngay trên máy
+
+			Debug app chạy trong container + Kubernetes
+
+		NÓ VẬN HÀNH THẾ NÀO?
+
+		Khi bạn chạy:
+
+			minikube start
+
+
+		Minikube sẽ:
+
+			Tạo 1 VM nhỏ (hoặc dùng Docker backend)
+
+			Cài Kubernetes vào trong đó
+
+			Kết nối kubectl của bạn vào cluster đó
+
+		Bạn có thể chạy:
+
+			kubectl get pods
+
+			kubectl create deployment
+
+			kubectl expose service
+			
+				… y như đang dùng Kubernetes thật.
+
+		MINIKUBE KHÁC GÌ VỚI KUBERNETES THẬT?
+
+			Kubernetes thật:
+
+				nhiều node
+
+				chạy trên cloud
+
+				tải lớn, HA, scaling
+
+			Minikube:
+
+				1 node (master + worker chung)
+
+				chạy trên laptop
+
+				để học / test
+
+			Chức năng gần như giống nhau, chỉ thu nhỏ.
+
+		ƯU ĐIỂM CỦA MINIKUBE
+
+			Cài cực dễ (1 lệnh)
+
+			Nhẹ, chạy được trên Windows, macOS, Linux
+
+			Không cần cloud
+
+			Ideal cho dev/test
+
+			Không tốn tiền
+			
+		NHƯỢC ĐIỂM
+
+			Không mô phỏng full production
+
+			Chỉ 1 node (không có real HA)
+
+			Nặng nếu máy yếu (RAM 8GB trở xuống hơi đuối)
+			
+	CHOCOLATEY:
+
+		Chocolatey (thường gọi là choco) là một trình quản lý package (package manager) dành cho Windows, tương tự như:
+
+			apt cho Ubuntu
+
+			yum/dnf cho CentOS
+
+			brew cho macOS
+
+		Chocolatey giúp bạn cài đặt phần mềm bằng dòng lệnh, thay vì phải:
+
+			tải file .exe/.msi
+
+			nhấn Next → Next → Install
+			
+	KOPS Kubernetes Operations):
+
+			kops (Kubernetes Operations) là một công cụ giúp bạn tự động tạo, quản lý và vận hành Kubernetes cluster trên các nền tảng cloud, đặc biệt là AWS.
+
+			Bạn có thể xem kops như:
+
+				“Terraform dành riêng cho Kubernetes”
+				
+					→ nhưng tập trung vào việc tạo cluster Kubernetes chuẩn production.
+
+		KOPS DÙNG ĐỂ LÀM GÌ?
+
+			Tạo Kubernetes cluster hoàn chỉnh trên AWS
+
+			Quản lý lifecycle của cluster:
+
+				tạo
+
+				cập nhật
+
+				nâng cấp version
+
+				thay đổi cấu hình
+
+				xóa cluster
+
+			Tự động cấu hình networking, load balancer, autoscaling, etcd…
+
+			Tạo cluster HA (High Availability)
+
+			Tự động hóa provisioning bằng file YAML (declarative)
+
+		TẠI SAO CẦN KOPS?
+
+			Vì Kubernetes không tự dựng cluster cho bạn.
+
+			Trên cloud như AWS, bạn phải tự tạo:
+
+				EC2 (master + worker nodes)
+
+				VPC
+
+				Route tables
+
+				Subnets
+
+				Autoscaling groups
+
+				Security groups
+
+				Load balancers
+
+				Etcd
+
+				DNS
+
+			Nếu làm thủ công → quá phức tạp, dễ sai.
+
+			kops làm tất cả tự động bằng 1 lệnh.
+
+		VÍ DỤ DỄ HIỂU
+
+			Tạo cluster:
+			
+				kops create cluster
+				--name=mycluster.k8s.local
+				--state=s3://my-kops-state
+				--zones=us-east-1a
+				--yes
+
+			Kops sẽ tự động:
+
+				tạo EC2
+
+				setup master/worker
+
+				cài kubelet, kube-apiserver
+
+				tạo VPC, subnet
+
+				tạo autoscaling group
+
+				cấu hình load balancer
+
+				hoàn thiện Kubernetes cluster
+
+			Rồi bạn chỉ cần:
+			
+				kubectl get nodes
+
+			Là xong.
+
+		KOPS KHÁC GÌ MINIKUBE?
+
+			Minikube:
+
+				dùng để học / test
+
+				chạy trên máy cá nhân
+
+				chỉ có 1 node
+
+				không phải production
+
+			Kops:
+
+				tạo cluster Kubernetes production trên AWS
+
+				multi-node, multi-AZ
+
+				high availability
+
+				autoscaling
+
+				networking chuẩn cloud
+
+		KOPS HỖ TRỢ NỀN TẢNG NÀO?
+
+			AWS: hỗ trợ mạnh nhất
+
+			GCE (Google Cloud): thử nghiệm
+
+			Bare metal / VMware: có thể dùng nhưng không phổ biến
 		
 
 	- Commands:
@@ -25774,6 +28905,14 @@ sudo updatedb
 
 --- App Deployment on Kubernetes Cluster:
 
+	Truy cập vào EC2 kops để tạo kops
+	
+	Upload source lên git, từ EC2 kops clone code về
+	
+	
+
+	-- Source: hkhcoder (kubeapp)
+
 	- Google search:
 	
 		kubernetes persistent volume claim
@@ -25784,7 +28923,152 @@ sudo updatedb
 		
 		helm docs install helm
 		
+	Kiến trúc ứng dụng chạy trên Kubernetes Cluster:
+	
+		Tổng quan hình ảnh
+
+			Ảnh mô tả một kiến trúc ứng dụng chạy trên Kubernetes Cluster (EKS chẳng hạn), bao gồm:
+
+				Load Balancer
+
+				Ingress
+
+				Các Service (Tomcat, RMQ, MC, DB)
+
+				Các Pod tương ứng (Tomcat, RabbitMQ, Memcache, MySQL)
+
+				Secret
+
+				PersistentVolumeClaim + StorageClass
+
+				Amazon EBS để lưu trữ dữ liệu bền vững
+
+		Giải thích từng thành phần
 		
+			Application Load Balancer (ALB – bên ngoài Kubernetes)
+
+				Đây là Load Balancer của AWS.
+
+				Nhận request từ người dùng trên Internet.
+
+				Chuyển request vào Ingress của Kubernetes.
+
+			Ingress
+
+				Điểm vào của toàn hệ thống trong Kubernetes.
+
+				Routing request dựa trên đường dẫn / domain.
+
+				Gửi request đến TomcatService.
+
+			TomcatService
+
+				Là Kubernetes Service (thường là ClusterIP hoặc NodePort).
+
+				Đứng trước Pod Tomcat.
+
+				Giúp load-balancing giữa nhiều Pod Tomcat (nếu có).
+
+			Tomcat Pod
+
+				Chạy ứng dụng chính (Java Spring, JSP, v.v…).
+
+				Đây là nơi xử lý business logic.
+
+				Từ Tomcat Pod, ứng dụng cần gọi đến các microservices khác như:
+
+					RMQService
+
+					MCService
+
+					DBService
+
+		Các service tầng dưới
+		
+			RMQService (RabbitMQ Service)
+
+				Service để kết nối tới Pod RabbitMQ.
+
+				RabbitMQ dùng để xử lý message queue.
+
+			MCService (Memcache Service)
+
+				Service cho Pod Memcache.
+
+				Dùng caching tăng tốc độ truy xuất.
+
+			DBService (MySQL Service)
+
+				Service đứng trước Pod Database.
+
+				Để Tomcat có thể giao tiếp ổn định với MySQL.
+
+		Các Pod tương ứng
+		
+			RabbitMQ Pod
+
+				Chạy message-broker RabbitMQ.
+
+				Nhận config từ Secret nếu cần (password, connection string).
+
+			Memcache Pod
+
+				Chạy Memcached.
+
+				Dùng caching để giảm tải DB và cải thiện tốc độ.
+
+			DB Pod (MySQL)
+
+				Chứa MySQL.
+
+				Volume mount vào thư mục:
+				/var/lib/mysql
+
+				→ Để đảm bảo dữ liệu không mất khi Pod chết.
+
+		Secret
+
+			Lưu password, key, connection string…
+
+			Gửi cho RabbitMQ, DB Pod hoặc Tomcat Pod.
+
+		Lưu trữ: PVC – StorageClass – Amazon EBS
+		
+			PersistentVolumeClaim (PVC)
+
+				DB Pod yêu cầu một disk để lưu trữ dữ liệu.
+
+				Ví dụ: 20GB SSD.
+
+			StorageClass
+
+				Quy định loại storage AWS cung cấp (gp3, io1, throughput…).
+
+			Amazon EBS
+
+				Ổ cứng thật của AWS được provision khi có PVC.
+
+				Gắn vào DB Pod để dữ liệu persist (bền vững).
+
+		Luồng xử lý tổng thể
+
+			Người dùng → ALB (AWS)
+
+			ALB → Ingress (Kubernetes)
+
+			Ingress → TomcatService
+
+			TomcatService → Tomcat Pod
+
+			Tomcat gọi:
+
+				RMQService → RabbitMQ Pod
+
+				MCService → Memcache Pod
+
+				DBService → MySQL Pod
+
+			MySQL Pod cần lưu dữ liệu → PVC → StorageClass → Amazon EBS
 
 	- Commands:
 	
@@ -25812,6 +29096,46 @@ sudo updatedb
 	- SonarCloud -> My Account -> Security -> Generate Token
 	- SonarCloud -> My organization -> instance -> Quality Gates -> Create -> Add Condition
 	- SonarCloud -> My Projects -> instance -> Administration -> Quality Gate -> Use a specific quality gate
+	
+	github action:
+	
+		checkout
+		
+		hashicorp - setup terraform
+		
+		docker ecr
+	
+	Tạo ssh-keygen, sau đó thêm vào ssh key của github
+	
+	Tạo user gitops tại IAM có policy là AdministratorAccess, sau đó thêm vào repository secret của github
+	
+	Tạo s3 bucket vprofileactions23
+	
+	Tạo repository vprofileapp trên Amazon Elastic Container Registry
+	
+	Các phần tạo sinh code nãy giờ đều được thêm vào Secrets and variables của github
+	
+	Tạo code terraform, làm việc với github actions
+	
+	Vào setting, vào branches để thiết lập branch protection rules để require a pull request before merging
+	
+	Từ code terraform sẽ tạo ra Elastic kubernetes service, VPC, subnet, gateway, elastic IP, load balancer, ec2
+	
+	Tạo mới organization trên sonarcloud, sau đó tạo mới project trên sonarcloud
+	
+	Tạo security token trên sonarcloud, sau đó lấy token này để thêm vào repository secret trên github
+	
+	Cài đặt kubernetes-helm bởi choco
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	- Google search:
