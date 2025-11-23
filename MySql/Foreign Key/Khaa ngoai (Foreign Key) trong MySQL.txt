@@ -1,0 +1,426 @@
+Khóa ngoại (Foreign Key) là gì?
+	
+	Thông thường chúng ta có hai loại khóa ngoại đó là khóa ngoại giữa hai bảng và khóa ngoại trỏ đến chính nó (đệ quy).
+	
+	Khóa ngoại (Foreign Key) trong MySQL là một ràng buộc dùng để xác định mối quan hệ giữa hai bảng trong cơ sở dữ liệu.
+
+	Khóa ngoại được sử dụng để đảm bảo tính toàn vẹn và liên kết dữ liệu giữa các bảng.
+
+	Nó định nghĩa một mối quan hệ giữa bảng cha (primary key) và bảng con (foreign key) để đảm bảo rằng dữ liệu trong bảng
+	con phụ thuộc vào dữ liệu trong bảng cha.
+
+		Khi chúng ta tạo ra một bảng, thì chỉ lấy được thông tin của duy nhất bảng đó.Tuy nhiên một số trường hợp cần
+		liên kết giữa các bảng lại với nhau để lấy thông tin của 2 hoặc nhiều bảng.Lúc này chúng ta sử dụng khóa ngoại
+		để nối bảng, lấy những thông tin cần thiết giữa các bảng.
+		
+		Một hàng trong bảng con phải chứa các giá trị tồn tại trong bảng cha.
+		
+Tác dụng của khóa ngoại trong dữ liệu
+
+	Việc thiết lập khóa ngoại (foreign key) trong cơ sở dữ liệu có nhiều tác dụng quan trọng:
+	
+		Đảm bảo tính toàn vẹn dữ liệu
+		
+			Khóa ngoại đảm bảo tính toàn vẹn dữ liệu bằng cách đảm bảo rằng mối quan hệ giữa các bảng được
+			duy trì. Nó ngăn chặn việc chèn hoặc cập nhật dữ liệu không hợp lệ trong bảng con, bảo vệ sự nhất
+			quán của cơ sở dữ liệu.
+			
+		Quản lý mối quan hệ giữa các bảng
+		
+			Khóa ngoại giúp quản lý mối quan hệ giữa các bảng trong cơ sở dữ liệu. Nó cho phép bạn liên kết
+			dữ liệu từ các bảng khác nhau dựa trên cột khóa ngoại, giúp truy vấn và thu thập thông tin từ
+			nhiều bảng dễ dàng.
+			
+		Hành vi xóa và cập nhật kiểm tra
+		
+			Thông qua tùy chọn ON DELETE và ON UPDATE, bạn có thể xác định hành vi khi xóa hoặc cập nhật bản
+			ghi trong bảng cha. Điều này giúp bạn quản lý cách dữ liệu trong bảng con phản ánh thay đổi trong
+			bảng cha. Ví dụ, bạn có thể xóa tất cả các bản ghi con khi xóa một bản ghi cha (CASCADE) hoặc đặt
+			các cột khóa ngoại trong bảng con thành NULL khi xóa bản ghi cha (SET NULL).
+			
+		Ngăn chặn dữ liệu không hợp lệ
+		
+			Khóa ngoại ngăn chặn dữ liệu không hợp lệ được chèn vào bảng con. Điều này đảm bảo rằng chỉ dữ liệu hợp
+			lệ và thỏa mãn ràng buộc sẽ được thêm vào bảng con, giúp bảo vệ tính toàn vẹn dữ liệu.
+			
+		Duyệt qua và thực hiện các thao tác dữ liệu liên quan
+		
+			Mối quan hệ khóa ngoại giúp bạn dễ dàng duyệt qua và thực hiện các thao tác dữ liệu liên quan. Ví dụ, bạn
+			có thể lấy tất cả các đơn đặt hàng của một khách hàng cụ thể, tính tổng giá trị đơn đặt hàng của họ hoặc
+			tìm tất cả các đơn đặt hàng liên quan đến một sản phẩm cụ thể.
+			
+	Tóm lại, việc thiết lập khóa ngoại trong cơ sở dữ liệu là một cách quan trọng để đảm bảo tính toàn vẹn dữ liệu, quản lý
+	mối quan hệ giữa các bảng và thực hiện các thao tác dữ liệu liên quan một cách hiệu quả và an toàn.
+	
+Xóa (Drop) Foreign Key
+
+	Để xóa được Foreign Key thì bạn phải biết tên của nó là gì, mà tên chỉ tồn tại trong trường hợp ta
+	có sử dụng từ khóa CONSTRAINT lúc tạo khóa, vì vậy khuyến khích bạn sử dụng CONSTRAINT để tạo khóa ngoại.
+	
+		ALTER TABLE Users DROP FOREIGN KEY fk_group;
+		
+			Trong đó fk_group là tên của khóa ngoại.
+	
+	Một trong những lưu ý quan trọng là khi chúng ta đã tạo khóa ngoại liên kết đến các bảng khác
+	thì khi thực hiện xóa bảng cha các bạn cần xóa bảng con trước rồi mới xóa được bảng cha!
+	
+Tùy chọn ON DELETE khi thiết lập khóa ngoại
+	
+	If a table has a primary key but no dependents, or if a table has only foreign keys but no primary key,
+	the DELETE statement operates the same way as it does for tables without referential constraints. If a
+	table has a primary key and dependent tables, the DELETE statement operates according to the delete rules
+	specified for the table.
+	
+	All delete rules of all affected relationships must be satisfied in order for the delete operation to succeed. If
+	a referential constraint is violated, the DELETE operation fails.
+
+	The action to be taken on dependent tables when a DELETE is performed on a parent table depends on the delete rule
+	specified for the referential constraint. If no delete rule was defined, the DELETE NO ACTION rule is used.
+		
+		Lựa chọn tùy chọn ON DELETE nên phụ thuộc vào mục tiêu và yêu cầu cụ thể của ứng dụng cơ sở dữ liệu
+		của bạn. Dưới đây là một số tùy chọn phù hợp với một số tình huống cụ thể:
+			
+			DELETE NO ACTION
+			
+				Sử dụng NO ACTION nếu bạn muốn ngăn chặn xóa hoặc cập nhật các bản ghi trong bảng cha khi tồn
+				tại các bản ghi con tham chiếu đến chúng, tương tự như RESTRICT. Nó là tùy chọn mặc định và
+				ngăn chặn các hành động không mong muốn.
+					
+					CREATE TABLE OrderDetails (
+						DetailID INT PRIMARY KEY,
+						OrderID INT,
+						ProductName VARCHAR(50),
+						Quantity INT,
+						FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE NO ACTION
+					);
+					
+				Specifies that the row in the parent table can be deleted if no other row depends on it. If a dependent row exists
+				in the relationship, the DELETE fails. The check for dependent rows is performed at the end of the statement.
+			
+			DELETE RESTRICT
+				
+				Sử dụng RESTRICT khi bạn muốn ngăn chặn việc xóa hoặc cập nhật các bản ghi trong bảng cha nếu tồn tại các bản ghi
+				con tham chiếu đến chúng. Điều này có thể là tùy chọn an toàn để đảm bảo tính toàn vẹn dữ liệu, nhưng bạn cần
+				phải quản lý các xử lý lỗi khi cố gắng xóa hoặc cập nhật các bản ghi cha có liên kết với bản ghi con.
+					
+					CREATE TABLE OrderDetails (
+						DetailID INT PRIMARY KEY,
+						OrderID INT,
+						ProductName VARCHAR(50),
+						Quantity INT,
+						FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE RESTRICT
+					);
+					
+				Specifies that the row in the parent table can be deleted if no other row depends on it. If a dependent
+				row exists in the relationship, the DELETE fails. The check for dependent rows is performed immediately.
+
+	For example, you cannot delete a department from the department table if it is still responsible for some
+	project that is described by a dependent row in the project table.
+			
+			DELETE CASCADE
+			
+				Sử dụng CASCADE khi bạn muốn tự động xóa hoặc cập nhật các bản ghi trong bảng con khi có sự thay đổi
+				trong bảng cha. Điều này hữu ích khi bạn muốn duyệt qua và cập nhật dữ liệu bảng con liên quan mà không
+				cần thực hiện điều này thủ công. Tuy nhiên, bạn cần cẩn thận để không gây ra sự mất mát dữ liệu không
+				mong muốn.
+					
+					CREATE TABLE OrderDetails (
+						DetailID INT PRIMARY KEY,
+						OrderID INT,
+						ProductName VARCHAR(50),
+						Quantity INT,
+						FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE
+					);
+					
+				Specifies that first the designated rows in the parent table are deleted. Then, the dependent rows are deleted.
+
+	For example, you can delete a department by deleting its row in the department table. Deleting the row from
+	the department table also deletes:
+					
+					The rows for all departments that report to it
+					
+	All departments that report to those departments and so forth.
+			
+			DELETE SET NULL
+				
+				Sử dụng SET NULL khi bạn muốn đặt các cột khóa ngoại trong bảng con thành NULL khi bản ghi
+				cha được xóa hoặc cập nhật. Điều này hữu ích khi bạn muốn giữ lại dữ liệu trong bảng con và
+				cho phép các bản ghi con không có khóa ngoại hợp lệ. Tuy nhiên, bạn cần kiểm tra và xử lý các
+				giá trị NULL trong ứng dụng của bạn.
+				
+					CREATE TABLE OrderDetails (
+						DetailID INT PRIMARY KEY,
+						OrderID INT,
+						ProductName VARCHAR(50),
+						Quantity INT,
+						FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE SET NULL
+					);
+					
+				Specifies that each nullable column of the foreign key in each dependent row is set to its default
+				value. This means that the column is only set to its default value if it is a member of a foreign
+				key that references the row being deleted. Only the dependent rows that are immediate descendents
+				are affected.
+				
+			DELETE SET DEFAULT
+				
+				Specifies that each column of the foreign key in each dependent row is set to its default value. This means
+				that the column is only set to its default value if it is a member of a foreign key that references the row
+				being deleted. Only the dependent rows that are immediate descendants are affected.
+					
+					CREATE TABLE OrderDetails (
+						DetailID INT PRIMARY KEY,
+						OrderID INT,
+						ProductName VARCHAR(50),
+						Quantity INT,
+						FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE SET DEFAULT
+					);
+					
+				For example, you can delete an employee from the employee table (EMPLOYEE) even if the employee manages
+				some department. In that case, the value of MGRNO for each employee who reported to the manager
+				is set to blanks in the department table (DEPARTMENT). If some other default value was specified
+				on the create of the table, that value is used.
+				
+		Lựa chọn tùy chọn ON DELETE cần xem xét cẩn thận và phụ thuộc vào logic kết nối dữ liệu của bạn và cách bạn
+		muốn xử lý các thay đổi trong cơ sở dữ liệu.
+
+Xóa Dữ Liệu (DELETE)
+
+	Xóa Dòng Trong Bảng Cha:
+	
+		Nếu bạn xóa một dòng trong bảng cha (primary key), hãy kiểm tra xem có bảng con nào tham chiếu đến nó hay không.
+
+		Có thể có các lựa chọn để xử lý thao tác xóa, chẳng hạn như xóa tất cả các dòng con liên quan hoặc đặt giá
+		trị null cho các khóa ngoại trong bảng con.
+	
+	Ràng Buộc Xóa (DELETE CASCADE):
+		
+		Nếu muốn xóa tất cả các dòng liên quan từ bảng con khi xóa một dòng trong bảng cha, bạn có thể sử
+		dụng ràng buộc XÓA TỰ ĐỘNG (DELETE CASCADE).
+
+Cẩn thận với tùy chọn này vì nó có thể dẫn đến mất mát dữ liệu không mong muốn.
+
+	Cập Nhật Dữ Liệu (UPDATE)
+		
+		Cập Nhật Khóa Chính:
+			
+			Nếu bạn cập nhật giá trị khóa chính của một dòng trong bảng cha, hãy kiểm tra xem có bảng con nào
+			tham chiếu đến nó hay không.
+
+	Nếu khóa chính thay đổi, các giá trị khóa ngoại trong bảng con cũng cần được cập nhật để duy trì tính toàn vẹn.
+		
+		Ràng Buộc Cập Nhật (UPDATE CASCADE):
+			
+			Có thể sử dụng ràng buộc CẬP NHẬT TỰ ĐỘNG (UPDATE CASCADE) để tự động cập nhật giá trị trong các bảng
+			con khi có sự thay đổi ở bảng cha.
+
+	Lưu ý rằng tùy chọn này cũng cần được sử dụng cẩn thận để tránh mất mát dữ liệu.
+		
+		Sử Dụng Ràng Buộc NULL (ON UPDATE SET NULL):
+			
+			Bạn cũng có thể sử dụng tùy chọn ON UPDATE SET NULL để đặt giá trị khóa ngoại trong bảng con thành NULL khi có sự thay
+			đổi trong bảng cha.
+		
+		NO ACTION:
+			
+			Không thực hiện bất kỳ hành động nào khi giá trị khóa chính của dữ liệu cha được cập nhật. Điều này có thể dẫn đến việc
+			từ chối cập nhật nếu có dữ liệu con liên quan.
+				
+				FOREIGN KEY (column_name) REFERENCES parent_table (parent_column) ON UPDATE NO ACTION;
+		
+		CASCADE:
+			
+			Tự động cập nhật giá trị khóa ngoại trong dữ liệu con khi giá trị khóa chính của dữ liệu cha được cập nhật.
+				
+				FOREIGN KEY (column_name) REFERENCES parent_table (parent_column) ON UPDATE CASCADE;
+		
+		SET NULL:
+			
+			Đặt giá trị của khóa ngoại trong dữ liệu con thành NULL khi giá trị khóa chính của dữ liệu cha được cập nhật.
+				
+				FOREIGN KEY (column_name) REFERENCES parent_table (parent_column) ON UPDATE SET NULL;
+		
+		SET DEFAULT:
+			
+			Đặt giá trị của khóa ngoại trong dữ liệu con thành giá trị mặc định khi giá trị khóa chính của dữ liệu cha được cập nhật.
+		
+		RESTRICT:
+			
+			Tương tự như NO ACTION, ngăn chặn cập nhật nếu có dữ liệu con liên quan.
+				
+				FOREIGN KEY (column_name) REFERENCES parent_table (parent_column) ON UPDATE RESTRICT;
+			
+			RESTRICT trong mối quan hệ khóa ngoại được sử dụng để ngăn chặn cập nhật dữ liệu trong bảng
+			cha (parent). Nó không ngăn chặn cập nhật dữ liệu trong bảng con (child).
+			
+			Khi bạn đặt ON UPDATE RESTRICT trên một khóa ngoại, nó có nghĩa là nếu giá trị khóa chính
+			trong bảng cha (parent) được thay đổi, mọi cập nhật sẽ bị từ chối nếu có bất kỳ dữ liệu
+			con (child) nào phụ thuộc vào giá trị khóa chính đó.
+		
+Lưu ý chung
+	
+	Kiểm Soát Tùy Chọn Xóa và Cập Nhật:
+		
+		Khi định nghĩa ràng buộc khóa ngoại, bạn có thể sử dụng các tùy chọn như CASCADE, SET NULL,
+		SET DEFAULT, RESTRICT, NO ACTION để kiểm soát hành vi của thao tác xóa và cập nhật.
+		
+		Nếu bạn không chọn tùy chọn nào khi định nghĩa ràng buộc khóa ngoại, thì mặc định thường
+		là NO ACTION. NO ACTION là một trong những tùy chọn được sử dụng khi không có tùy chọn nào
+		được chỉ định, và nó thường tương đương với RESTRICT. Điều này có nghĩa là:
+			
+			Khi bạn cố gắng thực hiện thao tác xóa hoặc cập nhật trên bảng cha, hệ thống sẽ kiểm tra xem
+			có bảng con tham chiếu đến dữ liệu đó hay không.
+
+		Nếu có tham chiếu từ bảng con, thì thao tác xóa hoặc cập nhật sẽ bị từ chối, và không có thay đổi nào sẽ xảy ra.
+	
+	Tính Toàn Vẹn Cơ Dữ Liệu:
+	
+		Luôn giữ tính toàn vẹn của dữ liệu là quan trọng. Hãy đảm bảo rằng quan hệ khóa ngoại được
+		xử lý một cách đúng đắn để tránh mất mát dữ liệu hoặc dữ liệu không hợp lý.
+
+Ví dụ
+
+		Cột CustomerID trong bảng Orders tham chiếu dữ liệu từ cột ID trong cái bảng Customers, nó cho
+		chúng ta biết những khách hàng nào đã đặt những đơn hàng nào (nếu chúng ta thêm vào cái bảng
+		Order những đơn hàng mà ID của các khách hàng không tồn tại thì những đơn hàng đó sẽ trở nên
+		không hợp lệ)
+		
+		Để tránh việc bảng Orders bị chứa những đơn hàng không hợp lệ thì chúng ta cần phải thiết lập ràng
+		buộc FOREIGN KEY cho cột CustomerID, ràng buộc này đảm bảo việc ngăn chặn những hành động không hợp
+		lệ, điển hình như:
+			
+			Không cho phép thêm những đơn hàng mà ID của khách hàng không tồn tại trong bảng Customers.
+
+			Không cho phép xóa những khách hàng mà ID của họ có tồn tại trong bảng Orders.
+
+			Không cho phép xóa bảng Customers khi bảng Orders vẫn còn đang tồn tại.
+			. . . .
+
+		Trong hai cái bảng, bảng chứa ràng buộc FOREIGN KEY (khóa ngoại) được gọi là bảng con, còn bảng chứa
+		khóa ứng viên thì được gọi là bảng tham chiếu hoặc bảng cha (điển hình như trong ví dụ phía trên, bảng
+		Orders được gọi là bảng con, bảng Customers được gọi là bảng tham chiếu)
+		
+Trong nhiều dự án thực tế, lựa chọn giữa các tùy chọn CASCADE, SET NULL, SET DEFAULT, RESTRICT
+(hoặc NO ACTION) phụ thuộc vào yêu cầu cụ thể của ứng dụng và mô hình dữ liệu. Dưới đây là một số
+hướng dẫn phổ biến:
+
+	NO ACTION hoặc RESTRICT:
+		
+		Khi tính toàn vẹn dữ liệu là quan trọng và không muốn tự động xóa hay cập nhật dữ liệu liên
+		quan khi có thay đổi trong bảng cha.
+		
+		Khi muốn chủ động quản lý thao tác xóa và cập nhật từ phía ứng dụng.
+		
+	CASCADE:
+			
+		Khi bạn muốn tự động xóa hoặc cập nhật dữ liệu liên quan trong bảng con khi có thay đổi trong bảng cha.
+
+		Khi đảm bảo rằng việc xóa hoặc cập nhật sẽ không gây ra mất mát dữ liệu quan trọng.
+		
+	SET NULL hoặc SET DEFAULT:
+			
+		Khi bạn muốn đặt giá trị khóa ngoại trong bảng con thành NULL hoặc giá trị mặc định khi
+		dòng tương ứng trong bảng cha bị xóa hoặc cập nhật.
+
+	Khi giá trị NULL hoặc giá trị mặc định là hợp lệ trong ngữ cảnh dữ liệu.
+		
+	Lựa chọn cụ thể sẽ phụ thuộc vào yêu cầu kịp thời của dự án, mô hình dữ liệu, và chiến lược quản lý
+	dữ liệu. Trong nhiều trường hợp, người ta thường chọn NO ACTION hoặc CASCADE tùy thuộc vào mức độ tự
+	động hóa và quản lý mối quan hệ dữ liệu. Cần lưu ý rằng không có một lựa chọn đơn nhất, và quyết định
+	sẽ phụ thuộc vào ngữ cảnh cụ thể của dự án.
+
+Tạo khóa ngoại (Foreign Key) trong MySQL
+
+	Tất cả các cách đều có chung một cấu trúc đó là khai báo field của bảng A và sẽ tham
+	chiếu đến field nào của bảng B bởi từ khóa REFERENCES.
+	
+	Tạo trong lệnh tạo bảng create table
+		
+		Chúng ta sẽ tạo trực tiếp trong lệnh tạo bảng và cú pháp của nó cũng tương tự như lệnh
+		tạo khóa chính, nghĩa là sẽ đặt ở cuối phần khai báo field. Nếu sử dụng cách này thì khóa ngoại sẽ không có tên.
+		
+			CREATE TABLE Groups (
+				groupid INT(11) NOT NULL PRIMARY KEY,
+				title INT(11) NOT NULL,
+				LEVEL TINYINT(1) DEFAULT 1 NOT NULL
+			);
+			 
+			CREATE TABLE Users(
+				userid INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+				username VARCHAR(50) NOT NULL ,
+				email VARCHAR (50) NOT NULL ,
+				groupid INT(11),
+				FOREIGN KEY (groupid) REFERENCES Groups(groupid)
+			);
+			
+			Các bạn thấy tôi đã sử dụng từ khóa FOREIGN KEY (groupid) REFERENCES Groups(groupid) để tạo khóa ngoại, trong đó:
+				
+				FOREIGN KEY (groupid): là field được chọn làm khóa ngoại ở bảng con, tức là bảng Users.
+				REFERENCES Groups(groupid): là khóa chính của bảng cha, tức là bảng Groups.
+		
+		Sau khi tạo xong bạn vào PHPMyAdmin và chọn mục database, chọn diagram ở thanh công cụ thì lúc này bạn sẽ thấy một sơ đồ như sau:
+		
+		Ví dụ có đặt tên:
+		
+			Tương tự như các phần trước, để đặt tên cho khóa ngoại thì ta phải sử dụng từ khóa CONSTRAINT.
+			
+				CREATE TABLE Groups (
+					groupid INT(11) NOT NULL PRIMARY KEY,
+					title INT(11) NOT NULL,
+					LEVEL TINYINT(1) DEFAULT 1 NOT NULL
+				);
+				 
+				CREATE TABLE Users(
+					userid INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+					username VARCHAR(50) NOT NULL ,
+					email VARCHAR (50) NOT NULL ,
+					groupid INT(11),
+					CONSTRAINT fk_group FOREIGN KEY (groupid) REFERENCES Groups(groupid)
+				);
+	
+	Tạo bằng lệnh ALTER TABLE
+		
+		Với cách này ta phải tạo hai bảng trước, sau đó sẽ dùng lệnh ALTER TABLE để thêm FOREIGN KEY.
+			
+			CREATE TABLE Groups (
+				groupid INT(11) NOT NULL PRIMARY KEY,
+				title INT(11) NOT NULL,
+				LEVEL TINYINT(1) DEFAULT 1 NOT NULL
+			);
+			 
+			CREATE TABLE Users(
+				userid INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+				username VARCHAR(50) NOT NULL ,
+				email VARCHAR (50) NOT NULL ,
+				groupid INT(11)
+			);
+ 
+			ALTER TABLE Users ADD FOREIGN KEY(groupid) REFERENCES Groups(groupid);
+		
+		Hoặc:
+		
+			CREATE TABLE Groups (
+				groupid INT(11) NOT NULL PRIMARY KEY,
+				title INT(11) NOT NULL,
+				LEVEL TINYINT(1) DEFAULT 1 NOT NULL
+			);
+			 
+			CREATE TABLE Users(
+				userid INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+				username VARCHAR(50) NOT NULL,
+				email VARCHAR (50) NOT NULL,
+				groupid INT(11)
+			);
+			 
+			ALTER TABLE Users ADD CONSTRAINT fk_group FOREIGN KEY(groupid) REFERENCES Groups(groupid);
+			
+	Tạo khóa ngoại trường hợp tham chiếu chính nó
+		
+		Trường hợp này ta cũng sử dụng cú pháp tương tự, thay vì tham chiếu tới bảng nào đó thì sẽ tham chiếu đến chính nó.
+			
+			CREATE TABLE Employee(
+				id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+				fullname VARCHAR(50) NOT NULL,
+				email VARCHAR (50) NOT NULL,
+				leader_id INT (11) NOT NULL,
+				CONSTRAINT pk_self FOREIGN KEY (leader_id) REFERENCES Employee(id) 
+			);
