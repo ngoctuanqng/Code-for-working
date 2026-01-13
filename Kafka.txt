@@ -1,0 +1,1722 @@
+Những việc cần làm:
+
+	Apache Kafka Broker(s):
+	
+		Cần chạy kafka version 4.1 để có thể start topic với replication-factor là 3
+
+--- Apache Kafka Broker(s):
+
+
+	Flow chạy với version nhỏ hơn 4.1:
+
+		Chạy lệnh sau trên cmd với quyền admin, wsl là window subsystem for linux:
+		
+			wsl --install
+			
+		Mở wsl
+		
+		Install Java:
+		
+			sudo apt-get update && sudo apt-get upgrade -y
+			
+			sudo apt install openjdk-17-jdk -y
+			
+		Download Kafka:
+		
+			wget https://dlcdn.apache.org/kafka/3.7.0/kafka_2.13-3.7.0.tgz
+			
+			tar -xzf kafka_2.13-3.5.0.tgz
+			
+			cd kafka_2.13-3.5.0
+		
+		Start the Kafka cluster:
+		
+			Run the kafka-storage.sh script to generate a cluster ID:
+			
+				KAFKA_CLUSTER_ID="$(bin/kafka-storage.sh random-uuid)"
+				
+			Run the kafka-storage.sh script again to format the log directories:
+			
+				bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c config/kraft/server.properties
+				
+			Run the kafka-server-start.sh script to start the Kafka server:
+			
+				bin/kafka-server-start.sh config/kraft/server.properties
+				
+		Tạo và chạy với nhiều broker:
+		
+			Thêm 3 file sau vào link config/kraft:
+			
+				server-1.properties:
+				
+					# Licensed to the Apache Software Foundation (ASF) under one or more
+					# contributor license agreements.  See the NOTICE file distributed with
+					# this work for additional information regarding copyright ownership.
+					# The ASF licenses this file to You under the Apache License, Version 2.0
+					# (the "License"); you may not use this file except in compliance with
+					# the License.  You may obtain a copy of the License at
+					#
+					#    http://www.apache.org/licenses/LICENSE-2.0
+					#
+					# Unless required by applicable law or agreed to in writing, software
+					# distributed under the License is distributed on an "AS IS" BASIS,
+					# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+					# See the License for the specific language governing permissions and
+					# limitations under the License.
+
+					#
+					# This configuration file is intended for use in KRaft mode, where
+					# Apache ZooKeeper is not present.
+					#
+
+					############################# Server Basics #############################
+
+					# The role of this server. Setting this puts us in KRaft mode
+					process.roles=broker,controller
+
+					# The node id associated with this instance's roles
+					node.id=1
+
+					# The connect string for the controller quorum
+					controller.quorum.voters=1@localhost:9093,2@localhost:9095,3@localhost:9097
+
+					############################# Socket Server Settings #############################
+
+					# The address the socket server listens on.
+					# Combined nodes (i.e. those with `process.roles=broker,controller`) must list the controller listener here at a minimum.
+					# If the broker listener is not defined, the default listener will use a host name that is equal to the value of java.net.InetAddress.getCanonicalHostName(),
+					# with PLAINTEXT listener name, and port 9092.
+					#   FORMAT:
+					#     listeners = listener_name://host_name:port
+					#   EXAMPLE:
+					#     listeners = PLAINTEXT://your.host.name:9092
+					listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+
+					# Name of listener used for communication between brokers.
+					inter.broker.listener.name=PLAINTEXT
+
+					# Listener name, hostname and port the broker will advertise to clients.
+					# If not set, it uses the value for "listeners".
+					advertised.listeners=PLAINTEXT://localhost:9092
+
+					# A comma-separated list of the names of the listeners used by the controller.
+					# If no explicit mapping set in `listener.security.protocol.map`, default will be using PLAINTEXT protocol
+					# This is required if running in KRaft mode.
+					controller.listener.names=CONTROLLER
+
+					# Maps listener names to security protocols, the default is for them to be the same. See the config documentation for more details
+					listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+
+					# The number of threads that the server uses for receiving requests from the network and sending responses to the network
+					num.network.threads=3
+
+					# The number of threads that the server uses for processing requests, which may include disk I/O
+					num.io.threads=8
+
+					# The send buffer (SO_SNDBUF) used by the socket server
+					socket.send.buffer.bytes=102400
+
+					# The receive buffer (SO_RCVBUF) used by the socket server
+					socket.receive.buffer.bytes=102400
+
+					# The maximum size of a request that the socket server will accept (protection against OOM)
+					socket.request.max.bytes=104857600
+
+
+					############################# Log Basics #############################
+
+					# A comma separated list of directories under which to store log files
+					log.dirs=/tmp/server-1/kraft-combined-logs
+
+					# The default number of log partitions per topic. More partitions allow greater
+					# parallelism for consumption, but this will also result in more files across
+					# the brokers.
+					num.partitions=1
+
+					# The number of threads per data directory to be used for log recovery at startup and flushing at shutdown.
+					# This value is recommended to be increased for installations with data dirs located in RAID array.
+					num.recovery.threads.per.data.dir=1
+
+					############################# Internal Topic Settings  #############################
+					# The replication factor for the group metadata internal topics "__consumer_offsets" and "__transaction_state"
+					# For anything other than development testing, a value greater than 1 is recommended to ensure availability such as 3.
+					offsets.topic.replication.factor=1
+					transaction.state.log.replication.factor=1
+					transaction.state.log.min.isr=1
+
+					############################# Log Flush Policy #############################
+
+					# Messages are immediately written to the filesystem but by default we only fsync() to sync
+					# the OS cache lazily. The following configurations control the flush of data to disk.
+					# There are a few important trade-offs here:
+					#    1. Durability: Unflushed data may be lost if you are not using replication.
+					#    2. Latency: Very large flush intervals may lead to latency spikes when the flush does occur as there will be a lot of data to flush.
+					#    3. Throughput: The flush is generally the most expensive operation, and a small flush interval may lead to excessive seeks.
+					# The settings below allow one to configure the flush policy to flush data after a period of time or
+					# every N messages (or both). This can be done globally and overridden on a per-topic basis.
+
+					# The number of messages to accept before forcing a flush of data to disk
+					#log.flush.interval.messages=10000
+
+					# The maximum amount of time a message can sit in a log before we force a flush
+					#log.flush.interval.ms=1000
+
+					############################# Log Retention Policy #############################
+
+					# The following configurations control the disposal of log segments. The policy can
+					# be set to delete segments after a period of time, or after a given size has accumulated.
+					# A segment will be deleted whenever *either* of these criteria are met. Deletion always happens
+					# from the end of the log.
+
+					# The minimum age of a log file to be eligible for deletion due to age
+					log.retention.hours=168
+
+					# A size-based retention policy for logs. Segments are pruned from the log unless the remaining
+					# segments drop below log.retention.bytes. Functions independently of log.retention.hours.
+					#log.retention.bytes=1073741824
+
+					# The maximum size of a log segment file. When this size is reached a new log segment will be created.
+					log.segment.bytes=1073741824
+
+					# The interval at which log segments are checked to see if they can be deleted according
+					# to the retention policies
+					log.retention.check.interval.ms=300000
+					
+				server-2.properties:
+				
+					# Licensed to the Apache Software Foundation (ASF) under one or more
+					# contributor license agreements.  See the NOTICE file distributed with
+					# this work for additional information regarding copyright ownership.
+					# The ASF licenses this file to You under the Apache License, Version 2.0
+					# (the "License"); you may not use this file except in compliance with
+					# the License.  You may obtain a copy of the License at
+					#
+					#    http://www.apache.org/licenses/LICENSE-2.0
+					#
+					# Unless required by applicable law or agreed to in writing, software
+					# distributed under the License is distributed on an "AS IS" BASIS,
+					# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+					# See the License for the specific language governing permissions and
+					# limitations under the License.
+
+					#
+					# This configuration file is intended for use in KRaft mode, where
+					# Apache ZooKeeper is not present.
+					#
+
+					############################# Server Basics #############################
+
+					# The role of this server. Setting this puts us in KRaft mode
+					process.roles=broker,controller
+
+					# The node id associated with this instance's roles
+					node.id=2
+
+					# The connect string for the controller quorum
+					controller.quorum.voters=1@localhost:9093,2@localhost:9095,3@localhost:9097
+
+					############################# Socket Server Settings #############################
+
+					# The address the socket server listens on.
+					# Combined nodes (i.e. those with `process.roles=broker,controller`) must list the controller listener here at a minimum.
+					# If the broker listener is not defined, the default listener will use a host name that is equal to the value of java.net.InetAddress.getCanonicalHostName(),
+					# with PLAINTEXT listener name, and port 9092.
+					#   FORMAT:
+					#     listeners = listener_name://host_name:port
+					#   EXAMPLE:
+					#     listeners = PLAINTEXT://your.host.name:9092
+					listeners=PLAINTEXT://:9094,CONTROLLER://:9095
+
+					# Name of listener used for communication between brokers.
+					inter.broker.listener.name=PLAINTEXT
+
+					# Listener name, hostname and port the broker will advertise to clients.
+					# If not set, it uses the value for "listeners".
+					advertised.listeners=PLAINTEXT://localhost:9094
+
+					# A comma-separated list of the names of the listeners used by the controller.
+					# If no explicit mapping set in `listener.security.protocol.map`, default will be using PLAINTEXT protocol
+					# This is required if running in KRaft mode.
+					controller.listener.names=CONTROLLER
+
+					# Maps listener names to security protocols, the default is for them to be the same. See the config documentation for more details
+					listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+
+					# The number of threads that the server uses for receiving requests from the network and sending responses to the network
+					num.network.threads=3
+
+					# The number of threads that the server uses for processing requests, which may include disk I/O
+					num.io.threads=8
+
+					# The send buffer (SO_SNDBUF) used by the socket server
+					socket.send.buffer.bytes=102400
+
+					# The receive buffer (SO_RCVBUF) used by the socket server
+					socket.receive.buffer.bytes=102400
+
+					# The maximum size of a request that the socket server will accept (protection against OOM)
+					socket.request.max.bytes=104857600
+
+
+					############################# Log Basics #############################
+
+					# A comma separated list of directories under which to store log files
+					log.dirs=/tmp/server-2/kraft-combined-logs
+
+					# The default number of log partitions per topic. More partitions allow greater
+					# parallelism for consumption, but this will also result in more files across
+					# the brokers.
+					num.partitions=1
+
+					# The number of threads per data directory to be used for log recovery at startup and flushing at shutdown.
+					# This value is recommended to be increased for installations with data dirs located in RAID array.
+					num.recovery.threads.per.data.dir=1
+
+					############################# Internal Topic Settings  #############################
+					# The replication factor for the group metadata internal topics "__consumer_offsets" and "__transaction_state"
+					# For anything other than development testing, a value greater than 1 is recommended to ensure availability such as 3.
+					offsets.topic.replication.factor=1
+					transaction.state.log.replication.factor=1
+					transaction.state.log.min.isr=1
+
+					############################# Log Flush Policy #############################
+
+					# Messages are immediately written to the filesystem but by default we only fsync() to sync
+					# the OS cache lazily. The following configurations control the flush of data to disk.
+					# There are a few important trade-offs here:
+					#    1. Durability: Unflushed data may be lost if you are not using replication.
+					#    2. Latency: Very large flush intervals may lead to latency spikes when the flush does occur as there will be a lot of data to flush.
+					#    3. Throughput: The flush is generally the most expensive operation, and a small flush interval may lead to excessive seeks.
+					# The settings below allow one to configure the flush policy to flush data after a period of time or
+					# every N messages (or both). This can be done globally and overridden on a per-topic basis.
+
+					# The number of messages to accept before forcing a flush of data to disk
+					#log.flush.interval.messages=10000
+
+					# The maximum amount of time a message can sit in a log before we force a flush
+					#log.flush.interval.ms=1000
+
+					############################# Log Retention Policy #############################
+
+					# The following configurations control the disposal of log segments. The policy can
+					# be set to delete segments after a period of time, or after a given size has accumulated.
+					# A segment will be deleted whenever *either* of these criteria are met. Deletion always happens
+					# from the end of the log.
+
+					# The minimum age of a log file to be eligible for deletion due to age
+					log.retention.hours=168
+
+					# A size-based retention policy for logs. Segments are pruned from the log unless the remaining
+					# segments drop below log.retention.bytes. Functions independently of log.retention.hours.
+					#log.retention.bytes=1073741824
+
+					# The maximum size of a log segment file. When this size is reached a new log segment will be created.
+					log.segment.bytes=1073741824
+
+					# The interval at which log segments are checked to see if they can be deleted according
+					# to the retention policies
+					log.retention.check.interval.ms=300000
+					
+			server-3.properties:
+
+				# Licensed to the Apache Software Foundation (ASF) under one or more
+				# contributor license agreements.  See the NOTICE file distributed with
+				# this work for additional information regarding copyright ownership.
+				# The ASF licenses this file to You under the Apache License, Version 2.0
+				# (the "License"); you may not use this file except in compliance with
+				# the License.  You may obtain a copy of the License at
+				#
+				#    http://www.apache.org/licenses/LICENSE-2.0
+				#
+				# Unless required by applicable law or agreed to in writing, software
+				# distributed under the License is distributed on an "AS IS" BASIS,
+				# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+				# See the License for the specific language governing permissions and
+				# limitations under the License.
+
+				#
+				# This configuration file is intended for use in KRaft mode, where
+				# Apache ZooKeeper is not present.
+				#
+
+				############################# Server Basics #############################
+
+				# The role of this server. Setting this puts us in KRaft mode
+				process.roles=broker,controller
+
+				# The node id associated with this instance's roles
+				node.id=3
+
+				# The connect string for the controller quorum
+				controller.quorum.voters=1@localhost:9093,2@localhost:9095,3@localhost:9097
+
+				############################# Socket Server Settings #############################
+
+				# The address the socket server listens on.
+				# Combined nodes (i.e. those with `process.roles=broker,controller`) must list the controller listener here at a minimum.
+				# If the broker listener is not defined, the default listener will use a host name that is equal to the value of java.net.InetAddress.getCanonicalHostName(),
+				# with PLAINTEXT listener name, and port 9092.
+				#   FORMAT:
+				#     listeners = listener_name://host_name:port
+				#   EXAMPLE:
+				#     listeners = PLAINTEXT://your.host.name:9092
+				listeners=PLAINTEXT://:9096,CONTROLLER://:9097
+
+				# Name of listener used for communication between brokers.
+				inter.broker.listener.name=PLAINTEXT
+
+				# Listener name, hostname and port the broker will advertise to clients.
+				# If not set, it uses the value for "listeners".
+				advertised.listeners=PLAINTEXT://localhost:9096
+
+				# A comma-separated list of the names of the listeners used by the controller.
+				# If no explicit mapping set in `listener.security.protocol.map`, default will be using PLAINTEXT protocol
+				# This is required if running in KRaft mode.
+				controller.listener.names=CONTROLLER
+
+				# Maps listener names to security protocols, the default is for them to be the same. See the config documentation for more details
+				listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+
+				# The number of threads that the server uses for receiving requests from the network and sending responses to the network
+				num.network.threads=3
+
+				# The number of threads that the server uses for processing requests, which may include disk I/O
+				num.io.threads=8
+
+				# The send buffer (SO_SNDBUF) used by the socket server
+				socket.send.buffer.bytes=102400
+
+				# The receive buffer (SO_RCVBUF) used by the socket server
+				socket.receive.buffer.bytes=102400
+
+				# The maximum size of a request that the socket server will accept (protection against OOM)
+				socket.request.max.bytes=104857600
+
+
+				############################# Log Basics #############################
+
+				# A comma separated list of directories under which to store log files
+				log.dirs=/tmp/server-3/kraft-combined-logs
+
+				# The default number of log partitions per topic. More partitions allow greater
+				# parallelism for consumption, but this will also result in more files across
+				# the brokers.
+				num.partitions=1
+
+				# The number of threads per data directory to be used for log recovery at startup and flushing at shutdown.
+				# This value is recommended to be increased for installations with data dirs located in RAID array.
+				num.recovery.threads.per.data.dir=1
+
+				############################# Internal Topic Settings  #############################
+				# The replication factor for the group metadata internal topics "__consumer_offsets" and "__transaction_state"
+				# For anything other than development testing, a value greater than 1 is recommended to ensure availability such as 3.
+				offsets.topic.replication.factor=1
+				transaction.state.log.replication.factor=1
+				transaction.state.log.min.isr=1
+
+				############################# Log Flush Policy #############################
+
+				# Messages are immediately written to the filesystem but by default we only fsync() to sync
+				# the OS cache lazily. The following configurations control the flush of data to disk.
+				# There are a few important trade-offs here:
+				#    1. Durability: Unflushed data may be lost if you are not using replication.
+				#    2. Latency: Very large flush intervals may lead to latency spikes when the flush does occur as there will be a lot of data to flush.
+				#    3. Throughput: The flush is generally the most expensive operation, and a small flush interval may lead to excessive seeks.
+				# The settings below allow one to configure the flush policy to flush data after a period of time or
+				# every N messages (or both). This can be done globally and overridden on a per-topic basis.
+
+				# The number of messages to accept before forcing a flush of data to disk
+				#log.flush.interval.messages=10000
+
+				# The maximum amount of time a message can sit in a log before we force a flush
+				#log.flush.interval.ms=1000
+
+				############################# Log Retention Policy #############################
+
+				# The following configurations control the disposal of log segments. The policy can
+				# be set to delete segments after a period of time, or after a given size has accumulated.
+				# A segment will be deleted whenever *either* of these criteria are met. Deletion always happens
+				# from the end of the log.
+
+				# The minimum age of a log file to be eligible for deletion due to age
+				log.retention.hours=168
+
+				# A size-based retention policy for logs. Segments are pruned from the log unless the remaining
+				# segments drop below log.retention.bytes. Functions independently of log.retention.hours.
+				#log.retention.bytes=1073741824
+
+				# The maximum size of a log segment file. When this size is reached a new log segment will be created.
+				log.segment.bytes=1073741824
+
+				# The interval at which log segments are checked to see if they can be deleted according
+				# to the retention policies
+				log.retention.check.interval.ms=300000
+
+		Chạy các lệnh sau:
+		
+			- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0$ \./bin/kafka-storage.sh random-uuid
+			- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0$ ./bin/kafka-storage.sh format -t 3oly753rSTyljoJIc6whCw -c config/kraft/server-1.properties
+			- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0$ ./bin/kafka-server-start.sh config/kraft/server-1.properties
+			- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-topics.sh --create --topic topic1 --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092
+			- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-topics.sh --create --topic topic2 --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092,localhost:9094
+			
+			
+			
+			
+			
+		
+		
+	Cách các team backend làm hằng ngày:
+	
+		BẢN CHẤT KẾT NỐI
+
+			Producer (Spring Boot) chạy trên Windows
+
+			Kafka Broker + Consumer chạy trong WSL (Ubuntu)
+
+		Windows ↔ WSL không phải 2 máy khác nhau, mà:
+
+			WSL chạy trong Windows
+
+			Có network bridge riêng
+
+			Có thể giao tiếp TCP bình thường
+
+		SƠ ĐỒ ĐƠN GIẢN
+		
+			Spring Boot Producer (Windows)
+					|
+					|  localhost:9092
+					|
+			Kafka Broker (WSL)
+					|
+			Kafka Consumer (WSL)
+
+
+			Producer chỉ cần biết đúng địa chỉ Kafka
+
+		ĐIỀU QUAN TRỌNG NHẤT: advertised.listeners
+
+			Đây là chỗ 90% người mới bị lỗi.
+
+			Cấu hình SAI (mặc định)
+
+				Kafka trong WSL thường có:
+
+				advertised.listeners=PLAINTEXT://localhost:9092
+
+
+				→ Producer trên Windows sẽ KHÔNG kết nối được
+
+			CẤU HÌNH ĐÚNG (KHI PRODUCER Ở WINDOWS)
+
+				Trong server.properties (Kafka chạy WSL):
+
+					listeners=PLAINTEXT://0.0.0.0:9092
+					advertised.listeners=PLAINTEXT://localhost:9092
+
+
+			Vì sao?
+
+				0.0.0.0 → Kafka lắng nghe mọi interface
+
+				localhost → Windows truy cập được WSL		
+
+	kafka-storage.bat là batch file cho Command Prompt / cmd.exe, không chạy trực tiếp trong Bash hoặc Git Bash.
+	
+	Gặp lỗi The input line is too long. The syntax of the command is incorrect.
+	
+		Thì đưa folder kafka ra ổ E, chủ yếu để giảm chiều dài của link đến thư mục
+		
+	TẠI SAO 3 FILE server-*.properties KHÔNG CÓ Ý NGHĨA KHI DÙNG --standalone?
+
+		Kafka KHÔNG quan tâm:
+
+			bạn có bao nhiêu file config
+
+			bao nhiêu port
+
+			bao nhiêu process đang chạy
+
+		Kafka CHỈ quan tâm:
+
+			metadata của controller quorum
+
+		--standalone LÀ “KHÓA CHẾ ĐỘ CLUSTER”
+
+			Khi bạn chạy:
+
+				kafka-storage.bat format --standalone
+
+
+			Kafka sẽ ghi cứng vào meta.properties:
+
+				controller.quorum.voters=1@localhost:9093
+
+
+		Điều này có nghĩa:
+
+			Cluster bị khóa = 1 controller
+
+			Không node nào khác được tham gia
+
+		ĐIỀU GÌ XẢY RA KHI BẠN LÀM 3 LẦN --standalone?
+		
+		Server	Bạn nghĩ	Kafka hiểu
+		server-1	node 1	cluster A (1 node)
+		server-2	node 2	cluster B (1 node)
+		server-3	node 3	cluster C (1 node)
+
+		Không có khái niệm “gộp”
+		
+	BA LỰA CHỌN (HIỂU ĐỂ KHÔNG NHẦM)
+	
+		--standalone
+
+			Dùng khi:
+
+				1 node duy nhất
+
+				vừa broker + controller
+
+			KHÔNG dùng cho cluster 3 node
+
+			Trường hợp của bạn → KHÔNG PHÙ HỢP
+
+		--initial-controllers ✅ (CÁI BẠN CẦN)
+
+			Dùng khi:
+
+				Cluster nhiều controller
+
+				Chưa có metadata lần đầu
+
+			CHÍNH XÁC cho setup 3 server
+
+		--no-initial-controllers
+
+			Dùng khi:
+
+				Chỉ format broker
+
+				Controller đã tồn tại
+
+			KHÔNG dùng lúc khởi tạo cluster
+
+	- Commands:
+	
+		- cmd: tar -xzf kafka_2.13-4.1.1.tgz		
+		- cmd: kafka-metadata-quorum.bat --bootstrap-server localhost:9092 describe --status
+		- cmd: wget https://archive.apache.org/dist/kafka/3.5.0/kafka_2.13-3.5.0.tgz
+		- cmd: ./bin/kafka-server-start.sh config/kraft/server-3.properties
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0$ ./bin/kafka-storage.sh random-uuid
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0$ ./bin/kafka-storage.sh format -t 3oly753rSTyljoJIc6whCw -c config/kraft/server-1.properties
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0$ ./bin/kafka-server-start.sh config/kraft/server-1.properties
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-topics.sh --create --topic topic1 --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-topics.sh --create --topic topic2 --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092,localhost:9094
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-topics.sh --list --bootstrap-server localhost:9092
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-topics.sh --describe --bootstrap-server localhost:9092
+		
+		
+		
+		
+	- Các thay đổi cần sửa trong file server.properties với chạy mutiple server:
+	
+		node.id=2
+		
+		listeners=PLAINTEXT://localhost:9094,CONTROLLER://localhost:9095
+		
+		controller.quorum.bootstrap.servers=@localhost:9093,localhost:9095,localhost:9097
+		
+		advertised.listeners=PLAINTEXT://localhost:9094
+		
+		log.dirs=/tmp/server-2/kraft-combined-logs
+		
+--- Kafka CLI: Topics:
+
+	- Commands:
+	
+		- cmd: E:\Kafka\kafka_2.13-4.1.1\bin\windows>kafka-topics.bat --create --topic tpoic1 --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092,localhost:9094
+		
+		- cmd: E:\Kafka\kafka_2.13-4.1.1\bin\windows>kafka-topics.bat --create --topic topic1 --bootstrap-server localhost:9092
+		
+--- Kafka CLI Producers:
+
+	- Command:
+	
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-console-producer.sh --bootstrap-server localhost:9092,localhost:9094 --topic my-topic
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-console-producer.sh --bootstrap-server localhost:9092,localhost:9094 --topic my-topic --property "parse.key=true" --property "key.separator=:"
+		
+--- Kafka CLI Consumers:
+
+	- Command:
+	
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-console-consumer.sh --topic my-topic --from-beginning --bootstrap-server localhost:9092
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-console-consumer.sh --topic my-topic --from-beginning --bootstrap-server localhost:9092 --property  print.key=true
+		- cmd: ngoctuanqng1@DESKTOP-GNVB183:~/kafka_2.13-3.5.0/bin$ ./kafka-console-consumer.sh --topic my-topic --from-beginning --bootstrap-server localhost:9092 --property  print.key=true --property print.value=true --from-beginning
+		
+--- Kafka Producer - Spring Boot Microservice:
+
+		Để có thể chạy được trên WSL cần cấu hình các file như sau:
+		
+			Dù mở 3 WSL thì sẽ đều có chung 1 địa chỉ IP, lấy địa chỉ đó cho vào cấu hình phía dưới
+			
+			
+			1. updating server.properties : 
+
+				listeners=PLAINTEXT://0.0.0.0:9092,CONTROLLER://127.0.0.1:9093
+				advertised.listeners=PLAINTEXT://{IP ADDR OF WSL}:9092
+				
+					where "IP ADDR OF WSL" is the ip address of WSL.
+
+			2. updating application.properties file -
+
+
+				spring.kafka.bootstrap-servers={IP ADDR OF WSL}:9092,{IP ADDR OF WSL}:9094
+				
+		Sửa file pom.xml:
+		
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.17.1</version>
+			</dependency>
+			
+			Kafka không bắt buộc Jackson
+
+				Kafka chỉ làm việc với byte[].
+
+				Kafka không biết JSON là gì.
+
+				Nhưng trong project của bạn, bạn đang dùng:
+
+				spring.kafka.producer.value-serializer= org.springframework.kafka.support.serializer.JsonSerializer
+
+				JsonSerializer = Jackson
+
+				Nếu không có Jackson → Kafka không serialize được object → ném lỗi runtime.
+
+			JsonSerializer của Spring Kafka dùng Jackson như thế nào?
+
+				Bên trong JsonSerializer có đoạn logic tương đương:
+
+					ObjectMapper mapper = new ObjectMapper();
+					mapper.writeValueAsBytes(object);
+
+
+				ObjectMapper nằm trong jackson-databind
+
+				Nếu thiếu:
+
+					jackson-databind
+
+					hoặc version không tương thích
+
+					👉 JVM sẽ báo lỗi dạng:
+
+					ClassNotFoundException
+
+					NoClassDefFoundError
+
+					Failed to construct Kafka producer
+
+					TimeoutException (lỗi giả, nguyên nhân gốc là serialize fail)
+				
+		Sửa file application.properties:
+		
+			Case 1:
+			
+				server.port=0
+
+				spring.kafka.bootstrap-servers=172.28.85.33:9092,172.28.85.33:9094
+
+				spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+				spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+				
+		Sửa file KafkaConfig.java:
+		
+			Case 1:
+
+				@Configuration
+				public class KafkaConfig {
+
+					@Bean
+					NewTopic createTopic() {
+						return TopicBuilder.name("product-created-events-topic")
+								.partitions(3)
+								.replicas(3)
+								.configs(Map.of("min.insync.replicas", "2"))
+								.build();
+					}
+
+				}
+
+		Sửa file ProductServiceImpl.java:
+		
+			Case 1:
+			
+				package com.appsdeveloperblog.ws.products.service;
+
+				import com.appsdeveloperblog.ws.products.rest.CreateProductRestModel;
+				import org.slf4j.Logger;
+				import org.slf4j.LoggerFactory;
+				import org.springframework.http.HttpStatus;
+				import org.springframework.http.ResponseEntity;
+				import org.springframework.kafka.core.KafkaTemplate;
+				import org.springframework.kafka.support.SendResult;
+				import org.springframework.stereotype.Service;
+
+				import java.util.UUID;
+				import java.util.concurrent.CompletableFuture;
+
+				@Service
+				public class ProductServiceImpl implements ProductService {
+
+					KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate;
+
+					private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+					public ProductServiceImpl(KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate) {
+						this.kafkaTemplate = kafkaTemplate;
+					}
+
+					@Override
+					public String createProduct(CreateProductRestModel productRestModel) {
+						String productId = UUID.randomUUID().toString();
+
+						ProductCreatedEvent productCreatedEvent = new ProductCreatedEvent(productId,
+								productRestModel.getTitle(), productRestModel.getPrice(),
+								productRestModel.getQuantity());
+
+						CompletableFuture<SendResult<String, ProductCreatedEvent>> future =
+								kafkaTemplate.send("product-created-events-topic", productId, productCreatedEvent);
+
+						future.whenComplete((result, exception) -> {
+							if (exception != null) {
+								LOGGER.error("Failed to send message: " + exception.getMessage());
+							} else {
+								LOGGER.info("Message sent successfully: " + result.getRecordMetadata());
+							}
+						});
+
+						LOGGER.info("Returning product id");
+
+						return productId;
+					}
+				}
+
+			Case 2:
+			
+				package com.appsdeveloperblog.ws.products.service;
+
+				import com.appsdeveloperblog.ws.products.rest.CreateProductRestModel;
+				import org.slf4j.Logger;
+				import org.slf4j.LoggerFactory;
+				import org.springframework.http.HttpStatus;
+				import org.springframework.http.ResponseEntity;
+				import org.springframework.kafka.core.KafkaTemplate;
+				import org.springframework.kafka.support.SendResult;
+				import org.springframework.stereotype.Service;
+
+				import java.util.UUID;
+				import java.util.concurrent.CompletableFuture;
+
+				@Service
+				public class ProductServiceImpl implements ProductService {
+
+					KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate;
+
+					private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+					public ProductServiceImpl(KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate) {
+						this.kafkaTemplate = kafkaTemplate;
+					}
+
+					@Override
+					public String createProduct(CreateProductRestModel productRestModel) throws Exception {
+						String productId = UUID.randomUUID().toString();
+
+						ProductCreatedEvent productCreatedEvent = new ProductCreatedEvent(productId,
+								productRestModel.getTitle(), productRestModel.getPrice(),
+								productRestModel.getQuantity());
+
+						LOGGER.info("Before publising a ProductCreatedEvent");
+
+						SendResult<String, ProductCreatedEvent> result =
+								kafkaTemplate.send("product-created-events-topic", productId, productCreatedEvent).get();
+
+						LOGGER.info("Partition: " + result.getRecordMetadata().partition());
+						LOGGER.info("Topic: " + result.getRecordMetadata().topic());
+						LOGGER.info("Offset: " + result.getRecordMetadata().offset());
+
+						LOGGER.info("Returning product id");
+
+						return productId;
+					}
+				}
+				
+		Sửa file ProductController.java:
+		
+			Case 1:
+			
+				package com.appsdeveloperblog.ws.products.rest;
+
+				import com.appsdeveloperblog.ws.products.service.ProductService;
+				import org.slf4j.Logger;
+				import org.slf4j.LoggerFactory;
+				import org.springframework.http.HttpStatus;
+				import org.springframework.http.ResponseEntity;
+				import org.springframework.web.bind.annotation.PostMapping;
+				import org.springframework.web.bind.annotation.RequestBody;
+				import org.springframework.web.bind.annotation.RequestMapping;
+				import org.springframework.web.bind.annotation.RestController;
+
+				import java.util.Date;
+
+				@RestController
+				@RequestMapping("/products")
+				public class ProductController {
+
+					ProductService productService;
+
+					private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+					public ProductController(ProductService productService) {
+						this.productService = productService;
+					}
+
+					@PostMapping
+					public ResponseEntity<Object> createProduct(@RequestBody CreateProductRestModel product) {
+						String productId;
+
+						try {
+							productId = productService.createProduct(product);
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+							return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+									.body(new ErrorMessage(new Date(), e.getMessage(), "/products"));
+						}
+
+						return ResponseEntity.status(HttpStatus.CREATED).body(productId);
+					}
+
+
+				}
+
+--- Kafka Consumer - Spring Boot Microservice:
+
+		Trong file pom.xml chú ý thêm đoạn code sau:
+		
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.17.1</version>
+			</dependency>
+
+		Cách 1 class được dùng chung ở các package khác nhau:
+
+			Vì project core chứa class dùng chung với các project khác thì core phải được build trước
+		
+			Trong core xóa file application và file test application, trong pom.xml xóa maven-plugin
+			
+			Trong pom.xml của các project khác sẽ import link của project core vào
+			
+			
+		Cách 1 dùng cấu hình trong application.properties:
+		
+			core project:
+			
+				ProductCreatedEvent.java:
+				
+					package com.appsdeveloperblog.ws.core;
+
+					import java.math.BigDecimal;
+
+					public class ProductCreatedEvent {
+
+						private  String productId;
+						private String title;
+						private BigDecimal price;
+						private Integer quantity;
+
+						public ProductCreatedEvent() {
+
+						}
+
+						public ProductCreatedEvent(String productId, String title, BigDecimal price, Integer quantity) {
+							this.productId = productId;
+							this.title = title;
+							this.price = price;
+							this.quantity = quantity;
+						}
+
+						public String getProductId() {
+							return productId;
+						}
+
+						public String getTitle() {
+							return title;
+						}
+
+						public BigDecimal getPrice() {
+							return price;
+						}
+
+						public Integer getQuantity() {
+							return quantity;
+						}
+
+						public void setProductId(String productId) {
+							this.productId = productId;
+						}
+
+						public void setTitle(String title) {
+							this.title = title;
+						}
+
+						public void setPrice(BigDecimal price) {
+							this.price = price;
+						}
+
+					}
+
+			
+			EmailNotificationMicroservice project:
+			
+				ProductCreatedEventHandler.java:
+				
+					package com.appsdeveloperblog.ws.EmailNotificationMicroservice.handler;
+
+					import com.appsdeveloperblog.ws.core.ProductCreatedEvent;
+					import org.slf4j.Logger;
+					import org.slf4j.LoggerFactory;
+					import org.springframework.kafka.annotation.KafkaHandler;
+					import org.springframework.kafka.annotation.KafkaListener;
+					import org.springframework.stereotype.Component;
+
+					@Component
+					@KafkaListener(topics = "product-created-events-topic")
+					public class ProductCreatedEventHandler {
+
+						private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+						@KafkaHandler
+						public void handle(ProductCreatedEvent productCreatedEvent) {
+							LOGGER.info("Received a new event: " + productCreatedEvent.getTitle());
+						}
+
+					}
+					
+				application.properties:
+				
+					server.port=0
+					spring.kafka.consumer.bootstrap-servers=172.28.85.33:9092,172.28.85.33:9094
+					spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+					spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer
+					spring.kafka.consumer.group-id=product-created-events
+					spring.kafka.consumer.properties.spring.json.trusted.packages=*
+
+			
+			ProductMicroservice project:
+			
+				KafkaConfig.java:
+				
+				package com.appsdeveloperblog.ws.products;
+
+				import com.appsdeveloperblog.ws.core.ProductCreatedEvent;
+				import org.apache.kafka.clients.admin.NewTopic;
+				import org.slf4j.Logger;
+				import org.slf4j.LoggerFactory;
+				import org.springframework.context.annotation.Bean;
+				import org.springframework.context.annotation.Configuration;
+				import org.springframework.kafka.annotation.KafkaHandler;
+				import org.springframework.kafka.annotation.KafkaListener;
+				import org.springframework.kafka.config.TopicBuilder;
+				import org.springframework.stereotype.Component;
+
+				import java.util.Map;
+
+				@Configuration
+				public class KafkaConfig {
+
+					@Bean
+					NewTopic createTopic() {
+						return TopicBuilder.name("product-created-events-topic")
+								.partitions(3)
+								.replicas(3)
+								.configs(Map.of("min.insync.replicas", "2"))
+								.build();
+					}
+
+				}
+
+			CreateProductRestModel.java:
+			
+				package com.appsdeveloperblog.ws.products.rest;
+
+				import java.math.BigDecimal;
+
+				public class CreateProductRestModel {
+
+					private String title;
+					private BigDecimal price;
+					private Integer quantity;
+
+					public String getTitle() {
+						return title;
+					}
+
+					public BigDecimal getPrice() {
+						return price;
+					}
+
+					public Integer getQuantity() {
+						return quantity;
+					}
+
+					public void setTitle(String title) {
+						this.title = title;
+					}
+
+					public void setPrice(BigDecimal price) {
+						this.price = price;
+					}
+
+					public void setQuantity(Integer quantity) {
+						this.quantity = quantity;
+					}
+
+				}
+				
+			ErrorMessage.java:
+			
+				package com.appsdeveloperblog.ws.products.rest;
+
+				import java.util.Date;
+
+				public class ErrorMessage {
+
+					private Date timestamp;
+					private String message;
+					private String details;
+
+
+					public ErrorMessage() {
+					}
+
+					public ErrorMessage(Date timestamp, String message, String details) {
+						super();
+						this.timestamp = timestamp;
+						this.message = message;
+						this.details = details;
+					}
+
+					public Date getTimestamp() {
+						return timestamp;
+					}
+
+					public void setTimestamp(Date timestamp) {
+						this.timestamp = timestamp;
+					}
+
+					public String getMessage() {
+						return message;
+					}
+
+					public void setMessage(String message) {
+						this.message = message;
+					}
+
+					public String getDetails() {
+						return details;
+					}
+
+					public void setDetails(String details) {
+						this.details = details;
+					}
+				}
+				
+			ProductController.java:
+			
+				package com.appsdeveloperblog.ws.products.rest;
+
+				import com.appsdeveloperblog.ws.products.service.ProductService;
+				import org.slf4j.Logger;
+				import org.slf4j.LoggerFactory;
+				import org.springframework.http.HttpStatus;
+				import org.springframework.http.ResponseEntity;
+				import org.springframework.web.bind.annotation.PostMapping;
+				import org.springframework.web.bind.annotation.RequestBody;
+				import org.springframework.web.bind.annotation.RequestMapping;
+				import org.springframework.web.bind.annotation.RestController;
+
+				import java.util.Date;
+
+				@RestController
+				@RequestMapping("/products")
+				public class ProductController {
+
+					ProductService productService;
+
+					private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+					public ProductController(ProductService productService) {
+						this.productService = productService;
+					}
+
+					@PostMapping
+					public ResponseEntity<Object> createProduct(@RequestBody CreateProductRestModel product) {
+						String productId;
+
+						try {
+							productId = productService.createProduct(product);
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+							return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+									.body(new ErrorMessage(new Date(), e.getMessage(), "/products"));
+						}
+
+						return ResponseEntity.status(HttpStatus.CREATED).body(productId);
+					}
+
+				}
+				
+			ProductService.java:
+			
+				package com.appsdeveloperblog.ws.products.service;
+
+				import com.appsdeveloperblog.ws.products.rest.CreateProductRestModel;
+
+				public interface ProductService {
+
+					String createProduct(CreateProductRestModel productRestModel) throws Exception;
+				}
+				
+			ProductServiceImpl.java:
+			
+				package com.appsdeveloperblog.ws.products.service;
+
+				import com.appsdeveloperblog.ws.core.ProductCreatedEvent;
+				import com.appsdeveloperblog.ws.products.rest.CreateProductRestModel;
+				import org.slf4j.Logger;
+				import org.slf4j.LoggerFactory;
+				import org.springframework.http.HttpStatus;
+				import org.springframework.http.ResponseEntity;
+				import org.springframework.kafka.core.KafkaTemplate;
+				import org.springframework.kafka.support.SendResult;
+				import org.springframework.stereotype.Service;
+
+				import java.util.UUID;
+				import java.util.concurrent.CompletableFuture;
+
+				@Service
+				public class ProductServiceImpl implements ProductService {
+
+					KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate;
+
+					private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+					public ProductServiceImpl(KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate) {
+						this.kafkaTemplate = kafkaTemplate;
+					}
+
+					@Override
+					public String createProduct(CreateProductRestModel productRestModel) throws Exception {
+						String productId = UUID.randomUUID().toString();
+
+						ProductCreatedEvent productCreatedEvent = new ProductCreatedEvent(productId,
+								productRestModel.getTitle(), productRestModel.getPrice(),
+								productRestModel.getQuantity());
+
+						LOGGER.info("Before publising a ProductCreatedEvent");
+
+						SendResult<String, ProductCreatedEvent> result =
+								kafkaTemplate.send("product-created-events-topic", productId, productCreatedEvent).get();
+
+						LOGGER.info("Partition: " + result.getRecordMetadata().partition());
+						LOGGER.info("Topic: " + result.getRecordMetadata().topic());
+						LOGGER.info("Offset: " + result.getRecordMetadata().offset());
+
+						LOGGER.info("Returning product id");
+
+						return productId;
+					}
+				}
+				
+				KafkaConfig.java:
+				
+					package com.appsdeveloperblog.ws.products;
+
+					import com.appsdeveloperblog.ws.core.ProductCreatedEvent;
+					import org.apache.kafka.clients.admin.NewTopic;
+					import org.slf4j.Logger;
+					import org.slf4j.LoggerFactory;
+					import org.springframework.context.annotation.Bean;
+					import org.springframework.context.annotation.Configuration;
+					import org.springframework.kafka.annotation.KafkaHandler;
+					import org.springframework.kafka.annotation.KafkaListener;
+					import org.springframework.kafka.config.TopicBuilder;
+					import org.springframework.stereotype.Component;
+
+					import java.util.Map;
+
+					@Configuration
+					//@Component
+					//@KafkaListener(topics = "product-created-events-topic")
+					public class KafkaConfig {
+
+						@Bean
+						NewTopic createTopic() {
+							return TopicBuilder.name("product-created-events-topic")
+									.partitions(3)
+									.replicas(3)
+									.configs(Map.of("min.insync.replicas", "2"))
+									.build();
+						}
+
+					//    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+					//
+					//    @KafkaHandler
+					//    public void handle(ProductCreatedEvent productCreatedEvent) {
+					//        LOGGER.info("Recieved a new event: " + productCreatedEvent.getTitle());
+					//    }
+
+					}
+				
+			application.properties:
+			
+				server.port=0
+				spring.kafka.bootstrap-servers=172.28.85.33:9092,172.28.85.33:9094
+				spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+				spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+				
+		Cách 2 dùng cấu hình trong file java:
+		
+			core project:
+			
+				ProductCreatedEvent.java:
+				
+					package com.appsdeveloperblog.ws.core;
+
+					import java.math.BigDecimal;
+
+					public class ProductCreatedEvent {
+
+						private  String productId;
+						private String title;
+						private BigDecimal price;
+						private Integer quantity;
+
+						public ProductCreatedEvent() {
+
+						}
+
+						public ProductCreatedEvent(String productId, String title, BigDecimal price, Integer quantity) {
+							this.productId = productId;
+							this.title = title;
+							this.price = price;
+							this.quantity = quantity;
+						}
+
+						public String getProductId() {
+							return productId;
+						}
+
+						public String getTitle() {
+							return title;
+						}
+
+						public BigDecimal getPrice() {
+							return price;
+						}
+
+						public Integer getQuantity() {
+							return quantity;
+						}
+
+						public void setProductId(String productId) {
+							this.productId = productId;
+						}
+
+						public void setTitle(String title) {
+							this.title = title;
+						}
+
+						public void setPrice(BigDecimal price) {
+							this.price = price;
+						}
+
+					}
+
+
+			
+			EmailNotificationMicroservice project:
+			
+				ProductCreatedEventHandler.java:
+				
+					package com.appsdeveloperblog.ws.EmailNotificationMicroservice.handler;
+
+					import com.appsdeveloperblog.ws.core.ProductCreatedEvent;
+					import org.slf4j.Logger;
+					import org.slf4j.LoggerFactory;
+					import org.springframework.kafka.annotation.KafkaHandler;
+					import org.springframework.kafka.annotation.KafkaListener;
+					import org.springframework.stereotype.Component;
+
+					@Component
+					@KafkaListener(topics = "product-created-events-topic")
+					public class ProductCreatedEventHandler {
+
+						private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+						@KafkaHandler
+						public void handle(ProductCreatedEvent productCreatedEvent) {
+							LOGGER.info("Received a new event: " + productCreatedEvent.getTitle());
+						}
+
+					}
+				KafkaConsumerConfiguration.java:
+				
+					package com.appsdeveloperblog.ws.EmailNotificationMicroservice;
+
+					import org.apache.kafka.clients.consumer.ConsumerConfig;
+					import org.apache.kafka.common.serialization.StringDeserializer;
+					import org.springframework.beans.factory.annotation.Autowired;
+					import org.springframework.context.annotation.Bean;
+					import org.springframework.context.annotation.Configuration;
+					import org.springframework.core.env.Environment;
+					import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+					import org.springframework.kafka.core.ConsumerFactory;
+					import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+					import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+					import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+					import java.util.HashMap;
+					import java.util.Map;
+					import java.util.function.Consumer;
+
+					@Configuration
+					public class KafkaConsumerConfiguration {
+
+						@Autowired
+						Environment environment;
+
+						@Bean
+						public ConsumerFactory<String, Object> consumerFactory() {
+							Map<String, Object> config = new HashMap<>();
+							config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+									environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
+							config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+									StringDeserializer.class);
+					//        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+					//                JsonDeserializer.class);
+					//        config.put(JsonDeserializer.TRUSTED_PACKAGES,
+					//                environment.getProperty("spring.kafka.consumer.properties.spring.json.trusted.packages"));
+
+							config.put(ConsumerConfig.GROUP_ID_CONFIG,
+									environment.getProperty("spring.kafka.consumer.group-id"));
+
+							// 🔥 CHUẨN MỚI – KHÔNG DEPRECATED
+							config.put(
+									ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+									ErrorHandlingDeserializer.class
+							);
+
+							config.put(
+									ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
+									JsonDeserializer.class
+							);
+
+							// Khai báo type rõ ràng (RẤT QUAN TRỌNG)
+							config.put(
+									JsonDeserializer.VALUE_DEFAULT_TYPE,
+									"com.appsdeveloperblog.ws.core.ProductCreatedEvent"
+							);
+
+							config.put(
+									JsonDeserializer.TRUSTED_PACKAGES,
+									"com.appsdeveloperblog.ws.EmailNotificationMicroservice"
+							);
+
+
+
+							return new DefaultKafkaConsumerFactory<>(config);
+						}
+
+						@Bean
+						ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
+								ConsumerFactory<String, Object> consumerFactory) {
+
+							ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+									new ConcurrentKafkaListenerContainerFactory<>();
+							factory.setConsumerFactory(consumerFactory);
+
+							return factory;
+
+						}
+					}
+
+				application.properties:
+				
+					server.port=0
+					spring.kafka.consumer.bootstrap-servers=172.28.85.33:9092,172.28.85.33:9094
+					#spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+					#spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer
+					spring.kafka.consumer.group-id=product-created-events
+					spring.kafka.consumer.properties.spring.json.trusted.packages=com.appsdeveloperblog.ws.core
+			
+			ProductMicroservice project:
+			
+				
+
+				CreateProductRestModel.java:
+				
+					package com.appsdeveloperblog.ws.products.rest;
+
+					import java.math.BigDecimal;
+
+					public class CreateProductRestModel {
+
+						private String title;
+						private BigDecimal price;
+						private Integer quantity;
+
+						public String getTitle() {
+							return title;
+						}
+
+						public BigDecimal getPrice() {
+							return price;
+						}
+
+						public Integer getQuantity() {
+							return quantity;
+						}
+
+						public void setTitle(String title) {
+							this.title = title;
+						}
+
+						public void setPrice(BigDecimal price) {
+							this.price = price;
+						}
+
+						public void setQuantity(Integer quantity) {
+							this.quantity = quantity;
+						}
+
+					}
+					
+					
+				ErrorMessage.java:
+				
+					package com.appsdeveloperblog.ws.products.rest;
+
+					import java.util.Date;
+
+					public class ErrorMessage {
+
+						private Date timestamp;
+						private String message;
+						private String details;
+
+
+						public ErrorMessage() {
+						}
+
+						public ErrorMessage(Date timestamp, String message, String details) {
+							super();
+							this.timestamp = timestamp;
+							this.message = message;
+							this.details = details;
+						}
+
+						public Date getTimestamp() {
+							return timestamp;
+						}
+
+						public void setTimestamp(Date timestamp) {
+							this.timestamp = timestamp;
+						}
+
+						public String getMessage() {
+							return message;
+						}
+
+						public void setMessage(String message) {
+							this.message = message;
+						}
+
+						public String getDetails() {
+							return details;
+						}
+
+						public void setDetails(String details) {
+							this.details = details;
+						}
+					}
+
+					
+				ProductController.java:
+				
+					package com.appsdeveloperblog.ws.products.rest;
+
+					import com.appsdeveloperblog.ws.products.service.ProductService;
+					import org.slf4j.Logger;
+					import org.slf4j.LoggerFactory;
+					import org.springframework.http.HttpStatus;
+					import org.springframework.http.ResponseEntity;
+					import org.springframework.web.bind.annotation.PostMapping;
+					import org.springframework.web.bind.annotation.RequestBody;
+					import org.springframework.web.bind.annotation.RequestMapping;
+					import org.springframework.web.bind.annotation.RestController;
+
+					import java.util.Date;
+
+					@RestController
+					@RequestMapping("/products")
+					public class ProductController {
+
+						ProductService productService;
+
+						private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+						public ProductController(ProductService productService) {
+							this.productService = productService;
+						}
+
+						@PostMapping
+						public ResponseEntity<Object> createProduct(@RequestBody CreateProductRestModel product) {
+							String productId;
+
+							try {
+								productId = productService.createProduct(product);
+							} catch (Exception e) {
+								logger.error(e.getMessage(), e);
+								return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+										.body(new ErrorMessage(new Date(), e.getMessage(), "/products"));
+							}
+
+							return ResponseEntity.status(HttpStatus.CREATED).body(productId);
+						}
+
+
+					}
+					
+					
+				ProductService.java:
+				
+					package com.appsdeveloperblog.ws.products.service;
+
+					import com.appsdeveloperblog.ws.products.rest.CreateProductRestModel;
+
+					public interface ProductService {
+
+						String createProduct(CreateProductRestModel productRestModel) throws Exception;
+					}
+
+					
+				ProductServiceImpl.java:
+				
+					package com.appsdeveloperblog.ws.products.service;
+
+					import com.appsdeveloperblog.ws.core.ProductCreatedEvent;
+					import com.appsdeveloperblog.ws.products.rest.CreateProductRestModel;
+					import org.slf4j.Logger;
+					import org.slf4j.LoggerFactory;
+					import org.springframework.http.HttpStatus;
+					import org.springframework.http.ResponseEntity;
+					import org.springframework.kafka.core.KafkaTemplate;
+					import org.springframework.kafka.support.SendResult;
+					import org.springframework.stereotype.Service;
+
+					import java.util.UUID;
+					import java.util.concurrent.CompletableFuture;
+
+					@Service
+					public class ProductServiceImpl implements ProductService {
+
+						KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate;
+
+						private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+						public ProductServiceImpl(KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate) {
+							this.kafkaTemplate = kafkaTemplate;
+						}
+
+						@Override
+						public String createProduct(CreateProductRestModel productRestModel) throws Exception {
+							String productId = UUID.randomUUID().toString();
+
+							ProductCreatedEvent productCreatedEvent = new ProductCreatedEvent(productId,
+									productRestModel.getTitle(), productRestModel.getPrice(),
+									productRestModel.getQuantity());
+
+							LOGGER.info("Before publising a ProductCreatedEvent");
+
+							SendResult<String, ProductCreatedEvent> result =
+									kafkaTemplate.send("product-created-events-topic", productId, productCreatedEvent).get();
+
+							LOGGER.info("Partition: " + result.getRecordMetadata().partition());
+							LOGGER.info("Topic: " + result.getRecordMetadata().topic());
+							LOGGER.info("Offset: " + result.getRecordMetadata().offset());
+
+							LOGGER.info("Returning product id");
+
+							return productId;
+						}
+					}
+					
+				KafkaConfig.java:
+				
+					package com.appsdeveloperblog.ws.products;
+
+					import com.appsdeveloperblog.ws.core.ProductCreatedEvent;
+					import org.apache.kafka.clients.admin.NewTopic;
+					import org.slf4j.Logger;
+					import org.slf4j.LoggerFactory;
+					import org.springframework.context.annotation.Bean;
+					import org.springframework.context.annotation.Configuration;
+					import org.springframework.kafka.annotation.KafkaHandler;
+					import org.springframework.kafka.annotation.KafkaListener;
+					import org.springframework.kafka.config.TopicBuilder;
+					import org.springframework.stereotype.Component;
+
+					import java.util.Map;
+
+					@Configuration
+					//@Component
+					//@KafkaListener(topics = "product-created-events-topic")
+					public class KafkaConfig {
+
+						@Bean
+						NewTopic createTopic() {
+							return TopicBuilder.name("product-created-events-topic")
+									.partitions(3)
+									.replicas(3)
+									.configs(Map.of("min.insync.replicas", "2"))
+									.build();
+						}
+
+					//    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+					//
+					//    @KafkaHandler
+					//    public void handle(ProductCreatedEvent productCreatedEvent) {
+					//        LOGGER.info("Recieved a new event: " + productCreatedEvent.getTitle());
+					//    }
+
+					}
+
+
+					
+				application.properties:
+			
+					server.port=0
+					spring.kafka.bootstrap-servers=172.28.85.33:9092,172.28.85.33:9094
+					spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+					spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+
+
+
+
+

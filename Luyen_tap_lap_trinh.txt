@@ -1,0 +1,53 @@
+Mysql:
+
+	- Đề bài: Lấy ra mỗi người dùng (user_id), Ngày họ tham gia (join_date), Và số lượng
+	đơn hàng mà họ đã mua trong năm 2019.
+		
+		Cách 1:
+		
+		- Dùng left join với bảng bên trái là Users nên sẽ bao gồm đủ output
+		- Ta có group by theo user_id nên output sẽ luôn ra một dòng cho mỗi buyer_id
+					
+			SELECT u.user_id AS buyer_id, join_date, 
+			IFNULL(COUNT(order_date), 0) AS orders_in_2019 
+			FROM Users as u
+			LEFT JOIN
+			Orders as o
+			ON u.user_id = o.buyer_id
+			AND YEAR(order_date) = '2019'
+			GROUP BY u.user_id
+			
+	- 		
+	
+			CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+			BEGIN
+			SET N = N-1;
+			  RETURN (
+				  SELECT DISTINCT(salary) from Employee order by salary DESC
+				  LIMIT 1 OFFSET N
+				  
+			  );
+			END
+			
+	- Đề bài: Tính tổng trọng lượng theo thứ tự turn. Xác định người cuối
+	cùng được lên xe mà tổng trọng lượng không vượt quá 1000kg. Trả về
+	person_name của người đó.
+		
+		- Dùng inner join
+		
+		- Chú ý là group by được thực thi sau điều kiện on của join, sẽ tạo ra ví
+		dụ turn của q1 là 3 thì sẽ có 3 row là với turn của q2 là 1, 2, 3
+		
+		- Khi đó ta group by sẽ tạo thành 1 row duy nhất lấy cho đến
+		khi q2.weight <= 1000
+		
+		- Ví dụ q1 có turn 1 thỏa, turn 2... thỏa cho nên ta phải order by
+		theo sum giảm dần đề lấy row cuối cùng sẽ chứa người cuối cùng có
+		thể lên xe
+				
+				SELECT q1.person_name
+				FROM Queue q1 JOIN Queue q2 ON q1.turn >= q2.turn
+				GROUP BY q1.turn
+				HAVING SUM(q2.weight) <= 1000
+				ORDER BY SUM(q2.weight) DESC
+				LIMIT 1

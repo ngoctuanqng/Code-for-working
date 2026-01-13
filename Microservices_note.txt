@@ -2065,10 +2065,422 @@
 	- Command:
 
 		- cmd: docker images
+		
+# Lệnh:
+docker images
+
+# Giải thích chi tiết:
+
+# 1. docker
+#    - Docker là nền tảng để phát triển, triển khai và chạy ứng dụng trong các container
+#    - Container là môi trường nhẹ, tách biệt, chứa đầy đủ ứng dụng và các dependencies
+
+# 2. images
+#    - 'images' là subcommand của docker
+#    - Dùng để liệt kê tất cả các Docker images có sẵn trên máy local
+#    - Docker image là template dùng để tạo container
+
+# Ý nghĩa tổng thể:
+# - Lệnh này sẽ hiển thị danh sách tất cả các Docker images trên hệ thống
+# - Thông tin hiển thị bao gồm:
+#     REPOSITORY    # Tên repository của image
+#     TAG           # Tag hoặc phiên bản của image
+#     IMAGE ID      # ID duy nhất của image
+#     CREATED       # Thời gian image được tạo
+#     SIZE          # Kích thước của image
+
+# Ví dụ output:
+# REPOSITORY          TAG       IMAGE ID       CREATED        SIZE
+# nginx               latest    4bb46517cac3   2 weeks ago    133MB
+# ubuntu              20.04     1d622ef86b13   3 weeks ago    72.9MB
+		
+		
 		- cmd: docker run -d -p 8080:8080 eazybytes/accounts:s4
+		
+GIẢI THÍCH CHI TIẾT LỆNH:
+docker run -d -p 8080:8080 eazybytes/accounts:s4
+
+--------------------------------------------------
+1. TỔNG QUAN
+--------------------------------------------------
+Lệnh này dùng để:
+- Chạy một container từ image Docker `eazybytes/accounts` với tag `s4`
+- Chạy ở chế độ **detached** (-d), nghĩa là container chạy nền, không chiếm terminal
+- Map cổng máy host 8080 sang cổng 8080 trong container (-p 8080:8080)
+- Hữu ích khi:
+  + Triển khai ứng dụng web hoặc service
+  + Test image Docker mà không cần giữ terminal mở
+  + Cho phép truy cập service từ host thông qua cổng 8080
+
+--------------------------------------------------
+2. PHÂN TÍCH TỪNG THÀNH PHẦN
+--------------------------------------------------
+
+2.1. docker
+--------------------------------------------------
+- Công cụ quản lý container Docker
+
+2.2. run
+--------------------------------------------------
+- Lệnh để tạo và chạy một container từ image Docker
+
+2.3. -d
+--------------------------------------------------
+- Detached mode: chạy container ở nền
+- Terminal không bị chiếm, container vẫn chạy
+
+2.4. -p 8080:8080
+--------------------------------------------------
+- Port mapping: hostPort:containerPort
+- Cho phép truy cập service trong container từ máy host
+- Ở đây: port 8080 trên host → port 8080 trong container
+
+2.5. eazybytes/accounts:s4
+--------------------------------------------------
+- Image Docker và tag
+- `eazybytes/accounts`: tên image
+- `s4`: tag, xác định version cụ thể của image
+
+--------------------------------------------------
+3. QUÁ TRÌNH HOẠT ĐỘNG
+--------------------------------------------------
+1. Docker tìm image `eazybytes/accounts:s4` trong local
+2. Nếu chưa có, Docker pull image từ Docker Hub
+3. Tạo container từ image
+4. Khởi chạy container ở chế độ detached
+5. Map cổng 8080 host → 8080 container
+6. Container chạy nền, trả về container ID
+
+--------------------------------------------------
+4. OUTPUT MẪU
+--------------------------------------------------
+# Khi chạy lệnh, terminal trả về container ID
+3f9d2a1b6c9e4a7d8b1234567890abcdef1234567890abcdef1234567890abcd
+
+# Kiểm tra container đang chạy
+docker ps
+CONTAINER ID   IMAGE                     COMMAND                  STATUS          PORTS                    NAMES
+3f9d2a1b6c9e   eazybytes/accounts:s4     "java -jar app.jar"      Up 2m           0.0.0.0:8080->8080/tcp   serene_morse
+
+--------------------------------------------------
+5. CÁCH SỬ DỤNG LIÊN QUAN
+--------------------------------------------------
+- Truy cập service từ browser hoặc curl:
+http://localhost:8080
+
+- Stop container:
+docker stop 3f9d2a1b6c9e
+
+- Xóa container:
+docker rm 3f9d2a1b6c9e
+
+- Chạy với tên cụ thể:
+docker run -d -p 8080:8080 --name accounts-container eazybytes/accounts:s4
+
+--------------------------------------------------
+6. LỢI ÍCH THỰC TẾ
+--------------------------------------------------
+- Chạy ứng dụng web hoặc microservice nhanh chóng
+- Kiểm tra và test image Docker
+- Dễ dàng truy cập từ host qua port mapping
+- Chạy nền, không chiếm terminal
+
+--------------------------------------------------
+7. LỖI THƯỜNG GẶP
+--------------------------------------------------
+- Port 8080 đã bị chiếm → lỗi bind
+- Image không tồn tại local và không thể pull → lỗi
+- Quên chạy container ở detached mode → terminal bị chiếm
+
+--------------------------------------------------
+8. CẢNH BÁO
+--------------------------------------------------
+- Detached container vẫn chạy, cần stop hoặc rm khi không dùng
+- Kiểm tra quyền và firewall nếu không thể truy cập port
+
+--------------------------------------------------
+9. TÓM TẮT NGẮN GỌN
+--------------------------------------------------
+docker run -d -p 8080:8080 eazybytes/accounts:s4
+
+= Chạy container từ image `eazybytes/accounts:s4` ở nền
+= Map port 8080 host → 8080 container
+= Truy cập service bằng http://localhost:8080
+= Dùng detached mode để không chiếm terminal
+= Kiểm tra container với `docker ps`, dừng bằng `docker stop <ID>`
+		
+		
 		- cmd: docker ps
+		
+LỆNH: docker ps
+===============
+
+1. MỤC ĐÍCH CỦA LỆNH
+-------------------
+Lệnh này dùng để:
+- Liệt kê tất cả các container Docker đang chạy trên máy chủ
+- Giúp kiểm tra trạng thái, ID, tên và cổng của container
+- Thường dùng để giám sát container, debug hoặc xác định container cần thao tác
+
+
+2. PHÂN TÍCH CHI TIẾT TỪNG THÀNH PHẦN
+------------------------------------
+
+2.1. docker
+-----------
+- CLI chính thức của Docker
+- Dùng để quản lý container, image, network, volume và các thành phần Docker khác
+
+2.2. ps
+--------
+- Sub-command của Docker
+- Viết tắt của "process status"
+- Hiển thị thông tin container đang chạy
+- Thông tin bao gồm:
+  + CONTAINER ID: ID duy nhất của container
+  + IMAGE: image Docker được sử dụng
+  + COMMAND: lệnh đang chạy trong container
+  + CREATED: thời gian container được tạo
+  + STATUS: trạng thái container (Up, Exited, v.v.)
+  + PORTS: cổng được mapping từ host sang container
+  + NAMES: tên container
+
+
+3. CÁC TÙY CHỌN PHỔ BIẾN
+------------------------
+- Hiển thị tất cả container (đang chạy và đã dừng):
+  docker ps -a
+
+- Hiển thị container theo định dạng tùy chỉnh:
+  docker ps --format "{{.Names}}: {{.Status}}"
+
+- Chỉ hiển thị container ID:
+  docker ps -q
+
+- Hiển thị n container gần nhất:
+  docker ps -n 5
+
+
+4. QUÁ TRÌNH DIỄN RA KHI CHẠY LỆNH
+---------------------------------
+Khi chạy:
+docker ps
+
+Docker sẽ:
+1. Kết nối tới Docker daemon
+2. Lấy danh sách container đang chạy
+3. In thông tin chi tiết từng container lên terminal
+4. Nếu không có container nào chạy, output sẽ trống
+
+
+5. KẾT QUẢ MẪU
+---------------
+CONTAINER ID   IMAGE          COMMAND                  CREATED        STATUS        PORTS                    NAMES
+a1b2c3d4e5f6   nginx:latest   "nginx -g 'daemon ..."   2 hours ago    Up 2 hours    0.0.0.0:8080->80/tcp     webserver
+7g8h9i0j1k2l   mysql:5.7      "docker-entrypoint.s…"   3 hours ago    Up 3 hours    3306/tcp                 mydb
+
+
+6. LỢI ÍCH KHI DÙNG LỆNH NÀY
+----------------------------
+- Theo dõi container đang chạy trên máy
+- Kiểm tra port mapping và lệnh chạy container
+- Phục vụ debug, stop, restart hoặc xóa container
+
+
+7. LỖI THƯỜNG GẶP
+-----------------
+- Docker daemon không chạy:
+  => Error: Cannot connect to the Docker daemon
+
+- Không có container nào đang chạy:
+  => Output trống, không có dòng thông tin nào
+
+
+8. TÓM TẮT NGẮN GỌN
+-------------------
+docker           : CLI Docker
+ps               : liệt kê container đang chạy
+Kết quả          : hiển thị container ID, image, command, created, status, ports, names
+		
+		
 		- cmd: docker image push docker.io/eazybytes/accounts:s4
+		
+LỆNH: docker image push docker.io/eazybytes/accounts:s4
+====================================================================
+
+1. docker là gì?
+--------------------------------------------------------------------
+- Docker là nền tảng container hóa, giúp đóng gói ứng dụng và môi trường chạy vào container
+- Container giúp:
+  + Triển khai ứng dụng nhất quán trên mọi môi trường
+  + Cô lập môi trường, dễ quản lý
+  + Tăng tốc quá trình CI/CD
+
+--------------------------------------------------------------------
+
+2. image là gì?
+--------------------------------------------------------------------
+- Image = bản snapshot của ứng dụng và môi trường
+- Chứa:
+  + Code của ứng dụng
+  + Thư viện, dependency, cấu hình
+- Image được dùng để tạo container
+
+--------------------------------------------------------------------
+
+3. push là gì?
+--------------------------------------------------------------------
+- push = đẩy image lên registry
+- Registry = nơi lưu trữ image (Docker Hub, AWS ECR, GCP Artifact Registry…)
+- Khi push:
+  + Image local được upload lên registry
+  + Các developer hoặc server khác có thể pull image này để chạy container
+
+--------------------------------------------------------------------
+
+4. docker.io/eazybytes/accounts:s4 là gì?
+--------------------------------------------------------------------
+- docker.io → registry mặc định của Docker Hub
+- eazybytes → tên user hoặc organization trên Docker Hub
+- accounts → tên repository chứa image
+- s4 → tag của image (có thể là version, ví dụ v1, v2, s4…)
+- Toàn bộ "docker.io/eazybytes/accounts:s4" = identifier đầy đủ của image trên Docker Hub
+
+--------------------------------------------------------------------
+
+5. Ý nghĩa tổng thể của lệnh
+--------------------------------------------------------------------
+docker image push docker.io/eazybytes/accounts:s4
+
+→ Đẩy image accounts với tag s4 lên repository eazybytes trên Docker Hub
+→ Image local sẽ được upload lên registry
+→ Những người khác có quyền pull image này có thể dùng để chạy container
+
+--------------------------------------------------------------------
+
+6. Quy trình thực thi lệnh
+--------------------------------------------------------------------
+1) Docker kiểm tra image local docker.io/eazybytes/accounts:s4 có tồn tại không
+2) Kiểm tra Docker login (docker login) để có quyền push lên repository
+3) Upload image từng layer lên Docker Hub
+4) Xác nhận mỗi layer được push thành công
+5) Khi xong → image sẵn sàng trên Docker Hub
+
+--------------------------------------------------------------------
+
+7. Kiểm tra sau khi chạy lệnh
+--------------------------------------------------------------------
+- Kiểm tra image đã tồn tại trên Docker Hub:
+docker pull docker.io/eazybytes/accounts:s4
+
+- Kiểm tra local image:
+docker images | grep accounts
+
+--------------------------------------------------------------------
+
+8. Output điển hình
+--------------------------------------------------------------------
+The push refers to repository [docker.io/eazybytes/accounts]
+s4: digest: sha256:xxxxxxxxxxxx size: 12345678
+
+- Thông báo push thành công, kèm digest và size của image
+
+--------------------------------------------------------------------
+
+9. Lỗi thường gặp
+--------------------------------------------------------------------
+1) denied: requested access to the resource is denied
+- Docker chưa login hoặc không có quyền push vào repository
+- Sửa: docker login → nhập username/password
+
+2) repository does not exist
+- Repository eazybytes/accounts chưa được tạo trên Docker Hub
+- Sửa: tạo repository trên Docker Hub trước
+
+3) network errors
+- Kiểm tra kết nối Internet
+
+--------------------------------------------------------------------
+
+10. Khi nào nên dùng lệnh này?
+--------------------------------------------------------------------
+- Đẩy image lên Docker Hub để chia sẻ hoặc deploy trên server khác
+- Chuẩn bị image cho CI/CD pipeline
+- Lưu trữ version image với tag khác nhau (s1, s2, s3, s4…)
+
+--------------------------------------------------------------------
+
+11. So sánh nhanh
+--------------------------------------------------------------------
+docker pull <image> → kéo image từ registry về local
+docker build -t <image> . → build image local
+docker push <image> → đẩy image lên registry
+
+--------------------------------------------------------------------
+
+12. Tóm tắt 1 dòng
+--------------------------------------------------------------------
+docker image push docker.io/eazybytes/accounts:s4 =
+ĐẨY IMAGE accounts: s4 LÊN DOCKER HUB TRONG REPOSITORY eazybytes ĐỂ CÓ THỂ PULL VÀ SỬ DỤNG TRÊN SERVER KHÁC
+		
+		
 		- cmd: docker pull eazybytes/cards:s4
+		
+# Lệnh gốc:
+docker pull eazybytes/cards:s4
+
+# Giải thích chi tiết:
+
+# 1. docker
+# - `docker` là công cụ quản lý container, cho phép tạo, chạy, dừng, và quản lý các container.
+# - Container là môi trường chạy ứng dụng cô lập, dựa trên image đã được build sẵn.
+
+# 2. pull
+# - `pull` là lệnh dùng để tải một Docker image từ Docker registry về local machine.
+# - Image sau khi pull sẽ được lưu trong local Docker cache để có thể chạy container từ image đó.
+
+# 3. eazybytes/cards:s4
+# - Đây là tên image và tag mà bạn muốn pull.
+# - Cấu trúc:
+#     <repository>/<image_name>:<tag>
+#   + `eazybytes` là tên tổ chức hoặc user trên Docker registry (mặc định là Docker Hub nếu không chỉ định registry khác).
+#   + `cards` là tên image.
+#   + `s4` là tag của image, thường dùng để phân biệt version hoặc môi trường (vd: v1, v2, latest, s4,...).
+
+# 4. Chức năng tổng thể
+# - Khi chạy lệnh `docker pull eazybytes/cards:s4`, Docker sẽ:
+#   1. Kết nối tới Docker Hub (hoặc registry đã chỉ định nếu dùng prefix).
+#   2. Tải image `cards` với tag `s4` từ repository `eazybytes`.
+#   3. Lưu image vào local Docker cache để chuẩn bị cho việc chạy container.
+# - Sau khi pull xong, bạn có thể chạy container từ image này:
+#     docker run -d -p 8080:80 eazybytes/cards:s4
+
+# 5. Ví dụ workflow:
+# - Pull image:
+#     docker pull eazybytes/cards:s4
+# - Kiểm tra image đã có trong local:
+#     docker images
+# - Chạy container từ image:
+#     docker run --name mycards -p 8080:80 -d eazybytes/cards:s4
+
+# 6. Lưu ý quan trọng:
+# - Nếu tag `s4` không tồn tại, Docker sẽ báo lỗi.
+# - Nếu không chỉ định tag, mặc định Docker sẽ pull tag `latest`.
+# - Docker cần kết nối internet để pull image từ registry.
+
+# 7. Các lệnh liên quan:
+# - docker run eazybytes/cards:s4
+#   + Tạo và chạy container từ image đã pull.
+# - docker images
+#   + Liệt kê các image đã có trong local.
+# - docker rmi eazybytes/cards:s4
+#   + Xóa image khỏi local nếu không cần dùng nữa.
+
+# Kết luận:
+# Lệnh `docker pull eazybytes/cards:s4` dùng để tải Docker image `cards` với tag `s4` từ repository `eazybytes` về local,
+# chuẩn bị cho việc chạy container hoặc triển khai ứng dụng dựa trên image này.
+		
+		
 
 	Thêm dependency để build bằng Google Jib:
 	
@@ -2171,12 +2583,476 @@
 	- Command:
 	
 		- cmd: docker compose version
+		
+# Lệnh:
+docker compose version
+
+# Giải thích chi tiết:
+
+# 1. docker
+#    - Docker là nền tảng để phát triển, triển khai và chạy ứng dụng trong các container
+#    - Container là môi trường nhẹ, tách biệt, chứa đầy đủ ứng dụng và các dependencies
+
+# 2. compose
+#    - 'compose' là công cụ của Docker dùng để quản lý nhiều container cùng lúc
+#    - Docker Compose sử dụng file YAML (docker-compose.yml) để định nghĩa dịch vụ, mạng, volume, và các container liên quan
+
+# 3. version
+#    - Tùy chọn này hiển thị **phiên bản của Docker Compose** đang được cài đặt trên hệ thống
+#    - Giúp bạn kiểm tra xem Docker Compose có được cài đặt đúng và phiên bản phù hợp với project hay không
+
+# Ý nghĩa tổng thể:
+# - Lệnh này sẽ in ra phiên bản Docker Compose hiện tại
+# - Ví dụ output có thể là:
+#     Docker Compose version v2.20.2
+# - Giúp đảm bảo môi trường phát triển hoặc triển khai container phù hợp
+		
+		
 		- cmd: docker compose up
+		
+GIẢI THÍCH CHI TIẾT LỆNH:
+docker compose up
+
+--------------------------------------------------
+1. TỔNG QUAN
+--------------------------------------------------
+Lệnh này dùng để:
+- Tạo và chạy tất cả container được định nghĩa trong file `docker-compose.yml`
+- Dùng để triển khai multi-container application dễ dàng
+- Hữu ích khi:
+  + Khởi động toàn bộ stack gồm nhiều service (web, database, cache,…)
+  + Tự động tạo network, volume theo cấu hình trong `docker-compose.yml`
+  + Test hoặc deploy local môi trường multi-container
+
+--------------------------------------------------
+2. PHÂN TÍCH TỪNG THÀNH PHẦN
+--------------------------------------------------
+
+2.1. docker
+--------------------------------------------------
+- Công cụ quản lý container Docker
+
+2.2. compose
+--------------------------------------------------
+- Subcommand để làm việc với Docker Compose
+- Docker Compose quản lý multi-container application thông qua file YAML
+
+2.3. up
+--------------------------------------------------
+- Tạo container, network, volume theo định nghĩa trong `docker-compose.yml`
+- Nếu container đã tồn tại, Docker Compose sẽ start lại container
+- Tùy chọn thường dùng kèm:
+  + `-d` để chạy detached mode (nền)
+  + `--build` để build lại image trước khi chạy
+
+--------------------------------------------------
+3. QUÁ TRÌNH HOẠT ĐỘNG
+--------------------------------------------------
+1. Docker Compose đọc file `docker-compose.yml` trong thư mục hiện tại
+2. Kiểm tra các image được chỉ định:
+   - Nếu chưa có, pull từ Docker Hub hoặc build từ Dockerfile
+3. Tạo network và volume nếu chưa tồn tại
+4. Tạo container cho từng service trong file YAML
+5. Start tất cả container, log hiển thị trực tiếp trên terminal
+6. Nếu có lỗi, Docker Compose thông báo chi tiết để debug
+
+--------------------------------------------------
+4. OUTPUT MẪU
+--------------------------------------------------
+Starting network "myapp_default" with the default driver
+Creating volume "myapp_dbdata" with default driver
+Pulling db (mysql:5.7)...
+5.7: Pulling from library/mysql
+Digest: sha256:...
+Creating myapp_db_1 ... done
+Creating myapp_web_1 ... done
+Attaching to myapp_db_1, myapp_web_1
+db_1   | 2025-12-20 10:00:00+00:00 [Note] MySQL init complete
+web_1  | Starting web server on port 8080...
+
+--------------------------------------------------
+5. CÁCH SỬ DỤNG LIÊN QUAN
+--------------------------------------------------
+- Chạy detached mode:
+docker compose up -d
+
+- Build lại image trước khi chạy:
+docker compose up --build
+
+- Chỉ chạy một service cụ thể:
+docker compose up web
+
+- Dừng toàn bộ stack:
+docker compose down
+
+- Xem log service đang chạy:
+docker compose logs -f web
+
+--------------------------------------------------
+6. LỢI ÍCH THỰC TẾ
+--------------------------------------------------
+- Triển khai multi-container app nhanh chóng
+- Tự động tạo network và volume
+- Giúp local development và testing dễ dàng
+- Quản lý toàn bộ stack bằng một file YAML
+
+--------------------------------------------------
+7. LỖI THƯỜNG GẶP
+--------------------------------------------------
+- Docker Compose file sai cú pháp → lỗi parse YAML
+- Port conflict → không bind được port
+- Image không tồn tại và không build được → lỗi pull/build
+- Quên chạy `docker compose up -d` khi muốn chạy nền
+
+--------------------------------------------------
+8. CẢNH BÁO
+--------------------------------------------------
+- `docker compose up` sẽ hiển thị log trực tiếp, không dừng terminal nếu không dùng `-d`
+- Container chạy nền vẫn giữ tài nguyên, cần dùng `docker compose down` khi không dùng
+
+--------------------------------------------------
+9. TÓM TẮT NGẮN GỌN
+--------------------------------------------------
+docker compose up
+
+= Tạo và chạy tất cả container được định nghĩa trong docker-compose.yml
+= Tạo network và volume tự động nếu cần
+= Hiển thị log trực tiếp trên terminal
+= Dùng để phát triển, test hoặc deploy multi-container application
+= Tùy chọn `-d` để chạy nền, `--build` để build lại image
+		
+		
 		- cmd: docker compose up -d
+		
+LỆNH: docker compose up -d
+===========================
+
+1. MỤC ĐÍCH CỦA LỆNH
+-------------------
+Lệnh này dùng để:
+- Khởi chạy tất cả các service được định nghĩa trong file `docker-compose.yml`
+- Tạo các container nếu chưa tồn tại
+- Chạy các container ở chế độ "detached" (nền), nghĩa là terminal không bị chiếm bởi log của container
+- Thường dùng để triển khai môi trường đa-container nhanh chóng
+
+
+2. PHÂN TÍCH CHI TIẾT TỪNG THÀNH PHẦN
+------------------------------------
+
+2.1. docker compose
+------------------
+- CLI của Docker Compose
+- Docker Compose là công cụ quản lý nhiều container cùng lúc
+- File cấu hình mặc định: `docker-compose.yml`
+- Chức năng:
+  + Tạo network, volume nếu cần
+  + Build image nếu chưa có
+  + Khởi chạy container theo thứ tự phụ thuộc
+
+
+2.2. up
+-------
+- Sub-command của docker compose
+- Tạo và khởi chạy các container từ các service định nghĩa trong file compose
+- Nếu image chưa có, sẽ build từ Dockerfile hoặc pull từ registry
+
+2.3. -d
+-------
+- Tùy chọn "detached"
+- Chạy container ở chế độ nền, terminal sẽ trả về ngay
+- Logs không hiển thị trực tiếp, có thể xem bằng `docker compose logs`
+
+
+3. QUÁ TRÌNH DIỄN RA KHI CHẠY LỆNH
+---------------------------------
+Khi chạy:
+docker compose up -d
+
+Docker Compose sẽ:
+1. Kiểm tra file `docker-compose.yml` trong thư mục hiện tại
+2. Tạo network và volume nếu chưa tồn tại
+3. Kiểm tra image của từng service:
+   - Nếu image không tồn tại: build hoặc pull
+4. Tạo container cho mỗi service
+5. Khởi chạy container theo thứ tự phụ thuộc (depends_on)
+6. Chạy container ở chế độ nền và trả terminal về ngay
+
+
+4. KẾT QUẢ MẪU
+---------------
+Ví dụ output:
+
+Creating network "myapp_default" with the default driver
+Creating volume "myapp_dbdata" with default driver
+Creating service db     ... done
+Creating service webapp  ... done
+Creating service nginx   ... done
+
+Giải thích:
+- Network, volume được tạo nếu chưa tồn tại
+- Mỗi service được khởi chạy và hiển thị trạng thái "done"
+- Container chạy ở nền, terminal không bị chiếm
+
+
+5. CÁC BIẾN THỂ HAY DÙNG
+-----------------------
+- Chạy và xem log trực tiếp (không detached):
+  docker compose up
+
+- Chạy service cụ thể:
+  docker compose up -d webapp
+
+- Xóa container khi stop:
+  docker compose up --remove-orphans -d
+
+
+6. LỢI ÍCH KHI DÙNG LỆNH NÀY
+----------------------------
+- Triển khai nhiều container cùng lúc dễ dàng
+- Dễ dàng tái tạo môi trường dev/test
+- Chạy ở nền để tiếp tục dùng terminal
+- Quản lý service, volume, network tự động
+
+
+7. LỖI THƯỜNG GẶP
+-----------------
+- File `docker-compose.yml` sai cú pháp:
+  => Error: yaml parsing error
+
+- Image không tồn tại và không thể pull:
+  => Error: image not found
+
+- Docker daemon không chạy:
+  => Error: Cannot connect to the Docker daemon
+
+
+8. TÓM TẮT NGẮN GỌN
+-------------------
+docker compose  : CLI Docker Compose
+up             : tạo và khởi chạy container theo service
+-d             : chạy container ở nền (detached)
+Kết quả        : các container được khởi chạy, terminal trả về ngay, logs có thể xem bằng docker compose logs
+		
+		
 		- cmd: docker compose down
+		
+LỆNH: docker compose down
+====================================================================
+
+1. docker compose là gì?
+--------------------------------------------------------------------
+- Docker Compose là công cụ để định nghĩa và chạy multi-container Docker applications
+- Dùng file YAML (thường docker-compose.yml) để:
+  + Định nghĩa các service, network, volume
+  + Tạo và quản lý nhiều container cùng lúc
+- Thay vì chạy nhiều lệnh docker run riêng lẻ, Compose quản lý toàn bộ stack chỉ với 1 lệnh
+
+--------------------------------------------------------------------
+
+2. down là gì?
+--------------------------------------------------------------------
+- down = tắt và xóa toàn bộ stack được quản lý bởi Docker Compose
+- Khi chạy docker compose down:
+  + Dừng tất cả container
+  + Xóa container
+  + Xóa network do Compose tạo
+  + Có thể xóa volume nếu thêm tùy chọn `-v`
+
+--------------------------------------------------------------------
+
+3. Ý nghĩa tổng thể của lệnh
+--------------------------------------------------------------------
+docker compose down
+
+→ Dừng và xóa toàn bộ ứng dụng (container, network, volume nếu tùy chọn) được định nghĩa trong file docker-compose.yml hiện tại
+→ Giúp dọn dẹp môi trường, chuẩn bị deploy lại hoặc giải phóng tài nguyên
+
+--------------------------------------------------------------------
+
+4. Quy trình thực thi lệnh
+--------------------------------------------------------------------
+1) Docker Compose đọc file docker-compose.yml trong thư mục hiện tại
+2) Xác định các container, network, volume thuộc stack
+3) Dừng từng container
+4) Xóa container
+5) Xóa network do Compose tạo
+6) Nếu có thêm tùy chọn -v → xóa luôn volume
+7) Hiển thị trạng thái thực hiện trên terminal
+
+--------------------------------------------------------------------
+
+5. Kiểm tra sau khi chạy lệnh
+--------------------------------------------------------------------
+- Kiểm tra container còn tồn tại:
+docker ps -a
+
+- Kiểm tra network do Compose tạo:
+docker network ls
+
+- Kiểm tra volume (nếu có):
+docker volume ls
+
+- Nếu các resource không còn → lệnh thực thi thành công
+
+--------------------------------------------------------------------
+
+6. Output điển hình
+--------------------------------------------------------------------
+Stopping myweb ... done
+Removing myweb ... done
+Removing network myproject_default
+
+- Thông báo container dừng, xóa và network bị xóa
+
+--------------------------------------------------------------------
+
+7. Lỗi thường gặp
+--------------------------------------------------------------------
+1) Cannot find a Compose file
+- Thư mục hiện tại không có docker-compose.yml
+- Giải pháp: Chạy lệnh trong thư mục đúng hoặc chỉ định file bằng -f
+
+2) Permission denied
+- User không có quyền quản lý Docker
+- Giải pháp: chạy với sudo (Linux)
+
+--------------------------------------------------------------------
+
+8. Khi nào nên dùng lệnh này?
+--------------------------------------------------------------------
+- Dọn dẹp toàn bộ stack sau khi test
+- Tắt ứng dụng multi-container để giải phóng tài nguyên
+- Chuẩn bị deploy lại stack mới
+
+--------------------------------------------------------------------
+
+9. So sánh nhanh
+--------------------------------------------------------------------
+docker compose up → tạo và chạy stack
+docker compose stop → chỉ dừng container, không xóa network
+docker compose down → dừng và xóa toàn bộ stack, network, container, volume (nếu thêm -v)
+
+--------------------------------------------------------------------
+
+10. Tóm tắt 1 dòng
+--------------------------------------------------------------------
+docker compose down =
+DỪNG VÀ XÓA TOÀN BỘ STACK DOCKER COMPOSE (CONTAINER + NETWORK + VOLUME NẾU TÙY CHỌN) TRÊN THƯ MỤC HIỆN TẠI
+		
+		
 		- cmd: docker compose down -d
+		
+# Lệnh gốc:
+docker compose down -d
+
+# Giải thích chi tiết:
+
+# 1. docker compose
+# - `docker compose` là công cụ dùng để chạy nhiều container theo cấu hình được định nghĩa trong file `docker-compose.yml`.
+# - Thường dùng để quản lý các dịch vụ liên quan (multi-container application) một cách dễ dàng.
+
+# 2. down
+# - Lệnh `down` dùng để dừng và xóa tất cả container, network và volume được tạo ra bởi `docker compose up`.
+# - Khác với `docker compose stop`, `down` sẽ **xóa hoàn toàn resource** chứ không chỉ tạm dừng.
+
+# 3. -d
+# - Thường `-d` (detached mode) dùng khi chạy container, để chạy ngầm.  
+# - Tuy nhiên, trong lệnh `docker compose down`, **`-d` không phải là tùy chọn hợp lệ**.  
+#   + Docker Compose sẽ báo lỗi hoặc bỏ qua.  
+#   + Đúng chuẩn là chỉ dùng:
+#       docker compose down
+# - Nếu muốn dừng và xóa container chạy ngầm, chỉ cần `docker compose down`.
+
+# 4. Chức năng tổng thể
+# - Khi chạy `docker compose down`, Docker sẽ:
+#   1. Dừng tất cả container được tạo bởi file `docker-compose.yml`.
+#   2. Xóa container, network mà compose tạo ra.
+#   3. (Tùy cấu hình) Có thể xóa volume nếu thêm `-v`:
+#       docker compose down -v
+#   4. Giúp dọn dẹp môi trường sau khi triển khai hoặc test.
+
+# 5. Ví dụ workflow:
+# - Chạy các dịch vụ theo compose:
+#     docker compose up -d
+# - Kiểm tra container đang chạy:
+#     docker compose ps
+# - Dừng và xóa các dịch vụ:
+#     docker compose down
+# - Dọn cả volume:
+#     docker compose down -v
+
+# 6. Lưu ý quan trọng:
+# - Không nên dùng `-d` với `docker compose down`.
+# - Nếu muốn giữ dữ liệu persistent volume, không thêm `-v`.
+# - Sau khi down, tất cả container và network sẽ bị xóa, các thay đổi chưa commit trong container sẽ mất.
+
+# 7. Các lệnh liên quan:
+# - docker compose stop
+#   + Chỉ tạm dừng container mà không xóa.
+# - docker compose rm
+#   + Xóa container stopped mà compose quản lý.
+# - docker compose up -d
+#   + Khởi động dịch vụ theo file compose, chạy ngầm.
+
+# Kết luận:
+# Lệnh `docker compose down` dùng để dừng và xóa tất cả container, network, (tùy chọn volume) được tạo bởi Docker Compose,
+# giúp dọn dẹp môi trường sau khi phát triển hoặc test multi-container application.  
+# Lưu ý: không sử dụng `-d` với lệnh này.
+		
+		
 		- cmd: docker compose stop
+		
+# Lệnh:
+docker compose stop
+
+# Giải thích chi tiết:
+
+# 1. docker
+#    - Docker là nền tảng để phát triển, triển khai và chạy ứng dụng trong các container
+#    - Container là môi trường nhẹ, tách biệt, chứa đầy đủ ứng dụng và các dependencies
+
+# 2. compose
+#    - 'compose' là công cụ của Docker dùng để quản lý nhiều container cùng lúc
+#    - Docker Compose sử dụng file YAML (docker-compose.yml) để định nghĩa dịch vụ, mạng, volume, và các container liên quan
+
+# 3. stop
+#    - Tùy chọn này dùng để **dừng các container** được định nghĩa trong docker-compose.yml
+#    - Lệnh sẽ gửi tín hiệu SIGTERM đến các container, yêu cầu chúng dừng hoạt động
+#    - Container sẽ **không bị xóa**, vẫn giữ trạng thái và dữ liệu volume
+
+# Ý nghĩa tổng thể:
+# - Lệnh này dừng tất cả các container đang chạy được quản lý bởi Docker Compose trong thư mục hiện tại
+# - Thường dùng khi bạn muốn tạm dừng ứng dụng mà không mất dữ liệu hoặc cấu hình
+# - Nếu muốn dừng và xóa luôn container, network, volume thì dùng:
+#     docker compose down
+		
+		
 		- cmd: docker compose start
+		
+# Lệnh:
+docker compose start
+
+# Giải thích chi tiết:
+
+# 1. docker
+#    - Docker là nền tảng để phát triển, triển khai và chạy ứng dụng trong các container.
+#    - Container là môi trường nhẹ, tách biệt, chứa đầy đủ ứng dụng và các dependencies.
+
+# 2. compose
+#    - 'compose' là công cụ của Docker dùng để quản lý nhiều container cùng lúc.
+#    - Docker Compose sử dụng file YAML (docker-compose.yml) để định nghĩa dịch vụ, mạng, volume, và các container liên quan.
+
+# 3. start
+#    - Tùy chọn này dùng để **khởi động các container đã được dừng** (stopped) bởi Docker Compose.
+#    - Lệnh này sẽ chỉ chạy lại container mà không tạo lại các container mới.
+#    - Container vẫn giữ nguyên trạng thái trước khi dừng, bao gồm dữ liệu volume.
+
+# Ý nghĩa tổng thể:
+# - Lệnh này khởi động lại tất cả các container đang được quản lý bởi Docker Compose trong thư mục hiện tại.
+# - Thường dùng khi bạn muốn tiếp tục chạy ứng dụng sau khi đã dừng tạm thời với 'docker compose stop'.
+# - Nếu muốn tạo và chạy container mới từ đầu, dùng:
+#     docker compose up
+		
 		
 	- Code của docker-compose.yml:
 	
@@ -3072,22 +3948,35 @@
 			GatewayServer sẽ không thể tìm thấy các dịch vụ này.
 
 -- So sánh image, container và volume
+
 		Docker Image – như file .iso hoặc .exe
+		
 			Là template để tạo container.
+			
 			Không có trạng thái, không chạy được trực tiếp.
+			
 			Được build từ Dockerfile.
+			
 			Template, không thay đổi
 			
 		Docker Container – như một máy ảo đang chạy
+		
 			Là instance của image khi được chạy.
+			
 			Bạn có thể chạy nhiều container từ một image.
+			
 			Dữ liệu bên trong sẽ mất nếu container bị xóa (trừ khi dùng volume).
+			
 			Instance đang chạy, có thể thay đổi
 			
 		Docker Volume – ổ đĩa riêng cho dữ liệu
+		
 			Lưu trữ dữ liệu tách biệt với container.
+			
 			Không bị mất nếu container bị xóa.
+			
 			Dùng để lưu database, file upload, v.v.
+			
 			Dữ liệu lưu bền vững, dùng lại được
 		
 		Docker Image     →      Container       +        Volume
@@ -8533,8 +9422,94 @@
 --- Deploying microservices into cloud Kubernetes cluster:
 
 	- cmd: gcloud --version
+	
+# Lệnh:
+gcloud --version
+
+# Giải thích chi tiết:
+
+# 1. gcloud
+#    - 'gcloud' là công cụ Command Line Interface (CLI) chính thức của Google Cloud Platform (GCP)
+#    - Dùng để quản lý các dịch vụ của GCP như Compute Engine, Kubernetes Engine, Cloud Storage, BigQuery, v.v.
+
+# 2. --version
+#    - Tùy chọn này dùng để hiển thị **phiên bản hiện tại** của gcloud CLI đang được cài đặt trên hệ thống
+#    - Bao gồm cả phiên bản core và các component đã cài đặt
+
+# Ý nghĩa tổng thể:
+# - Lệnh này giúp bạn kiểm tra xem gcloud CLI đã được cài đặt và phiên bản hiện tại
+# - Thường dùng để xác nhận môi trường trước khi chạy các lệnh quản lý GCP
+# - Ví dụ output có thể là:
+#     Google Cloud SDK 423.0.0
+#     bq 2.0.76
+#     core 2025.10.21
+	
+	
 	- cmd: gcloud init
+	
+# Lệnh:
+gcloud init
+
+# Giải thích chi tiết:
+
+# 1. gcloud
+#    - 'gcloud' là công cụ Command Line Interface (CLI) chính thức của Google Cloud Platform (GCP)
+#    - Dùng để quản lý các dịch vụ của GCP như Compute Engine, Kubernetes Engine, Cloud Storage, BigQuery, v.v.
+
+# 2. init
+#    - Lệnh 'init' dùng để **khởi tạo cấu hình gcloud trên máy của bạn**
+#    - Thực hiện các bước như:
+#        1. Đăng nhập tài khoản Google
+#        2. Chọn dự án (project) mặc định
+#        3. Chọn khu vực (region) và vùng (zone) mặc định
+#        4. Tạo cấu hình mặc định cho gcloud CLI
+
+# Ý nghĩa tổng thể:
+# - Lệnh này giúp thiết lập môi trường gcloud trên máy local, chuẩn bị sẵn sàng để sử dụng các lệnh quản lý GCP
+# - Sau khi chạy 'gcloud init', bạn có thể:
+#       gcloud config list          # Kiểm tra cấu hình hiện tại
+#       gcloud compute instances list  # Thao tác với các dịch vụ GCP
+# - Lệnh này chỉ cần chạy một lần trên máy mới hoặc khi muốn thay đổi cấu hình gcloud
+	
+	
 	- cmd: gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project stellar-merket-389904
+	
+# Lệnh:
+gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project stellar-merket-389904
+
+# Giải thích chi tiết:
+
+# 1. gcloud
+#    - 'gcloud' là công cụ Command Line Interface (CLI) chính thức của Google Cloud Platform (GCP)
+#    - Dùng để quản lý các dịch vụ của GCP như Compute Engine, Kubernetes Engine, Cloud Storage, BigQuery, v.v.
+
+# 2. container clusters
+#    - Đây là module trong gcloud để quản lý Kubernetes clusters trên GKE (Google Kubernetes Engine)
+#    - 'clusters' là đối tượng quản lý các cluster Kubernetes
+
+# 3. get-credentials
+#    - Lệnh này **tải thông tin xác thực (credentials) của cluster** về máy local
+#    - Thêm thông tin vào file kubeconfig (~/.kube/config) để kubectl có thể kết nối với cluster
+
+# 4. cluster-1
+#    - Tên cluster GKE mà bạn muốn kết nối
+#    - Ở đây là 'cluster-1'
+
+# 5. --zone us-central1-c
+#    - Chỉ định **zone** nơi cluster GKE đang chạy
+#    - GKE clusters có thể nằm trong một zone hoặc region cụ thể
+
+# 6. --project stellar-merket-389904
+#    - Chỉ định **project GCP** mà cluster thuộc về
+#    - Ở đây là project 'stellar-merket-389904'
+
+# Ý nghĩa tổng thể:
+# - Lệnh này cấu hình máy local để kubectl có thể thao tác với cluster 'cluster-1' trên GKE
+# - Sau khi chạy lệnh, bạn có thể dùng các lệnh kubectl như:
+#       kubectl get nodes
+#       kubectl get pods -A
+# - Đây là bước cần thiết khi muốn quản lý cluster GKE từ terminal
+	
 
 	Trên google cloud enable cho Kubernetes engine API
 	
