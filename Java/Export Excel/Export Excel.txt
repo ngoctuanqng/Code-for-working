@@ -8,13 +8,116 @@ Export Excel--JAVA:
 		Chuyển Đổi Dữ Liệu: Đọc, viết, và chỉnh sửa dữ liệu trong các sheet của workbook.
 		
 		Các Phương Thức Quan Trọng Của XSSFWorkbook:
-		
-			createSheet(String sheetName): Tạo một sheet mới trong workbook với tên cụ thể.
-			getSheet(String sheetName): Lấy sheet dựa trên tên của sheet.
-			getSheetAt(int index): Lấy sheet dựa trên chỉ số của nó trong workbook.
-			removeSheetAt(int index): Xóa sheet tại chỉ số cụ thể.
-			getSheetIndex(String sheetName): Lấy chỉ số của sheet dựa trên tên của nó.
-			write(OutputStream stream): Ghi workbook vào một OutputStream, chẳng hạn như một file.
+			
+			1. Constructor (khởi tạo workbook)
+
+				XSSFWorkbook()
+					Tạo workbook mới trong bộ nhớ.
+
+				XSSFWorkbook(InputStream is)
+					Đọc file Excel từ InputStream.
+
+				XSSFWorkbook(File file)
+					Đọc file Excel từ file trên hệ thống.
+
+				XSSFWorkbook(OPCPackage pkg)
+					Đọc workbook từ OPCPackage (cơ chế đọc file .xlsx của Apache POI).
+
+
+			2. Tạo và quản lý Sheet
+
+				createSheet()
+					Tạo sheet mới với tên mặc định.
+
+				createSheet(String name)
+					Tạo sheet mới với tên chỉ định.
+
+				getSheet(String name)
+					Lấy sheet theo tên.
+
+				getSheetAt(int index)
+					Lấy sheet theo vị trí index.
+
+				getNumberOfSheets()
+					Trả về số lượng sheet trong workbook.
+
+				removeSheetAt(int index)
+					Xóa sheet theo index.
+
+				setSheetName(int index, String name)
+					Đổi tên sheet.
+
+				sheetIterator()
+					Iterator để duyệt tất cả sheet.
+
+
+			3. Style và Font
+
+				createCellStyle()
+					Tạo CellStyle mới.
+
+				createFont()
+					Tạo Font mới cho cell.
+
+				getCellStyleAt(int idx)
+					Lấy CellStyle theo index.
+
+				getFontAt(int idx)
+					Lấy Font theo index.
+
+
+			4. DataFormat
+
+				createDataFormat()
+					Tạo DataFormat để format số, ngày tháng.
+
+
+			5. Write Workbook ra file
+
+				write(OutputStream stream)
+					Ghi workbook ra OutputStream (ví dụ FileOutputStream).
+
+
+			6. Close Workbook
+
+				close()
+					Đóng workbook và giải phóng tài nguyên.
+
+
+			7. Clone Sheet
+
+				cloneSheet(int sheetIndex)
+					Tạo bản sao của sheet.
+
+
+			8. Set active sheet
+
+				setActiveSheet(int index)
+					Thiết lập sheet đang active khi mở file Excel.
+
+				getActiveSheetIndex()
+					Lấy index của sheet đang active.
+
+
+			9. Set sheet order
+
+				setSheetOrder(String sheetname, int pos)
+					Thay đổi thứ tự sheet.
+
+
+			10. Force formula recalculation
+
+				setForceFormulaRecalculation(boolean value)
+					Yêu cầu Excel tính lại công thức khi mở file.
+
+
+			11. Access CreationHelper
+
+				getCreationHelper()
+					Lấy CreationHelper để tạo:
+						- Hyperlink
+						- RichTextString
+						- DataFormat
 			
 		Tạo Workbook Mới:
 		
