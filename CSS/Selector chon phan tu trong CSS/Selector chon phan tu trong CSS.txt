@@ -3,7 +3,8 @@ Selector chọn phần tử trong CSS--CSS
 	Pesudo CSS Selector
 	
 		Code HTML:
-		
+
+/***		
 			<div class="container">
 			  <div class="paragraph-container">
 				<p id="hola-id" class="hola-class">Hola world</p>
@@ -25,42 +26,53 @@ Selector chọn phần tử trong CSS--CSS
 				<p>I'm the only child of this span</p>
 			  </div>
 			</div>
+***/
 			
 		Chọn phần tử đầu tiên: A:first-child. Nó chọn đến phần tử con đầu tiên. (A phải có cha mẹ).
-		
+
+/***		
 			li:first-child {
 			  color: blue;
 			}
+***/
 			
 		Bạn đoán thử xem. Nhắm mục tiêu ul:first-child có thành công không?
-		
+
+/***		
 			ul:first-child {
 			  color: red;
 			}
+***/
 			
 			Chẳng có gì xảy ra.
 			Điều này là do mặc dù ul có cha mẹ (div với class .container), nhưng ul không phải là con đầu
 			tiên (nó là con thứ 3).
 		
 		CSS dưới đây sẽ hoạt động vì .paragraph-container là con đầu tiên của .container.
-			
+
+/***			
 			.paragraph-container:first-child {
 			  color: red;
 			}
+***/
 			
 		Chọn phần tử con cuối cùng: A:last-child. Hoạt động như A:first-child, ngoại trừ thay vì chọn phần tử con
 		đầu tiên, nó chọn phần tử con cuối cùng.
-			
+
+/***			
 			li:last-child {
 			  color: purple;
 			}
+***/
 			
 		Chỉ chọn phần tử con: A:only-child. Chọn tất cả A là con duy nhất của cha mẹ nó. Tương tự như bộ chọn phần tử con đầu
 		tiên (A:first-child) và phần tử con cuối cùng (A:last-child). Ngoại trừ mục tiêu không được có anh chị em nào.
-			
+
+/***			
 			p:only-child {
 			  color: red;
 			}
+***/
 			
 		Lưu ý mặc dù chúng ta có một số phần tử p, chỉ phần tử cuối cùng được áp dụng vì các phần tử p khác không phải là phần
 		tử con duy nhất của cha mẹ chúng.
@@ -68,70 +80,88 @@ Selector chọn phần tử trong CSS--CSS
 		Nói cách khác, phần tử con có anh chị em thì không được áp dụng.
 		
 		Bộ chọn phần tử con thứ N: A:nth-child(n). Nó chọn từng mục tiêu là con thứ n của cha mẹ nó.
-			
+
+/***			
 			li:nth-child(2) {
 			  color: red;
 			}
+***/
 			
 		Hãy thử với phần tử p:
-			
+
+/***			
 			p:nth-child(2) {
 			  color: red;
 			}
+***/
 			
 			Bạn có thể thấy tại sao hai phần tử p thay đổi màu sắc?
 		
 		Bộ chọn con thứ N cuối cùng: A:nth-last-child(n). Nó tương tự như bộ chọn con thứ N, ngoại trừ nó được tính từ cuối cùng.
-			
+
+/***			
 			li:nth-last-child(2) {
 			  color: red;
 			}
+***/
 			
 		Không chọn: A:not(B). Chọn tất cả các phần tử A mà không phải B.
-			
+
+/***			
 			p:not(.outside-class) {
 			  color: blue;
 			}
+***/
 			
 		Bộ chọn loại đầu tiên: A:first-of-type. Nó chọn phần tử đầu tiên thuộc loại này trong số các phần tử anh chị em của nó.
 			
 			Nghe có vẻ tương tự :first-child nhỉ?
 			Nhưng không phải.
 			Để cảm nhận sự khác biệt của nó, hãy thử nghịch nó xem sao:
-				
+
+/***				
 				li:first-of-type {
 				  color: blue;
 				}
+***/
 				
 			Ok, đó không phải là một ví dụ hay vì nó cho thấy kết quả tương tự như li:first-child .
 			
 			Hãy làm một ví dụ khác:
-				
+
+/***				
 				p:first-of-type {
 				  color: red;
 				}
+***/
 				
 				So sánh với p:first-child. Bạn sẽ nhận thấy rằng p ở giữa chuyển sang màu đỏ khi sử dụng :first-of-type.
 
 				Điều này là do p ở giữa là loại phần tử p đầu tiên trong số các anh chị em của nó.
 		
 		Bộ chọn loại cuối cùng: A:last-of-type. Giống như trên, nhưng ngược lại.
-		
+
+/***		
 			li:last-of-type {
 			  color: blue;
 			}
+***/
 			
 		Bộ chọn loại thứ N: A:nth-of-type(n). Cũng giống như hai bộ chọn trên, nhưng nó chọn phần tử thứ N.
-			
+
+/***			
 			li:nth-of-type(2) {
 			  color: blue;
 			}
+***/
 			
 		Hãy thử với phần tử khác.
-			
+
+/***			
 			p:nth-of-type(2) {
 			  color: blue;
 			}
+***/
 			
 		Nếu chúng ta thay đổi nó thành p:nth-of-type(1), thì nó hoạt động giống như first-of-type.
 		
@@ -139,10 +169,12 @@ Selector chọn phần tử trong CSS--CSS
 		số các anh chị em.
 		
 		Bộ chọn Only type: A:only-of-type. Chọn phần tử chỉ có loại đó, không có Anh / Chị / Em.
-			
+
+/***			
 			p:only-of-type {
 			  color: purple;
 			}
+***/
 			
 			Chú ý, chúng ta có hai phần tử p đổi màu.
 
@@ -153,7 +185,8 @@ Selector chọn phần tử trong CSS--CSS
 		động với các phần tử không liên kết non-link).
 		
 		Code HTML:
-		
+
+/***		
 			<div id="app">
 			  <a class="cheesyLink" href="#">I like cheese</a>
 			  <a class="sweetLink" href="#">I like donut</a>
@@ -165,80 +198,105 @@ Selector chọn phần tử trong CSS--CSS
 				</form>
 			  </div>
 			</div>
+***/
 			
 		Hover Selector: A:hover. Chọn phần tử được hover. Thường được sử dụng để làm nổi bật các liên kết.
-			
+
+/***			
 			a:hover {
 			  color: red;
 			}
+***/
 			
 		Không chỉ hoạt động với thẻ a. Bộ chọn này hoạt động với mọi thứ.
-			
+
+/***			
 			.burger:hover {
 			  color: red;
 			}
+***/
 			
 		Focus Selector: A:focus. Chọn phần tử bạn đang tập trung vào nó. Thường được sử dụng với input.
-			
+
+/***			
 			input:focus {
 			  background: red;
 			}
+***/
 			
 		Active Selector: A:active. Chọn phần tử đang có trạng thái active.
-			
+
+/***			
 			.cheesyLink:active {
 			  background: red;
 			}
+***/
 			
 		Lưu ý khi bạn click vào nó, nền (background) sẽ thay đổi.
 		
 		Link Selector: A:link. Nó chọn tất cả các link chưa được click.
-			
+
+/***			
 			a:link {
 			  background: blue;
 			}
+***/
 			
 	Attribute CSS Selector
 		
 		Bộ chọn thuộc tính CSS (Attribute CSS Selector) sử dụng để chọn thuộc tính HTML (HTML Attributes).
 			
 			Code HTML:
-			
+
+/***			
 				<div for="chocolate">Chocolate</div>
 				<div for="peanut">Peanut</div>
 				<div for="butter">Butter</div>
 				<div>Jelly</div>
+***/
 				 
 		Bộ chọn thuộc tính cơ bản: A[B]. Chọn tất cả các phần tử A có thuộc tính B.
-			
+
+/***			
 			div[for] {
 			  color: red;
 			}
-		Bộ chọn thuộc tính cụ thể: A[B="C"]. Chọn các phần tử A có thuộc tính B với giá trị là C.
+***/			
 			
+		Bộ chọn thuộc tính cụ thể: A[B="C"]. Chọn các phần tử A có thuộc tính B với giá trị là C.
+
+/***			
 			div[for="chocolate"]{
 			  color: blue;
 			}
+***/
 			
 		Bộ chọn thuộc tính cụ thể (Bắt đầu với ...): A[B^="C"]. Chọn tất cả các phần tử A có thuộc tính B với giá trị bắt đầu
 		là C. Ký tự ^ là ký tự thể hiện chuỗi bắt đầu (trong Biểu thức chính quy (Regex)).
-			
+
+/***			
 			div[for^="cho"] {
 			  color: magenta;
 			}
+***/
 			
 		Bộ chọn thuộc tính cụ thể (Kết thúc với ...): A[B$="C"]. Chọn tất cả các phần tử A có thuộc tính B với giá trị kết thúc
 		là C. Ký tự $ là ký tự thể hiện chuỗi kết thúc trong (Biểu thức chính quy (Regex)).
-			
+
+/***			
 			div[for$="er"] {
 			  color: yellow;
 			}
+***/
 			
 		Bộ chọn thuộc tính cụ thể (Chứ ký tự ...): A[B*="C"]. Chọn tất cả phần tử A với thuộc tính B chứa giá trị C.
-			
+
+/***			
 			div[for*="ut"]{
 			  color: cyan;
-			}		
+			}
+***/			
+		
 	CSS Selectors
 	
 		.class								.intro						Selects all elements with class="intro"

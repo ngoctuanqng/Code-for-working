@@ -1,14 +1,20 @@
 Khái niệm về Apache Kafka--Kafka:
 
-	- Để rõ hơn về lợi ích của kafka, hãy tưởng tượng một hệ thống thương mại điện tử có nhiều máy chủ
-	thực hiện các công việc khác nhau, tất cả các máy chủ này đều muốn giao tiếp với database server, vì vậy
-	chúng ta sẽ có nhiều data pipeline kết nối các server khác đến database server này
-	- Nhưng trong thực tế, hệ thống thương mại điện tử sẽ còn phải kết nối đến một vài server khác nữa
-	- Data pipeline đang trở nên phức tạp theo sự gia tăng của số lượng hệ thống. Để giải quyết vấn đề
-	này thì kafka ra đời. Kafka tách rời các data pipeline giữa các hệ thống để làm cho việc communicate giữa các hệ thống
+	- Để rõ hơn về lợi ích của kafka, hãy tưởng tượng một hệ thống thương mại
+	điện tử có nhiều máy chủ thực hiện các công việc khác nhau, tất cả các máy chủ
+	này đều muốn giao tiếp với database server, vì vậy chúng ta sẽ có nhiều data
+	pipeline kết nối các server khác đến database server này
+	
+	- Nhưng trong thực tế, hệ thống thương mại điện tử sẽ còn phải kết nối đến một
+	vài server khác nữa
+	
+	- Data pipeline đang trở nên phức tạp theo sự gia tăng của số lượng hệ thống. Để
+	giải quyết vấn đề này thì kafka ra đời. Kafka tách rời các data pipeline giữa các
+	hệ thống để làm cho việc communicate giữa các hệ thống
 	trở nên đơn giản hơn và dễ quản lý hơn.
 
 	Kafka là gì?--Khái niệm về Apache Kafka:
+	
 		- Real-time data có giá trị đặc biệt quan trọng đối với các doanh nghiệp. Các doanh nghiệp sử dụng real-time data để cải thiện
 		dịch vụ khách hàng, quản lý sản phẩm và tối ưu hóa vận hành. Ngoài ra, real-time data còn để giúp theo dõi và duy trì cơ sở
 		hạ tầng CNTT. Nhận biết được những lợi ích trên, nhu cầu thu thập real-time data ngày càng tăng cao ở khắp các doanh nghiệp toàn thế giới.

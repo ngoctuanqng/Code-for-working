@@ -201,7 +201,8 @@ JsonNode Working with Tree Model Nodes in Jackson--JAVA:
 				
 				Similar results might be achieved by using replace or setAll methods on objects of the same type.
 				
-				To verify that the method works as expected, we’ll change the value of the field name under root node from an object of first and last into another one consisting of only nick field in a test:
+				To verify that the method works as expected, we’ll change the value of the field name under root node
+				from an object of first and last into another one consisting of only nick field in a test:
 					
 					@Test
 					public void givenANode_whenModifyingIt_thenCorrect() throws IOException {
@@ -219,7 +220,8 @@ JsonNode Working with Tree Model Nodes in Jackson--JAVA:
 					
 					JsonNode removedNode = locatedNode.remove(fieldName);
 				
-				In order to remove multiple nodes at once, we can invoke an overloaded method with the parameter of Collection<String> type, which returns the parent node instead of the one to be removed:
+				In order to remove multiple nodes at once, we can invoke an overloaded method with the parameter of
+				Collection<String> type, which returns the parent node instead of the one to be removed:
 					
 					ObjectNode locatedNode = locatedNode.remove(fieldNames);
 				

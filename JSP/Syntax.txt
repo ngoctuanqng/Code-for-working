@@ -1,6 +1,7 @@
 Elements of JSP
 	The Scriptlet
-		A scriptlet can contain any number of JAVA language statements, variable or method declarations, or expressions that
+		A scriptlet can contain any number of JAVA language statements,
+		variable or method declarations, or expressions that
 		are valid in the page scripting language.
 		
 			<% code fragment %>
@@ -11,7 +12,8 @@ Elements of JSP
 			   code fragment
 			</jsp:scriptlet>
 			
-		Any text, HTML tags, or JSP elements you write must be outside the scriptlet. Following is the simple and first example for JSP
+		Any text, HTML tags, or JSP elements you write must be outside the
+		scriptlet. Following is the simple and first example for JSP
 		
 			<html>
 			   <head><title>Hello World</title></head>
@@ -26,7 +28,8 @@ Elements of JSP
 			
 	JSP Declarations
 	
-		A declaration declares one or more variables or methods that you can use in Java code later in the JSP file. You must
+		A declaration declares one or more variables or methods that you can use
+		in Java code later in the JSP file. You must
 		declare the variable or method before you use it in the JSP file.
 		
 		Following is the syntax for JSP Declarations
@@ -47,14 +50,17 @@ Elements of JSP
 			
 	JSP Expression
 	
-		A JSP expression element contains a scripting language expression that is evaluated, converted to a String,
-		and inserted where the expression appears in the JSP file.
+		A JSP expression element contains a scripting language expression that is
+		evaluated, converted to a String, and inserted where the expression
+		appears in the JSP file.
 
-		Because the value of an expression is converted to a String, you can use an expression within a line of
-		text, whether or not it is tagged with HTML, in a JSP file.
+		Because the value of an expression is converted to a String, you can use
+		an expression within a line of text, whether or not it is tagged
+		with HTML, in a JSP file.
 
-		The expression element can contain any expression that is valid according to the Java Language Specification
-		but you cannot use a semicolon to end an expression.
+		The expression element can contain any expression that is valid
+		according to the Java Language Specification but you cannot use a
+		semicolon to end an expression.
 		
 		Following is the syntax of JSP Expression
 		
@@ -78,8 +84,9 @@ Elements of JSP
 				
 	JSP Comments
 	
-		JSP comment marks text or statements that the JSP container should ignore. A JSP comment is useful when
-		you want to hide or "comment out", a part of your JSP page.
+		JSP comment marks text or statements that the JSP container should
+		ignore. A JSP comment is useful when you want to hide or "comment
+		out", a part of your JSP page.
 		
 		Following is the syntax of the JSP comments
 		
@@ -98,8 +105,9 @@ Elements of JSP
 			
 			A Test of Comments
 			
-		There are a small number of special constructs you can use in various cases to insert comments or characters
-		that would otherwise be treated specially. Here's a summary
+		There are a small number of special constructs you can use in various cases
+		to insert comments or characters that would otherwise be treated
+		specially. Here's a summary
 		
 		JSP Comment: <%-- comment --%>
 			
@@ -140,7 +148,8 @@ Elements of JSP
 			
 	JSP Directives
 		
-		A JSP directive affects the overall structure of the servlet class. It usually has the following form
+		A JSP directive affects the overall structure of the servlet class. It
+		usually has the following form
 			
 			<%@ directive attribute="value" %>
 		
@@ -195,8 +204,10 @@ Elements of JSP
 				
 				
 	JSP Actions
-		JSP actions use constructs in XML syntax to control the behavior of the servlet engine. You can dynamically
-		insert a file, reuse JavaBeans components, forward the user to another page, or generate HTML for the Java plugin.
+	
+		JSP actions use constructs in XML syntax to control the behavior of the servlet
+		engine. You can dynamically insert a file, reuse JavaBeans components, forward
+		the user to another page, or generate HTML for the Java plugin.
 		
 		There is only one syntax for the Action element, as it conforms to the XML standard
 		
@@ -292,15 +303,18 @@ Elements of JSP
 				
 	JSP Implicit Objects
 	
-		JSP supports nine automatically defined variables, which are also called implicit objects. These variables are
+		JSP supports nine automatically defined variables, which are also called
+		implicit objects. These variables are
 	
 	Control-Flow Statements
 	
-		You can use all the APIs and building blocks of Java in your JSP programming including decision-making statements, loops, etc.
+		You can use all the APIs and building blocks of Java in your JSP programming
+		including decision-making statements, loops, etc.
 	
 	Decision-Making Statements
 	
-		The if...else block starts out like an ordinary Scriptlet, but the Scriptlet is closed at each line with HTML text included
+		The if...else block starts out like an ordinary Scriptlet, but the Scriptlet is
+		closed at each line with HTML text included
 		between the Scriptlet tags.
 			
 			<%! int day = 3; %> 
@@ -318,7 +332,8 @@ Elements of JSP
 			
 			Today is not weekend
 			
-		Now look at the following switch...case block which has been written a bit differentlty using out.println() and inside Scriptletas
+		Now look at the following switch...case block which has been written a bit differentlty
+		using out.println() and inside Scriptletas
 			
 			<%! int day = 3; %> 
 			<html> 
@@ -356,7 +371,8 @@ Elements of JSP
 			
 	Loop Statements
 		
-		You can also use three basic types of looping blocks in Java: for, while, and dowhile blocks in your JSP programming.
+		You can also use three basic types of looping blocks in Java: for, while, and dowhile
+		blocks in your JSP programming.
 			<%! int fontSize; %> 
 			<html> 
 			   <head><title>FOR LOOP Example</title></head> 
@@ -393,6 +409,7 @@ Elements of JSP
 			JSP Tutorial
 			
 	JSP Operators
+	
 		JSP supports all the logical and arithmetic operators supported by Java. Following table lists out all the operators
 		with the highest precedence appear at the top of the table, those with the lowest appear at the bottom.
 		

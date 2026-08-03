@@ -27,6 +27,7 @@
 							map.put("A", 1);
 							map.put("B", 2);
 							map.put("C", 3);
+							
 		Khởi tạo:
 		
 							- keySet và entrySet sẽ hoàn lại 1 Set
@@ -34,7 +35,8 @@
 							- Trong Java, "entry" thường được sử dụng để đề cập đến một cặp khóa-giá trị trong một cấu trúc dữ
 							liệu như một Map. Một "entry" trong Java thường đại diện cho một phần tử trong một Map, nơi mỗi
 							phần tử được lưu trữ dưới dạng một cặp khóa-giá trị.
-		
+
+/***		
 							Map<String, Integer> map1 = new HashMap<>();
 							
 							Map<String, Integer> map2 = Map.of("apple", 10, "banana", 20);
@@ -84,54 +86,103 @@
 							map.put(1, "Suzuki");
 							map.put(7, "Mercedes");
 							map.put(4, "Mazda");
-		- put:				
+***/
+							
+		- put:
+
+/***		
 							map.put("D", 4);
 							for (Map.Entry<String, Integer> entry : map.entrySet()) {
 								System.out.println(entry.getKey() + ": " + entry.getValue()); // 1 2 3 4
 							}
-		putAll:				
+***/							
+		putAll:
+
+/***		
 							Map<String, Integer> anotherMap = new HashMap<>();
 							anotherMap.put("D", 4);
 							anotherMap.put("E", 5);
 							map.putAll(anotherMap); // Sử dụng phương thức putAll để thêm tất cả các cặp key-value từ anotherMap vào map. 1 2 3 4 5
-		- get:				Integer valueB = map.get("B"); // Sử dụng phương thức get để lấy giá trị tương ứng với key "B". 2
+***/
+
+		- get:				
+
+/***		
+							Integer valueB = map.get("B"); // Sử dụng phương thức get để lấy giá trị tương ứng với key "B". 2
+***/							
+							
 		- remove:
+
+/***		
 							Map<String, Integer> map = new HashMap<>();
 							map.put("apple", 10);
 							map.put("banana", 20);
 							map.remove("apple");
 							System.out.println(map); // Output: {banana=20}
+***/							
+							
 		- isEmpty:
+		
+/***		
 							Map<String, Integer> map = new HashMap<>();
 							System.out.println(map.isEmpty()); // Output: true
+***/							
+							
 		- size:
+		
+/***		
 							Map<String, Integer> map = new HashMap<>();
 							map.put("apple", 10);
 							map.put("banana", 20);
 							System.out.println(map.size()); // Output: 2
+***/							
+							
+							
 		- clear:
+		
+/***		
 							Map<String, Integer> map = new HashMap<>();
 							map.put("apple", 10);
 							map.put("banana", 20);
 							map.clear();
 							System.out.println(map); // Output: {}
-		- containsKey:		
+***/							
+							
+		- containsKey:
+		
+/***		
 							boolean containsKeyB = map.containsKey("B"); // Kiểm tra xem key "B" có tồn tại trong map hay không. true
 							boolean containsKeyD = map.containsKey("D"); // Kiểm tra xem key "D" có tồn tại trong map hay không. false
-		- containsValue:		
+***/							
+							
+		- containsValue:
+
+/***		
 							boolean containsValue2 = map.containsValue(2); // Kiểm tra xem giá trị 2 có tồn tại trong map hay không. true
 							boolean containsValue4 = map.containsValue(4); // Kiểm tra xem giá trị 4 có tồn tại trong map hay không. false
-		- keySet:				
+***/							
+							
+		- keySet:
+
+/***		
 							Set<String> keySet = map.keySet(); // Sử dụng phương thức keySet để lấy tập hợp chứa tất cả các key
 							for (String key : keySet) {
 								System.out.println(key); // A B C
 							}
-		- values:				
+***/							
+							
+		- values:
+
+/***		
 							Collection<Integer> values = map.values(); // Sử dụng phương thức values để lấy Collection chứa tất cả các giá trị
 							for (Integer value : values) {
 								System.out.println(value); // 1 2 3
 							}
-		- entrySet:			
+***/							
+							
+		- entrySet:
+
+/***		
 							Set<Entry<String, Integer>> entrySet = map.entrySet(); // Sử dụng phương thức entrySet để lấy Set chứa tất cả các cặp key-value
 							for (Entry<String, Integer> entry : entrySet) {
 								System.out.println(entry.getKey() + ": " + entry.getValue()); // A: 1. B: 2. C: 3 
@@ -145,6 +196,8 @@
 							for(Map.Entry<Integer, String> entry : map.entrySet()){ //Sử dụng Map.Entry
 								System.out.println(entry.getKey() + " - " +entry.getValue());
 							}
+***/							
+							
 		Note:
 							- Vấn đề là khi bạn thêm listResult2 vào listResult1, thì thực chất bạn đang thêm một tham chiếu đến đối tượng listResult2
 							vào listResult1. Vì vậy, tất cả các phần tử trong listResult1 sẽ cùng trỏ đến
@@ -153,7 +206,8 @@
 							listResult1 chỉ chứa các tham chiếu đến đối tượng listResult2, nên khi phương thức
 							clear() được gọi, tất cả các phần tử trong listResult1 cũng sẽ thấy sự thay đổi và chứa các giá trị rỗng.
 							- serviceLifecycle thực chất là 1 đối tượng của service
-							
+
+/***							
 							@Override
 							public List<Map<String, Object>> getAllProjectListViewWithEmpId(ServiceLifecycle serviceLifecycle, String empId) {
 									List<Object[]> listResult = new ArrayList<>();
@@ -176,6 +230,8 @@
 									}
 									return listResult1;
 							}
+***/
+
 							
 							- Trong mỗi vòng lặp for, một đối tượng listResult2 mới được tạo và các giá trị được thêm vào đối tượng này. Sau đó,
 							đối tượng listResult2 được thêm vào listResult1. Do đó, không có sự chia sẻ tham
@@ -188,7 +244,8 @@
 							biệt, không chia sẻ tham chiếu với nhau.
 							Sau khi kết thúc vòng lặp for, listResult1 vẫn giữ giá trị của các phần tử được thêm vào từ các đối tượng listResult2
 							trong mỗi vòng lặp. Mất tham chiếu của biến listResult2 không ảnh hưởng đến giá trị của listResult1.
-							
+
+/***							
 							listResult = this.store.getAllProjectListViewWithEmpId();
 							for (Object[] object : listResult) {
 								Map<String, Object> listResult2 = new HashMap<>();
@@ -205,3 +262,4 @@
 								listResult1.add(listResult2);
 							}
 							return listResult1;
+***/							

@@ -1,8 +1,11 @@
 MimeMessage--Java:
 
-	- MimeMessage trong Spring Framework là một lớp thuộc gói javax.mail được sử dụng để tạo và quản lý các email theo định dạng MIME (Multipurpose Internet Mail Extensions). MIME là một chuẩn
-	cho việc định dạng các loại dữ liệu khác nhau trong email, chẳng hạn như văn bản, hình ảnh, tệp đính kèm, và nhiều hơn nữa.
-	- Trong Spring, bạn có thể sử dụng MimeMessage kết hợp với các lớp khác để gửi email. Dưới đây là một ví dụ cơ bản về cách sử dụng MimeMessage trong một ứng dụng Spring để gửi email.
+	- MimeMessage trong Spring Framework là một lớp thuộc gói javax.mail được sử dụng để tạo và
+	quản lý các email theo định dạng MIME (Multipurpose Internet Mail Extensions). MIME là một chuẩn
+	cho việc định dạng các loại dữ liệu khác nhau trong email, chẳng hạn như văn bản, hình ảnh, tệp
+	đính kèm, và nhiều hơn nữa.
+	- Trong Spring, bạn có thể sử dụng MimeMessage kết hợp với các lớp khác để gửi email. Dưới đây là
+	một ví dụ cơ bản về cách sử dụng MimeMessage trong một ứng dụng Spring để gửi email.
 	- Cấu hình Spring để gửi email:
 	
 		Thêm phụ thuộc vào pom.xml (nếu bạn đang sử dụng Maven):

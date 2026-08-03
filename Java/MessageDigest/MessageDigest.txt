@@ -1,7 +1,9 @@
 MessageDigest--Java:
 
-	- MessageDigest là một lớp trong Java thuộc gói java.security, được sử dụng để thực hiện các thuật toán băm (hashing). Các thuật toán băm là các hàm toán học có thể chuyển
-	đổi dữ liệu đầu vào (thường là chuỗi hoặc tệp) thành một giá trị băm có kích thước cố định. Điều này thường được sử dụng trong các tình huống bảo mật, chẳng hạn như lưu trữ
+	- MessageDigest là một lớp trong Java thuộc gói java.security, được sử dụng để
+	thực hiện các thuật toán băm (hashing). Các thuật toán băm là các hàm toán học có thể chuyển
+	đổi dữ liệu đầu vào (thường là chuỗi hoặc tệp) thành một giá trị băm có kích thước cố
+	định. Điều này thường được sử dụng trong các tình huống bảo mật, chẳng hạn như lưu trữ
 	mật khẩu một cách an toàn hoặc kiểm tra tính toàn vẹn của dữ liệu.
 	- Các Thuật Toán Băm Hỗ Trợ:
 		MD5 (Message Digest Algorithm 5)
@@ -18,7 +20,8 @@ MessageDigest--Java:
 		
 		void update(byte input):
 
-			Cập nhật đối tượng MessageDigest với một byte dữ liệu. Bạn có thể gọi phương thức này nhiều lần với các phần khác nhau của dữ liệu.
+			Cập nhật đối tượng MessageDigest với một byte dữ liệu. Bạn có thể gọi phương thức này nhiều
+			lần với các phần khác nhau của dữ liệu.
 
 			md.update(data.getBytes());
 		
@@ -28,7 +31,8 @@ MessageDigest--Java:
 		
 		byte[] digest():
 
-			Tính toán giá trị băm và trả về kết quả dưới dạng mảng byte. Sau khi gọi phương thức này, đối tượng MessageDigest không còn giữ lại trạng thái của dữ liệu trước đó.
+			Tính toán giá trị băm và trả về kết quả dưới dạng mảng byte. Sau khi gọi phương thức này, đối
+			tượng MessageDigest không còn giữ lại trạng thái của dữ liệu trước đó.
 	
 			byte[] hashBytes = md.digest();
 		

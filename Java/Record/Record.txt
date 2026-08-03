@@ -181,7 +181,8 @@ Steps in setting up java records
 	
 	Step 2
 		
-		If this is your first time using JDK-14 then there will be some more steps that you'll need to follow in order to configure for records to work. You might see this type of exception mark on your project folder.
+		If this is your first time using JDK-14 then there will be some more steps that you'll need
+		to follow in order to configure for records to work. You might see this type of exception mark on your project folder.
 	
 	Step 3
 		
@@ -193,7 +194,8 @@ Steps in setting up java records
 	
 	Step 5
 		
-		Now on the Add JRE window that opens, select Standard VM and click Next. You'll see a new window open to select a JRE, now click on Directory and navigate to where your jdk-14 is installed and select that folder. Click on Finish.
+		Now on the Add JRE window that opens, select Standard VM and click Next. You'll see a new window open to
+		select a JRE, now click on Directory and navigate to where your jdk-14 is installed and select that folder. Click on Finish.
 	
 	Step 6
 		
@@ -201,11 +203,14 @@ Steps in setting up java records
 	
 	Step 7
 		
-		We are not done yet. Since records are a preview feature, we need to enable them to use it. On your Project Explorer window on the left side, select your project and right-click and go to its Properties.
+		We are not done yet. Since records are a preview feature, we need to enable them to use it. On your Project
+		Explorer window on the left side, select your project and right-click and go to its Properties.
 	
 	Step 8
 		
-		On the window that opens, to the right of it, from the various options select Java Compiler. After that on the left side, uncheck the settings marked with red arrows in the image, and check mark the setting highlighted with green. Doing that will enable the preview features.
+		On the window that opens, to the right of it, from the various options select Java Compiler. After that on the
+		left side, uncheck the settings marked with red arrows in the image, and check mark the setting highlighted with
+		green. Doing that will enable the preview features.
 	
 	Step 9
 		

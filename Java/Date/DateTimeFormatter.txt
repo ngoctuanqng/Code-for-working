@@ -1,5 +1,6 @@
 DateTimeFormatter--Ngày và giờ trong Java:
 
+/***
 		Formatter for displaying and parsing date-time objects
 		
 		LocalDateTime currentDateTime = LocalDateTime.now();
@@ -10,3 +11,4 @@ DateTimeFormatter--Ngày và giờ trong Java:
 		LocalDateTime parsedDateTime = LocalDateTime.parse(dateTimeString, formatter); // parse chuỗi dateTimeString thành một đối tượng LocalDateTime.
 		                                                                               // 2024-02-25T15:30:00
 																					   // parse là chuyển một input thành kiểu của nó
+***/

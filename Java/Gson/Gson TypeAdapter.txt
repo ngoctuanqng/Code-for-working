@@ -2,30 +2,39 @@ Gson TypeAdapter--JAVA:
 
 	Giới thiệu
 	
-		Trong bài viết Gson Custom Serialization và Deserialization, tôi đã hướng dẫn cách custom dữ liệu được chuyển đổi sang/ từ chuỗi JSON sử dụng thư viện GSON. Tuy nhiên, các lớp JsonSerializer và
-		JsonDeserializer sử dụng một lớp trung gian của các đối tượng. Các đối tượng Java hoặc JSON lần đầu tiên được chuyển thành JsonElement (lớp trung gian) và sau đó chuyển sang chuỗi Java hoặc JSON
+		Trong bài viết Gson Custom Serialization và Deserialization, tôi đã hướng dẫn cách custom
+		dữ liệu được chuyển đổi sang/ từ chuỗi JSON sử dụng thư viện GSON. Tuy nhiên, các lớp JsonSerializer và
+		JsonDeserializer sử dụng một lớp trung gian của các đối tượng. Các đối tượng Java hoặc JSON lần đầu
+		tiên được chuyển thành JsonElement (lớp trung gian) và sau đó chuyển sang chuỗi Java hoặc JSON
 		như được hiển thị trong hình ảnh sau:
 		
-			Lớp trung gian này có thể tránh được bằng cách sử dụng TypeAdapter thay vì JsonSerializer hoặc JsonDeserializer. TypeAdapter hiệu quả hơn JsonSerializer và JsonDeserializer khi nó bỏ qua lớp trung gian.
+			Lớp trung gian này có thể tránh được bằng cách sử dụng TypeAdapter thay vì JsonSerializer hoặc
+			JsonDeserializer. TypeAdapter hiệu quả hơn JsonSerializer và JsonDeserializer khi nó bỏ qua lớp trung gian.
 		
-		Với JsonSerializer và JsonDeserializer cung cấp đệm an toàn rất tiện lợi vì nó làm giảm nguy cơ tạo chuỗi JSON không hợp lệ. Hình ảnh được hiển thị ở trên cho thấy cách các đối tượng được tuần tự hóa
-		bằng cách sử dụng JsonSerializer. Đầu tiên các đối tượng Java được chuyển sang JsonElements, và sau đó chuyển sang chuỗi JSON. Quá trình này tạo ra một tập hợp các đối tượng tạm thời, sau đó được chuyển
-		đổi thành chuỗi JSON. Các đối tượng này được chuyển thành chuỗi JSON sử dụng một thực hiện nội bộ của TypeAdapter. TypeAdapter có thể lấy bất kỳ đối tượng Java (bao gồm các đối tượng thuộc kiểu JsonElement)
+		Với JsonSerializer và JsonDeserializer cung cấp đệm an toàn rất tiện lợi vì nó làm giảm nguy cơ tạo
+		chuỗi JSON không hợp lệ. Hình ảnh được hiển thị ở trên cho thấy cách các đối tượng được tuần tự hóa
+		bằng cách sử dụng JsonSerializer. Đầu tiên các đối tượng Java được chuyển sang JsonElements, và sau đó
+		chuyển sang chuỗi JSON. Quá trình này tạo ra một tập hợp các đối tượng tạm thời, sau đó được chuyển
+		đổi thành chuỗi JSON. Các đối tượng này được chuyển thành chuỗi JSON sử dụng một thực hiện nội bộ của
+		TypeAdapter. TypeAdapter có thể lấy bất kỳ đối tượng Java (bao gồm các đối tượng thuộc kiểu JsonElement)
 		và chuyển nó sang chuỗi JSON như thể hiện trong hình dưới đây:
 		
 		TypeAdapter là một lớp trừu tượng, có hai phương thức trừu tượng:
 		
-			Phương thức write() lấy một thể hiện của JsonWriter và đối tượng được nối tiếp. Đối tượng được ghi vào JsonWriter một cách tương tự như một đối tượng được in tới PrintStream.
+			Phương thức write() lấy một thể hiện của JsonWriter và đối tượng được nối tiếp. Đối tượng được ghi
+			vào JsonWriter một cách tương tự như một đối tượng được in tới PrintStream.
 			
 			Phương thức read() lấy một thể hiện của JsonReader và trả về một thể hiện của đối tượng deserialised.
 		
-		Tương tự như JsonSerializer và JsonDeserializer, TypeAdapter cần được đăng ký thông qua GsonBuilder trước khi nó có thể được sử dụng như sau:
+		Tương tự như JsonSerializer và JsonDeserializer, TypeAdapter cần được đăng ký thông qua GsonBuilder
+		trước khi nó có thể được sử dụng như sau:
 			
 			final GsonBuilder gsonBuilder = new GsonBuilder();
 			gsonBuilder.registerTypeAdapter(Book.class, new BookTypeAdapter());
 			final Gson gson = gsonBuilder.create();
 		
-		Trong phần dưới đây chúng ta sẽ thấy cách sử dụng TypeAdapter để chuyển các đối tượng Java sang chuỗi JSON (serialise) và ngược lại (deserialise).
+		Trong phần dưới đây chúng ta sẽ thấy cách sử dụng TypeAdapter để chuyển các đối tượng Java sang
+		chuỗi JSON (serialise) và ngược lại (deserialise).
 	
 	Ví dụ sử dụng TypeAdapter
 		
@@ -166,11 +175,14 @@ Gson TypeAdapter--JAVA:
 				}
 	 
 				Convert JSON String to Book object: 
-				Book [title=Head First Design Patterns, authors=[Eric Freeman, Bert Bates, Kathy Sierra, Elisabeth Robson], isbn10=0596007124, isbn13=978-0596007126, price=52.41, publishedDate=Fri Oct 01 00:00:00 ICT 2004]
+				Book [title=Head First Design Patterns, authors=[Eric Freeman, Bert Bates, Kathy Sierra,
+				Elisabeth Robson], isbn10=0596007124, isbn13=978-0596007126, price=52.41,
+				publishedDate=Fri Oct 01 00:00:00 ICT 2004]
 	
 	So sánh hiệu suất của TypeAdapter với JsonSerializer
 		
-		Như đã nói ở trên, hiệu suất khi sử dụng TypeAdapter tốt hơn so với JsonSerializer bởi vì nó bỏ qua lớp trung gian. Trong phần tiếp theo, tôi sẽ chứng minh cho các bạn thấy điều này.
+		Như đã nói ở trên, hiệu suất khi sử dụng TypeAdapter tốt hơn so với JsonSerializer bởi vì
+		nó bỏ qua lớp trung gian. Trong phần tiếp theo, tôi sẽ chứng minh cho các bạn thấy điều này.
 		
 		LargeData
 			
@@ -246,7 +258,8 @@ Gson TypeAdapter--JAVA:
 					}
 				}
 				
-			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi của JsonSerializer khoảng 15950 ms. Một file outputserializer.json được tạo ra trong thư mục data có kích thước là 129 MB. Bộ nhớ sử dụng khoảng 1.1 GB.
+			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi của JsonSerializer khoảng 15950 ms. Một
+			file outputserializer.json được tạo ra trong thư mục data có kích thước là 129 MB. Bộ nhớ sử dụng khoảng 1.1 GB.
 		
 		TypeAdapter
 			
@@ -310,8 +323,10 @@ Gson TypeAdapter--JAVA:
 					}
 				}
 				
-				Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi của TypeAdapter chỉ khoảng 3293 ms, nhanh hơn rất nhiều so với 15950 ms của JsonSerializer. Một file outputTypeAdapter.json được tạo ra trong
-				thư mục data có kích thước là 129 MB, bằng với kích thước được tạo ra khi sử dụng JsonSerializer. Bộ nhớ sử dụng khoảng 640 MB.
+				Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi của TypeAdapter chỉ khoảng 3293 ms,
+				nhanh hơn rất nhiều so với 15950 ms của JsonSerializer. Một file outputTypeAdapter.json được tạo ra trong
+				thư mục data có kích thước là 129 MB, bằng với kích thước được tạo ra khi sử dụng JsonSerializer. Bộ
+				nhớ sử dụng khoảng 640 MB.
 		
 		Kết hợp JsonSerializer và Streams
 			
@@ -349,7 +364,8 @@ Gson TypeAdapter--JAVA:
 				}
 			}
 			
-			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi là 12511 ms, nhanh hơn so với 15950 ms của JsonSerializer không sử dụng Stream. Một file outputTypeAdapterStreaming.json được tạo ra trong thư
+			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi là 12511 ms, nhanh hơn so với 15950 ms của
+			JsonSerializer không sử dụng Stream. Một file outputTypeAdapterStreaming.json được tạo ra trong thư
 			mục data có cùng kích thước là 129 MB. Bộ nhớ sử dụng khoảng 727 MB.
 		
 		Kết hợp TypeAdapter và Streams
@@ -388,8 +404,10 @@ Gson TypeAdapter--JAVA:
 				}
 			}
 			
-			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi là 2247 ms, nhanh hơn so với 3293 ms của TypeAdapter không sử dụng Stream. Một file outputTypeAdapterStreaming.json được tạo ra trong thư mục
+			Thực thi chương trình trên, bạn sẽ thấy thời gian thực thi là 2247 ms, nhanh hơn so với 3293 ms của
+			TypeAdapter không sử dụng Stream. Một file outputTypeAdapterStreaming.json được tạo ra trong thư mục
 			data có cùng kích thước là 129 MB. Bộ nhớ sử dụng khoảng 160 MB.
 			
-	Tóm lại, TypeAdapter tốt hơn về mặt hiệu suất so với JsonSerializer do bỏ qua lớp đệm. Tuy nhiên, với JsonSerializer và JsonDeserializer cung cấp đệm an toàn rất tiện lợi vì nó làm giảm nguy cơ tạo chuỗi JSON
+	Tóm lại, TypeAdapter tốt hơn về mặt hiệu suất so với JsonSerializer do bỏ qua lớp đệm. Tuy nhiên, với JsonSerializer và
+	JsonDeserializer cung cấp đệm an toàn rất tiện lợi vì nó làm giảm nguy cơ tạo chuỗi JSON
 	không hợp lệ. Luôn cố gắng kết hợp TypeAdapter với Stream hoặc JsonSerializer với Stream để có được hiệu suất tốt nhất.	

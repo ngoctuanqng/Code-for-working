@@ -116,7 +116,8 @@ Thứ tự ưu tiên CSS--CSS
 			
 				Đoạn văn “Chào mừng bạn đến với khoá học CSS!” chịu tác động bởi 4 rule thuộc 4 dạng khác nhau (inline, thẻ p, class .p1,
 				id #p2). 4 rule này quy định 4 màu chữ (color) khác nhau.
-				
+
+/***				
 					<p class="p1" id="p2" style="color:black;">Chào mừng các bạn đến với khoá học CSS!</p>
 					p{
 					  color:red;
@@ -127,6 +128,8 @@ Thứ tự ưu tiên CSS--CSS
 					#p2{
 					  color:blue;
 					}
+***/
+					
 					Kết quả: Theo bảng thứ tự ưu tiên thì màu của chữ “Chào mừng bạn đến với khoá học CSS” sẽ theo màu ưu tiên
 					của rule inline (màu black)
 					
@@ -147,7 +150,8 @@ Thứ tự ưu tiên CSS--CSS
 			Ví dụ 1.4
 				
 				Ta có thể sử dụng !important để tăng mức độ ưu tiên.
-					
+
+/***					
 					<p class="p1" id="p2" style="color:black;">Chào mừng các bạn đến với khoá học CSS!</p>
 					p{
 					  color:red!important;
@@ -158,11 +162,13 @@ Thứ tự ưu tiên CSS--CSS
 					#p2{
 					  color:blue;
 					}
+***/
 					
 				Với việc thêm !important vào sau giá trị màu red thì rule dạng tag, lúc này css của thẻ này có mức độ ưu tiên cao nhất.
 			
 			Ví dụ 1.5
-				
+
+/***				
 				<p class="p1" id="p2" style="color:black!important;">Chào mừng các bạn đến với khoá học CSS!</p>
 				p{
 				  color:red!important;
@@ -173,11 +179,13 @@ Thứ tự ưu tiên CSS--CSS
 				#p2{
 				  color:blue;
 				}
+***/
 				
 				Nhưng nếu các dạng rule đều có !important thì thứ tự ưu tiên lại theo bảng ưu tiên ở trên (inline > id > class > tag)
 		
 		Dạng chồng chéo 2
-			
+
+/***			
 			<p class="p1">Chào mừng các bạn đến với khoá học CSS!</p>
 			.p1{
 			  color:green;
@@ -186,6 +194,7 @@ Thứ tự ưu tiên CSS--CSS
 			  color:blue;
 			  background-color:#FF0;
 			}
+***/
 			
 			Trong khai báo trên thì cả 2 rule đều là dạng class và cùng tên p1. Hai rule này có thuộc tính color chồng nhau.
 			

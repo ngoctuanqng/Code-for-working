@@ -1,15 +1,20 @@
 Chuyển đổi dữ liệu frontend thành đối tượng java--SPRING:
 
-		Với @RequestParam, dữ liệu thường được truyền dưới dạng chuỗi khi đến backend. Điều này đặc biệt đúng khi bạn truyền dữ liệu thông qua query string của URL
-		trong yêu cầu HTTP. Dữ liệu thường được truyền dưới dạng key=value, và trong trường hợp của chuỗi, giá trị sẽ được đưa vào trong dấu ngoặc kép. Spring sẽ tự
-		động chuyển đổi chuỗi này thành các kiểu dữ liệu Java phù hợp nếu cần thiết.
+		Với @RequestParam, dữ liệu thường được truyền dưới dạng chuỗi khi đến backend. Điều này
+		đặc biệt đúng khi bạn truyền dữ liệu thông qua query string của URL trong yêu cầu HTTP. Dữ
+		liệu thường được truyền dưới dạng key=value, và trong trường hợp của chuỗi, giá trị sẽ
+		được đưa vào trong dấu ngoặc kép. Spring sẽ tự động chuyển đổi chuỗi này thành các kiểu
+		dữ liệu Java phù hợp nếu cần thiết.
 		
-		Với @RequestBody, dữ liệu thường không được truyền dưới dạng chuỗi khi đến backend. Thay vào đó, dữ liệu thường được truyền dưới dạng một đối tượng JSON
-		(JavaScript Object Notation) từ phần thân của yêu cầu HTTP. Spring sẽ tự động chuyển đổi đối tượng JSON này thành một đối tượng Java tương ứng để bạn có thể
-		làm việc với nó trong mã backend của mình.
+		Với @RequestBody, dữ liệu thường không được truyền dưới dạng chuỗi khi đến backend. Thay
+		vào đó, dữ liệu thường được truyền dưới dạng một đối tượng JSON (JavaScript Object Notation)
+		từ phần thân của yêu cầu HTTP. Spring sẽ tự động chuyển đổi đối tượng JSON này thành một đối
+		tượng Java tương ứng để bạn có thể làm việc với nó trong mã backend của mình.
 		
-		@PathVariable: Dữ liệu khi mới đến backend từ @PathVariable thường là một phần của URL, được trích xuất từ mẫu đường dẫn (URL pattern). Dữ liệu này thường là
-		một giá trị cụ thể (ví dụ: số nguyên, chuỗi,..) và không phải là một chuỗi JSON hoặc bất kỳ dạng dữ liệu nào khác.
+		@PathVariable: Dữ liệu khi mới đến backend từ @PathVariable thường là một phần của
+		URL, được trích xuất từ mẫu đường dẫn (URL pattern). Dữ liệu này thường là
+		một giá trị cụ thể (ví dụ: số nguyên, chuỗi,..) và không phải là một chuỗi
+		JSON hoặc bất kỳ dạng dữ liệu nào khác.
 
 		{
 		  "name": "John Doe",

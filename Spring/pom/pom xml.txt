@@ -2,22 +2,28 @@ pom.xml--SPRING:
 
 	<dependency>:
 		
-		- Thẻ này xác định một phụ thuộc mà dự án cần. Các thẻ con bên trong thẻ này cung cấp thông tin chi tiết về phụ thuộc đó.
+		- Thẻ này xác định một phụ thuộc mà dự án cần. Các thẻ con bên trong thẻ này cung
+		cấp thông tin chi tiết về phụ thuộc đó.
 		
 	<groupId>:
 	
-		- Xác định nhóm của phụ thuộc. Thông thường, groupId theo cấu trúc của tên miền ngược, ví dụ: com.poscodx.odc. Nó giúp tổ chức và phân biệt giữa các dự án hoặc thư viện khác nhau.
+		- Xác định nhóm của phụ thuộc. Thông thường, groupId theo cấu trúc của tên miền
+		ngược, ví dụ: com.poscodx.odc. Nó giúp tổ chức và phân biệt giữa các dự án hoặc
+		thư viện khác nhau.
 		
 	<artifactId>:
 
-		- Xác định tên của phụ thuộc cụ thể trong nhóm. Trong trường hợp này, tên của phụ thuộc là ampro015-store. Mỗi dự án hoặc thư viện sẽ có một artifactId duy nhất trong nhóm của nó.
+		- Xác định tên của phụ thuộc cụ thể trong nhóm. Trong trường hợp này, tên của phụ thuộc
+		là ampro015-store. Mỗi dự án hoặc thư viện sẽ có một artifactId duy nhất trong nhóm của nó.
 		
 	<version>:
 	
-		- Xác định phiên bản của phụ thuộc mà dự án sẽ sử dụng. Trong trường hợp này, phiên bản là 1.0-SNAPSHOT.
+		- Xác định phiên bản của phụ thuộc mà dự án sẽ sử dụng. Trong trường hợp này, phiên
+		bản là 1.0-SNAPSHOT.
 		
-		- SNAPSHOT là một phiên bản đặc biệt trong Maven, đại diện cho một phiên bản phát triển (chưa hoàn thiện hoặc đang trong quá trình phát triển). Mỗi lần bạn build dự án, Maven có thể tải về phiên bản
-		mới nhất của SNAPSHOT từ kho lưu trữ.
+		- SNAPSHOT là một phiên bản đặc biệt trong Maven, đại diện cho một phiên bản phát
+		triển (chưa hoàn thiện hoặc đang trong quá trình phát triển). Mỗi lần bạn build dự
+		án, Maven có thể tải về phiên bản mới nhất của SNAPSHOT từ kho lưu trữ.
 	
 	Ví dụ:	
 

@@ -39,6 +39,8 @@ Calendar--Ngày và giờ trong Java:
 			
 	--- Ví dụ về Calendar trong java
 	
+/***	
+	
 											package vn.viettuts.date;													
 											import java.util.Calendar;													 
 											public class CalendarExample1 {
@@ -58,9 +60,11 @@ Calendar--Ngày và giờ trong Java:
 											15 ngay sau: Sun Aug 27 09:33:11 ICT 2017
 											4 thang sau: Wed Dec 27 09:33:11 ICT 2017
 											2 nam sau: Fri Dec 27 09:33:11 ICT 2019
+***/
 											
 	--- Ví dụ về Calendar trong java - phương thức get()
-	
+
+/***	
 											package vn.viettuts.date;												 
 											import java.util.Calendar;												 
 											public class CalendarExample2 {
@@ -77,9 +81,11 @@ Calendar--Ngày và giờ trong Java:
 											MONTH: 8
 											DAY: 11
 											DAY_OF_WEEK: 2
+***/
 	
 	--- Ví dụ về Calendar trong java - phương thức getTime()
-	
+
+/***	
 											package vn.viettuts.date;													 
 											import java.util.Calendar;													 
 											public class CalendarExample3 {
@@ -90,9 +96,11 @@ Calendar--Ngày và giờ trong Java:
 											}
 											Kết quả:
 											Date And Time: Mon Sep 11 09:50:21 ICT 2017
+***/
 											
 	--- Ví dụ về Calendar trong java - phương thức getMaximum()
-												
+
+/***												
 											package vn.viettuts.date;														 
 											import java.util.Calendar;													 
 											public class CalendarExample4 {
@@ -107,9 +115,10 @@ Calendar--Ngày và giờ trong Java:
 											Kết quả:
 											Gia tri MAX cua so ngay trong tuan: 7
 											Gia tri MAX cua so tuan trong nam: 53
-											
+***/											
 	--- Ví dụ về Calendar trong java - phương thức getMinimum()
-	
+
+/***	
 											package vn.viettuts.date;													 
 											import java.util.Calendar;													 
 											public class CalendarExample5 {
@@ -124,3 +133,4 @@ Calendar--Ngày và giờ trong Java:
 											Kết quả:
 											Gia tri MIN cua so ngay trong tuan: 1
 											Gia tri MIN cua so tuan trong nam: 1	
+***/

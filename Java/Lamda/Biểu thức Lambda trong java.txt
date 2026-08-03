@@ -2,23 +2,28 @@ Biểu thức Lambda trong java--JAVA:
 
 	--- Giới thiệu Lambda Expression trong Java
 	
-		- Lambda Expression - Biểu thức Lambda trong java là một tính năng mới và quan trọng được thêm vào trong Java SE 8. Nó cung cấp một cách rõ ràng và ngắn ngọn để đại diện cho một phương thức interface sử dụng
+		- Lambda Expression - Biểu thức Lambda trong java là một tính năng mới và quan trọng được thêm
+		vào trong Java SE 8. Nó cung cấp một cách rõ ràng và ngắn ngọn để đại diện cho một phương thức interface sử dụng
 		một biểu thức. Nó rất hữu ích trong thư viện collection. Nó giúp duyệt, lọc và trích xuất dữ liệu từ collection.
 		
-		- Biểu thức Lambda được sử dụng để cung cấp bản cài đặt của một interface mà có interface chức năng. Nó tiết kiệm rất nhiều mã. Trong trường hợp biểu thức lambda, chúng ta không cần định nghĩa lại phương thức
-		để cung cấp việc thực hiện. Ở đây, chúng ta chỉ cần viết mã thực thi.
+		- Biểu thức Lambda được sử dụng để cung cấp bản cài đặt của một interface mà có interface chức
+		năng. Nó tiết kiệm rất nhiều mã. Trong trường hợp biểu thức lambda, chúng ta không cần định nghĩa
+		lại phương thức để cung cấp việc thực hiện. Ở đây, chúng ta chỉ cần viết mã thực thi.
 		
 		- Biểu thức Java lambda được coi như là một chức năng, do đó trình biên dịch không tạo tập tin .class.
 		
-		- Bản chất của Lambda Expression - Biểu thức Lambda trong java là tạo ra một đối tượng nặc danh cho một Functional Interface, và cung cấp thân hàm cho phương thức trừu tượng duy nhất của Functional
+		- Bản chất của Lambda Expression - Biểu thức Lambda trong java là tạo ra một đối tượng nặc danh cho
+		một Functional Interface, và cung cấp thân hàm cho phương thức trừu tượng duy nhất của Functional
 		Interface. Functional Interface trong Java là một interface chỉ được chứa một hàm trừu tượng duy nhất.
 		
-		- Tại sao Functional Interface chỉ chứa MỘT hàm trừu tượng duy nhất? Bởi vì biểu thức Lambda chỉ chứa các tham số và thân hàm, không chỉ định tên hàm. Do vậy nếu có nhiều hơn 1 phương thức trong
+		- Tại sao Functional Interface chỉ chứa MỘT hàm trừu tượng duy nhất? Bởi vì biểu thức Lambda chỉ chứa
+		các tham số và thân hàm, không chỉ định tên hàm. Do vậy nếu có nhiều hơn 1 phương thức trong
 		Functional Interface thì biểu thức Lambda sẽ bị bế tắc vì nó không biết cấp thân hàm cho phương thức nào.
 	
 	--- Functional Interface
 		
-		- Biểu thức Lambda cung cấp bản cài đặt cho Functional Interface. Một interface chỉ có MỘT phương thức trừu tượng được gọi là Functional Interface. Java cung cấp một anotation @FunctionalInterface , được
+		- Biểu thức Lambda cung cấp bản cài đặt cho Functional Interface. Một interface chỉ có MỘT phương thức trừu
+		tượng được gọi là Functional Interface. Java cung cấp một anotation @FunctionalInterface , được
 		sử dụng để khai báo một interface như functional interface.
 	
 	--- Tại sao sử dụng biểu thức Lambda
@@ -39,9 +44,11 @@ Biểu thức Lambda trong java--JAVA:
 			
 			- Body: Nó chứa các biểu thức và câu lệnh cho biểu thức lambda.
 		
-		Một biểu thức lambda có thể có không, một hoặc nhiều tham số. Số lượng tham số của biểu thức lambda phụ thuộc vào số lượng tham số của phương thức duy nhất của interface chức năng.
+		Một biểu thức lambda có thể có không, một hoặc nhiều tham số. Số lượng tham số của biểu thức lambda phụ
+		thuộc vào số lượng tham số của phương thức duy nhất của interface chức năng.
 		
-		Trong biểu thức java lambda, nếu chỉ có một câu lệnh, bạn có thể sử dụng hoặc không sử dụng từ khoá return. Bạn phải sử dụng từ khóa return khi biểu thức lambda chứa nhiều câu lệnh.
+		Trong biểu thức java lambda, nếu chỉ có một câu lệnh, bạn có thể sử dụng hoặc không sử dụng từ khoá
+		return. Bạn phải sử dụng từ khóa return khi biểu thức lambda chứa nhiều câu lệnh.
 	
 	--- Ví dụ không sử dụng biểu thức Lambda
 		
@@ -207,13 +214,17 @@ Biểu thức Lambda trong java--JAVA:
 	
 		- Chúng ta sẽ cùng tìm hiểu bản chất của biểu thức Lambda trong hàm forEarch().
 		
-		- Hàm forEach() có một tham số truyền vào là đối tượng Consumer với tên biến là action. Sau đó nó gọi hàm action.accept(), hàm này có tham số là các phần tử của ArrayList.
+		- Hàm forEach() có một tham số truyền vào là đối tượng Consumer với tên biến là action. Sau đó nó gọi
+		hàm action.accept(), hàm này có tham số là các phần tử của ArrayList.
 		
-		- java.util.function.Consumer là một Functional Interface có duy nhất một hàm accept() được định nghĩa như sau:
+		- java.util.function.Consumer là một Functional Interface có duy nhất một hàm accept() được định
+		nghĩa như sau:
 		
-		- Có nghĩa là chúng ta cần phải tạo một đối tượng nặc danh từ Consumer interface để cung cấp thân hàm cho accept().
+		- Có nghĩa là chúng ta cần phải tạo một đối tượng nặc danh từ Consumer interface để cung cấp thân
+		hàm cho accept().
 		
-		- java.util.function.Consumer là một Functional Interface có duy nhất một hàm accept() được định nghĩa như sau:
+		- java.util.function.Consumer là một Functional Interface có duy nhất một hàm accept() được định
+		nghĩa như sau:
 			
 			Kết quả:
 				Java
@@ -223,7 +234,8 @@ Biểu thức Lambda trong java--JAVA:
 	
 	--- Ví dụ biểu thức Lambda với Thread
 		
-		Bạn có thể sử dụng biểu thức lambda để chạy thread. Trong ví dụ sau, chúng ta đang cài đặt phương thức run() bằng cách sử dụng biểu thức lambda.
+		Bạn có thể sử dụng biểu thức lambda để chạy thread. Trong ví dụ sau, chúng ta đang cài đặt phương thức
+		run() bằng cách sử dụng biểu thức lambda.
 			
 			package vn.viettuts.java8;		 
 			public class LambdaExpressionExample9 {
@@ -248,11 +260,13 @@ Biểu thức Lambda trong java--JAVA:
 				Thread1 is running...
 				Thread2 is running...
 		
-		Giao diện Runable được đánh dấu bởi @FunctionalInterface và chỉ có một phương thức trừu tượng, vậy nó là một giao diện chức năng nên chúng ta có thể áp dụng biểu thức lambda với giao diện Runable.
+		Giao diện Runable được đánh dấu bởi @FunctionalInterface và chỉ có một phương thức trừu tượng, vậy nó là
+		một giao diện chức năng nên chúng ta có thể áp dụng biểu thức lambda với giao diện Runable.
 	
 	--- Ví dụ biểu thức Lambda với Comparator
 		
-		- Biểu thức Java lambda có thể được sử dụng trong collection. Nó cung cấp cách hiệu quả và ngắn gọn để duyệt, lọc và lấy dữ liệu. Sau đây là một số ví dụ biểu thức lambda với Comparator.
+		- Biểu thức Java lambda có thể được sử dụng trong collection. Nó cung cấp cách hiệu quả và ngắn gọn để
+		duyệt, lọc và lấy dữ liệu. Sau đây là một số ví dụ biểu thức lambda với Comparator.
 			
 			package vn.viettuts.java8;		 
 			import java.util.ArrayList;

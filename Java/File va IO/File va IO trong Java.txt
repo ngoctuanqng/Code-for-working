@@ -62,7 +62,8 @@ File và I/O trong Java
 		và FileWriter sử dụng FileOutputStream, nhưng có một điểm khác biệt lớn ở đây là FileReader đọc hai byte cùng một thời điểm
 		và FileWriter ghi 2 byte cùng một lúc.
 		
-		Chúng ta có thể viết lại ví dụ trên mà sử dụng hai lớp này để sao chép một input file (có các ký tự Unicode) vào trong một output file.
+		Chúng ta có thể viết lại ví dụ trên mà sử dụng hai lớp này để sao chép một input file (có các ký tự Unicode) vào
+		trong một output file.
 		
 			import java.io.*;
 

@@ -12,7 +12,8 @@ ObjectMapper (Xử lý Json với Jackson ObjectMapper trong Java)--JAVA:
 			
 	Đọc ghi Json với ObjectMapper
 	
-		Thao tác đọc ghi Json là 2 thao tác cơ bản mà ObjectMapper cung cấp. Chúng ta có thể sử dụng readValue() method để deserialize Json sang Java Object. Tương tự, writeValue() serialize Java Object sang Json.
+		Thao tác đọc ghi Json là 2 thao tác cơ bản mà ObjectMapper cung cấp. Chúng ta có thể sử dụng readValue()
+		method để deserialize Json sang Java Object. Tương tự, writeValue() serialize Java Object sang Json.
 		
 		Giả sử có Car class chứa 2 thuộc tính color và type:
 			public class Car {
@@ -55,7 +56,8 @@ ObjectMapper (Xử lý Json với Jackson ObjectMapper trong Java)--JAVA:
 				
 				{"color":"yellow","type":"renault"}
 			
-			Các method writeValueAsString() và writeValueAsBytes() của ObjectMapper sẽ tạo ra một string hoặc mảng byte tương ứng thay vì ghi vào file json.
+			Các method writeValueAsString() và writeValueAsBytes() của ObjectMapper sẽ tạo ra một string hoặc mảng
+			byte tương ứng thay vì ghi vào file json.
 				
 				String carAsString = objectMapper.writeValueAsString(car);
 		
@@ -105,12 +107,15 @@ ObjectMapper (Xử lý Json với Jackson ObjectMapper trong Java)--JAVA:
 	
 	Custom Jackson
 		
-		Khi làm việc với Json, chúng ta hiểu được sẽ nhiều trường hợp không prefect như cấu trúc giữa file Json và Java Class không trùng khớp, file Json được lấy từ nguồn khác chứa nhiều thuộc tính hơn Java
-		class cần thiết etc. Tất cả đó, Jackson cung cấp bộ công cụ cho phép chúng ta có thể custom serialization và deserialization.
+		Khi làm việc với Json, chúng ta hiểu được sẽ nhiều trường hợp không prefect như cấu trúc
+		giữa file Json và Java Class không trùng khớp, file Json được lấy từ nguồn khác chứa nhiều thuộc tính hơn Java
+		class cần thiết etc. Tất cả đó, Jackson cung cấp bộ công cụ cho phép chúng ta có thể custom
+		serialization và deserialization.
 		
 		Configuring Serialization or Deserialization
 			
-			Trong khi convert Json string sang Java class, trong trường hợp nếu Json string có 1 số field mới, mặc định Jackson sẽ ném exception.
+			Trong khi convert Json string sang Java class, trong trường hợp nếu Json string có 1 số
+			field mới, mặc định Jackson sẽ ném exception.
 			
 			Ví dụ convert Json string sang Car object, trong Json string chứa một thuộc tính year mới mà Car class không có.
 				
@@ -125,7 +130,8 @@ ObjectMapper (Xử lý Json với Jackson ObjectMapper trong Java)--JAVA:
 					}
 				}
 				
-			Để xử lý trường hợp trên, chúng ta có thể config để Jackson bỏ qua field mới trong quá trình deserialize với FAIL_ON_UNKNOWN_PROPERTIES option.
+			Để xử lý trường hợp trên, chúng ta có thể config để Jackson bỏ qua field mới trong quá
+			trình deserialize với FAIL_ON_UNKNOWN_PROPERTIES option.
 				
 				import java.io.IOException;
 				import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -151,7 +157,8 @@ ObjectMapper (Xử lý Json với Jackson ObjectMapper trong Java)--JAVA:
 	
 	Custom Serializer or Deserializer
 		
-		Trong trường hợp cấu trúc Json và Java class có cấu trúc khác nhau, chúng ta có thể tạo một custom serializer và deserializer và đăng ký sử dụng chúng với Jackson.
+		Trong trường hợp cấu trúc Json và Java class có cấu trúc khác nhau, chúng ta có thể tạo một
+		custom serializer và deserializer và đăng ký sử dụng chúng với Jackson.
 		
 		Dưới đây là một Custom Serializer cho phép chuyển giá trị type trong Car class sang car_brand trong Json.
 			
@@ -220,7 +227,8 @@ ObjectMapper (Xử lý Json với Jackson ObjectMapper trong Java)--JAVA:
 			
 	Handing Date Format
 		
-		Mặc định, quá trình serialization của java.util.Date sẽ cho ra một số timestamp (số mili giây kể từ 01-01-1970 UTC). Tuy nhiên giá trị này có thể gây khó hiểu cho người đọc, chúng ta có hoàn toàn có thể thay
+		Mặc định, quá trình serialization của java.util.Date sẽ cho ra một số timestamp (số mili giây kể
+		từ 01-01-1970 UTC). Tuy nhiên giá trị này có thể gây khó hiểu cho người đọc, chúng ta có hoàn toàn có thể thay
 		đổi timestamp thành các định dạng chuẩn ngày tháng như sau.
 		
 		Giả sử có Request class
@@ -261,7 +269,8 @@ ObjectMapper (Xử lý Json với Jackson ObjectMapper trong Java)--JAVA:
 			
 	Handling Collections
 		
-		Ở phần trên chúng ta cũng đã được giới thiệu cách thao tác với Json chứa một mảng dữ liệu, tuy nhiên ở phần này chúng ta sẽ gợi lại một xíu, cộng thêm việc xử lý các Array thông thường trong Java.
+		Ở phần trên chúng ta cũng đã được giới thiệu cách thao tác với Json chứa một mảng dữ liệu, tuy nhiên
+		ở phần này chúng ta sẽ gợi lại một xíu, cộng thêm việc xử lý các Array thông thường trong Java.
 		
 		Ví dụ chuyển Json chứa mảng Car sang array trong java.
 			

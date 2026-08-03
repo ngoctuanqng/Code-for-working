@@ -1,11 +1,21 @@
 Axios---:
-							Axios là một thư viện HTTP Client dựa trên Promise. Cơ bản thì nó cung cấp một API cho việc xử lý XHR (XMLHttpRequests).
-							Một trong những đặc điểm lớn ta có thể thấy đó là cách mà 2 thư viện xử lý với các HTTP error code. Khi sử dụng Fetch, nếu khi server trả về các mã lỗi 4xx hay 5xx, thì hàm
-							catch() của bạn sẽ không được gọi đến và người lập trình viên sẽ có nhiệm vụ phải tự kiểm tra trạng thái của mã trả về để xác định xem liệu request đó có thành công hay không.
-							Trong khi đó, Axios sẽ reject tất cả các promise của request nếu một trong các mã lỗi trên được trả về.
+							Axios là một thư viện HTTP Client dựa trên Promise. Cơ bản thì nó cung cấp một
+							API cho việc xử lý XHR (XMLHttpRequests).
+							
+							Một trong những đặc điểm lớn ta có thể thấy đó là cách mà 2 thư viện xử lý với
+							các HTTP error code. Khi sử dụng Fetch, nếu khi server trả về các mã lỗi 4xx hay
+							5xx, thì hàm catch() của bạn sẽ không được gọi đến và người lập trình viên sẽ có
+							nhiệm vụ phải tự kiểm tra trạng thái của mã trả về để xác định xem liệu request đó
+							có thành công hay không.
+							
+							Trong khi đó, Axios sẽ reject tất cả các promise của request nếu một trong các mã
+							lỗi trên được trả về.
 	Response Object:
-							Khi một request được thực hiện thành công, thì hàm then() của bạn sẽ nhận được một response object với các thuộc tính như sau:
-								data: 			Payload được trả về từ server. Mặc định, Axios mong chờ JSON và sẽ parse nó trở thành một Javascript Object cho bạn.
+							Khi một request được thực hiện thành công, thì hàm then() của bạn sẽ nhận được một response
+							object với các thuộc tính như sau:
+							
+								data: 			Payload được trả về từ server. Mặc định, Axios mong chờ JSON và sẽ parse nó trở
+												thành một Javascript Object cho bạn.
 								status: 		mã HTTP được trả về từ server.
 								statusText: 	message của HTTP status được trả về bởi server.
 								headers: 		tất cả các header được gửi về từ server.
@@ -38,7 +48,8 @@ Axios---:
 							axios.put(url[, data[, config]])
 							axios.patch(url[, data[, config]])
 	Xây dựng truy vấn với axios:
-												
+
+/***												
 								const config = { // Định nghĩa cấu hình cho yêu cầu
 								  method: 'get', // Phương thức HTTP, ở đây là GET
 								  url: 'https://api.example.com/data', // URL mục tiêu
@@ -103,7 +114,10 @@ Axios---:
 								            });
 								    },
 								};
+***/
 		axios get:
+
+/***
 								axios.get('/user?ID=12345')
 									.then(function (response) {
 										onsole.log(response);
@@ -123,7 +137,11 @@ Axios---:
 								.catch(function (error) {
 								  console.log(error);
 								});
+***/
+								
 		axios post:
+		
+/***
 								axios.post('/users', {
 								  firstName: 'First name',
 								  lastName: 'Last name'
@@ -164,7 +182,11 @@ Axios---:
 								.catch(error => {
 								  console.error('Lỗi:', error);
 								});
+***/
+								
 		axios put:
+		
+/***
 								const newData = {
 								  name: 'Updated Name',
 								  description: 'Updated Description'
@@ -178,7 +200,11 @@ Axios---:
 								  .catch(error => {
 									console.error('Lỗi:', error);
 								  });
+***/
+
 		axios delete:
+		
+/***		
 								const itemId = 123;
 								const apiUrl = `https://api.example.com/items/${itemId}`; // URL đích
 								axios.delete(apiUrl) // Gửi yêu cầu DELETE
@@ -188,7 +214,11 @@ Axios---:
 								  .catch(error => {
 									console.error('Lỗi khi xóa mục:', error);
 								  });
+***/
+		
 		axios create:
+		
+/***		
 								const instance = axios.create({
 									baseURL: process.env.REACT_APP_BASE_URL,
 									headers: {
@@ -196,35 +226,48 @@ Axios---:
 										'Access-Control-Allow-Origin': '*',
 									}
 								});
-		Thực hiện nhiều truy cập đồng thời:										
-												function getUserAccount() {
-												  return axios.get('/user/12345');
-												}
+***/								
+								
+		Thực hiện nhiều truy cập đồng thời:
 
-												function getUserPermissions() {
-												  return axios.get('/user/12345/permissions');
-												}
+/***		
+								function getUserAccount() {
+								  return axios.get('/user/12345');
+								}
 
-												axios.all([getUserAccount(), getUserPermissions()])
-												.then(axios.spread(function (acct, perms) {
-												  // Tất cả request đều đã được thực hiện xong
-												}));
+								function getUserPermissions() {
+								  return axios.get('/user/12345/permissions');
+								}
+
+								axios.all([getUserAccount(), getUserPermissions()])
+								.then(axios.spread(function (acct, perms) {
+								  // Tất cả request đều đã được thực hiện xong
+								}));
+***/
+
 	Tạo ra một đối tượng axios với các config của mình bằng hàm axios.create([config]):
-																								var instance = axios.create({
-																								  baseURL: 'https://some-domain.com/api/',
-																								  timeout: 1000,
-																								  headers: {'X-Custom-Header': 'foobar'}
-																								});
+
+/***	
+								var instance = axios.create({
+								  baseURL: 'https://some-domain.com/api/',
+								  timeout: 1000,
+								  headers: {'X-Custom-Header': 'foobar'}
+								});
+***/
+																								
 		Khi đó, đối tượng này có thể sử dụng các phương thức sau để thực hiện việc gửi request:
-																										axios#request(config)
-																										axios#get(url[, config])
-																										axios#delete(url[, config])
-																										axios#head(url[, config])
-																										axios#options(url[, config])
-																										axios#post(url[, data[, config]])
-																										axios#put(url[, data[, config]])
-																										axios#patch(url[, data[, config]])
+		
+								axios#request(config)
+								axios#get(url[, config])
+								axios#delete(url[, config])
+								axios#head(url[, config])
+								axios#options(url[, config])
+								axios#post(url[, data[, config]])
+								axios#put(url[, data[, config]])
+								axios#patch(url[, data[, config]])
 	Ví dụ:
+	
+/***
 						import axios from 'axios';
 						// Tạo một request bằng Axios
 						axios.get('https://api.example.com/data')
@@ -245,4 +288,5 @@ Axios---:
 							  // Có lỗi xảy ra trong quá trình thiết lập request
 							  console.log('Lỗi:', error.message);
 							}
-						  });						
+						  });
+***/						  

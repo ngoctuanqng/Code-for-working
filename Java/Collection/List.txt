@@ -19,6 +19,8 @@
 				List<String> additionalFruits = List.of("Apple", "Banana", "Orange");
 				
 		Khởi tạo:			
+		
+/***		
 							List<String> list1 = new ArrayList<>();
 							list1.add("Apple");
 							list1.add("Banana");
@@ -42,48 +44,102 @@
 							List<String> list8 = new ArrayList<>(List.of("Apple", "Banana", "Orange"));
 							
 							List<String> emptyList = Collections.emptyList();
+***/							
+							
 		- add:				
 		
 			Hai cách dùng add() trong List:
 			
 				add(E element) — Thêm vào cuối danh sách (phổ biến nhất):
-				
+	
+/***	
 							List<String> list = new ArrayList<>();
 							list.add("Apple");
 							list.add("Banana");
+***/
 							
 				add(int index, E element) — phần tử được chèn vào vị trí chỉ định, các phần tử sau đó bị đẩy lùi.
-				
+
+/***				
 							list.add(0, "Orange"); // thêm vào vị trí đầu tiên
 		
 							additionalFruits.add("Apple"); [Apple, Banana, Orange, Apple]
+***/
 							
 		addAll:				
+
+/***							
 							List<String> additionalFruits = List.of("Mango", "Strawberry");
 							fruits.addAll(additionalFruits); // Thêm tất cả phần tử từ một collection. [Apple, Banana, Orange, Mango, Strawberry]
+***/
+							
 		- remove:
+
+/***							
 							List<String> fruits = new ArrayList<>();
 							fruits.add("Apple");
 							fruits.add("Banana");
 							fruits.add("Orange");
 							fruits.remove("Banana"); // [Apple, Orange]
-		removeAll:			fruits.removeAll(fruitsToRemove); // Loại bỏ tất cả phần tử có trong một collection. []
-		- get:				String retrievedFruit = additionalFruits.get(1); // Lấy phần tử tại index 1. Banana
-		- set:				additionalFruits.set(1, "Mango"); // Sử dụng phương thức set để thay đổi giá trị tại index 1. [Apple, Mango, Orange]
-		- indexOf:			int indexOfBanana = additionalFruits.indexOf("Banana"); // 1
+***/
+							
+		removeAll:			
+
+/***		
+							fruits.removeAll(fruitsToRemove); // Loại bỏ tất cả phần tử có trong một collection. []
+***/
+		
+		- get:				
+
+/***		
+							String retrievedFruit = additionalFruits.get(1); // Lấy phần tử tại index 1. Banana
+***/
+		
+		- set:				
+
+/***		
+							additionalFruits.set(1, "Mango"); // Sử dụng phương thức set để thay đổi giá trị tại index 1. [Apple, Mango, Orange]
+***/
+		
+		- indexOf:			
+
+/***		
+							int indexOfBanana = additionalFruits.indexOf("Banana"); // 1
+***/
+		
 		- lastIndexOf:		
+
+/***							
 							List<String> additionalFruits = List.of("Apple", "Banana", "Orange", "Banana");
 							int lastIndexOfBanana = additionalFruits.lastIndexOf("Banana"); // Lấy index của phần tử "Banana" cuối cùng trong danh sách. 3
+***/
+		
 		toArray:			
+
+/***							
 							String[] array = additionalFruits.toArray(new String[0]); // Chuyển đổi danh sách thành mảng
 							System.out.print("Array: ");
 							for (String fruit : array) {
 								System.out.print(fruit + " "); // Apple Banana Orange
 							}
-		subList:			List<String> subListOfFruits = additionalFruits.subList(1, 2); // Lấy danh sách con từ index 1 đến index 2
+***/
+		
+		subList:			
+
+/***		
+							List<String> subListOfFruits = additionalFruits.subList(1, 2); // Lấy danh sách con từ index 1 đến index 2
 																					       // (không bao gồm index 2). [Banana]
-		- sort:				Collections.sort(additionalFruits); // Sắp xếp danh sách theo thứ tự tăng dần. [Apple, Banana, Orange]
+***/
+
+		- sort:				
+
+/***		
+							Collections.sort(additionalFruits); // Sắp xếp danh sách theo thứ tự tăng dần. [Apple, Banana, Orange]
+***/
+		
 		listIterator:		
+
+/***							
 							ListIterator<String> iterator = additionalFruits.listIterator();
 							System.out.println("Iterating forward:");
 							while (iterator.hasNext()) {
@@ -95,3 +151,4 @@
 							while (iterator.hasNext()) {
 								System.out.println(iterator.next()); // banana orange
 							}
+***/							

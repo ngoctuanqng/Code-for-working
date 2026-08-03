@@ -1,9 +1,12 @@
 Java.lang.Class--JAVA:
 
-	- Java provides a class with name Class in java.lang package. Instances of the class Class represent classes and interfaces in a running Java application. The primitive Java
-	types (boolean, byte, char, short, int, long, float, and double), and the keyword void are also represented as Class objects.
+	- Java provides a class with name Class in java.lang package. Instances of the class Class
+	represent classes and interfaces in a running Java application. The primitive Java
+	types (boolean, byte, char, short, int, long, float, and double), and the keyword void are
+	also represented as Class objects.
 	
-	- In Java, the java.lang.Class class is a built-in class that represents a class or interface at runtime. It contains various methods that provide information about the class or
+	- In Java, the java.lang.Class class is a built-in class that represents a class or interface at
+	runtime. It contains various methods that provide information about the class or
 	interface, such as its name, superclass, interfaces, fields, and methods.
 	
 	- Here are some commonly used methods of the Class class:
@@ -12,14 +15,18 @@ Java.lang.Class--JAVA:
 		getSimpleName(): Returns the simple name of the class or interface represented by this Class object.
 		getSuperclass(): Returns the superclass of the class represented by this Class object.
 		getInterfaces(): Returns an array of interfaces implemented by the class or interface represented by this Class object.
-		getField(String name): Returns a Field object that represents the public field with the specified name in the class or interface represented by this Class object.
-		getMethod(String name, Class<?>… parameterTypes): Returns a Method object that represents the public method with the specified name and parameter types in the class or interface represented by this Class object.
+		getField(String name): Returns a Field object that represents the public field with the specified name in the
+		class or interface represented by this Class object.
+		getMethod(String name, Class<?>… parameterTypes): Returns a Method object that represents the public method with
+		the specified name and parameter types in the class or interface represented by this Class object.
 		newInstance(): Creates a new instance of the class represented by this Class object using its default constructor.
-		isInstance(Object obj): Returns true if the specified object is an instance of the class or interface represented by this Class object, false otherwise.
+		isInstance(Object obj): Returns true if the specified object is an instance of the class or interface represented by
+		this Class object, false otherwise.
 		isAssignableFrom(Class<?> cls): Returns true if this Class object is assignable from the specified Class object, false otherwise.
 	
 	Here’s an example of how to use some of these methods:
-		
+
+/***		
 		public class Main {
 			public static void main(String[] args) throws Exception {
 				Class<?> myClass = String.class;
@@ -30,7 +37,7 @@ Java.lang.Class--JAVA:
 				System.out.println("Is string assignable from Object? " + String.class.isAssignableFrom(Object.class));
 			}
 		}
-		
+***/		
 		Output:
 			Name: java.lang.String
 			Simple name: String
@@ -44,75 +51,85 @@ Java.lang.Class--JAVA:
 			
 			Class.forName(“className”)
 				
-				Since class Class doesn’t contain any constructor, there is static factory method present in class Class, which is Class.forName() , used for creating object of class Class. Below is the syntax :
+				Since class Class doesn’t contain any constructor, there is static factory method present in class Class, which
+				is Class.forName() , used for creating object of class Class. Below is the syntax :
 					
 					Class c = Class.forName(String className)
 			
 			Myclass.class
 				
 				Class c = int.class
-					
+
+/***					
 					A a = new A();   // Any class A
 					Class c = A.class; // No error
 					Class c = a.class; // Error
+***/
 			
 			obj.getClass()
+
+/***			
 				A a = new A();   // Any class A
 				Class c = a.getClass();
+***/
 	
 	Methods:
 		
 		Class<? super T> getSuperclass()
+
+/***		
 			// Java program to demonstrate getSuperclass() method
 		 
-		// base class
-		class A
-		{
-			// methods and fields
-		}			 
-		// derived class
-		class B extends A
-		{				 
-		}		 
-		// Driver class
-		public class Test
-		{
-			public static void main(String[] args) 
-					throws ClassNotFoundException 				 
+			// base class
+			class A
 			{
-				// returns the Class object associated with Test class
-				Class myClass = Test.class;					 
-				// returns the Class object for the class 
-				// with the specified name 
-				Class c1 = Class.forName("A");
-				Class c2 = Class.forName("B");
-				Class c3 = Class.forName("java.lang.Object");				 
-				// getSuperclass method returns the superclass of the class represented 
-				// by this class object 					 
-				System.out.print("Test superclass : ");					 
-				// getSuperclass method on myClass
-				System.out.println(myClass.getSuperclass());					 
-				System.out.print("A superclass : ");					 
-				// getSuperclass method on c1
-				System.out.println(c1.getSuperclass());					 
-				System.out.print("B superclass : ");					 
-				// getSuperclass method on c2
-				System.out.println(c2.getSuperclass());				 
-				System.out.print("Object superclass : ");				 
-				// getSuperclass method on c3
-				System.out.println(c3.getSuperclass());
+				// methods and fields
+			}			 
+			// derived class
+			class B extends A
+			{				 
+			}		 
+			// Driver class
+			public class Test
+			{
+				public static void main(String[] args) 
+						throws ClassNotFoundException 				 
+				{
+					// returns the Class object associated with Test class
+					Class myClass = Test.class;					 
+					// returns the Class object for the class 
+					// with the specified name 
+					Class c1 = Class.forName("A");
+					Class c2 = Class.forName("B");
+					Class c3 = Class.forName("java.lang.Object");				 
+					// getSuperclass method returns the superclass of the class represented 
+					// by this class object 					 
+					System.out.print("Test superclass : ");					 
+					// getSuperclass method on myClass
+					System.out.println(myClass.getSuperclass());					 
+					System.out.print("A superclass : ");					 
+					// getSuperclass method on c1
+					System.out.println(c1.getSuperclass());					 
+					System.out.print("B superclass : ");					 
+					// getSuperclass method on c2
+					System.out.println(c2.getSuperclass());				 
+					System.out.print("Object superclass : ");				 
+					// getSuperclass method on c3
+					System.out.println(c3.getSuperclass());
+				}
 			}
-		}
-		
-		Output:
-		
-			Test superclass : class java.lang.Object
-			A superclass : class java.lang.Object
-			B superclass : class A
-			Object superclass : null
+***/
+			
+			Output:
+			
+				Test superclass : class java.lang.Object
+				A superclass : class java.lang.Object
+				B superclass : class A
+				Object superclass : null
 			
 		Class<?>[] getInterfaces()
-			
+
+/***			
 			// Java program to demonstrate getInterfaces() method
 			// base interface
 			interface A
@@ -154,6 +171,8 @@ Java.lang.Class--JAVA:
 					}
 				}
 			}
+***/
+			
 			Output:
 				interfaces implemented by B class : 
 				interface A
@@ -163,7 +182,8 @@ Java.lang.Class--JAVA:
 				interface java.lang.CharSequence
 		
 		Class<?>[ ] getClasses()
-			
+
+/***			
 			// Java program to demonstrate getClasses() method
 			public class Test
 			{
@@ -194,6 +214,7 @@ Java.lang.Class--JAVA:
 					}				 
 				}
 			}
+***/
 			
 			Output:
 				public members of Test class : 
@@ -201,7 +222,8 @@ Java.lang.Class--JAVA:
 				class Test$B
 		
 		Field getField(String fieldName)
-			
+
+/***			
 			// Java program to demonstrate getField() method 
 			import java.lang.reflect.Field;
 			public class Test
@@ -220,13 +242,15 @@ Java.lang.Class--JAVA:
 					System.out.println(f);
 				}
 			}
+***/
 			
 			Output:
 				public field in Integer class with MIN_VALUE name :
 				public static final int java.lang.Integer.MIN_VALUE
 		
 		int getModifiers()
-			
+
+/***			
 			// Java program to demonstrate getModifiers() method
 			import java.lang.reflect.Modifier;		 
 			public abstract class Test
@@ -245,6 +269,7 @@ Java.lang.Class--JAVA:
 					System.out.println(Modifier.toString(i));
 				}
 			}
+***/
 			
 			Output:
 				
@@ -252,7 +277,8 @@ Java.lang.Class--JAVA:
 				Modifiers of Test class are : public abstract
 		
 		Class<?>[] getDeclaredClasses()
-			
+
+/***			
 			// Java program to demonstrate getDeclaredClasses() method
 			public class Test
 			{
@@ -283,6 +309,7 @@ Java.lang.Class--JAVA:
 					 
 				}
 			}
+***/
 			
 			Output:
 				Declared classes and interfaces present in Test class : 
@@ -290,7 +317,8 @@ Java.lang.Class--JAVA:
 				class Test$B
 		
 		Field getDeclaredField(String fieldName)
-			
+
+/***			
 			// Java program to demonstrate getDeclaredField() method
 			import java.lang.reflect.Field;		 
 			public class Test
@@ -310,13 +338,16 @@ Java.lang.Class--JAVA:
 					System.out.println(f);
 				}
 			}
+***/
 			
 			Output:
+			
 				Declared field present in Test class specified by "i" : 
 				int Test.i
 		
 		Field[] getDeclaredFields()
-			
+
+/***			
 			// Java program to demonstrate getDeclaredFields() method
 			import java.lang.reflect.Field;				 
 			public class Test
@@ -340,6 +371,7 @@ Java.lang.Class--JAVA:
 					}
 				}
 			}
+***/
 			
 			Output:
 				Declared fields present in Test class are : 
@@ -348,7 +380,8 @@ Java.lang.Class--JAVA:
 				boolean Test.b
 		
 		Method getDeclaredMethod(String methodName,Class… parameterTypes)
-			
+
+/***			
 			// Java program to demonstrate getDeclaredMethod() method
 			import java.lang.reflect.Method;				 
 			public class Test
@@ -375,13 +408,15 @@ Java.lang.Class--JAVA:
 					System.out.println(m);
 				}
 			}
+***/
 			
 			Output:
 				Declared method present in Test class specified by argument : java.lang.String
 				public void Test.m1(java.lang.String)
 		
 		Method[] getDeclaredMethods()
-			
+
+/***			
 			// Java program to demonstrate getDeclaredMethods() method
 			import java.lang.reflect.Method;			 
 			public class Test
@@ -416,6 +451,7 @@ Java.lang.Class--JAVA:
 					}
 				}
 			}
+***/
 			
 			Output:
 				Declared methods present in Test class are : 
@@ -424,7 +460,8 @@ Java.lang.Class--JAVA:
 				static void Test.m2()
 				
 		String toString()
-		
+
+/***		
 			// Java program to demonstrate toString() method
 			public class Test {
 				public static void main(String[] args)
@@ -450,6 +487,7 @@ Java.lang.Class--JAVA:
 					System.out.println(c3.toString());
 				}
 			}
+***/
 			
 			Output:
 			
@@ -459,6 +497,7 @@ Java.lang.Class--JAVA:
 		
 		Class<?> forName(String className)
 
+/***
 			// Java program to demonstrate forName() method
 			public class Test
 			{
@@ -472,13 +511,15 @@ Java.lang.Class--JAVA:
 					System.out.print("Class represented by c : " + c.toString());
 				}
 			}
+***/
 			
 			Output:
 				
 				Class represented by c : class java.lang.String
 		
 		Class<?> forName(String className,boolean initialize, ClassLoader loader)
-			
+
+/***			
 			// Java program to demonstrate forName() method
 			public class Test
 			{
@@ -495,12 +536,14 @@ Java.lang.Class--JAVA:
 					System.out.print("Class represented by c : " + c.toString());
 				}
 			}
+***/
 			
 			Output:
 				Class represented by c : class java.lang.String
 		
 		T newInstance()
-			
+
+/***			
 			// Java program to demonstrate newInstance() method
 			public class Test
 			{
@@ -519,12 +562,14 @@ Java.lang.Class--JAVA:
 					System.out.println("Class of obj : " + obj.getClass());
 				}
 			}
+***/
 			
 			Output:
 				Class of obj : class Test
 		
 		boolean isInstance(Object obj)
-			
+
+/***			
 			// Java program to demonstrate isInstance() method
 			public class Test
 			{
@@ -549,13 +594,15 @@ Java.lang.Class--JAVA:
 					 
 				}
 			}
+***/
 			
 			Output:
 				is s instance of String : true
 				is i instance of String : false
 		
 		boolean isAssignableFrom(Class<?> cls)
-		
+
+/***		
 			// Java program to demonstrate isAssignableFrom() method
 			public class Test extends Thread
 			{
@@ -580,13 +627,15 @@ Java.lang.Class--JAVA:
 					
 				}
 			}
+***/
 			
 			Output:
 				is Thread class Assignable from Test : true
 				is String class Assignable from Test : false
 		
 		boolean isInterface()
-			
+
+/***			
 			// Java program to demonstrate isInterface() method
 			public class Test
 			{
@@ -606,13 +655,15 @@ Java.lang.Class--JAVA:
 					System.out.println("is java.lang.Runnable an interface : " + b2);
 				}
 			}
+***/
 			
 			Output:
 				is java.lang.String an interface : false
 				is java.lang.Runnable an interface : true
 		
 		boolean isPrimitive()
-			
+
+/***			
 			// Java program to demonstrate isPrimitive method
 			public class Test
 			{
@@ -631,13 +682,15 @@ Java.lang.Class--JAVA:
 					System.out.println("is "+c2.toString()+" primitive : " + b2);
 				}
 			}
+***/
 			
 			Output:
 				is int primitive : true
 				is class Test primitive : false
 		
 		boolean isArray()
-			
+
+/***			
 			// Java program to demonstrate isArray method
 			public class Test
 			{
@@ -658,13 +711,15 @@ Java.lang.Class--JAVA:
 					 
 				}
 			}
+***/
 			
 			Output:
 				is class [I an array : true
 				is class Test an array : false
 		
 		boolean isEnum()
-			
+
+/***			
 			// Java program to demonstrate isEnum() method			 
 			enum Color
 			{
@@ -686,13 +741,15 @@ Java.lang.Class--JAVA:
 					System.out.println("is "+c2.toString()+" an Enum class : " + b2);
 				}
 			}
+***/
 			
 			Output:
 				is class Color an Enum class : true
 				is class Test an Enum class : false
 		
 		boolean isAnnotation()
-			
+
+/***			
 			// Java program to demonstrate isAnnotation() method				 
 			// declaring an Annotation Type
 			@interface A
@@ -717,13 +774,15 @@ Java.lang.Class--JAVA:
 					 
 				}
 			}
+***/
 			
 			Output:
 				is interface A an annotation  : true
 				is class Test an annotation : false
 		
 		String getName()
-		
+
+/***		
 			// Java program to demonstrate getName() method
 			public class Test
 			{
@@ -740,9 +799,11 @@ Java.lang.Class--JAVA:
 			
 			Output:
 				Class Name associated with c : Test
+***/
 		
 		String getSimpleName()
-		
+
+/***		
 			// Java program to demonstrate getSimpleName() method
 			public class Test
 			{
@@ -762,6 +823,7 @@ Java.lang.Class--JAVA:
 					System.out.println(c1.getSimpleName());
 				}
 			}
+***/
 			
 			Output:
 				Class Name associated with c : java.lang.String

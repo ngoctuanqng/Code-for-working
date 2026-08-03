@@ -1,195 +1,211 @@
 --- Tong quan ve code ben duoi:
 
-		🧩 1. MultiTypeKafkaListener – Consumer chính
+🧩 1. MultiTypeKafkaListener – Consumer chính
+
+		Đây là class được dùng để lắng nghe Kafka topic "amface" trong group "deep-fake".
+
+		@KafkaListener là annotation trong Spring Kafka dùng để đánh dấu một method sẽ nhận
+		và xử lý message từ Kafka topic một cách tự động.
 		
-				Đây là class được dùng để lắng nghe Kafka topic "amface" trong group "deep-fake".
+		Tóm gọn: Nó là "consumer listener" – khi Kafka có message mới, Spring tự động
+		gọi method có @KafkaListener.
 
-				@KafkaListener là annotation trong Spring Kafka dùng để đánh dấu một method sẽ nhận và xử lý message từ Kafka topic một cách tự động.
-				Tóm gọn: Nó là "consumer listener" – khi Kafka có message mới, Spring tự động gọi method có @KafkaListener.
+		🔹 Annotation:
+		@KafkaListener(id = "multiGroup1", topics = "amface", groupId = "deep-fake", autoStartup = "false")
+		
+			topics = "amface": Lắng nghe các message được gửi đến topic này.
 
-				🔹 Annotation:
-				@KafkaListener(id = "multiGroup1", topics = "amface", groupId = "deep-fake", autoStartup = "false")
+			groupId = "deep-fake": Mỗi group xử lý message độc lập (cùng 1 message không được gửi cho 2 consumer cùng group).
+
+			autoStartup = false: Listener chưa chạy ngay khi ứng dụng khởi động – bạn có thể bật/tắt động nếu cần.
+
+		@KafkaHandler – xử lý message theo loại dữ liệu
+		
+			1.1. Hàm nhận đúng object DeepFaceInfoRequest
+			@KafkaHandler
+			public void handleUserFaceRequest(DeepFaceInfoRequest userFaceRequest)
+			Kafka tự động deserialize JSON → DeepFaceInfoRequest (nếu message đúng định dạng).
+
+			Bạn có thể xử lý sâu tại đây: gọi service AI, lưu DB, log, ...
+
+			1.2. Hàm xử lý chuỗi JSON thủ công
+			@KafkaHandler
+			public void handleUserFaceRequest2(String userFaceRequest)
+			Nếu Kafka gửi message dưới dạng chuỗi, hàm này xử lý.
+
+			Dùng ObjectMapper để tự parse chuỗi thành object.
+
+			Gọi hàm:
+
+			notificationService.createOrUpdateWorkingTime(request);
+			→ Có thể là xử lý "giờ vào - ra", xác định fake hay không.
+
+			Sau đó đẩy thông tin lên WebSocket để các client (giao diện) hiển thị:
+
+			template.convertAndSend("/topic/check-face-time", request);
+			
+			1.3. Hàm mặc định khi không khớp kiểu dữ liệu
+			@KafkaHandler
+			public void unknown(ConsumerRecord<String, Object> record)
+			Nếu message gửi lên không phải String, cũng không phải DeepFaceInfoRequest → vào đây.
+
+			In log để dev biết có gì đó sai.
+
+🛠 2. ProductProducer – Kafka Producer
+
+		Class này chịu trách nhiệm gửi message lên Kafka.
+		
+		KafkaTemplate là thành phần chính để gửi dữ liệu (message) đến Kafka topic.
+
+		@Autowired
+		private KafkaTemplate<String, String> kafkaTemplate2;
+		@Autowired
+		private KafkaTemplate<String, DeepFaceInfoRequest> kafkaTemplate;
+		Hàm gửi chuỗi:
+		public void sendToKafka(String message) {
+		  kafkaTemplate2.send("deepfake", message);
+		}
+		Hàm gửi object:
+		public void sendToKafkaJson(DeepFaceInfoRequest message) {
+		  kafkaTemplate.send("deepfake", message);
+		}
+		👉 Gửi lên topic "deepfake".
+
+⚙️ 3. Kafka Consumer Config
+
+		ConcurrentKafkaListenerContainerFactory là factory (nhà máy) tạo ra container listener để
+		xử lý các message Kafka gửi đến trong Spring Boot. Nói đơn giản: Nó cấu hình cách Spring Boot
+		sẽ nhận và xử lý message Kafka thông qua @KafkaListener.
+
+		ConsumerFactory<K, V> là interface trong Spring Kafka dùng để tạo Kafka Consumer cho việc đọc message từ Kafka
+		topic. Nó là đối xứng với ProducerFactory – nhưng dành cho phía consumer.
+			- ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress:
+				Địa chỉ Kafka broker để consumer kết nối đến (VD: "localhost:9092").
+				Đây là điểm khởi đầu để Kafka Consumer kết nối vào cụm Kafka.
+			- ConsumerConfig.GROUP_ID_CONFIG, groupId:
+				ID của consumer group mà consumer này thuộc về.
+				Kafka sử dụng group ID để quản lý offset và cân bằng tải giữa các consumer trong group.
+			- ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class:
+				Chỉ định lớp dùng để deserialize key của message từ Kafka.
+				Key là kiểu String, nên dùng StringDeserializer.
+			- ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class:
+				Chỉ định lớp để deserialize value của message.
+				Value cũng là kiểu String.
+			- ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "20971520":
+				20971520 byte = 20MB
+				Số byte tối đa consumer được phép fetch từ 1 partition duy nhất trong 1 lần yêu cầu.						
+				Nếu message lớn, tăng giá trị này để tránh lỗi record too large.
+			- ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "20971520":
+				20971520 byte = 20MB
+				Mô tả: Tổng số byte tối đa mà Kafka broker sẽ gửi về cho consumer trong 1 lần fetch, tính tổng cả các partition.						
+				Ý nghĩa: Nếu bạn có nhiều partition được assign cùng lúc, giá trị này là giới hạn chung.
+
+		DefaultKafkaConsumerFactory là implementation mặc định của ConsumerFactory trong Spring Kafka, dùng
+		để tạo ra các Kafka Consumer (người tiêu thụ) với cấu hình bạn cung cấp.
+
+		@Bean
+		public ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> deepFakeKafkaListenerContainerFactory2()
+		Cấu hình một listener cho topic dạng object JSON:
+
+		Deserializer sẽ dùng JsonDeserializer để đọc và parse ra DeepFaceInfoRequest.
+
+		Phải khai báo class rõ ràng để Jackson biết deserialize.
+
+🧪 4. Kafka Health Check
+
+		HealthIndicator là một interface trong Spring Boot Actuator, dùng để kiểm tra và báo cáo
+		trạng thái "sức khỏe" (health) của một thành phần trong hệ thống — ví dụ như Kafka,
+		Database, Redis, RabbitMQ, v.v.
+
+		AdminClient là một API quản lý (administrative) được cung cấp bởi Kafka (trong thư viện
+		kafka-clients), cho phép bạn tương tác và điều khiển các thành phần bên trong Kafka như: tạo
+		topic, xóa topic, liệt kê topic, xem metadata
+
+		Trong Spring Boot, Health là một đối tượng đại diện cho trạng thái sức khỏe (health status)
+		của một thành phần, hệ thống hoặc toàn bộ ứng dụng.
+
+		Trong Kafka, ListTopicsOptions là một class thuộc Kafka Client Java API, được sử dụng khi bạn
+		muốn liệt kê danh sách các topic với các tùy chọn cụ thể.
+
+		@Component("kafka_indicator")
+		public class KafkaHealthIndicator implements HealthIndicator
+		
+		Spring Boot Actuator sẽ gọi hàm:
+
+		public Health health() {
+			AdminClient adminClient = AdminClient.create(props);
+			DescribeClusterResult clusterResult = adminClient.describeCluster();
+			...
+		}
+		Mục đích: kiểm tra Kafka có hoạt động không (ping cluster ID, broker list).
+
+		Trả về trạng thái UP, DOWN cho màn hình health check (ex: /actuator/health).
+
+⚒️ 5. Kafka Producer Config
+
+		ProducerFactory là interface do Spring Kafka cung cấp để tạo ra Kafka Producer instance, dùng
+		để gửi message (produce message) lên Kafka. Nó là phần “bên gửi” của Kafka — tương tự như
+		KafkaTemplate nhưng ở cấp thấp hơn. Tạo ra producer để KafkaTemplate dùng.
+
+		ProducerConfig là một lớp tiện ích (utility class) trong Spring Kafka / Kafka client Java,
+		chứa các hằng số cấu hình dành cho Kafka Producer. Khi bạn cấu hình một Kafka Producer, bạn
+		sẽ dùng các key từ ProducerConfig để truyền vào Map<String, Object>.
+		
+			- ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress:
+				Chỉ định danh sách các Kafka broker mà Producer sẽ kết nối để gửi message.
+				bootstrapAddress là một biến chứa chuỗi địa chỉ, ví dụ: "localhost:9092" hoặc "kafka1:9092,kafka2:9092"
+			- ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class:
+				Chỉ định serializer (bộ mã hóa) dùng cho key của message.
+				Ở đây dùng StringSerializer, nghĩa là key sẽ được serialize thành chuỗi UTF-8 để Kafka hiểu được.
+				Bạn cũng có thể dùng LongSerializer, IntegerSerializer, hoặc JsonSerializer nếu muốn.
+			- ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class:
+				Chỉ định serializer dùng cho value của message.
+				Ở đây cũng dùng StringSerializer, tức value là chuỗi văn bản.
+				Nếu bạn muốn gửi object, bạn có thể dùng JsonSerializer.class.
+			- ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "20971520":
+				Thiết lập kích thước tối đa (bytes) cho 1 request gửi đến Kafka.
+				Mặc định Kafka chỉ cho gửi tối đa 1MB (1048576 bytes).						
+				Ở đây bạn tăng lên 20MB (20971520 bytes) để có thể gửi message lớn hơn.						
+				Nếu không set mà gửi message lớn, sẽ bị lỗi RecordTooLargeException.
+
+		DefaultKafkaProducerFactory là class mặc định trong Spring Kafka dùng để tạo ra Kafka
+		Producer instances dựa trên cấu hình bạn cung cấp. Nó là implementation của interface
+		ProducerFactory<K, V>.
+
+		@Bean(name = "kafkaTemplate2")
+		public KafkaTemplate<String, String> kafkaTemplate2(...)
+		Tạo 2 producer:
+
+		Một producer gửi message dạng String.
+
+		Một producer gửi message dạng DeepFaceInfoRequest.
+
+		Dùng JsonSerializer để Kafka tự động biến object thành JSON trước khi gửi.
+
+🧾 6. Kafka Topic Config
+
+		KafkaAdmin là bean do Spring Kafka cung cấp để giúp bạn tạo và quản lý các topic Kafka ngay khi ứng
+		dụng khởi động, mà không cần dùng lệnh CLI hoặc tool ngoài.
+
+		AdminClientConfig trong Apache Kafka là một class chứa các key cấu hình dùng cho
+		AdminClient, một API dùng để thao tác quản trị Kafka cluster thông qua Java
+		code (tạo topic, xóa topic, danh sách broker, thay đổi partition, v.v.
+			- AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG:
+			
+				Đây là hằng số key cấu hình được Kafka cung cấp sẵn.
+				Nó đại diện cho chuỗi "bootstrap.servers", dùng để cấu hình địa chỉ các Kafka
+				broker ban đầu mà client (ở đây là AdminClient) cần kết nối tới.
 				
-					topics = "amface": Lắng nghe các message được gửi đến topic này.
+				Khi một client (producer, consumer, admin) khởi tạo, nó cần biết ít nhất một
+				broker để có thể kết nối và khám phá toàn bộ cluster.
 
-					groupId = "deep-fake": Mỗi group xử lý message độc lập (cùng 1 message không được gửi cho 2 consumer cùng group).
+		@Bean
+		public KafkaAdmin kafkaAdmin()
+		@Bean
+		public NewTopic topic()
+		Tự động tạo topic "deepfake" (nếu chưa tồn tại).
 
-					autoStartup = false: Listener chưa chạy ngay khi ứng dụng khởi động – bạn có thể bật/tắt động nếu cần.
-
-				@KafkaHandler – xử lý message theo loại dữ liệu
-				
-					1.1. Hàm nhận đúng object DeepFaceInfoRequest
-					@KafkaHandler
-					public void handleUserFaceRequest(DeepFaceInfoRequest userFaceRequest)
-					Kafka tự động deserialize JSON → DeepFaceInfoRequest (nếu message đúng định dạng).
-
-					Bạn có thể xử lý sâu tại đây: gọi service AI, lưu DB, log, ...
-
-					1.2. Hàm xử lý chuỗi JSON thủ công
-					@KafkaHandler
-					public void handleUserFaceRequest2(String userFaceRequest)
-					Nếu Kafka gửi message dưới dạng chuỗi, hàm này xử lý.
-
-					Dùng ObjectMapper để tự parse chuỗi thành object.
-
-					Gọi hàm:
-
-					notificationService.createOrUpdateWorkingTime(request);
-					→ Có thể là xử lý "giờ vào - ra", xác định fake hay không.
-
-					Sau đó đẩy thông tin lên WebSocket để các client (giao diện) hiển thị:
-
-					template.convertAndSend("/topic/check-face-time", request);
-					
-					1.3. Hàm mặc định khi không khớp kiểu dữ liệu
-					@KafkaHandler
-					public void unknown(ConsumerRecord<String, Object> record)
-					Nếu message gửi lên không phải String, cũng không phải DeepFaceInfoRequest → vào đây.
-
-					In log để dev biết có gì đó sai.
-
-		🛠 2. ProductProducer – Kafka Producer
-		
-				Class này chịu trách nhiệm gửi message lên Kafka.
-				
-				KafkaTemplate là thành phần chính để gửi dữ liệu (message) đến Kafka topic.
-
-				@Autowired
-				private KafkaTemplate<String, String> kafkaTemplate2;
-				@Autowired
-				private KafkaTemplate<String, DeepFaceInfoRequest> kafkaTemplate;
-				Hàm gửi chuỗi:
-				public void sendToKafka(String message) {
-				  kafkaTemplate2.send("deepfake", message);
-				}
-				Hàm gửi object:
-				public void sendToKafkaJson(DeepFaceInfoRequest message) {
-				  kafkaTemplate.send("deepfake", message);
-				}
-				👉 Gửi lên topic "deepfake".
-
-		⚙️ 3. Kafka Consumer Config
-		
-				ConcurrentKafkaListenerContainerFactory là factory (nhà máy) tạo ra container listener để
-				xử lý các message Kafka gửi đến trong Spring Boot. Nói đơn giản: Nó cấu hình cách Spring Boot
-				sẽ nhận và xử lý message Kafka thông qua @KafkaListener.
-
-				ConsumerFactory<K, V> là interface trong Spring Kafka dùng để tạo Kafka Consumer cho việc đọc message từ Kafka
-				topic. Nó là đối xứng với ProducerFactory – nhưng dành cho phía consumer.
-					- ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress:
-						Địa chỉ Kafka broker để consumer kết nối đến (VD: "localhost:9092").
-						Đây là điểm khởi đầu để Kafka Consumer kết nối vào cụm Kafka.
-					- ConsumerConfig.GROUP_ID_CONFIG, groupId:
-						ID của consumer group mà consumer này thuộc về.
-						Kafka sử dụng group ID để quản lý offset và cân bằng tải giữa các consumer trong group.
-					- ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class:
-						Chỉ định lớp dùng để deserialize key của message từ Kafka.
-						Key là kiểu String, nên dùng StringDeserializer.
-					- ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class:
-						Chỉ định lớp để deserialize value của message.
-						Value cũng là kiểu String.
-					- ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "20971520":
-						20971520 byte = 20MB
-						Số byte tối đa consumer được phép fetch từ 1 partition duy nhất trong 1 lần yêu cầu.						
-						Nếu message lớn, tăng giá trị này để tránh lỗi record too large.
-					- ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "20971520":
-						20971520 byte = 20MB
-						Mô tả: Tổng số byte tối đa mà Kafka broker sẽ gửi về cho consumer trong 1 lần fetch, tính tổng cả các partition.						
-						Ý nghĩa: Nếu bạn có nhiều partition được assign cùng lúc, giá trị này là giới hạn chung.
-
-				DefaultKafkaConsumerFactory là implementation mặc định của ConsumerFactory trong Spring Kafka, dùng để tạo ra các Kafka Consumer (người tiêu thụ)
-				với cấu hình bạn cung cấp.
-		
-				@Bean
-				public ConcurrentKafkaListenerContainerFactory<String, DeepFaceInfoRequest> deepFakeKafkaListenerContainerFactory2()
-				Cấu hình một listener cho topic dạng object JSON:
-
-				Deserializer sẽ dùng JsonDeserializer để đọc và parse ra DeepFaceInfoRequest.
-
-				Phải khai báo class rõ ràng để Jackson biết deserialize.
-
-		🧪 4. Kafka Health Check
-
-				HealthIndicator là một interface trong Spring Boot Actuator, dùng để kiểm tra và báo cáo trạng thái "sức khỏe" (health) của
-				một thành phần trong hệ thống — ví dụ như Kafka, Database, Redis, RabbitMQ, v.v.
-
-				AdminClient là một API quản lý (administrative) được cung cấp bởi Kafka (trong thư viện kafka-clients), cho phép bạn tương tác
-				và điều khiển các thành phần bên trong Kafka như: tạo topic, xóa topic, liệt kê topic, xem metadata
-
-				Trong Spring Boot, Health là một đối tượng đại diện cho trạng thái sức khỏe (health status) của một thành phần, hệ thống hoặc toàn bộ ứng dụng.
-
-				Trong Kafka, ListTopicsOptions là một class thuộc Kafka Client Java API, được sử dụng khi bạn muốn liệt kê danh sách các topic với các tùy chọn cụ thể.
-		
-				@Component("kafka_indicator")
-				public class KafkaHealthIndicator implements HealthIndicator
-				
-				Spring Boot Actuator sẽ gọi hàm:
-
-				public Health health() {
-					AdminClient adminClient = AdminClient.create(props);
-					DescribeClusterResult clusterResult = adminClient.describeCluster();
-					...
-				}
-				Mục đích: kiểm tra Kafka có hoạt động không (ping cluster ID, broker list).
-
-				Trả về trạng thái UP, DOWN cho màn hình health check (ex: /actuator/health).
-
-		⚒️ 5. Kafka Producer Config
-
-				ProducerFactory là interface do Spring Kafka cung cấp để tạo ra Kafka Producer instance, dùng để gửi message (produce message)
-				lên Kafka. Nó là phần “bên gửi” của Kafka — tương tự như KafkaTemplate nhưng ở cấp thấp hơn. Tạo ra producer để KafkaTemplate dùng.
-
-				ProducerConfig là một lớp tiện ích (utility class) trong Spring Kafka / Kafka client Java, chứa các hằng số cấu hình dành cho
-				Kafka Producer. Khi bạn cấu hình một Kafka Producer, bạn sẽ dùng các key từ ProducerConfig để truyền vào Map<String, Object>.
-					- ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress:
-						Chỉ định danh sách các Kafka broker mà Producer sẽ kết nối để gửi message.
-						bootstrapAddress là một biến chứa chuỗi địa chỉ, ví dụ: "localhost:9092" hoặc "kafka1:9092,kafka2:9092"
-					- ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class:
-						Chỉ định serializer (bộ mã hóa) dùng cho key của message.
-						Ở đây dùng StringSerializer, nghĩa là key sẽ được serialize thành chuỗi UTF-8 để Kafka hiểu được.
-						Bạn cũng có thể dùng LongSerializer, IntegerSerializer, hoặc JsonSerializer nếu muốn.
-					- ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class:
-						Chỉ định serializer dùng cho value của message.
-						Ở đây cũng dùng StringSerializer, tức value là chuỗi văn bản.
-						Nếu bạn muốn gửi object, bạn có thể dùng JsonSerializer.class.
-					- ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "20971520":
-						Thiết lập kích thước tối đa (bytes) cho 1 request gửi đến Kafka.
-						Mặc định Kafka chỉ cho gửi tối đa 1MB (1048576 bytes).						
-						Ở đây bạn tăng lên 20MB (20971520 bytes) để có thể gửi message lớn hơn.						
-						Nếu không set mà gửi message lớn, sẽ bị lỗi RecordTooLargeException.
-
-				DefaultKafkaProducerFactory là class mặc định trong Spring Kafka dùng để tạo ra Kafka Producer instances dựa trên cấu hình bạn cung
-				cấp. Nó là implementation của interface ProducerFactory<K, V>.
-		
-				@Bean(name = "kafkaTemplate2")
-				public KafkaTemplate<String, String> kafkaTemplate2(...)
-				Tạo 2 producer:
-
-				Một producer gửi message dạng String.
-
-				Một producer gửi message dạng DeepFaceInfoRequest.
-
-				Dùng JsonSerializer để Kafka tự động biến object thành JSON trước khi gửi.
-
-		🧾 6. Kafka Topic Config
-		
-				KafkaAdmin là bean do Spring Kafka cung cấp để giúp bạn tạo và quản lý các topic Kafka ngay khi ứng
-				dụng khởi động, mà không cần dùng lệnh CLI hoặc tool ngoài.
-
-				AdminClientConfig trong Apache Kafka là một class chứa các key cấu hình dùng cho AdminClient, một API dùng
-				để thao tác quản trị Kafka cluster thông qua Java code (tạo topic, xóa topic, danh sách broker, thay đổi partition, v.v.
-					- AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG:
-						Đây là hằng số key cấu hình được Kafka cung cấp sẵn.
-						Nó đại diện cho chuỗi "bootstrap.servers", dùng để cấu hình địa chỉ các Kafka broker ban đầu mà client (ở đây là AdminClient) cần kết nối tới.
-						Khi một client (producer, consumer, admin) khởi tạo, nó cần biết ít nhất một broker để có thể kết nối và khám phá toàn bộ cluster.
-		
-				@Bean
-				public KafkaAdmin kafkaAdmin()
-				@Bean
-				public NewTopic topic()
-				Tự động tạo topic "deepfake" (nếu chưa tồn tại).
-
-				Có thể config: số partition, replication,...
+		Có thể config: số partition, replication,...
 
 
 

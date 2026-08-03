@@ -4,6 +4,8 @@
 							in the same way.
 							However, while the ArrayList class and the LinkedList class can be used in the same way, they are built very differently.
 		addFirst():
+
+/***
 							import java.util.LinkedList;
 							public class Main {
 							  public static void main(String[] args) {
@@ -16,7 +18,11 @@
 								System.out.println(cars); // [Mazda, Volvo, BMW, Ford]
 							  }
 							}
+***/							
+							
 		addLast():
+
+/***
 							import java.util.LinkedList;
 							public class Main {
 							  public static void main(String[] args) {
@@ -29,7 +35,11 @@
 								System.out.println(cars); // [Volvo, BMW, Ford, Mazda]
 							  }
 							}
+***/							
+							
 		removeFirst():
+
+/***
 							import java.util.LinkedList;
 							public class Main {
 							  public static void main(String[] args) {
@@ -44,7 +54,11 @@
 								System.out.println(cars); [BMW, Ford, Mazda]
 							  }
 							}
+***/							
+							
 		removeLast():
+
+/***
 							import java.util.LinkedList;
 							public class Main {
 							  public static void main(String[] args) {
@@ -58,7 +72,11 @@
 								System.out.println(cars); // [Volvo, BMW, Ford]
 							  }
 							}
+***/							
+							
 		getFirst():
+
+/***
 							import java.util.LinkedList;
 							public class Main {
 							  public static void main(String[] args) {
@@ -71,7 +89,11 @@
 								System.out.println(cars.getFirst()); // Volvo
 							  }
 							}
+***/							
+							
 		getLast():
+
+/***
 							import java.util.LinkedList;
 							public class Main {
 							  public static void main(String[] args) {
@@ -84,4 +106,5 @@
 								// Use getLast() to display the last item in the list
 								System.out.println(cars.getLast()); // Mazda
 							  }
-							}			
+							}
+***/							

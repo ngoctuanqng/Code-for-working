@@ -89,8 +89,9 @@ MyBatis--SPRING:
 																
 			Tạo file cấu hình MyBatis SqlMapConfig.xml trong resources
 				
-				Trong file cấu hình này có sử dụng thẻ typeAliases tạo alias Student có type là lớp vn.viettuts.entity.Student. Bằng cách này trong các file cấu hình này hoặc trong các file mapper có thể sử dụng tên tắt
-				Student thay vì vn.viettuts.entity.Student.
+				Trong file cấu hình này có sử dụng thẻ typeAliases tạo alias Student có type là
+				lớp vn.viettuts.entity.Student. Bằng cách này trong các file cấu hình này hoặc
+				trong các file mapper có thể sử dụng tên tắt Student thay vì vn.viettuts.entity.Student.
 					
 					<?xml version = "1.0" encoding = "UTF-8"?>
 					<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">						 
@@ -107,7 +108,8 @@ MyBatis--SPRING:
 			
 			Tạo file mapper Student.xml
 			
-				Đối với kết quả trả về của câu lệnh truy vấn select các bạn có thể dùng thuộc tính resultMap hoặc resultType như được khai báo dưới đây.
+				Đối với kết quả trả về của câu lệnh truy vấn select các bạn có thể dùng thuộc tính resultMap
+				hoặc resultType như được khai báo dưới đây.
 					
 					<?xml version = "1.0" encoding = "UTF-8"?>
 					<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">						 
@@ -137,16 +139,19 @@ MyBatis--SPRING:
 						</resultMap>
 					</mapper>
 					
-					Vì các tên cột của bảng details.student giống với các tên trường của lớp vn.viettuts.entity.Student (không phân biệt chữ hoa, chữ thường), nên trong câu lệnh select có id="selectStudentById" ta có thể
+					Vì các tên cột của bảng details.student giống với các tên trường của lớp vn.viettuts.entity.Student
+					(không phân biệt chữ hoa, chữ thường), nên trong câu lệnh select có id="selectStudentById" ta có thể
 					khai báo kết quả trả về là resultType="Student". Trong trường hợp này là hoàn toàn hợp lệ.
 					
-				Giả sử có tên cột của bảng trong database nào đó khác tên trường của lớp java thì ta dùng resultMap để ánh xạ chúng với nhau.
+				Giả sử có tên cột của bảng trong database nào đó khác tên trường của lớp java thì ta dùng resultMap
+				để ánh xạ chúng với nhau.
 				
 				File mapper Student.xml có namespace="vn.viettuts.mapper.StudentMapper"
 			
 			Tạo interface StudentMapper.java
 			
-				Tạo interface StudentMapper.java và định nghĩa các method có tên giống với các id của câu lệnh trong file mapper Student.xml. Và tham số truyền vào và giá trị trả về của phương thức có kiểu dữ
+				Tạo interface StudentMapper.java và định nghĩa các method có tên giống với các id của câu lệnh trong
+				file mapper Student.xml. Và tham số truyền vào và giá trị trả về của phương thức có kiểu dữ
 				liệu tương ứng.
 					
 					package vn.viettuts.mapper;				 

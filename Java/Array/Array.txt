@@ -2,14 +2,389 @@
 							Immutable
 							
 							String[] names = {"Alice", "Bob", "Charlie", "David", "Eva"};
-		- stream:			Arrays.stream(names).forEach(System.out::println); // Alice Bob Charlie David Eva
-		- length:			names.length; // 5
-		- sort:				Arrays.sort(names); // [Alice, Bob, Charlie, David, Eva]
-		- asList:			List<String> nameList = Arrays.asList(names);
+							
+		- stream:			
+
+/***		
+							Arrays.stream(names).forEach(System.out::println); // Alice Bob Charlie David Eva
+***/
+		
+		- length:			
+
+/***		
+							names.length; // 5
+***/
+		
+		- sort:				
+
+/***		
+							Arrays.sort(names); // [Alice, Bob, Charlie, David, Eva]
+***/
+		
+		- asList:			
+
+/***		
+							List<String> nameList = Arrays.asList(names);
 							System.out.println("\nList from array: " + nameList); // List from array: [Alice, Bob, Charlie, David, Eva]
-		spliterator:		Spliterator<String> spliterator = Arrays.spliterator(names);
+***/
+							
+		spliterator:		
+
+/***		
+							Spliterator<String> spliterator = Arrays.spliterator(names);
 							System.out.println("\nUsing spliterator:");
-							spliterator.forEachRemaining(System.out::println); // Alice Bob Charlie David Eva\
-		- for-each:			for (String name : names) {
+							spliterator.forEachRemaining(System.out::println); // Alice Bob Charlie David Eva
+***/
+							
+		- for-each:			
+
+/***		
+							for (String name : names) {
 								// Thực hiện thao tác với num
 							}
+***/							
+							
+Tạo một mảng trong Java
+
+	Để khai báo một mảng, khai báo loại biến với dấu ngoặc vuông []:
+
+/***		
+		dataType[] arr;
+		dataType []arr; 
+		dataType arr[];
+***/
+	
+	Để chèn giá trị vào nó, chúng ta có thể sử dụng một mảng bằng chữ - đặt các giá trị trong danh sách
+	được phân tách bằng dấu phẩy, bên trong dấu ngoặc nhọn:
+
+/***		
+		String[] cars = { "Honda", "BMW", "Ford", "Mazda" };
+***/
+	
+	Để tạo một mảng các số nguyên, bạn có thể viết:
+
+/***
+		int[] myNum = { 10, 20, 30, 40 };
+***/
+		
+Truy cập các phần tử của một mảng trong Java
+
+	Bạn truy cập một phần tử mảng bằng cách sử dụng số chỉ mục (index).
+
+/***		
+		package vn.viettuts.array;
+ 
+		public class TruyCapArray1 {
+			public static void main(String[] args) {
+				String[] cars = { "Honda", "BMW", "Ford", "Mazda" };
+				System.out.println(cars[0]);
+			}
+		}
+***/
+
+Thay đổi một phần tử mảng trong Java
+
+	Để thay đổi giá trị của một phần tử cụ thể, hãy sử dụng số chỉ mục:
+
+/***		
+		package vn.viettuts.array;
+ 
+		public class TruyCapArray2 {
+			public static void main(String[] args) {
+				String[] cars = { "Honda", "BMW", "Ford", "Mazda" };
+				// thay đổi phần tử đầu tiên của mảng cars
+				cars[0] = "Morning";
+				// hiển thị phần tử đầu tiên của mảng cars
+				System.out.println("Phần tử đầu tiên: " + cars[0]);
+			}
+		}
+***/
+
+Độ dài mảng trong Java
+
+	Để biết có bao nhiêu phần tử một mảng, sử dụng thuộc tính length :
+
+/***		
+		package vn.viettuts.array;
+ 
+		public class DodaiArray1 {
+			public static void main(String[] args) {
+				String[] cars = { "Honda", "BMW", "Ford", "Mazda" };
+				System.out.println("Độ dài của mảng cars là: " + cars.length);
+			}
+		}
+***/
+
+Duyệt các phần tử của mảng trong Java
+
+	Có 2 các để duyệt các phần tử của mảng:
+		
+		Sử dụng vòng lặp for
+			
+			Bạn có thể lặp qua các phần tử mảng bằng vòng lặp for và sử dụng thuộc tính length để chỉ
+			định số lần vòng lặp sẽ chạy. Ví dụ:
+
+/***				
+				package vn.viettuts.array;
+ 
+				public class DuyetArray1 {
+					public static void main(String[] args) {
+						String[] cars = { "Honda", "BMW", "Ford", "Mazda" };
+						for (int i = 0; i < cars.length; i++) {
+							System.out.println(cars[i]);
+						}
+					}
+				}
+***/
+				
+				Kết quả:
+					
+					Honda
+					BMW
+					Ford
+					Mazda
+					
+		Sử dụng for each
+
+/***			
+			package vn.viettuts.array;
+ 
+			public class DuyetArray2 {
+				public static void main(String[] args) {
+					String[] cars = { "Honda", "BMW", "Ford", "Mazda" };
+					for (String car : cars) {
+						System.out.println(car);
+					}
+				}
+			}
+***/
+			
+			Kết quả:
+			
+				Honda
+				BMW
+				Ford
+				Mazda
+				
+	So sánh for với for each
+		
+		Nếu bạn so sánh vòng lặp for và vòng lặp for each, bạn sẽ thấy rằng phương thức
+		foreach dễ viết hơn, nó không yêu cầu bộ đếm (sử dụng thuộc tính length) và nó dễ
+		đọc hơn.
+
+Sắp xếp mảng
+
+	Có nhiều phương thức mảng có sẵn, ví dụ Sort(), sắp xếp một mảng theo thứ tự bảng chữ cái hoặc
+	theo thứ tự tăng dần, ví dụ:
+
+/***		
+		package vn.viettuts.array;
+ 
+		import java.util.Arrays;
+		 
+		public class DuyetArray2 {
+			public static void main(String[] args) {
+				String[] cars = { "Honda", "BMW", "Ford", "Mazda" };
+				// sap xep mangr cars theo thu tu tang dan
+				Arrays.sort(cars);
+				System.out.println("Mảng cars sau khi được sắp xếp:");
+				for (String car : cars) {
+					System.out.println(car);
+				}
+			}
+		}
+***/
+		
+		Kết quả:
+		
+			Mảng cars sau khi được sắp xếp:
+			BMW
+			Ford
+			Honda
+			Mazda
+
+Các cách khác để tạo một mảng trong Java
+
+	Trong Java, có nhiều cách khác nhau để tạo một mảng:
+		
+		// tạo một mảng có độ dài 4, thêm các phần tử sau tạo
+		String[] cars1 = new String[4];
+		 
+		// tạo một mảng không cần chỉ định số phần tử cụ thể
+		String[] cars2 = new String[] { "Honda", "BMW", "Ford", "Mazda" };
+		 
+		// tạo một mảng không cần chỉ định số phần tử cụ thể
+		// và không cần dùng từ khóa new
+		String[] cars3 = { "Honda", "BMW", "Ford", "Mazda" };
+		
+	Bạn có thể chọn bất kỳ cách khởi tạo nào. Trong hướng dẫn của chúng tôi, chúng tôi
+	sẽ thường sử dụng tùy chọn cuối cùng, vì nó nhanh hơn và dễ đọc hơn.
+	
+	Một trường hợp khác, nếu bạn khai báo một mảng và khởi tạo nó sau, bạn phải sử dụng từ khóa new:
+
+/***	
+		// khai báo một mảng
+		String[] cars;
+		 
+		// thêm giá trị, sử dụng từ khóa new
+		cars = new String[] { "Honda", "BMW", "Ford" };
+		 
+		// nếu không dùng new sẽ bị lỗi
+		cars = {"Honda","BMW","Ford"};
+***/
+
+Truyền mảng vào phương thức trong java
+
+	Chúng ta có thể truyền mảng vào phương thức, điều này giúp tái sử dụng code logic để xử lý mảng bất kỳ. Ví dụ:
+
+/***		
+		public class TestArray2 {
+			static void min(int arr[]) {
+				int min = arr[0];
+				for (int i = 1; i < arr.length; i++)
+					if (min > arr[i]) {
+						min = arr[i];
+					}
+				System.out.println(min);
+			}
+		 
+			public static void main(String args[]) {
+				int a[] = { 33, 3, 4, 5 };
+				min(a);// truyền mảng tới phương thức
+			}
+		}
+***/
+		
+		Kết quả:
+			3
+			
+Sao chép một mảng trong java
+
+	Chúng ta có thể sao chép một mảng tới mảng khác bởi phương thức arraycopy của
+	lớp System. Cú pháp của phương thức arraycopy:
+
+/***		
+		public static void arraycopy(  
+			Object src, int srcPos,Object dest, int destPos, int length  
+		)
+***/
+	
+	Ví dụ về sao chép mảng trong java
+
+/***		
+		public class TestArrayCopyDemo {
+			public static void main(String[] args) {
+				char[] copyFrom = { 'd', 'e', 'c', 'a', 'f', 
+						'f', 'e', 'i', 'n', 'a', 't', 'e', 'd' };
+				char[] copyTo = new char[7];
+		 
+				System.arraycopy(copyFrom, 2, copyTo, 0, 7);
+				System.out.println(new String(copyTo));
+			}
+		}
+***/
+		
+		Kết quả:
+			caffein
+			
+Mảng hai chiều và đa chiều trong Java
+
+	Trong TH này, dữ liệu được lưu trữ theo hàng và cột theo chỉ mục (hay còn gọi là dạng ma trận).
+	
+	Khai báo mảng đa chiều trong java
+
+/***		
+		dataType[][] arr;
+		dataType [][]arr;
+		dataType arr[][];
+		dataType []arr[];
+***/
+		
+	Ví dụ về khởi tạo và gán giá trị cho mảng đa chiều trong java
+
+/***		
+		int[][] arr=new int[3][3]; // 3 hàng 3 cột
+		arr[0][0]=1;  
+		arr[0][1]=2;  
+		arr[0][2]=3;  
+		arr[1][0]=4;  
+		arr[1][1]=5;  
+		arr[1][2]=6;  
+		arr[2][0]=7;  
+		arr[2][1]=8;  
+		arr[2][2]=9;
+***/
+		
+	Ví dụ khai báo và khởi tạo mảng đa chiều trong java
+
+/***	
+		public class TestArray3 {
+			public static void main(String args[]) {
+		 
+				// khai báo và khởi tạo mảng 2 chiều
+				int arr[][] = { { 1, 2, 3 }, { 2, 4, 5 }, { 4, 4, 5 } };
+		 
+				// in mảng 2 chiều r màn hình
+				for (int i = 0; i < 3; i++) {
+					for (int j = 0; j < 3; j++) {
+						System.out.print(arr[i][j] + " ");
+					}
+					System.out.println();
+				}
+		 
+			}
+		}
+***/		
+		
+		Kết quả:
+			1 2 3 
+			2 4 5 
+			4 4 5
+	Ví dụ cộng 2 ma trận (mảng đa chiều) trong Java
+
+/***		
+		package vn.viettuts.array;
+ 
+		public class CongMaTran {
+			public static void main(String[] args) {
+				// tao hai ma tran
+				int a[][] = { { 1, 3, 4 }, { 3, 4, 5 } };
+				int b[][] = { { 1, 3, 4 }, { 3, 4, 5 } };
+		 
+				// tao ma tran khac de luu giu ket qua phep cong hai ma tran
+				int c[][] = new int[2][3];
+		 
+				// cong va in tong hai ma tran
+				for (int i = 0; i < 2; i++) {
+					for (int j = 0; j < 3; j++) {
+						c[i][j] = a[i][j] + b[i][j];
+						System.out.print(c[i][j] + " ");
+					}
+					System.out.println();
+				}
+			}
+		}
+***/
+		
+		Kết quả:
+			2 6 8 
+			6 8 10
+			
+Lợi thế và hạn chế của mảng trong java
+	
+	Lợi thế
+		
+		Tối ưu code: Mảng giúp lấy hoặc sắp xếp dữ liệu dễ dàng.
+		
+		Truy cập ngẫu nhiên: Chúng ta có thể lấy dữ liệu được lưu trữ ở bất kỳ vị trí nào thông qua chỉ số.
+	
+	Hạn chế
+		
+		Giới hạn kích thước: Chúng ta phải khởi tạo kích thước của mảng trong java trước khi sử dụng. Không
+		thể thay đổi được kích thước của nó lúc runtime. Collection framework được sử dụng trong java để
+		giải quyết vấn đề này.
+		
+Giới thiệu Lớp Array trong Java
+	
+	Lớp java.util.Arrays chứa nhiều phương thức static đa dạng để xếp thứ tự và tìm kiếm các mảng, so
+	sánh các mảng và điền các phần tử vào mảng.

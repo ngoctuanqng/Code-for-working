@@ -21,6 +21,8 @@ Syntax of getOrDefault() Method
 Example
 
 	Example 1: Retrieve the Value when the Key exists
+	
+/***	
 		// Java Program to demonstrate the working of
 		// getOrDefault() with an exisiting key
 		import java.util.HashMap;
@@ -40,11 +42,13 @@ Example
 				System.out.println("Value for 'Geek1': " + a);
 			}
 		}
+***/
 		
 		Value for 'Geek1': 1
 		
 	Example 2: Returning a Default Value when the Key does not exists
-		
+
+/***		
 		// Java Program to demonstrate the working of
 		// getOrDefault() with an non-exisiting key
 		import java.util.HashMap;
@@ -63,10 +67,12 @@ Example
 				System.out.println("Value for 'Geek5': " + a);
 			}
 		}
+***/
 		
 		Value for 'Geek5': 0
 	Example 3: Key exists but the value is null
-	
+
+/***	
 		// Java Program to demonstrate how to handle cases
 		// where the key exists with null value or does not exist
 		import java.util.HashMap;
@@ -89,6 +95,7 @@ Example
 				System.out.println("Value for 'Geek2': " + s2);
 			}
 		}
+***/
 		
 		Value for 'Geek': null
 		Value for 'Geek2': default

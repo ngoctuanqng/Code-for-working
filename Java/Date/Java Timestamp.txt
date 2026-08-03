@@ -63,7 +63,8 @@ Java Timestamp--Ngày và giờ trong Java:
 			Converts the string object to Timestamp value or obtains an instance of Timestamp from a LocalDateTime object.
 	
 	Example 1
-	
+
+/***	
 		import java.sql.Timestamp;  
 		import java.time.Instant;  
 		public class JavaTimestampFromExample_1 {  
@@ -76,9 +77,11 @@ Java Timestamp--Ngày và giờ trong Java:
 				System.out.println("4. Boolean value returned : "+timestamp.before(ts2)); // true. before() returns Boolean value true if this ts1 comes earlier than given ts2						
 			}  
 		}
+***/
 		
 	Example 2
-		
+
+/***		
 		import java.sql.Timestamp;  
 		import java.time.Instant;  
 		public class JavaTimespanExample2 {  
@@ -90,6 +93,7 @@ Java Timestamp--Ngày và giờ trong Java:
 				Instant instant = ts1.toInstant(); // 2018-09-01T03:31:15.000054647Z. toInstant() method returns an Instant which represents the same point on the time-line as this Timestamp  
 			}  
 		}
+***/
 		
 	Chuyển Date thành Timestamp và Timestamp thành Date
 		
@@ -102,7 +106,8 @@ Java Timestamp--Ngày và giờ trong Java:
 		chuyển về Timestamp và ngược lại.
 		
 		Ví dụ
-		
+
+/***		
 			package com.ngockhuong;
 			import java.sql.Timestamp;
 			import java.util.Date;
@@ -119,6 +124,8 @@ Java Timestamp--Ngày và giờ trong Java:
 					System.out.println(last);
 				}
 			}
+***/			
+			
 			Tue Feb 14 01:53:24 ICT 2017
 			2017-02-14 01:53:24.981
 			Tue Feb 14 01:53:24 ICT 2017

@@ -1,4 +1,5 @@
 Bean Scopes--SPRING:
+
 	Explicitly Specify Bean Scope:
 	
 					@Component
