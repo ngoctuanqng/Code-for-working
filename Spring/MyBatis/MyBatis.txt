@@ -60,32 +60,34 @@ MyBatis--SPRING:
 							);
 			
 			Tạo lớp Student trong package vn.viettuts.mapper.entity
-			package mybatis.mapper.entity;
+			
+			
+				package mybatis.mapper.entity;
 			 
-							public class Student {
-								private int id;
-								private String name;
-								private String branch;
-								private int percentage;
-								private int phone;
-								private String email;																	 
-								public Student() {
-								}																	 
-								public Student(String name, String branch, int percentage, int phone, String email) {
-									super();
-									this.name = name;
-									this.branch = branch;
-									this.percentage = percentage;
-									this.phone = phone;
-									this.email = email;
-								}																	 
-							   // các setter và getter																		 
-								@Override
-								public String toString() {
-									return getClass().getName() + "[" + "id = " + id + ", name = " + name + ", branch = " + branch 
-											+ ", percentage = " + percentage  + ", phone = " + phone  + ", email = " + email + "]"; 
-								}
-							}
+				public class Student {
+					private int id;
+					private String name;
+					private String branch;
+					private int percentage;
+					private int phone;
+					private String email;																	 
+					public Student() {
+					}																	 
+					public Student(String name, String branch, int percentage, int phone, String email) {
+						super();
+						this.name = name;
+						this.branch = branch;
+						this.percentage = percentage;
+						this.phone = phone;
+						this.email = email;
+					}																	 
+				   // các setter và getter																		 
+					@Override
+					public String toString() {
+						return getClass().getName() + "[" + "id = " + id + ", name = " + name + ", branch = " + branch 
+								+ ", percentage = " + percentage  + ", phone = " + phone  + ", email = " + email + "]"; 
+					}
+				}
 																
 			Tạo file cấu hình MyBatis SqlMapConfig.xml trong resources
 				

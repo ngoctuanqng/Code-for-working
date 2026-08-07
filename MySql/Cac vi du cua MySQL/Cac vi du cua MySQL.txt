@@ -1,0 +1,403 @@
+--- MySQL ALTER Table
+
+	Ví dụ 1
+	
+		ALTER TABLE cus_tbl  
+		ADD cus_age varchar(40) NOT NULL;
+		
+	Ví dụ 2
+	
+		ALTER TABLE cus_tbl  
+		ADD cus_address varchar(100) NOT NULL  
+		AFTER cus_surname,  
+		ADD cus_salary int(100) NOT NULL  
+		AFTER cus_age ;
+		
+	Ví dụ 3
+	
+		ALTER TABLE cus_tbl  
+		MODIFY cus_surname varchar(50) NULL;
+	
+	Ví dụ 4
+	
+		ALTER TABLE cus_tbl  
+		DROP COLUMN cus_address;
+	
+	Ví dụ 5
+	
+		ALTER TABLE  cus_tbl  
+		CHANGE COLUMN cus_surname cus_title  
+		varchar(20) NOT NULL;
+		
+	Ví dụ 6
+	
+		ALTER TABLE cus_tbl  
+		RENAME TO cus_table;
+	
+	Ví dụ 7
+	
+		ALTER TABLE cus_tbl  
+		ADD cus_address varchar(100) NOT NULL  
+		AFTER cus_surname,  
+		ADD cus_salary int(100) NOT NULL  
+		AFTER cus_age ;
+	
+	Ví dụ 8
+	
+		ALTER TABLE cus_tbl  
+		MODIFY cus_surname varchar(50) NULL;
+	
+	Ví dụ 9
+	
+		ALTER TABLE cus_tbl  
+		DROP COLUMN cus_address;
+	
+	Ví dụ 10
+	
+		ALTER TABLE  cus_tbl  
+		CHANGE COLUMN cus_surname cus_title  
+		varchar(20) NOT NULL;
+	
+	Ví dụ 11
+	
+		ALTER TABLE cus_tbl  
+		RENAME TO cus_table;	
+
+--- MySQL DROP Database
+	
+	Ví dụ 1
+	
+		DROP DATABASE mytestdb_copy;
+				
+--- MySQL DROP Table
+	
+	Ví dụ 1
+	
+		mysql> DROP TABLE  orders;
+
+--- MySQL INSERT Statement
+
+	CREATE TABLE People(  
+		id int NOT NULL AUTO_INCREMENT,  
+		name varchar(45) NOT NULL,  
+		occupation varchar(35) NOT NULL,  
+		age int,  
+		PRIMARY KEY (id)  
+	);
+	
+	Ví dụ 1
+	
+		INSERT INTO People VALUES  
+		(102, 'Joseph', 'Developer', 30),  
+		(103, 'Mike', 'Leader', 28),  
+		(104, 'Stephen', 'Scientist', 45);
+	
+	Ví dụ 2
+	
+		INSERT INTO People (name, occupation)   
+		VALUES ('Stephen', 'Scientist'), ('Bob', 'Actor');
+
+--- MySQL UPDATE Query
+	
+	Ví dụ 1
+	
+		UPDATE trainer    
+		SET email = 'mike@tutorialandexamples.com'    
+		WHERE course_name = 'Java';
+
+--- MySQL DELETE Statement
+	
+	Ví dụ 1
+	
+		mysql> DELETE FROM Employees WHERE emp_id=107;
+	
+	Ví dụ 2
+	
+		mysql> DELETE FROM Employees ORDER BY name LIMIT 3;
+	
+	Ví dụ 3
+	
+		mysql> DELETE Employees, Payment FROM Employees   
+		INNER JOIN Payment      
+		ON Employees.emp_id = Payment.emp_id      
+		WHERE Employees.emp_id = 102;
+
+--- MySQL Add/Delete Column
+	
+	ALTER TABLE Test   
+	ADD COLUMN Branch VARCHAR(30) DEFAULT NULL After Name,  
+	ADD COLUMN Email VARCHAR(20) DEFAULT NULL AFTER Phone_number;
+		
+	ALTER TABLE Test  
+	DROP COLUMN Mobile_number,  
+	DROP COLUMN Email;
+	
+--- MySQL View
+	
+	Ví dụ 1
+	
+		CREATE VIEW trainer AS    
+		
+		SELECT course_name, trainer     
+		FROM courses;
+		
+		SELECT * FROM trainer;
+	
+	Ví dụ 2
+	
+		ALTER VIEW trainer AS    
+		SELECT id, course_name, trainer  
+		FROM courses;
+		
+	Ví dụ 3
+	
+		DROP VIEW trainer;
+	
+	Ví dụ 4
+	
+		CREATE VIEW Trainer       
+		AS SELECT c.course_name, c.trainer, t.email       
+		FROM courses c, contact t   
+		WHERE c.id = t.id;	
+	
+--- MySQL ORDER BY Clause
+	
+	Ví dụ 1
+	
+		SELECT officer_name, address  
+		FROM officers  
+		WHERE officer_id < 5  
+		ORDER BY officer_name DESC, address ASC;
+
+--- MySQL GROUP BY Clause
+
+	Ví dụ 1
+	
+		SELECT address, COUNT(*)  
+		FROM   officers   
+		GROUP BY address;
+		
+	Ví dụ 2
+	
+		SELECT emp_name, SUM(working_hours) AS "Total working hours"  
+		FROM employees  
+		GROUP BY emp_name;
+		
+	Ví dụ 3
+	
+		SELECT emp_name, MIN(working_hours) AS "Minimum working hour"  
+		FROM employees  
+		GROUP BY emp_name;
+		
+	Ví dụ 4
+	
+		SELECT emp_name, AVG(working_hours) AS "Average working hour"  
+		FROM employees  
+		GROUP BY emp_name;
+
+--- MySQL HAVING Clause
+
+	Ví dụ 1
+	
+		SELECT emp_name, SUM(working_hours) AS "Total working hours"  
+		FROM employees  
+		GROUP BY emp_name  
+		HAVING SUM(working_hours) > 5;
+
+--- MySQL Count() Function
+
+	Ví dụ 1
+	
+		mysql> SELECT COUNT(emp_name) FROM employees;
+	
+	Ví dụ 2
+	
+		mysql> SELECT COUNT(*) FROM employees WHERE emp_age>32;
+	
+	Ví dụ 3
+	
+		mysql> SELECT COUNT(DISTINCT emp_age) FROM employees;
+	
+	Ví dụ 4
+	
+		mysql> SELECT emp_name, city, COUNT(*) FROM employees GROUP BY city;
+	
+	Ví dụ 5
+	
+		mysql> SELECT emp_name, emp_age, COUNT(*) FROM employees   
+		GROUP BY emp_age   
+		HAVING COUNT(*)>=2   
+		ORDER BY COUNT(*);
+
+--- MySQL sum() function
+	
+	Ví dụ 1
+	
+		mysql> SELECT SUM(working_hours) AS "Total working hours" FROM employees WHERE working_hours>=12;
+	
+	Ví dụ 2
+	
+		mysql> SELECT emp_id, emp_name, occupation, SUM(working_hours) AS "Total working hours" FROM employees GROUP BY occupation;
+	
+	Ví dụ 3
+	
+		mysql> SELECT emp_id, emp_name, occupation,   
+		SUM(working_hours) Total_working_hours   
+		FROM employees   
+		GROUP BY occupation   
+		HAVING SUM(working_hours)>24;
+	
+	Ví dụ 4
+	
+		mysql> SELECT emp_name, occupation,   
+		SUM(DISTINCT working_hours) Total_working_hours  
+		FROM employees   
+		GROUP BY occupation;
+		
+--- MySQL avg() function
+	
+	Ví dụ 1
+	
+		mysql> SELECT AVG(working_hours) Avg_working_hours FROM employees WHERE working_hours>=12;
+	
+	Ví dụ 2
+	
+		mysql> SELECT emp_name, occupation, AVG(working_hours) Avg_working_hours FROM employees GROUP BY occupation;
+	
+	Ví dụ 3
+	
+		mysql> SELECT emp_name, occupation,   
+		AVG(working_hours) Avg_working_hours   
+		FROM employees   
+		GROUP BY occupation   
+		HAVING AVG(working_hours)>9;
+	
+	Ví dụ 4
+	
+		mysql> SELECT emp_name, occupation,   
+		AVG(DISTINCT working_hours) Avg_working_hours  
+		FROM employees  
+		GROUP BY occupation;
+
+--- MySQL MAX() Function
+	
+	Ví dụ 1
+	
+		mysql> SELECT MAX(income) AS "Maximum_Income"   
+		FROM employees   
+		WHERE emp_age > 35;
+	
+	Ví dụ 2
+	
+		mysql> SELECT emp_age, MAX(income) AS "Maximum Income"   
+		FROM employees   
+		GROUP BY emp_age;
+	
+	Ví dụ 3
+	
+		mysql> SELECT city, MAX(income) AS "Maximum Income"   
+		FROM employees   
+		GROUP BY city  
+		HAVING MAX(income) >= 200000;
+	
+	Ví dụ 4
+	
+		mysql> SELECT city, MAX(DISTINCT income) AS "Maximum Income"   
+		FROM employees   
+		GROUP BY city;
+	
+	Ví dụ 5
+	
+		mysql> SELECT * FROM employees WHERE   
+		emp_age = (SELECT MAX(emp_age) FROM employees);
+
+--- MySQL first function
+	
+	Ví dụ 1
+	
+		SELECT officer_name   
+		FROM officers  
+		LIMIT 2;
+
+--- MySQL last function
+	
+	Ví dụ 1
+	
+		SELECT officer_name   
+		FROM officers  
+		ORDER BY officer_name DESC  
+		LIMIT 1;
+
+--- MySQL CONCAT() Function
+	
+	Ví dụ 1
+	
+		select concat('java','t','point');
+
+--- MySQL Create Database
+	
+	Ví dụ 1
+	
+		mysql> CREATE DATABASE employeesdb;
+		mysql> SHOW DATABASES;
+
+--- MySQL CREATE TABLE
+	
+	Ví dụ 1
+	
+		mysql> CREATE TABLE employee_table(  
+			id int NOT NULL AUTO_INCREMENT,  
+			name varchar(45) NOT NULL,  
+			occupation varchar(35) NOT NULL,  
+			age int NOT NULL,  
+			PRIMARY KEY (id)  
+		);
+
+--- MySQL SELECT Database
+	
+	Ví dụ 1
+	
+		USE customers;
+
+--- MySQL LIKE condition
+	
+	Ví dụ 1
+	
+		SELECT officer_name  
+		FROM officers  
+		WHERE address LIKE 'Luck%';
+	
+	Ví dụ 2
+	
+		SELECT officer_name  
+		FROM officers  
+		WHERE address LIKE 'Luc_now';
+	
+	Ví dụ 3
+	
+		SELECT officer_name  
+		FROM officers  
+		WHERE address NOT LIKE 'Luck%';
+
+--- MySQL JOINS
+	
+	Ví dụ 1
+	
+		SELECT officers.officer_name, officers.address, students.course_name  
+		FROM officers   
+		INNER JOIN students  
+		ON officers.officer_id = students.student_id;
+	
+	Ví dụ 2
+	
+		SELECT columns  
+		FROM table1  
+		LEFT [OUTER] JOIN table2  
+		ON table1.column = table2.column;
+	
+	Ví dụ 3
+	
+		SELECT columns  
+		FROM table1  
+		RIGHT [OUTER] JOIN table2  
+		ON table1.column = table2.column;

@@ -2,9 +2,10 @@ Microservices là gì?--MICROSERVICE:
 
 	Vậy Microservices là gì nhỉ?--Microservices là gì:
 			
-			Thực tế có nhiều định nghĩa khác nhau đối với Microservices nhưng hiểu theo cách đơn giản thì, microservice là một kiếu kiến trúc
-			phần mềm. Các module trong phần mềm này được chia thành các service rất
-			nhỏ (microservice). Mỗi service sẽ được đặt trên một server riêng -> dễ dàng để nâng cấp và scale ứng dụng.
+		Thực tế có nhiều định nghĩa khác nhau đối với Microservices nhưng hiểu theo cách 
+		đơn giản thì, microservice là một kiếu kiến trúc phần mềm. Các module trong phần 
+		mềm này được chia thành các service rất nhỏ (microservice). Mỗi service sẽ được 
+		đặt trên một server riêng -> dễ dàng để nâng cấp và scale ứng dụng.
 	
 	Monolith Application là gì?--Microservices là gì:
 	
@@ -18,16 +19,17 @@ Microservices là gì?--MICROSERVICE:
 				
 				Đó chính là những đặc điểm của Monolith Application
 			
-			Các ứng dụng Monolith thường rất lớn - thường sẽ có size hơn 100.000 dòng code. Trong một số trường hợp
-			thậm chí có hơn một triệu dòng code.
+			Các ứng dụng Monolith thường rất lớn - thường sẽ có size hơn 100.000 dòng 
+			code. Trong một số trường hợp thậm chí có hơn một triệu dòng code.
 			
-			Khi xây dựng phần mềm theo kiến trúc monolith (một khối). Toàn bộ các module (view, business, database, report)
-			đều được gom chung vào một project lớn. Khi deploy, chúng ta sẽ quăng khối code này lên server
-			và config để nó chạy.
+			Khi xây dựng phần mềm theo kiến trúc monolith (một khối). Toàn bộ các module 
+			(view, business, database, report) đều được gom chung vào một project lớn. Khi 
+			deploy, chúng ta sẽ quăng khối code này lên server và config để nó chạy.
 			
-			Kiến trúc này hoạt động khá ngon vì nó đơn giản, dễ code. Tuy nhiên, khi phần mềm trở nên lớn và phức tạp thì nó
-			lại dần bộc lộ nhược điểm. Do các module đóng với nhau thành một bánh, khi muốn nâng cấp
-			một module, ta phải deploy lại toàn bộ code (người dùng cuối sẽ không sử dụng được toàn bộ các chức năng của hệ
+			Kiến trúc này hoạt động khá ngon vì nó đơn giản, dễ code. Tuy nhiên, khi phần 
+			mềm trở nên lớn và phức tạp thì nó lại dần bộc lộ nhược điểm. Do các module 
+			đóng với nhau thành một bánh, khi muốn nâng cấp một module, ta phải deploy lại 
+			toàn bộ code (người dùng cuối sẽ không sử dụng được toàn bộ các chức năng của hệ
 			thống khi deploy); khi muốn phục vụ nhiều người dùng, ta phải nâng cấp server...
 			
 			Các thử thách đối với Monolith Application
@@ -39,29 +41,41 @@ Microservices là gì?--MICROSERVICE:
 				Thích ứng với thực tiễn phát triển hiện đại
 				
 				...
-			Một dịch vụ gọi taxi qua di động, với business logic được thể hiện bởi các khối dịch vụ, đối tượng cho từng vùng
-			nghiệp vụ (domain objects) và các sự kiện (events: khách đặt xe, khách hủy xe, xe nhận
-			khách...)Xung quanh lõi là bộ chuyển đổi (adapter) ví dụ như kết nối vào cơ sở dữ liệu, gửi nhận thông điệp
+			Một dịch vụ gọi taxi qua di động, với business logic được thể hiện bởi các 
+			khối dịch vụ, đối tượng cho từng vùng nghiệp vụ (domain objects) và các sự 
+			kiện (events: khách đặt xe, khách hủy xe, xe nhận khách...)Xung quanh lõi là 
+			bộ chuyển đổi (adapter) ví dụ như kết nối vào cơ sở dữ liệu, gửi nhận thông điệp
 			(messaging), web service hoặc giao diện web front end.
 			
-			Trong nhiều trường hợp, người ta có thể xây dựng các services độc lập nhưng chúng lại được triển khai chung. Mặc
-			dù có cấu trúc module hóa hợp lý, nhưng ứng dụng kiểu này sẽ đóng gói và cài đặt thành một
-			khối (monolithic). Mã chạy cụ thể tùy thuộc vào ngôn ngữ lập trình hay thư viện framework.
+			Trong nhiều trường hợp, người ta có thể xây dựng các services độc lập nhưng 
+			chúng lại được triển khai chung. Mặc dù có cấu trúc module hóa hợp lý, nhưng 
+			ứng dụng kiểu này sẽ đóng gói và cài đặt thành một khối (monolithic). Mã chạy 
+			cụ thể tùy thuộc vào ngôn ngữ lập trình hay thư viện framework.
 			
-			Tương tự như ứng dụng monolithic, những services này to và phức tạp lên theo thời gian vì thường xuyên thêm các
-			tính năng. Và thế là những ứng dụng này lại trở thành một mớ các services monolithic, cũng
-			không còn khác mấy so với kiến trúc một khối thông thường. Hình trên thể hiện một ứng dụng gồm nhiều services. Những
+			Tương tự như ứng dụng monolithic, những services này to và phức tạp lên theo 
+			thời gian vì thường xuyên thêm các tính năng. Và thế là những ứng dụng này 
+			lại trở thành một mớ các services monolithic, cũng không còn khác mấy so với 
+			kiến trúc một khối thông thường. Hình trên thể hiện một ứng dụng gồm nhiều services. Những
 			services này được triển khai cùng một lúc vào 1 ứng dụng lớn. Dù bên trong có gồm các
 			services thì đây là một ứng dụng monolithic. Một số tính chất của kiến trúc một khối:
 			
 				Được thiết kế, phát triển và triển khai theo một khối duy nhất
-				Ứng dụng monolithic phức tạp và to gây khó khăn cho việc bảo trì, nâng cấp và thêm tính năng mới
+				
+				Ứng dụng monolithic phức tạp và to gây khó khăn cho việc bảo trì, nâng cấp 
+				và thêm tính năng mới
+				
 				Khó áp dụng phát triển kiểu agile
+				
 				Phải triển khai lại toàn bộ hệ thống dù chỉ cập nhật hay nâng cấp một phần
-				Mở rộng: phải mở rộng cả khối ứng dụng, gặp khó khăn nếu có các yêu cầu về tài nguyên khác nhau (ví dụ một service
-				yêu cầu thêm CPU, service khác lại yêu cầu nhiều memory)
+				
+				Mở rộng: phải mở rộng cả khối ứng dụng, gặp khó khăn nếu có các yêu cầu về tài 
+				nguyên khác nhau (ví dụ một service yêu cầu thêm CPU, service khác lại yêu 
+				cầu nhiều memory)
+				
 				Độ tin cậy: một service không ổn định có thể sập cả hệ thống
-				Khó đổi mới: ứng dụng monolithic phải sử dụng chung công nghệ nên khó thay đổi hay áp dụng công nghệ mới.
+				
+				Khó đổi mới: ứng dụng monolithic phải sử dụng chung công nghệ nên khó 
+				thay đổi hay áp dụng công nghệ mới.
 	
 	Kiến trúc dịch vụ nhỏ (Microservices Architecture)--Microservices là gì:
 	
