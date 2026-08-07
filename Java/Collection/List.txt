@@ -1,19 +1,35 @@
 	List--JAVA:				
 				
 				- Một list có thể chứa giá trị null phía trong
-				- Một danh sách được coi là rỗng nếu nó không chứa bất kỳ phần tử nào. Nếu danh sách chứa một hoặc nhiều phần tử, kể cả khi một trong số đó là null, thì danh sách đó không được coi là rỗng.
-				- List: Các phần tử trong List interface được sắp xếp có thứ tự và có thể có giá trị giống nhau.
-				- LinkedList: Là 1 cấu trúc dữ liệu lưu trữ các phần tử dưới dạng danh sách. Các phần tử trong LinkedList được sắp xếp có thứ
-							tự và có thể có giá trị giống nhau. là một lớp kế thừa lớp AbstractSequentialList và triển khai của List,
-							Queue Interface trong Collections Framework
-					Singly Linked List:	Trong Singly Linked List, mỗi node trong danh sách này được lưu trữ dữ liệu của node và con trỏ trỏ
+				
+				- Một danh sách được coi là rỗng nếu nó không chứa bất kỳ phần tử nào. Nếu 
+				danh sách chứa một hoặc nhiều phần tử, kể cả khi một trong số đó là null, 
+				thì danh sách đó không được coi là rỗng.
+				
+				- List: Các phần tử trong List interface được sắp xếp có thứ tự và có thể 
+				có giá trị giống nhau.
+				
+				- LinkedList: Là 1 cấu trúc dữ liệu lưu trữ các phần tử dưới dạng danh 
+				sách. Các phần tử trong LinkedList được sắp xếp có thứ tự và có thể có giá 
+				trị giống nhau. là một lớp kế thừa lớp AbstractSequentialList và triển khai 
+				của List, Queue Interface trong Collections Framework
+				
+					Singly Linked List:	Trong Singly Linked List, mỗi node trong danh sách này 
+										được lưu trữ dữ liệu của node và con trỏ trỏ
 										tới node tiếp theo trong danh sách
-					Doubly Linked List: Trong Double Linked List, có hai tham chiếu, đến node tiếp theo và đến node trước đó.										
-				- ArrayList: Là kiểu danh sách sử dụng cấu trúc mảng để lưu trữ phần tử. Thứ tự các phần tử dựa theo thứ tự lúc thêm vào và
-						   giá trị của các phần tử này có thể trùng nhau.
-						   Được sử dụng như một mảng động để lưu trữ các phần tử. Là một lớp kế thừa từ AbtractList và implements List
-						   interface trong collections framework
+										
+					Doubly Linked List: Trong Double Linked List, có hai tham chiếu, đến node 
+										tiếp theo và đến node trước đó.
+										
+				- ArrayList: Là kiểu danh sách sử dụng cấu trúc mảng để lưu trữ phần tử. Thứ 
+							 tự các phần tử dựa theo thứ tự lúc thêm vào và
+						     giá trị của các phần tử này có thể trùng nhau.
+						     Được sử dụng như một mảng động để lưu trữ các phần tử. Là một lớp 
+							 kế thừa từ AbtractList và implements List interface trong collections 
+							 framework
+						   
 				- AbstractList: kế thừa từ AbstractCollection và implements hầu hết List interface
+				
 				- List khi chuyển sang Javascript sẽ là một Array.
 				
 				List<String> additionalFruits = List.of("Apple", "Banana", "Orange");
@@ -21,29 +37,29 @@
 		Khởi tạo:			
 		
 /***		
-							List<String> list1 = new ArrayList<>();
-							list1.add("Apple");
-							list1.add("Banana");
-							
-							List<String> list2 = Arrays.asList("Apple", "Banana", "Orange");
-							
-							List<String> list3 = List.of("Apple", "Banana", "Orange");
-							
-							List<String> list4 = Lists.newArrayList("Apple", "Banana", "Orange");
-							
-							List<String> list5 = new ArrayList<>(Arrays.asList("Apple", "Banana", "Orange"));
-							
-							List<String> list6 = new LinkedList<>();
-							list6.add("Apple");
-							list6.add("Banana");
-							
-							List<String> list7 = new CopyOnWriteArrayList<>();
-							list7.add("Apple");
-							list7.add("Banana");
-							
-							List<String> list8 = new ArrayList<>(List.of("Apple", "Banana", "Orange"));
-							
-							List<String> emptyList = Collections.emptyList();
+				List<String> list1 = new ArrayList<>();
+				list1.add("Apple");
+				list1.add("Banana");
+				
+				List<String> list2 = Arrays.asList("Apple", "Banana", "Orange");
+				
+				List<String> list3 = List.of("Apple", "Banana", "Orange");
+				
+				List<String> list4 = Lists.newArrayList("Apple", "Banana", "Orange");
+				
+				List<String> list5 = new ArrayList<>(Arrays.asList("Apple", "Banana", "Orange"));
+				
+				List<String> list6 = new LinkedList<>();
+				list6.add("Apple");
+				list6.add("Banana");
+				
+				List<String> list7 = new CopyOnWriteArrayList<>();
+				list7.add("Apple");
+				list7.add("Banana");
+				
+				List<String> list8 = new ArrayList<>(List.of("Apple", "Banana", "Orange"));
+				
+				List<String> emptyList = Collections.emptyList();
 ***/							
 							
 		- add:				

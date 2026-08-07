@@ -1,18 +1,22 @@
-When we work with Java's HashMap, one common problem occurs that is dealing with missing keys. If we try to fetch a value
-for a key that does not exist, we get "null" and sometimes it may throw NullPointerException.
+When we work with Java's HashMap, one common problem occurs that is 
+dealing with missing keys. If we try to fetch a value for a key that 
+does not exist, we get "null" and sometimes it may throw NullPointerException.
 
 To solve this problem, Java provides a method called getOrDefault() of the HashMap class.
 
 What is getOrDefault() in HashMap?
 	
-	This method getOrDefault(Object key, V defaultValue) retrieves the value associated with a given key if it exists
-	in the map. If the key does not exist, it returns a default value provided by the user. This is helpful when
+	This method getOrDefault(Object key, V defaultValue) retrieves the value 
+	associated with a given key if it exists in the map. If the key does not 
+	exist, it returns a default value provided by the user. This is helpful when
 	we work with maps that might not always contain every possible key.
 	
 Syntax of getOrDefault() Method
 	
 	public V getOrDefault(Object key, V defaultValue)
-		V: It represents the type of the value that the map holds. It is a generic type and it will match the type of the values in the HashMap.
+	
+		V: It represents the type of the value that the map holds. It is a 
+		generic type and it will match the type of the values in the HashMap.
 		
 		key: The key whose associated value is to be returned.
 		

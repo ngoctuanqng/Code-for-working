@@ -1,16 +1,17 @@
 	Set--JAVA:				
-							Set: Các phần tử trong Set là duy nhất, không chứa các phần tử chùng lặp. Là một dạng riêng của
-							Set interface, trong đó các giá trị của các phần tử mặc định được sắp xếp tăng dần.
-							
-							AbstractSet: extends AbstractCollection và implements hầu hết Set interface
-							
-							HashSet: Extends AbstractSet để sử dụng với bảng băm.
-							
-							TreeSet: Implements một tập hợp được lưu trữ bởi tree. Extends AbstractSet
-							
-							Set khi chuyển sang Javascript sẽ là một Array.
-							
-							Set<String> set = new HashSet<>(Arrays.asList("A", "B", "C"));
+				Set: Các phần tử trong Set là duy nhất, không chứa các phần tử chùng lặp. Là một dạng riêng của
+				Set interface, trong đó các giá trị của các phần tử mặc định được sắp xếp tăng dần.
+				
+				AbstractSet: extends AbstractCollection và implements hầu hết Set interface
+				
+				HashSet: Extends AbstractSet để sử dụng với bảng băm.
+				
+				TreeSet: Implements một tập hợp được lưu trữ bởi tree. Extends AbstractSet
+				
+				Set khi chuyển sang Javascript sẽ là một Array.
+				
+				Set<String> set = new HashSet<>(Arrays.asList("A", "B", "C"));
+		
 		Khởi tạo:
 
 /***		
