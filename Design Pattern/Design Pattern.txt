@@ -1,0 +1,3199 @@
+Note:
+
+	turnOnTVCommand = new TurnOnCommand(tv);
+	
+		Bạn đang khai báo một biến tham chiếu có kiểu là Command.
+		
+		Điều này nghĩa là biến đó chỉ có thể trỏ tới các đối tượng thuộc 
+		những class nào implements Command. Nó giống như bạn nói: "Tôi có 
+		một cái remote, remote này chỉ điều khiển được những thiết bị tuân 
+		theo giao diện Command."
+		
+		turnOnTVCommand (kiểu tham chiếu là Command) đang trỏ tới một đối 
+		tượng cụ thể của class TurnOnCommand.
+		
+		Trong Java, biến tham chiếu (reference variable) là một biến không 
+		trực tiếp chứa đối tượng, mà chỉ lưu địa chỉ tham chiếu đến vùng nhớ 
+		nơi đối tượng thực sự đang tồn tại trên heap.
+
+		Cách hiểu đơn giản
+			
+			Khi bạn tạo đối tượng bằng new, đối tượng được cấp phát trên heap memory.
+
+			Biến tham chiếu chỉ giữ địa chỉ của đối tượng đó, chứ không phải 
+			bản thân đối tượng.
+
+			Vì vậy, nhiều biến tham chiếu có thể cùng trỏ tới một đối tượng duy nhất.	
+
+--- Abstract Factory
+
+	Abstract Factory Pattern là một creational design pattern (mẫu thiết kế khởi tạo) 
+	dùng để tạo ra một nhóm đối tượng liên quan hoặc phụ thuộc lẫn nhau mà không cần 
+	chỉ định lớp cụ thể của chúng.
+
+	Ý tưởng chính
+	
+		Thay vì khởi tạo trực tiếp đối tượng, ta định nghĩa một interface (Factory)
+		để tạo ra các đối tượng thuộc cùng một "họ" (family).
+
+	The Abstract Factory Pattern is one of the creational design patterns that
+	provides an interface for creating families of related or dependent objects
+	without specifying their concrete classes and implementation, in simpler
+	terms the Abstract Factory Pattern is a way of organizing how you create
+	groups of things that are related to each other.
+	
+	What is the Abstract Factory Pattern?
+	
+		The Abstract Factory Pattern is a way of organizing how you create groups
+		of things that are related to each other. It provides a set of rules or
+		instructions that let you create different types of things without knowing
+		exactly what those things are. This helps you keep everything organized and
+		lets you switch between different types easily.
+		
+		Abstract Factory pattern is almost same as Factory Pattern and is considered
+		as another layer of abstraction over factory pattern.
+		
+		Abstract Factory patterns work around a super-factory which creates other factories.
+		
+		At runtime, the abstract factory is coupled with any desired concrete factory
+		which can create objects of the desired type.
+	
+	Components of Abstract Factory Pattern
+	
+		Abstract Factory:
+		
+			Abstract Factory provides a high-level blueprint that defines rules for 
+			creating families of related object without specifying their concrete classes.
+			
+			It provides a way such that concrete factories follow a common interface, 
+			providing consistent way to produce related set of objects.
+			
+		Concrete Factories:
+		
+			Concrete Factories implement the rules specified by the abstract factory. It 
+			contain the logic for creating specific instances of objects within a family.
+			
+			Also multiple concrete factories can exist, each produce a distinct family 
+			of related objects.
+		Abstract Products:
+		
+			Abstract Products represents a family of related objects by defining a 
+			set of common methods or properties.
+			
+			It acts as an abstract or interface type that all concrete products within 
+			a family must follow to and provides a unified way for concrete products to 
+			be used interchangeably.
+			
+		Concrete Products:
+		
+			They are the actual instances of objects created by concrete factories.
+			
+			They implement the methods declared in the abstract products, ensuring 
+			consistency within a family and belong to a specific category or family 
+			of related objects.
+			
+		Client:
+		
+			Client utilizes the abstract factory to create families of objects without 
+			specifying their concrete types and interacts with objects through abstract 
+			interfaces provided by abstract products.
+	
+	Example of Abstract Factory Design Pattern
+	
+		// Abstract Factory Interface
+		interface CarFactory {
+			Car createCar();
+			CarSpecification createSpecification();
+		}
+
+		// Concrete Factory for North America Cars
+		class NorthAmericaCarFactory implements CarFactory {
+			public Car createCar() {
+				return new Sedan();
+			}
+
+			public CarSpecification createSpecification() {
+				return new NorthAmericaSpecification();
+			}
+		}
+
+		// Concrete Factory for Europe Cars
+		class EuropeCarFactory implements CarFactory {
+			public Car createCar() {
+				return new Hatchback();
+			}
+
+			public CarSpecification createSpecification() {
+				return new EuropeSpecification();
+			}
+		}
+
+		// Abstract Product Interface for Cars
+		interface Car {
+			void assemble();
+		}
+
+		// Abstract Product Interface for Car Specifications
+		interface CarSpecification {
+			void display();
+		}
+
+		// Concrete Product for Sedan Car
+		class Sedan implements Car {
+			public void assemble() {
+				System.out.println("Assembling Sedan car.");
+			}
+		}
+
+		// Concrete Product for Hatchback Car
+		class Hatchback implements Car {
+			public void assemble() {
+				System.out.println("Assembling Hatchback car.");
+			}
+		}
+
+		// Concrete Product for North America Car Specification
+		class NorthAmericaSpecification implements CarSpecification {
+			public void display() {
+				System.out.println("North America Car Specification: Safety features compliant with local regulations.");
+			}
+		}
+
+		// Concrete Product for Europe Car Specification
+		class EuropeSpecification implements CarSpecification {
+			public void display() {
+				System.out.println("Europe Car Specification: Fuel efficiency and emissions compliant with EU standards.");
+			}
+		}
+
+
+		// Client Code
+		public class CarFactoryClient {
+			public static void main(String[] args) {
+				// Creating cars for North America
+				CarFactory northAmericaFactory = new NorthAmericaCarFactory();
+				Car northAmericaCar = northAmericaFactory.createCar();
+				CarSpecification northAmericaSpec = northAmericaFactory.createSpecification();
+
+				northAmericaCar.assemble();
+				northAmericaSpec.display();
+
+				// Creating cars for Europe
+				CarFactory europeFactory = new EuropeCarFactory();
+				Car europeCar = europeFactory.createCar();
+				CarSpecification europeSpec = europeFactory.createSpecification();
+
+				europeCar.assemble();
+				europeSpec.display();
+			}
+		}
+		
+		Output
+		
+			Assembling Sedan car.			
+			North America Car Specification: Safety features compliant with local regulations.
+			Assembling Hatchback car.
+			Europe Car Specification: Fuel efficiency and emissions compliant wit...
+			
+	Benefits of using Abstract Factory Pattern
+	
+		The Abstract Factory pattern separates the creation of objects, so clients don’t 
+		need to know specific classes.
+		
+		Clients interact with objects through abstract interfaces, keeping class names 
+		hidden from client code.
+		
+		Changing the factory allows for different product configurations, as all related 
+		products change together.
+		
+		The pattern ensures that an application uses objects from only one family at a 
+		time for better compatibility.
+	
+	Challenges of using Abstract Factory Pattern
+	
+		The Abstract Factory pattern can add unnecessary complexity to simpler projects 
+		with multiple factories and interfaces.
+		
+		Adding new product types may require changes to both concrete factories and the 
+		abstract factory interface, impacting existing code.
+		
+		Introducing more factories and product families can quickly increase the number of 
+		classes, making code management difficult in smaller projects.
+		
+		It may violate the Dependency Inversion Principle if client code depends directly on 
+		concrete factories rather than abstract interfaces.
+	
+	When to use Abstract Factory Pattern
+	
+		When your system requires multiple families of related products and you want 
+		to ensure compatibility between them.
+		
+		When you need flexibility and extensibility, allowing for new product variants to 
+		be added without changing existing client code.
+		
+		When you want to encapsulate the creation logic, making it easier to modify or extend 
+		the object creation process without affecting the client.
+		
+		When you aim to maintain consistency across different product families, ensuring a 
+		uniform interface for the products.
+	
+	When not to use Abstract Factory Pattern
+	
+		The product families are unlikely to change, as it may add unnecessary complexity.
+		
+		When your application only requires single, independent objects and isn't concerned 
+		with families of related products.
+		
+		When overhead of maintaining multiple factories outweighs the benefits, particularly 
+		in smaller applications.
+		
+		When simpler solutions, like the Factory Method or Builder pattern, if they meet your 
+		needs without adding the complexity of the Abstract Factory pattern.
+		
+--- Adapter
+
+	Adapter Pattern là một structural design pattern (mẫu thiết kế cấu trúc) 
+	dùng để chuyển đổi giao diện của một lớp thành một giao diện khác mà 
+	client mong đợi.
+
+	Ý tưởng chính
+	
+		Khi có một lớp với interface không tương thích với hệ thống hiện tại, 
+		ta tạo ra một Adapter để "bọc" lớp đó và cung cấp giao diện phù hợp.
+
+		Nó giống như một bộ chuyển đổi ổ cắm điện: thiết bị dùng phích cắm kiểu
+		A nhưng ổ cắm là kiểu B → Adapter giúp chúng kết nối được.
+
+	The Adapter Design Pattern in Java acts as a bridge between two incompatible 
+	interfaces, allowing them to work together. It is commonly used when you want 
+	to integrate a legacy system or third-party library with your application without
+	modifying their code. This pattern promotes reusability and flexibility. In this 
+	article, we’ll explore its concept, benefits, and implementation in Java.
+	
+	What is Adapter Design Pattern in Java?
+		
+		The Adapter design pattern is a structural pattern that allows the interface
+		of an existing class to be used as another interface. It acts as a bridge between 
+		two incompatible interfaces, making them work together. This pattern involves a 
+		single class, known as the adapter, which is responsible for joining functionalities 
+		of independent or incompatible interfaces.
+		
+		Let's understand this concept using a simple example:
+			
+			Let's say you have two friends, one who speaks only English and another 
+			who speaks only French. You want them to communicate, but there's a language 
+			barrier.
+				
+				You act as an adapter, translating messages between them. Your role 
+				allows the English speaker to convey messages to you, and you convert 
+				those messages into French for the other person.
+				
+				In this way, despite the language difference, your adaptation enables 
+				smooth communication between your friends.
+				
+				This role you play is similar to the Adapter design pattern, bridging 
+				the gap between incompatible interfaces.
+	
+	Components of Adapter Design Pattern in Java
+	
+		Target Interface
+		
+			Description
+			
+				Defines the interface expected by the client. It represents the set of 
+				operations that the client code can use.
+			
+			Role
+			
+				It's the common interface that the client code interacts with.
+		Adaptee
+		
+			Description
+			
+				The existing class or system with an incompatible interface that needs to 
+				be integrated into the new system.
+			
+			Role
+			
+				It's the class or system that the client code cannot directly use due to 
+				interface mismatches.
+		
+		Adapter
+		
+			Description
+			
+				A class that implements the target interface and internally uses an instance 
+				of the adaptee to make it compatible with the target interface.
+			
+			Role
+			
+				It acts as a bridge, adapting the interface of the adaptee to match the 
+				target interface.
+		
+		Client
+		
+			Description
+			
+				The code that uses the target interface to interact with objects. It remains 
+				unaware of the specific implementation details of the adaptee and the adapter.
+			
+			Role
+			
+				It's the code that benefits from the integration of the adaptee into the 
+				system through the adapter.
+	
+	Adapter Design Pattern Example in Java
+		
+		Problem Statement
+			Let's consider a scenario where we have an existing system that uses a 
+			LegacyPrinter class with a method named printDocument() which we want to 
+			adapt into a new system that expects a Printer interface with a method named 
+			print(). We'll use the Adapter design pattern to make these two interfaces compatible.
+		
+		// Target Interface
+		interface Printer {
+			void print();
+		}
+
+		// Adaptee
+		class LegacyPrinter {
+			public void printDocument() {
+				System.out.println("Legacy Printer is printing a document.");
+			}
+		}
+
+		// Adapter
+		class PrinterAdapter implements Printer {
+			private LegacyPrinter legacyPrinter;
+
+			public PrinterAdapter() {
+				this.legacyPrinter = new LegacyPrinter();
+			}
+
+			@Override
+			public void print() {
+				legacyPrinter.printDocument();
+			}
+		}
+
+		// Client Code
+		public class Client {
+			public static void clientCode(Printer printer) {
+				printer.print();
+			}
+
+			public static void main(String[] args) {
+				// Using the Adapter
+				PrinterAdapter adapter = new PrinterAdapter();
+				clientCode(adapter);
+			}
+		}
+		
+		Biến một interface không tương thích thành interface mà client mong muốn
+		
+		Output
+		
+			Legacy Printer is printing a document.
+	
+	How Adapter Design Pattern works?
+	
+		Client Request
+		
+			The client initiates a request by calling a method on the adapter 
+			using the target interface.
+		
+		Adapter Translation
+		
+			The adapter translates or maps the client's request into a form that 
+			the adaptee understands, using the adaptee's interface.
+		
+		Adaptee Execution
+		
+			The adaptee performs the actual work based on the translated request 
+			from the adapter.
+		
+		Result to Client
+		
+			The client receives the results of the call, remaining unaware of the 
+			adapter's presence or the specific details of the adaptee.
+	
+	Why do we need Adapter Design Pattern?
+		
+		Integration of Existing Code
+			
+			Scenario
+			
+				When you have existing code or components with interfaces that are 
+				incompatible with the interfaces expected by new code or systems.
+			
+			Need
+			
+				The Adapter pattern allows you to integrate existing components seamlessly 
+				into new systems without modifying their original code.
+		
+		Reuse of Existing Functionality
+		
+			Scenario
+			
+				When you want to reuse classes or components that provide valuable 
+				functionality but don't conform to the desired interface.
+			
+			Need
+			
+				The Adapter pattern enables you to reuse existing code by creating an 
+				adapter that makes it compatible with the interfaces expected by new code.
+		
+		Interoperability
+		
+			Scenario
+				
+				When you need to make different systems or components work together, 
+				especially when they have different interfaces.
+			
+			Need
+			
+				The Adapter pattern acts as a bridge, allowing systems with incompatible 
+				interfaces to collaborate effectively.
+		
+		Client-Server Communication
+			
+			Scenario
+			
+				When building client-server applications, and the client expects a 
+				specific interface while the server provides a different one.
+			
+			Need
+			
+				Adapters help in translating requests and responses between client and 
+				server, ensuring smooth communication despite interface differences.
+		
+		Third-Party Library Integration
+		
+			Scenario
+				
+				When incorporating third-party libraries or APIs into a project, and 
+				their interfaces do not match the rest of the system.
+			
+			Need
+			
+				Adapters make it possible to use external components by providing a 
+				compatible interface for the rest of the application.
+	
+	When not to use Adapter Design Pattern?
+	
+		When Interfaces Are Stable
+			
+			Scenario
+			
+				If the interfaces of the existing system and the new system are stable 
+				and not expected to change frequently.
+			
+			Reason
+			
+				Adapters are most beneficial when dealing with evolving or incompatible 
+				interfaces. If the interfaces are stable, the overhead of maintaining
+				adapters might outweigh the benefits.
+		
+		When Direct Modification Is Feasible
+		
+			Scenario
+			
+				If you have control over the source code of the existing system, and it's
+				feasible to directly modify its interface to match the target interface.
+			
+			Reason
+			
+				If you can modify the existing code, direct adaptation of interfaces might be 
+				a simpler and more straightforward solution than introducing adapters.
+		
+		When Performance is Critical
+		
+			Scenario
+				
+				In performance-critical applications where the overhead introduced by the 
+				Adapter pattern is not acceptable.
+			
+			Reason
+			
+				Adapters may introduce a level of indirection and abstraction, which could have 
+				a minor impact on performance. In situations where every bit of performance 
+				matters, the Adapter pattern might not be the best choice.
+		
+		When Multiple Adapters Are Required
+		
+			Scenario
+				
+				If a system requires lot of adapters for various components, and the complexity 
+				of managing these adapters becomes difficult.
+			
+			Reason
+			
+				Managing a large number of adapters might lead to increased complexity and 
+				maintenance challenges. In such cases, reconsider the overall design or explore 
+				alternatives.
+		
+		When Adapters Introduce Ambiguity
+		
+			Scenario
+				
+				When introducing adapters leads to ambiguity or confusion in the overall system architecture.
+			
+			Reason
+			
+				If the presence of adapters makes the system design less clear or harder to 
+				understand, it may be worthwhile to explore alternative solutions that offer 
+				a clearer design.
+				
+--- Command
+
+	Command Pattern là một behavioral design pattern (mẫu thiết kế hành vi) 
+	dùng để đóng gói một yêu cầu (request) thành một đối tượng riêng biệt.
+
+	Ý tưởng chính
+	
+		Thay vì gọi trực tiếp một phương thức, ta biến lời gọi đó thành một Command object.
+
+		Command chứa thông tin về hành động cần thực hiện (receiver + operation).
+
+		Client chỉ cần gửi command, còn việc thực thi sẽ do đối tượng khác (invoker) đảm nhận.
+
+	The Command Design Pattern is a behavioral design pattern that turns a request 
+	into a stand-alone object called a command. With the help of this pattern, you
+	can capture each component of a request, including the object that owns the method, 
+	the parameters for the method, and the method itself. By doing this, you can easily 
+	pass, queue, or log requests and support operations like undo/redo.
+	
+	What is the Command Design Pattern?
+	
+		The Command Design Pattern is a behavioral design pattern that turns a request 
+		into a stand-alone object called a command. With the help of this pattern, you 
+		can capture each component of a request, including the object that owns the 
+		method, the parameters for the method, and the method itself.
+			
+			The Command Pattern encapsulates a request as an object, allowing for the 
+			separation of sender and receiver.
+			
+			Commands can be parameterized, meaning you can create different commands with 
+			different parameters without changing the invoker.
+			
+			It decouples the sender from the receiver, providing flexibility and extensibility.
+			
+			The pattern supports undoable operations by storing the state or reverse commands.
+	
+	Components of the Command Design Pattern
+		
+		Command Interface
+		
+			The Command Interface is like a rulebook that all command classes follow. It 
+			declares a common method, execute(), ensuring that every concrete command knows 
+			how to perform its specific action. It sets the standard for all commands, making 
+			it easier for the remote control to manage and execute diverse operations.
+			
+		Concrete Command Classes
+		
+			Concrete Command Classes are the specific commands, like turning on a TV or adjusting
+			the stereo volume. Each class encapsulates the details of a particular action. These 
+			classes act as executable instructions that the remote control can trigger without 
+			worrying about the small details.
+			
+		Invoker (Remote Control)
+		
+			The Invoker, often a remote control, is the one responsible for initiating command 
+			execution. It holds a reference to a command but doesn't delve into the specifics of
+			how each command works. It's like a button that, when pressed, makes things happen.
+			
+		Receiver (Devices)
+		
+			The Receiver is the device that knows how to perform the actual operation associated 
+			with a command. It could be a TV, stereo, or any other device. Receivers understand
+			the specific tasks mentioned in commands.
+			
+				If a command says, "turn on," the Receiver (device) knows precisely how to execute that action.
+				
+				The Receiver-Command relationship separates responsibilities, making it easy to
+				add new devices or commands without messing with existing functionality.
+	
+	How to implement Command Design Pattern?
+	
+		Create the Command Interface
+		
+			Define an interface or abstract class that declares the execute() method. This 
+			method will be called to carry out the action.
+			
+		Create Concrete Command Classes
+		
+			Implement the command interface in multiple classes. Each class will represent 
+			a different command and will call the appropriate method on the receiver to 
+			perform the specific action.
+			
+		Define the Receiver Class
+		
+			This class contains the actual logic that needs to be executed. The command objects 
+			will call methods on this receiver to perform actions.
+			
+		Create the Invoker Class
+		
+			The invoker triggers the command’s execute() method but doesn’t know the details 
+			of the operation. It simply knows that it needs to call the command.
+			
+		Client Uses the Command
+		
+			The client creates the concrete command objects and associates them with the 
+			receiver. It then assigns commands to the invoker, which will call them when 
+			needed.
+			
+	Command Design Pattern example
+	
+		Problem Statement
+		
+			Imagine you are tasked with designing a remote control system for various 
+			electronic devices in a smart home. The devices include a TV, a stereo, and 
+			potentially other appliances. The goal is to create a flexible remote control 
+			that can handle different types of commands for each device, such as turning 
+			devices on/off, adjusting settings, or changing channels.
+			
+	What can be the challenges while implementing this system?
+	
+		Devices can have different functionalities, so designing a remote control that can 
+		easily handle different device types with varying functionalities without becoming 
+		highly complex.
+		
+		Implementing a remote control that supports various commands without tightly coupling 
+		ensuring the remote control can execute commands for different devices without needing 
+		extensive modifications for each new command.
+		
+		Designing a system that allows users to customize the behavior of the remote control 
+		dynamically.
+		
+	How Command Pattern help to solve above challenges?
+	
+		The Command Pattern can be employed to address these challenges. It introduces a level 
+		of abstraction between the sender of a command (remote control) and the receiver of the 
+		command (electronic devices).
+		
+			The Command Pattern decouples the sender (Invoker) from the receiver (Devices).
+			
+			The remote control doesn't need to know the specific details of how each device 
+			operates; it only triggers commands.
+			
+			New devices or commands can be added without modifying existing code.
+			
+			The remote control can work with any device that implements the common command interface.
+			
+	Below is the code of above problem statement using Command Pattern
+	
+		// Command interface
+		interface Command {
+			void execute();
+		}
+
+		// Concrete command for turning a device on
+		class TurnOnCommand implements Command {
+			private Device device;
+
+			public TurnOnCommand(Device device) {
+				this.device = device;
+			}
+
+			@Override
+			public void execute() {
+				device.turnOn();
+			}
+		}
+
+		// Concrete command for turning a device off
+		class TurnOffCommand implements Command {
+			private Device device;
+
+			public TurnOffCommand(Device device) {
+				this.device = device;
+			}
+
+			@Override
+			public void execute() {
+				device.turnOff();
+			}
+		}
+
+		// Concrete command for adjusting the volume of a stereo
+		class AdjustVolumeCommand implements Command {
+			private Stereo stereo;
+
+			public AdjustVolumeCommand(Stereo stereo) {
+				this.stereo = stereo;
+			}
+
+			@Override
+			public void execute() {
+				stereo.adjustVolume();
+			}
+		}
+
+		// Concrete command for changing the channel of a TV
+		class ChangeChannelCommand implements Command {
+			private TV tv;
+
+			public ChangeChannelCommand(TV tv) {
+				this.tv = tv;
+			}
+
+			@Override
+			public void execute() {
+				tv.changeChannel();
+			}
+		}
+
+		// Receiver interface
+		interface Device {
+			void turnOn();
+			void turnOff();
+		}
+
+		// Concrete receiver for a TV
+		class TV implements Device {
+			@Override
+			public void turnOn() {
+				System.out.println("TV is now on");
+			}
+
+			@Override
+			public void turnOff() {
+				System.out.println("TV is now off");
+			}
+
+			public void changeChannel() {
+				System.out.println("Channel changed");
+			}
+		}
+
+		// Concrete receiver for a stereo
+		class Stereo implements Device {
+			@Override
+			public void turnOn() {
+				System.out.println("Stereo is now on");
+			}
+
+			@Override
+			public void turnOff() {
+				System.out.println("Stereo is now off");
+			}
+
+			public void adjustVolume() {
+				System.out.println("Volume adjusted");
+			}
+		}
+
+		// Invoker
+		class RemoteControl {
+			private Command command;
+
+			public void setCommand(Command command) {
+				this.command = command;
+			}
+
+			public void pressButton() {
+				command.execute();
+			}
+		}
+
+		// Example usage
+		public class CommandPatternExample {
+			public static void main(String[] args) {
+				// Create devices
+				TV tv = new TV();
+				Stereo stereo = new Stereo();
+
+				// Create command objects
+				Command turnOnTVCommand = new TurnOnCommand(tv);
+				Command turnOffTVCommand = new TurnOffCommand(tv);
+				Command adjustVolumeStereoCommand = new AdjustVolumeCommand(stereo);
+				Command changeChannelTVCommand = new ChangeChannelCommand(tv);
+
+				// Create remote control
+				RemoteControl remote = new RemoteControl();
+
+				// Set and execute commands
+				remote.setCommand(turnOnTVCommand);
+				remote.pressButton(); // Outputs: TV is now on
+
+				remote.setCommand(adjustVolumeStereoCommand);
+				remote.pressButton(); // Outputs: Volume adjusted
+
+				remote.setCommand(changeChannelTVCommand);
+				remote.pressButton(); // Outputs: Channel changed
+
+				remote.setCommand(turnOffTVCommand);
+				remote.pressButton(); // Outputs: TV is now off
+			}
+		}
+		
+		TV is now on
+		Volume adjusted
+		Channel changed
+		TV is now off
+		
+		Giải thích:
+		
+			Mục đích: 
+			
+				Biến một yêu cầu (request) thành một đối tượng độc lập, cho 
+				phép bạn tham số hóa các đối tượng khác bằng yêu cầu, xếp 
+				hàng, log lại, hoặc hỗ trợ undo/redo.
+
+			Thành phần chính:
+
+				Command (interface): Định nghĩa phương thức execute().
+
+				Concrete Command: Cài đặt Command, chứa tham chiếu đến Receiver và gọi hành vi cụ thể.
+
+				Receiver: Thực hiện hành động thực sự (ví dụ: TV, Stereo).
+
+				Invoker: Gọi execute() trên Command (ví dụ: RemoteControl).
+
+				Client: Tạo Command và gán cho Invoker.
+
+			Liên hệ với code của bạn
+			
+				Command interface: Command với phương thức execute().
+
+				Concrete Commands: TurnOnCommand, TurnOffCommand, AdjustVolumeCommand, ChangeChannelCommand.
+
+				Receiver: TV, Stereo (thực hiện hành động thật sự).
+
+				Invoker: RemoteControl (giữ tham chiếu đến Command và gọi execute()).
+
+				Client: CommandPatternExample.main() (tạo các Command, gán cho RemoteControl).
+		
+	When to use the Command Design Pattern
+	
+		Decoupling is Needed
+		
+			In order to separate the requester making the request (the sender) 
+			from the object executing it, use the Command Pattern.
+			
+			Your code will become more expandable and adaptable as a result.
+			
+		Undo/Redo Functionality is Required
+		
+			If you need to support undo and redo operations in your application, 
+			the Command Pattern is a good fit.
+			
+			Each command can encapsulate an operation and its inverse, making it 
+			easy to undo or redo actions.
+			
+		Support for Queues and Logging
+		
+			If you want to maintain a history of commands, log them, or even put 
+			them in a queue for execution, the Command Pattern provides a structured 
+			way to achieve this.
+			
+		Dynamic Configuration
+		
+			When you need the ability to dynamically configure and assemble commands 
+			at runtime, the Command Pattern allows for flexible composition of commands.
+			
+	When not to use the Command Design Pattern
+	
+		Simple Operations
+		
+			For very simple operations or one-off tasks, introducing the Command 
+			Pattern might be overkill.
+			
+			It's beneficial when you expect your operations to become more complex 
+			or when you need to support undo/redo.
+			
+		Tight Coupling is Acceptable
+		
+			If the sender and receiver of a request are tightly coupled and changes 
+			in one do not affect the other, using the Command Pattern might introduce 
+			unnecessary complexity.
+			
+		Overhead is a Concern
+		
+			In scenarios where performance and low overhead are critical factors, 
+			introducing the Command Pattern might add some level of indirection and, 
+			in turn, impact performance.
+			
+		Limited Use of Undo/Redo
+		
+			If your application does not require undo/redo functionality and you do not 
+			anticipate needing to support such features in the future, the Command Pattern 
+			might be unnecessary complexity.
+			
+--- Composite
+
+	Composite Pattern là một structural design pattern (mẫu thiết kế cấu trúc) 
+	dùng để biểu diễn cấu trúc cây (tree structure), trong đó các đối tượng riêng 
+	lẻ (leaf) và các nhóm đối tượng (composite) được xử lý thống nhất như nhau.
+
+	Ý tưởng chính
+	
+		Định nghĩa một interface chung cho cả Leaf và Composite.
+
+		Composite có thể chứa nhiều Leaf hoặc Composite khác.
+
+		Client chỉ cần làm việc với interface chung mà không cần phân biệt đối tượng đơn hay nhóm.
+	
+	The Composite Design Pattern is a structural design pattern that lets you compose 
+	objects into tree-like structures to represent part-whole hierarchies. It allows 
+	clients to treat individual objects and compositions of objects uniformly. In other 
+	words, whether dealing with a single object or a group of objects (composite), 
+	clients can use them interchangeably.
+	
+	As described by the Gang of four, "Compose objects into tree structure to represent 
+	part-whole hierarchies. Composite lets client treat individual objects and 
+	compositions of objects uniformly".
+	
+	Components of Composite Design Pattern
+	
+		Component
+			
+			The component declares the interface for objects in the composition and for 
+			accessing and managing its child components. This is like a blueprint that 
+			tells us what both individual items (leaves) and groups of items (composites) 
+			should be able to do. It lists the things they all have in common.
+		
+		Leaf
+		
+			Leaf defines behavior for primitive objects in the composition. This is the 
+			basic building block of the composition, representing individual objects that 
+			don't have any child components. Leaf elements implement the operations 
+			defined by the Component interface.
+		
+		Composite
+		
+			Composite stores child components and implements child-related operations in 
+			the component interface. This is a class that has child components, which can 
+			be either leaf elements or other composites. A composite class implements the 
+			methods declared in the Component interface, often by delegating the operations 
+			to its child components.
+		
+		Client
+		
+			The client manipulates the objects in the composition through the component 
+			interface. The client uses the component class interface to interact with objects 
+			in the composition structure. If the recipient is a leaf then the request is 
+			handled directly. If the recipient is a composite, then it usually forwards 
+			the request to its child components, possibly performing additional operations 
+			before and after forwarding.
+	
+	Composite Design Pattern example in Java
+		
+		Imagine you are building a project management system where tasks can be either 
+		simple tasks or a collection of tasks (subtasks) forming a larger task.
+		
+		import java.util.ArrayList;
+		import java.util.List;
+
+		// Component
+		interface Task {
+			String getTitle();
+			void setTitle(String title);
+			void display();
+		}
+
+		// Leaf
+		class SimpleTask implements Task {
+			private String title;
+
+			public SimpleTask(String title) {
+				this.title = title;
+			}
+
+			@Override
+			public String getTitle() {
+				return title;
+			}
+
+			@Override
+			public void setTitle(String title) {
+				this.title = title;
+			}
+
+			@Override
+			public void display() {
+				System.out.println("Simple Task: " + title);
+			}
+		}
+
+		// Composite
+		class TaskList implements Task {
+			private String title;
+			private List<Task> tasks;
+
+			public TaskList(String title) {
+				this.title = title;
+				this.tasks = new ArrayList<>();
+			}
+
+			@Override
+			public String getTitle() {
+				return title;
+			}
+
+			@Override
+			public void setTitle(String title) {
+				this.title = title;
+			}
+
+			public void addTask(Task task) {
+				tasks.add(task);
+			}
+
+			public void removeTask(Task task) {
+				tasks.remove(task);
+			}
+
+			@Override
+			public void display() {
+				System.out.println("Task List: " + title);
+				for (Task task : tasks) {
+					task.display();
+				}
+			}
+		}
+
+		// Client
+		public class TaskManagementApp {
+			public static void main(String[] args) {
+				// Creating simple tasks
+				Task simpleTask1 = new SimpleTask("Complete Coding");
+				Task simpleTask2 = new SimpleTask("Write Documentation");
+
+				// Creating a task list
+				TaskList projectTasks = new TaskList("Project Tasks");
+				projectTasks.addTask(simpleTask1);
+				projectTasks.addTask(simpleTask2);
+
+				// Nested task list
+				TaskList phase1Tasks = new TaskList("Phase 1 Tasks");
+				phase1Tasks.addTask(new SimpleTask("Design"));
+				phase1Tasks.addTask(new SimpleTask("Implementation"));
+
+				projectTasks.addTask(phase1Tasks);
+
+				// Displaying tasks
+				projectTasks.display();
+			}
+		}
+		
+		Output
+		
+			Task List: Project Tasks	
+			Simple Task: Complete Coding
+			Simple Task: Write Documentation
+			Task List: Phase 1 Tasks
+			Simple Task: Design
+			Simple Task: Implementation
+			
+	Why do we need Composite Design Pattern?
+	
+		Uniform Interface
+		
+			The Composite Pattern provides a uniform interface for both individual 
+			objects and compositions.
+			
+			This uniformity simplifies client code, making it more intuitive and 
+			reducing the need for conditional statements to differentiate between 
+			different types of objects.
+			
+			Other design patterns may not offer the same level of consistency in 
+			handling individual and composite objects.
+			
+		Hierarchical Structures
+		
+			The primary focus of the Composite Pattern is to deal with hierarchical 
+			structures where objects can be composed of other objects.
+			
+			While other patterns address different types of problems, the Composite 
+			Pattern specifically targets scenarios involving tree-like structures.
+			
+		Flexibility and Scalability
+		
+			The Composite Pattern allows for dynamic composition of objects, enabling 
+			the creation of complex structures.
+			
+			It promotes flexibility and scalability, making it easier to add or remove 
+			elements from the hierarchy without modifying the client code.
+			
+		Common Operations
+		
+			By defining common operations at the component level, the Composite Pattern 
+			reduces code duplication and promotes a consistent approach to handling both 
+			leaf and composite objects.
+			
+			Other design patterns may not provide the same level of support for common 
+			operations within hierarchical structures.
+			
+		Client Simplification
+		
+			The Composite Pattern simplifies client code by providing a unified way to 
+			interact with individual and composite objects. This simplification is particularly 
+			valuable when working with complex structures, such as graphical user interfaces 
+			or organizational hierarchies.
+			
+	When to use Composite Design Pattern?
+	
+		Composite Pattern should be used when clients need to ignore the difference between 
+		compositions of objects and individual objects. If programmers find that they are 
+		using multiple objects in the same way, and often have nearly identical code to handle 
+		each of them, then composite is a good choice, it is less complex in this situation to 
+		treat primitives and composites as homogeneous.
+		
+			Less number of objects reduces the memory usage, and it manages to keep us away 
+			from errors related to memory like java.lang.OutOfMemoryError.
+			
+			Although creating an object in Java is really fast, we can still reduce the 
+			execution time of our program by sharing objects.
+			
+	When not to use Composite Design Pattern?
+	
+		Composite Design Pattern makes it harder to restrict the type of components of a 
+		composite. So it should not be used when you don't want to represent a full or 
+		partial hierarchy of objects.
+		
+			Composite Design Pattern can make the design overly general.
+			
+			It makes harder to restrict the components of a composite.
+			
+			Sometimes you want a composite to have only certain components. With Composite, 
+			you can't rely on the type system to enforce those constraints for you.
+			
+			Instead you'll have to use run-time checks.
+			
+--- Facade
+
+	Facade Pattern là một structural design pattern (mẫu thiết kế cấu trúc) 
+	dùng để cung cấp một giao diện đơn giản, thống nhất cho một hệ thống phức 
+	tạp gồm nhiều lớp hoặc nhiều module.
+
+	Ý tưởng chính
+	
+		Thay vì để client phải tương tác trực tiếp với nhiều lớp phức tạp, 
+		ta tạo ra một lớp Facade.
+
+		Facade sẽ đóng vai trò như "cửa ngõ" duy nhất, bên trong nó gọi đến 
+		các lớp con để thực hiện công việc.
+
+		Client chỉ cần làm việc với Facade mà không cần biết chi tiết bên trong.
+
+	Facade Method Design Pattern is a part of the Gang of Four design patterns and 
+	it is categorized under Structural design patterns. Before we go into the details, 
+	visualize a structure. The house is the facade, it is visible to the outside world,
+	but beneath it is a working system of pipes, cables, and other components that allow 
+	the building to run. It provides an easy-to-use interface so that users may interact 
+	with the system.
+	
+	What is the Facade Method Design Pattern?
+		
+		In the above diagram
+		
+			Structuring a system into subsystems helps reduce complexity.
+			
+			A common design goal is to minimize the communication and dependencies 
+			between subsystems.
+			
+			One way to achieve this goal is to introduce a Facade object that provides a 
+			single simplified interface to the more general facilities of a subsystem.
+	
+	When to use Facade Method Design Pattern
+		
+		A Facade provide a simple default view of the subsystem that is good enough 
+		for most clients.
+		
+		There are many dependencies between clients and the implementation classes of 
+		an abstraction.
+		
+		A Facade to decouple the subsystem from clients and other subsystems, thereby 
+		promoting subsystem independence and portability.
+		
+		Facade define an entry point to each subsystem level. If subsystem are dependent, 
+		then you can simplify the dependencies between them by making them communicate 
+		with each other through their facades.
+	
+	Key Components of Facade Method Design Pattern
+		
+		In the above diagram, Consider for example a programming environment that gives 
+		applications access to its compiler subsystem.
+			
+			This subsystem contains classes such as Scanner,Parser, ProgramNode, BytecodeStream, 
+			and ProgramNodeBuilder that implement the compiler.
+			
+			Compiler class acts as a facade: It offers clients a single, simple interface to 
+			the compilersubsystem.
+			
+			It glues together the classes that implement compilerfunctionality without 
+			hiding themcompletely.
+			
+			The compiler facade makes life easier for most programmers without hiding the 
+			lower-level functionality from the few that need it.
+		
+		Facade (Compiler)
+			
+			Facade knows which subsystem classes are responsible for a request.
+			
+			It delegate client requests to appropriate subsystem objects.
+		
+		Subsystem classes (Scanner, Parser, ProgramNode, etc.)
+			
+			It implement subsystem functionality.
+			
+			It handle work assigned by the Facade object.
+			
+			It have no knowledge of the facade; that is, they keep no references to it.
+		
+		Interface
+			
+			The Interface in the Facade Design Pattern refers to the set of simplified 
+			methods that the facade exposes to the client.
+			
+			It hides the complexities of the subsystem, ensuring that clients interact 
+			only with high-level operations, without dealing with the underlying details 
+			of the system.
+		
+		Facade Method Design Pattern collaborate in different way
+			
+			Client communicate with the subsystem by sending requests to Facade, which 
+			forwards them to the appropriate subsystem objects.
+			
+			The Facade may have to do work of its own to translate it inheritance to 
+			subsystem interface.
+			
+			Clients that use the Facade don't have to access its subsystem objects directly.
+	
+	Steps to implement Facade Design Pattern
+		
+		Step 1
+			
+			First, determine the complex subsystems or components that the client needs 
+			to interact with.
+		
+		Step 2
+			
+			Build a facade class that serves as the middle layer between the client and 
+			the subsystems. This class should offer simplified methods that wrap the 
+			interactions with the subsystems.
+		
+		Step 3
+			
+			Expose a clear, high-level interface in the facade class. This interface will 
+			include the methods that the client will use, hiding the internal complexity.
+		
+		Step 4
+			
+			Inside the facade methods, delegate the requests to the appropriate subsystem 
+			classes to perform the actual operations.
+		
+		Step 5
+			
+			The client now interacts only with the facade, which manages the underlying 
+			calls to the subsystems, simplifying the client’s experience.
+			
+	Exmaple for the Facade Method Design Pattern (with implementation)
+	
+		Problem Statement
+		
+			Let’s consider a hotel. This hotel has a hotel keeper. There are a lot of 
+			restaurants inside the hotel e.g. Veg restaurants, Non-Veg restaurants, and 
+			Veg/Non Both restaurants. You, as a client want access to different menus of 
+			different restaurants.
+				
+				You do not know what are the different menus they have. You just have 
+				access to a hotel keeper who knows his hotel well.
+				
+				Whichever menu you want, you tell the hotel keeper and he takes it out 
+				of the respective restaurants and hands it over to you.
+		
+		Interface of Hotel
+		
+			package structural.facade;
+
+			public interface Hotel {
+				public Menus getMenus();
+			}
+					
+		NonVegRestaurant
+						
+			package structural.facade;
+
+			public class NonVegRestaurant implements Hotel {
+
+				public Menus getMenus()
+				{
+					NonVegMenu nv = new NonVegMenu();
+					return nv;
+				}
+			}
+					
+		VegRestaurant
+						
+			package structural.facade;
+
+			public class VegRestaurant implements Hotel {
+
+				public Menus getMenus()
+				{
+					VegMenu v = new VegMenu();
+					return v;
+				}
+			}
+					
+					
+		VegNonBothRestaurant
+						
+			package structural.facade;
+
+			public class VegNonBothRestaurant implements Hotel {
+
+				public Menus getMenus()
+				{
+					Both b = new Both();
+					return b;
+				}
+			}
+					
+					
+		HotelKeeper.java
+						
+						
+			/*package whatever //do not write package name here */
+
+			package structural.facade;
+
+			public interface HotelKeeper {
+			  
+
+			  public VegMenu getVegMenu();
+			  public NonVegMenu getNonVegMenu();
+			  public Both getVegNonMenu();
+
+			}
+					
+					
+		HotelKeeperImplementation.java
+						
+						
+			package structural.facade;
+
+			public class HotelKeeperImplementation implements HotelKeeper {
+
+				public VegMenu getVegMenu()
+				{
+					VegRestaurant v = new VegRestaurant();
+					VegMenu vegMenu = (VegMenu)v.getMenus();
+					return vegMenu;
+				}
+
+				public NonVegMenu getNonVegMenu()
+				{
+					NonVegRestaurant v = new NonVegRestaurant();
+					NonVegMenu NonvegMenu = (NonVegMenu)v.getMenus();
+					return NonvegMenu;
+				}
+
+				public Both getVegNonMenu()
+				{
+					VegNonBothRestaurant v = new VegNonBothRestaurant();
+					Both bothMenu = (Both)v.getMenus();
+					return bothMenu;
+				}
+			}
+					
+					
+		How will the client program access this facade?
+			
+			package structural.facade;
+
+			public class Client
+			{
+				public static void main (String[] args)
+				{
+					HotelKeeper keeper = new HotelKeeperImplementation();
+					
+					VegMenu v = keeper.getVegMenu();
+					NonVegMenu nv = keeper.getNonVegMenu();
+					Both = keeper.getVegNonMenu();
+
+				}
+			}
+			 
+		Đơn giản hóa việc sử dụng hệ thống phức tạp
+		
+		Giảm coupling giữa client và subsystem
+		
+	Use Cases of Facade Method Design Pattern
+	
+		Simplifying Complex External Systems
+		
+			A facade encapsulates database connection, query execution, 
+			and result processing, offering a clean interface to the application.
+			
+			A facade simplifies the usage of external APIs by hiding the 
+			complexities of authentication, request formatting, and response parsing.
+		
+		Layering Subsystems
+		
+			Facades define clear boundaries between subsystems, reducing 
+			dependencies and promoting modularity.
+			
+			Facades offer simplified interfaces to lower-level subsystems, 
+			making them easier to understand and use.
+		
+		Providing a Unified Interface to Diverse Systems
+			
+			A facade can combine multiple APIs into a single interface, 
+			streamlining interactions and reducing code duplication.
+			
+			A facade can create a modern interface for older, less accessible 
+			systems, facilitating their integration with newer components.
+		
+		Protecting Clients from Unstable Systems
+			
+			Facades minimize the impact of changes to underlying systems by 
+			maintaining a stable interface.
+			
+			Facades can protect clients from changes or issues in external 
+			libraries or services.
+
+	Advantages of Facade Method Design Pattern
+		
+		Simplified Interface
+			
+			Simplifies the use and understanding of a complex system by offering a clear and 
+			concise interface.
+			
+			Hides the internal details of the system, reducing cognitive load for clients.
+		
+		Reduced Coupling
+			
+			Clients become less reliant on the internal workings of the underlying 
+			system when they are disconnected from it.
+			
+			Encourages the reusability and modularity of code components.
+			
+			Allows for the independent testing and development of various system components.
+		
+		Encapsulation
+			
+			Encapsulates the complex interactions within a subsystem, protecting clients from 
+			changes in its implementation.
+			
+			Allows for changes to the subsystem without affecting clients, as long as 
+			the facade interface remains stable.
+		
+		Improved Maintainability
+			
+			Easier to change or extend the underlying system without affecting clients, as long 
+			as the facade interface remains consistent.
+			
+			Allows for refactoring and optimization of the subsystem without impacting client code.
+	
+	Disadvantages of Facade Method Design Pattern
+		
+		Increased Complexity
+			
+			Adding the facade layer in the system increases the level of abstraction.
+			
+			Because of this, the code may be more difficult to understand and debug
+		
+		Reduced Flexibility
+			
+			The facade acts as a single point of access to the underlying system.
+			
+			This can limit the flexibility for clients who need to bypass the facade 
+			or access specific functionalities hidden within the subsystem.
+		
+		Overengineering
+			
+			Applying the facade pattern to very simple systems can be overkill, adding 
+			unnecessary complexity where it's not needed.
+			
+			Consider the cost-benefit trade-off before implementing a facade for every situation.
+		
+		Potential Performance Overhead
+			
+			Adding an extra layer of indirection through the facade can introduce a 
+			slight performance overhead, especially for frequently used operations.
+			
+			This may not be significant for most applications, but it's worth 
+			considering in performance-critical scenarios.
+	
+	Conclusion
+		
+		The facade pattern is appropriate when you have a complex system that you want 
+		to expose to clients in a simplified way, or you want to make an external 
+		communication layer over an existing system that is incompatible with the 
+		system. Facade deals with interfaces, not implementation. Its purpose is to 
+		hide internal complexity behind a single interface that appears simple on 
+		the outside.
+			
+--- Factory Method
+
+	Factory Method Pattern là một creational design pattern (mẫu thiết kế khởi tạo) 
+	dùng để định nghĩa một interface để tạo đối tượng, nhưng cho phép các lớp con 
+	quyết định loại đối tượng cụ thể nào sẽ được tạo.
+
+	Ý tưởng chính
+	
+		Thay vì khởi tạo trực tiếp bằng new, ta định nghĩa một factory method.
+
+		Các lớp con sẽ override phương thức này để tạo ra đối tượng phù hợp.
+
+		Giúp tách biệt logic khởi tạo khỏi logic sử dụng.
+
+	The Factory Method Design Pattern is a creational design pattern that provides 
+	an interface for creating objects in a superclass, allowing subclasses to alter
+	the type of objects that will be created. This pattern is particularly useful 
+	when the exact types of objects to be created may vary or need to be determined 
+	at runtime, enabling flexibility and extensibility in object creation.
+	
+	What is the Factory Method Design Pattern?
+		
+		The Factory Method Design Pattern is a creational design pattern used in 
+		software development. It provides an interface for creating objects in a 
+		superclass while allowing subclasses to specify the types of objects they 
+		create.
+		
+		This pattern simplifies the object creation process by placing it in a dedicated 
+		method, promoting loose coupling between the object creator and the objects themselves.
+		
+		This approach enhances flexibility, extensibility, and maintainability, enabling 
+		subclasses to implement their own factory methods for creating specific object types.
+	
+	When to Use the Factory Method Design Pattern
+		
+		If your object creation process is complex or varies under different conditions, 
+		using a factory method can make your client code simpler and promote reusability.
+		
+		The Factory Method Pattern allows you to create objects through an interface or 
+		abstract class, hiding the details of concrete implementations. This reduces 
+		dependencies and makes it easier to modify or expand the system without affecting 
+		existing code.
+		
+		If your application needs to create different versions of a product or may introduce 
+		new types in the future, the Factory Method Pattern provides a flexible way to handle
+		these variations by defining specific factory methods for each product type.
+		
+		Factories can also encapsulate configuration logic, allowing clients to customize 
+		the object creation process by providing parameters or options to the factory method.
+	
+	Components of Factory Method Design Pattern
+		
+		Creator
+			
+			This is an abstract class or an interface that declares the factory method. The 
+			creator typically contains a method that serves as a factory for creating objects. 
+			It may also contain other methods that work with the created objects.
+		
+		Concrete Creator
+			
+			Concrete Creator classes are subclasses of the Creator that implement the factory 
+			method to create specific types of objects. Each Concrete Creator is responsible 
+			for creating a particular product.
+		
+		Product
+			
+			This is the interface or abstract class for the objects that the factory method 
+			creates. The Product defines the common interface for all objects that the factory 
+			method can create.
+		
+		Concrete Product
+			
+			Concrete Product classes are the actual objects that the factory method creates. Each 
+			Concrete Product class implements the Product interface or extends the Product abstract 
+			class.
+	
+	Factory Method Design Pattern Example
+		
+		Without Factory Method Design Pattern
+		
+			/*package whatever //do not write package name here */
+
+			import java.io.*;
+
+			// Library classes
+			abstract class Vehicle {
+				public abstract void printVehicle();
+			}
+
+			class TwoWheeler extends Vehicle {
+				public void printVehicle() {
+					System.out.println("I am two wheeler");
+				}
+			}
+
+			class FourWheeler extends Vehicle {
+				public void printVehicle() {
+					System.out.println("I am four wheeler");
+				}
+			}
+
+			// Client (or user) class
+			class Client {
+				private Vehicle pVehicle;
+
+				public Client(int type) {
+					if (type == 1) {
+						pVehicle = new TwoWheeler();
+					} else if (type == 2) {
+						pVehicle = new FourWheeler();
+					} else {
+						pVehicle = null;
+					}
+				}
+
+				public void cleanup() {
+					if (pVehicle != null) {
+						pVehicle = null;
+					}
+				}
+
+				public Vehicle getVehicle() {
+					return pVehicle;
+				}
+			}
+
+			// Driver program
+			public class GFG {
+				public static void main(String[] args) {
+					Client pClient = new Client(1);
+					Vehicle pVehicle = pClient.getVehicle();
+					if (pVehicle != null) {
+						pVehicle.printVehicle();
+					}
+					pClient.cleanup();
+				}
+			}
+			
+			Issues with the Current Design
+				
+				The Client class creates TwoWheeler and FourWheeler objects directly based on 
+				input. This strong dependency makes the code hard to maintain or update.
+				
+				The Client class not only decides which vehicle to create but also handles its 
+				lifecycle. This mixes responsibilities, which goes against the principle that a 
+				class should only have one reason to change.
+				
+				To add a new vehicle type, you must modify the Client class, which makes it 
+				difficult to scale the design. This conflicts with the idea that classes should 
+				be open for extension but closed for modification.
+			
+			Solutions to the Problems
+				
+				Define a Factory Interface
+					
+					 Create an interface, VehicleFactory, with a method to produce vehicles.
+					
+					Create Specific Factories: Implement classes like TwoWheelerFactory and 
+					FourWheelerFactory that follow the VehicleFactory interface, providing 
+					methods for each vehicle type.
+				
+				Revise the Client Class
+				
+					Change the Client class to use a VehicleFactory instance instead of creating 
+					vehicles directly. This way, it can request vehicles without using conditional 
+					logic.
+				
+				Enhance Flexibility
+				
+					This structure allows for easy addition of new vehicle types by simply 
+					creating new factory classes, without needing to alter existing Client 
+					code.
+		
+		With Factory Method Design Pattern
+			
+			// Library classes
+			abstract class Vehicle {
+				public abstract void printVehicle();
+			}
+
+			class TwoWheeler extends Vehicle {
+				public void printVehicle() {
+					System.out.println("I am two wheeler");
+				}
+			}
+
+			class FourWheeler extends Vehicle {
+				public void printVehicle() {
+					System.out.println("I am four wheeler");
+				}
+			}
+
+			// Factory Interface
+			interface VehicleFactory {
+				Vehicle createVehicle();
+			}
+
+			// Concrete Factory for TwoWheeler
+			class TwoWheelerFactory implements VehicleFactory {
+				public Vehicle createVehicle() {
+					return new TwoWheeler();
+				}
+			}
+
+			// Concrete Factory for FourWheeler
+			class FourWheelerFactory implements VehicleFactory {
+				public Vehicle createVehicle() {
+					return new FourWheeler();
+				}
+			}
+
+			// Client class
+			class Client {
+				private Vehicle pVehicle;
+
+				public Client(VehicleFactory factory) {
+					pVehicle = factory.createVehicle();
+				}
+
+				public Vehicle getVehicle() {
+					return pVehicle;
+				}
+			}
+
+			// Driver program
+			public class GFG {
+				public static void main(String[] args) {
+					VehicleFactory twoWheelerFactory = new TwoWheelerFactory();
+					Client twoWheelerClient = new Client(twoWheelerFactory);
+					Vehicle twoWheeler = twoWheelerClient.getVehicle();
+					twoWheeler.printVehicle();
+
+					VehicleFactory fourWheelerFactory = new FourWheelerFactory();
+					Client fourWheelerClient = new Client(fourWheelerFactory);
+					Vehicle fourWheeler = fourWheelerClient.getVehicle();
+					fourWheeler.printVehicle();
+				}
+			}
+			
+			Điểm chung đó là class cha sẽ là interface, con sẽ là class thường
+			
+			Tạo object thông qua subclass, không tạo trực tiếp trong code chính
+			
+			In the above code:
+			
+				Vehicle serves as the Product interface, defining the common method printVehicle() 
+				that all concrete products must implement.
+				
+				TwoWheeler and FourWheeler are concrete product classes representing different types 
+				of vehicles, implementing the printVehicle() method.
+				
+				VehicleFactory acts as the Creator interface (Factory Interface) with a method 
+				createVehicle() representing the factory method.
+				
+				TwoWheelerFactory and FourWheelerFactory are concrete creator classes (Concrete 
+				Factories) implementing the VehicleFactory interface to create instances of specific 
+				types of vehicles
+				
+			Giải thích:
+			
+				Vehicle là lớp trừu tượng (Product).
+
+				TwoWheeler và FourWheeler là các lớp cụ thể (Concrete Product).
+
+				VehicleFactory là interface định nghĩa phương thức tạo đối tượng (Factory).
+
+				TwoWheelerFactory và FourWheelerFactory là các Factory cụ thể (Concrete Factory).
+
+				Client sử dụng Factory để tạo ra đối tượng mà không cần biết 
+				chi tiết lớp cụ thể nào sẽ được khởi tạo.
+
+				Đặc điểm của Factory Method Pattern:
+				
+					Định nghĩa một interface để tạo đối tượng, nhưng để cho các 
+					lớp con quyết định lớp nào sẽ được khởi tạo.
+
+					Giúp tách biệt phần khởi tạo đối tượng khỏi phần sử dụng đối tượng.
+
+					Dễ mở rộng: chỉ cần thêm một Factory mới nếu có loại Vehicle mới.
+
+				Ví dụ trong code của bạn:
+				
+					Khi Client nhận vào TwoWheelerFactory, nó sẽ tạo ra TwoWheeler.
+
+					Khi Client nhận vào FourWheelerFactory, nó sẽ tạo ra FourWheeler.
+	
+	Use Cases of the Factory Method
+		
+		Used in JDBC for creating connections and in frameworks like Spring for managing beans.
+		
+		Libraries like Swing and JavaFX use factories to create flexible UI components.
+		
+		Tools like Log4j rely on factories to create configurable loggers.
+		
+		Factories help create objects from serialized data, supporting various formats.
+	
+	Advantages of the Factory Method
+		
+		Separates creation logic from client code, improving flexibility.
+		
+		New product types can be added easily.
+		
+		Simplifies unit testing by allowing mock product creation.
+		
+		Centralizes object creation logic across the application.
+		
+		Hides specific product classes from clients, reducing dependency.
+	
+	Disadvantages of the Factory Method
+		
+		Adds more classes and interfaces, which can complicate maintenance.
+		
+		Slight performance impacts due to polymorphism.
+		
+		Concrete creators are linked to their products.
+		
+		Clients need knowledge of specific subclasses.
+		
+		May lead to unnecessary complexity if applied too broadly.
+		
+		Factory logic can be harder to test.
+		
+--- Iterator
+
+	Iterator Pattern là một behavioral design pattern (mẫu thiết kế hành vi) 
+	dùng để cung cấp cách duyệt qua các phần tử của một tập hợp (collection)
+	mà không cần biết cấu trúc bên trong của tập hợp đó.
+
+	Ý tưởng chính
+	
+		Thay vì để client tự xử lý cấu trúc dữ liệu (mảng, danh sách, cây…), ta tạo ra một Iterator.
+
+		Iterator có các phương thức như hasNext() và next() để duyệt tuần tự các phần tử.
+
+		Client chỉ cần dùng iterator, không cần quan tâm tập hợp được cài đặt thế nào.
+
+	A design pattern is proved solution for solving the specific problem/task. We 
+	need to keep in mind that design patterns are programming language independent 
+	for solving the common object-oriented design problems. In Other Words, a design 
+	pattern represents an idea, not a particular implementation. Using design patterns 
+	you can make your code more flexible, reusable, and maintainable.
+	
+	Behavioural - Iterator Pattern
+		
+		The iterator pattern is a great pattern for providing navigation without 
+		exposing the structure of an object.
+		
+		Traverse a container. In Java and most current programming languages, there’s 
+		the notion of a collection. List, Maps, Sets are all examples of a collection 
+		that we would want to traverse. Historically we use a loop of some sort and 
+		index into your collection to traverse it.
+		
+		Doesn’t expose the underlying structure of the object we want to navigate. Navigating 
+		various structures may have different algorithms or approaches to cycle through the data.
+		
+		Decouples the data from the algorithm used to traverse it
+		
+	Design: Iterator Pattern
+		
+		It is an interface-based design pattern. Whichever object you want to iterate 
+		over will provide a method to return an instance of an iterator from it.
+		
+		Follows a factory-based method pattern in the way you get an instance of the iterator.
+		
+		Each iterator is developed in such a way that it is independent of another.
+		
+		Iterators also Fail Fast. Fail Fast means that iterators can’t modify the 
+		underlying object without an error being thrown.
+		
+		The Collection interface is extended by the List Interface.
+		
+		List Interface contains a factory method iterator(). This iterator factory method 
+		returns an instance of the Iterator Interface.
+		
+		In the case of the list and its implementations, the underlying instances are 
+		ListIterator.
+		
+		The ListIterator is an implementation of the Iterator interface that understands how 
+		to iterate over the various list objects in the Collection API. It declares the 
+		interface for objects in the composition.
+		
+		There are some pitfalls of iterator which are as follows:
+		
+			You don’t have access to an index of any sort. If you want to get an element of a 
+			certain position, there is no way to do that without just iterating though. In the 
+			case of sets and maps, there isn’t a method to grab an element at a certain index 
+			position
+			
+			UniDirectional: It iterates objects in forwarding direction only.
+			
+			Although iterator is the most efficient way to looping through objects of any sort. But 
+			in some cases, it may be slower than using an index and looping through it.
+			
+		// Java Program to Implement Behavioral>Iterator Pattern
+
+		// importing required package to
+		// implement Behavioral>Iterator Pattern
+		package com.demo.application;
+
+		// Importing required libraries
+		// Here Iterator Interface to
+		// use it to iterate over the elements
+		import java.util.Iterator;
+
+
+		// Class 1
+
+		// Car Class Implementing Iterable Interface so
+		// that we can implement the iterator method and
+		// add our own implementation
+
+		public class Car implements Iterable<String> {
+		  private String[] cars;
+		  private int index;
+
+		  // Default Constructor
+		  public Car() {
+			cars = new String[10];
+			index = 0;
+		  }
+
+		  // Method 1
+		  // Adding method to add Cars
+		  public void addCar(String car) {
+			if (index == cars.length) {
+			  String[] largerCars = new String[cars.length + 5];
+			  System.arraycopy(cars, 0, largerCars, 0, cars.length);
+			  cars = largerCars;
+			  largerCars = null;
+			}
+			cars[index] = car;
+			index++;
+		  }
+
+		  // Method 2
+		  // Implementing the iterator method and
+		  // adding your own implementation
+		  @Override
+		  public Iterator<String> iterator() {
+			Iterator<String> it = new Iterator<String>() {
+
+			  private int currentIndex = 0;
+
+			  // Method 3
+			  // Finding whether during iteration if
+			  // there is next element or not
+			  @Override
+			  public boolean hasNext() {
+				return currentIndex < cars.length && cars[currentIndex] != null;
+			  }
+
+			  // Method 4
+			  // Going to grab each car element by one by one
+			  // according to the index
+			  @Override
+			  public String next() {
+				return cars[currentIndex++];
+			  }
+
+			  // Method 5
+			  @Override
+			  public void remove() {
+				throw new UnsupportedOperationException();
+			  }
+			};
+
+			return it;
+		  }
+
+		  // Method 6
+		  // Main driver method
+		  public static void main(String[] args) {
+
+			// Instantiating Car object
+			Car cars = new Car();
+
+			// Adding cars to the Array
+			cars.addCar("Dodge");
+			cars.addCar("Ferrari");
+			cars.addCar("Sedan");
+
+			// Creating an Iterator and pointing the cursor
+			// to the index just before the first element in cars
+			Iterator<String> carIterator = cars.iterator();
+
+			// Checking whether the next element is available or not
+			while (carIterator.hasNext()) {
+			  System.out.println(carIterator.next());
+			}
+		  }
+		}
+		
+	Conclusion
+	
+		An iterator is an efficient way to traverse an object.
+		
+		Hides the algorithm from the client, so that simplicity for your 
+		client is contained within the algorithm that you have coated in 
+		the container you’re creating an iterator for
+		
+		Helps us to simplify that client.
+		
+		Helps us to take advantage of the for each syntax which definitely 
+		simplifies iterating over that object in a for each loop.
+		
+--- Observer
+
+	Observer Pattern là một behavioral design pattern (mẫu thiết kế hành vi) 
+	dùng để thiết lập cơ chế thông báo tự động giữa các đối tượng.
+
+	Ý tưởng chính
+	
+		Có một đối tượng Subject (chủ thể) giữ danh sách các Observers (người quan sát).
+
+		Khi trạng thái của Subject thay đổi, nó sẽ tự động thông báo cho tất cả Observers.
+
+		Observer quyết định cách phản ứng với thông báo đó.
+
+	The Observer Design Pattern is a behavioral design pattern that defines a 
+	one-to-many dependency between objects. When one object (the subject) changes 
+	state, all its dependents (observers) are notified and updated automatically.
+	
+	What is the Observer Design Pattern?
+		
+		The Observer Design Pattern is a behavioral design pattern that defines a 
+		one-to-many dependency between objects. When one object (the subject) 
+		changes state, all its dependents (observers) are notified and updated 
+		automatically. It primarily deals with the interaction and communication 
+		between objects, specifically focusing on how objects behave in response 
+		to changes in the state of other objects.
+		
+		Note: Subjects are the objects that maintain and notify observers about changes 
+		in their state, while Observers are the entities that react to those changes.
+		
+		Below are some key points about observer design pattern:
+			
+			Defines how a group of objects (observers) interact based on changes in the 
+			state of a subject.
+			
+			Observers react to changes in the subject's state.
+			
+			The subject doesn't need to know the specific classes of its observers, 
+			allowing for flexibility.
+			
+			Observers can be easily added or removed without affecting the subject.
+	
+	Real-world analogy of the Observer Design Pattern
+		
+		Imagine a scenario where a weather station is observed by various smart devices. The 
+		weather station maintains a list of registered devices. Weather Station will update 
+		all the devices whenever there is change in the weather.
+		
+		Each of the devices are concrete observers and each have their ways to interpret 
+		and display the information.
+		
+		The Observer Design Pattern provides a flexible and scalable system where adding 
+		new devices or weather stations doesn't disrupt the overall communication, providing 
+		real-time and location-specific weather updates to users.
+	
+	Components of Observer Design Pattern
+		
+		Subject
+			
+			The subject maintains a list of observers (subscribers or listeners).
+			
+			It Provides methods to register and unregister observers dynamically and 
+			defines a method to notify observers of changes in its state.
+		
+		Observer
+			
+			Observer defines an interface with an update method that concrete observers must 
+			implement and ensures a common or consistent way for concrete observers to receive 
+			updates from the subject.
+		
+		ConcreteSubject
+			
+			ConcreteSubjects are specific implementations of the subject. They hold the actual 
+			state or data that observers want to track. When this state changes, concrete subjects 
+			notify their observers.
+			
+			For instance, if a weather station is the subject, specific weather stations in 
+			different locations would be concrete subjects.
+		
+		ConcreteObserver
+			
+			Concrete Observer implements the observer interface. They register with a concrete 
+			subject and react when notified of a state change.
+			
+			When the subject's state changes, the concrete observer's update()
+			
+			method is invoked, allowing it to take appropriate actions.
+			
+			For example, a weather app on your smartphone is a concrete observer that reacts to 
+			changes from a weather station.
+	
+	Observer Design Pattern Example
+		
+		Consider a scenario where you have a weather monitoring system. Different parts of your 
+		application need to be updated when the weather conditions change.
+		
+		Challenges or difficulties while implementing this system without Observer Design Pattern
+			
+			Components interested in weather updates would need direct references to the weather 
+			monitoring system, leading to tight coupling.
+			
+			Adding or removing components that react to weather changes requires modifying the 
+			core weather monitoring system code, making it hard to maintain.
+		
+		How Observer Pattern helps to solve above challenges?
+			
+			The Observer Pattern facilitates the decoupling of the weather monitoring system from 
+			the components that are interested in weather updates (via interfaces). Every element 
+			can sign up as an observer, and observers are informed when the weather conditions 
+			change. The weather monitoring system is thus unaffected by the addition or removal of components.
+		
+		import java.util.ArrayList;
+		import java.util.List;
+
+		// Observer Interface
+		interface Observer {
+			void update(String weather);
+		}
+
+		// Subject Interface
+		interface Subject {
+			void addObserver(Observer observer);
+			void removeObserver(Observer observer);
+			void notifyObservers();
+		}
+
+		// ConcreteSubject Class
+		class WeatherStation implements Subject {
+			private List<Observer> observers = new ArrayList<>();
+			private String weather;
+
+			@Override
+			public void addObserver(Observer observer) {
+				observers.add(observer);
+			}
+
+			@Override
+			public void removeObserver(Observer observer) {
+				observers.remove(observer);
+			}
+
+			@Override
+			public void notifyObservers() {
+				for (Observer observer : observers) {
+					observer.update(weather);
+				}
+			}
+
+			public void setWeather(String newWeather) {
+				this.weather = newWeather;
+				notifyObservers();
+			}
+		}
+
+		// ConcreteObserver Class
+		class PhoneDisplay implements Observer {
+			private String weather;
+
+			@Override
+			public void update(String weather) {
+				this.weather = weather;
+				display();
+			}
+
+			private void display() {
+				System.out.println("Phone Display: Weather updated - " + weather);
+			}
+		}
+
+		// ConcreteObserver Class
+		class TVDisplay implements Observer {
+			private String weather;
+
+			@Override
+			public void update(String weather) {
+				this.weather = weather;
+				display();
+			}
+
+			private void display() {
+				System.out.println("TV Display: Weather updated - " + weather);
+			}
+		}
+
+		// Usage Class
+		public class WeatherApp {
+			public static void main(String[] args) {
+				WeatherStation weatherStation = new WeatherStation();
+
+				Observer phoneDisplay = new PhoneDisplay();
+				Observer tvDisplay = new TVDisplay();
+
+				weatherStation.addObserver(phoneDisplay);
+				weatherStation.addObserver(tvDisplay);
+
+				// Simulating weather change
+				weatherStation.setWeather("Sunny");
+
+				// Output:
+				// Phone Display: Weather updated - Sunny
+				// TV Display: Weather updated - Sunny
+			}
+		}
+		
+	When to use the Observer Design Pattern?
+	
+		When you need one object to notify multiple others about changes.
+		
+		When you want to keep objects loosely connected, so they don’t rely on 
+		each other’s details.
+		
+		When you want observers to automatically respond to changes in the subject’s state.
+		
+		When you want to easily add or remove observers without changing the main subject.
+		
+		When you’re dealing with event systems that require various components to 
+		react without direct connections.
+	
+	When not to use the Observer Design Pattern?
+		
+		When the relationships between objects are simple and don’t require notifications.
+		
+		When performance is a concern, as many observers can lead to overhead during updates.
+		
+		When the subject and observers are tightly coupled, as it defeats the purpose of decoupling.
+		
+		When number of observers is fixed and won’t change over time.
+		
+		When the order of notifications is crucial, as observers may be notified in an 
+		unpredictable sequence.
+		
+--- Proxy
+
+	Proxy Pattern là một structural design pattern (mẫu thiết kế cấu trúc) 
+	dùng để cung cấp một đối tượng thay thế (proxy) nhằm kiểm soát việc truy 
+	cập đến đối tượng thật (real object).
+
+	Ý tưởng chính
+	
+		Proxy đóng vai trò như “người đại diện” cho đối tượng thật.
+
+		Khi client gọi phương thức, Proxy sẽ xử lý trước (ví dụ: kiểm tra quyền, cache, logging…) rồi mới chuyển tiếp đến đối tượng thật.
+
+		Giúp kiểm soát, tối ưu hoặc bảo vệ việc truy cập.
+
+	The Proxy Design Pattern a structural design pattern is a way to use a placeholder 
+	object to control access to another object. Instead of interacting directly with the 
+	main object, the client talks to the proxy, which then manages the interaction. This 
+	is useful for things like controlling access, delaying object creation until it's 
+	needed (lazy initialization), logging, or adding security checks.
+	
+	A real-world example can be a cheque or credit card as a proxy for what is in our bank 
+	account. It can be used in place of cash and provides a means of accessing that cash 
+	when required.
+	
+	What is Proxy Design Pattern?
+		
+		The Proxy Design Pattern is a design pattern in which the client and the actual 
+		object are connected by a proxy object. The client communicates with the proxy, 
+		which manages access to the real object, rather than the real object directly. Before 
+		sending the request to the real object, the proxy can take care of additional tasks 
+		like caching, security, logging, and lazy loading.
+	
+	Chaining of Proxies
+		
+		Chaining proxies in the Proxy Design Pattern means connecting them in a sequence, 
+		where each proxy adds its behavior or checks before passing the request to the next 
+		proxy or the real object. It's like forming a chain of guards, each responsible for 
+		a specific task.
+	
+	Components of Proxy Design Pattern
+		
+		Subject
+			
+			The Subject is an interface or an abstract class that defines the common interface 
+			shared by the RealSubject and Proxy classes. It declares the methods that the Proxy 
+			uses to control access to the RealSubject.
+				
+				Declares the common interface for both RealSubject and Proxy.
+				
+				Usually includes the methods that the client code can invoke on the RealSubject 
+				and the Proxy.
+		
+		RealSubject
+			
+			The RealSubject is the actual object that the Proxy represents. It contains the real 
+			implementation of the business logic or the resource that the client code wants to access.
+				
+				It Implements the operations declared by the Subject interface.
+				
+				Represents the real resource or object that the Proxy controls access to.
+		
+		Proxy
+			
+			The Proxy acts as a surrogate or placeholder for the RealSubject. It controls access 
+			to the real object and may provide additional functionality such as lazy loading,
+			access control, or logging.
+				
+				Implements the same interface as the RealSubject (Subject).
+				
+				Maintains a reference to the RealSubject.
+				
+				Controls access to the RealSubject, adding additional logic if necessary.
+	
+	How to implement Proxy Design Pattern?
+		
+		Create the Real Object Interface
+			
+			Define an interface or abstract class that represents the operations the real object 
+			will provide. Both the real object and proxy will implement this interface.
+		
+		Create the Real Object
+			
+			This class implements the interface and contains the actual logic or operation that the 
+			client wants to use.
+		
+		Create the Proxy Class
+			
+			The proxy class also implements the same interface as the real object. It holds a reference 
+			to the real object and controls access to it. The proxy can add extra logic like logging, 
+			caching, or security checks before calling the real object's methods.
+		
+		Client Uses the Proxy
+			
+			Instead of creating the real object directly, the client interacts with the proxy. The 
+			proxy decides when and how to forward the client’s request to the real object.
+	
+	Proxy Design Pattern example (with implementation)
+		
+		Problem Statement
+			
+			Consider a scenario where your application needs to load and display images, and you 
+			want to optimize the image loading process. Loading images from disk or other external 
+			sources can be resource-intensive, especially if the images are large or stored remotely.
+		
+		To address this issue, we need to implement the Proxy Design Pattern to control the access 
+		and loading of images.
+		
+		// Subject
+		interface Image {
+			void display();
+		}
+
+		// RealSubject
+		class RealImage implements Image {
+			private String filename;
+
+			public RealImage(String filename) {
+				this.filename = filename;
+				loadImageFromDisk();
+			}
+
+			private void loadImageFromDisk() {
+				System.out.println("Loading image: " + filename);
+			}
+
+			public void display() {
+				System.out.println("Displaying image: " + filename);
+			}
+		}
+
+		// Proxy
+		class ProxyImage implements Image {
+			private RealImage realImage;
+			private String filename;
+
+			public ProxyImage(String filename) {
+				this.filename = filename;
+			}
+
+			public void display() {
+				if (realImage == null) {
+					realImage = new RealImage(filename);
+				}
+				realImage.display();
+			}
+		}
+
+		// Client code
+		public class ProxyPatternExample {
+			public static void main(String[] args) {
+				Image image = new ProxyImage("example.jpg");
+
+				// Image will be loaded from disk only when display() is called
+				image.display();
+
+				// Image will not be loaded again, as it has been cached in the Proxy
+				image.display();
+			}
+		}
+		
+			Loading image: example.jpg
+			Displaying image: example.jpg
+			Displaying image: example.jpg
+			
+		Subject (Image)
+		
+			→ Interface chung để cả đối tượng thật và proxy cùng implement.
+		
+		RealSubject (RealImage)
+		
+			→ Đối tượng “thật”, thực hiện logic chính (load ảnh từ disk, hiển thị).
+		
+		Proxy (ProxyImage)
+		
+			→ Đứng trung gian, kiểm soát việc truy cập vào RealImage.
+	
+	Why do we need Proxy Design Pattern?
+		
+		The Proxy Design Pattern is employed to address various concerns and scenarios in software 
+		development, providing a way to control access to objects, add functionality, or optimize 
+		performance.
+		
+		Lazy Loading
+			
+			One of the primary use cases for proxies is lazy loading. In situations where creating 
+			or initializing an object is resource-intensive, the proxy delays the creation of the 
+			real object until it is actually needed.
+			
+			This can lead to improved performance by avoiding unnecessary resource allocation.
+		
+		Access Control
+			
+			Proxies can enforce access control policies.
+			
+			By acting as a gatekeeper to the real object, proxies can restrict access based on certain 
+			conditions, providing security or permission checks.
+		
+		Protection Proxy
+			
+			Protection proxies control access to a real object by adding an additional layer of 
+			security checks.
+			
+			They can ensure that the client code has the necessary permissions before allowing 
+			access to the real object.
+		
+		Caching
+			
+			Proxies can implement caching mechanisms to store results or resources.
+			
+			This is particularly useful when repeated operations on a real object can be optimized 
+			by caching previous results, avoiding redundant computations or data fetching.
+		
+		Logging and Monitoring
+			
+			Proxies provide a convenient point to add logging or monitoring functionalities.
+			
+			By intercepting method calls to the real object, proxies can log information, track 
+			usage, or measure performance without modifying the real object.
+	
+	When to use Proxy Design Pattern?
+		
+		Use a proxy when you want to postpone the creation of a resource-intensive object until 
+		it's actually needed.
+		
+		Use a proxy when you need to control and manage access to an object, ensuring that 
+		certain conditions or permissions are met before allowing clients to interact with 
+		the real object.
+		
+		Use a proxy to optimize the utilization of resources, such as caching results or 
+		storing previously fetched data. This can lead to performance improvements by 
+		avoiding redundant computations or data retrieval.
+		
+		Use a proxy when dealing with distributed systems and you want to interact with 
+		objects located in different addresses or systems.
+		
+		The proxy can handle the communication details, making remote object interaction 
+		more seamless.
+	
+	When not to use Proxy Design Pattern?
+		
+		Overhead for Simple Operations
+			
+			Avoid using a proxy for simple objects or operations that don't involve 
+			resource-intensive tasks. Introducing a proxy might add unnecessary 
+			complexity in such cases.
+		
+		Unnecessary Abstraction
+			
+			If your application doesn't require lazy loading, access control, or additional 
+			functionalities provided by proxies, introducing proxies may lead to unnecessary 
+			abstraction and code complexity.
+		
+		Performance Impact
+			
+			If the introduction of a proxy negatively impacts performance rather than improving 
+			it, especially in cases where objects are lightweight and creation is not a 
+			significant overhead.
+		
+		When Access Control Isn't Needed
+			
+			If there are no access control requirements and the client code can directly 
+			interact with the real object without any restrictions.
+		
+		When Eager Loading is Acceptable
+			
+			If eager loading of objects is acceptable and doesn't affect the performance 
+			of the system, introducing a proxy for lazy loading might be unnecessary.
+			
+--- Singleton
+
+	Singleton Pattern là một creational design pattern (mẫu thiết kế khởi tạo) dùng 
+	để đảm bảo rằng chỉ có duy nhất một instance (đối tượng) của một lớp được tạo ra 
+	trong toàn bộ chương trình, và cung cấp một điểm truy cập toàn cục đến instance đó.
+
+	Ý tưởng chính
+	
+		Lớp Singleton tự quản lý việc khởi tạo của nó.
+
+		Nếu instance chưa tồn tại → tạo mới.
+
+		Nếu đã tồn tại → trả về instance cũ.
+
+	The Singleton Method Design Pattern ensures a class has only one instance 
+	and provides a global access point to it. It’s ideal for scenarios requiring 
+	centralized control, like managing database connections or configuration 
+	settings. This article explores its principles, benefits, drawbacks, and 
+	best use cases in software development.
+	
+	What is Singleton Method Design Pattern?
+		
+		The Singleton method or Singleton Design pattern is one of the simplest 
+		design patterns. It ensures a class only has one instance, and provides 
+		a global point of access to it.
+	
+	Singleton Design Pattern Principles
+		
+		Single Instance
+			
+			Singleton ensures that only one instance of the class exists throughout 
+			the application.
+		
+		Global Access
+			
+			Provide a global point of access to that instance.
+		
+		Lazy or Eager Initialization
+			
+			Support creating the instance either when needed (lazy) or when the 
+			class is loaded (eager).
+		
+		Thread Safety
+			
+			Implement mechanisms to prevent multiple threads from creating separate 
+			instances simultaneously.
+		
+		Private Constructor
+			
+			Restrict direct instantiation by making the constructor private, forcing 
+			the use of the access point
+	
+	When to use Singleton Method Design Pattern?
+		
+		Consider using the Singleton pattern when you need to ensure that only one 
+		instance of a class exists in your application.
+		
+		Use it when you want to provide a straightforward way for clients to access 
+		that instance from a specific location in your code.
+		
+		If you think you might want to extend the class later, the Singleton pattern 
+		is a good choice. It allows for subclassing, so clients can work with the extended 
+		version without changing the original Singleton.
+		
+		This pattern is often used in situations like logging, managing connections to 
+		hardware or databases, caching data, or handling thread pools, where having just 
+		one instance makes sense
+	
+	Initialization Types of Singleton
+		
+		Early initialization
+			
+			In this method, class is initialized whether it is to be used or not. The main 
+			advantage of this method is its simplicity. You initiate the class at the time
+			of class loading. Its drawback is that class is always initialized whether it 
+			is being used or not.
+		
+		Lazy initialization
+			
+			In this method, class in initialized only when it is required. It can save you 
+			from instantiating the class when you don't need it. Generally, lazy initialization 
+			is used when we create a singleton class.
+	
+	Key Component of Singleton Method Design Pattern
+		
+		Static Member
+			
+			The Singleton pattern or pattern Singleton employs a static member within the 
+			class. This static member ensures that memory is allocated only once, preserving 
+			the single instance of the Singleton class.
+				
+				// Static member to hold the single instance
+				private static Singleton instance;
+		
+		Private Constructor
+			
+			The Singleton pattern or pattern singleton incorporates a private constructor, which 
+			serves as a barricade against external attempts to create instances of the Singleton 
+			class. This ensures that the class has control over its instantiation process.
+				
+				// Private constructor to
+				// prevent external instantiation
+				class Singleton {
+
+					// Making the constructor as Private
+					private Singleton()
+					{
+						// Initialization code here
+					}
+				}
+				
+		Static Factory Method
+			
+			A crucial aspect of the Singleton pattern is the presence of a static factory method. This
+			method acts as a gateway, providing a global point of access to the Singleton object. When 
+			someone requests an instance, this method either creates a new instance (if none exists) 
+			or returns the existing instance to the caller.
+				
+				// Static factory method for global access
+				public static Singleton getInstance()
+				{
+					// Check if an instance exists
+					if (instance == null) {
+						// If no instance exists, create one
+						instance = new Singleton();
+					}
+					// Return the existing instance
+					return instance;
+				}
+				
+	Different Ways to Implement Singleton Method Design Pattern
+		
+		Sometimes we need to have only one instance of our class for example a single DB connection 
+		shared by multiple objects as creating a separate DB connection for every object may be 
+		costly. Similarly, there can be a single configuration manager or error manager in an 
+		application that handles all problems instead of creating multiple managers.
+		
+		Method 1 - Classic Implementation || Make getInstance() static to implement Singleton 
+		Method Design Pattern
+			
+			// Classical Java implementation of singleton
+			// design pattern
+			class Singleton {
+				private static Singleton obj;
+
+				// private constructor to force use of
+				// getInstance() to create Singleton object
+				private Singleton() {}
+
+				public static Singleton getInstance()
+				{
+					if (obj == null)
+						obj = new Singleton();
+					return obj;
+				}
+			}
+			
+			Constructor private: private Singleton() {}
+			
+				→ Không cho phép tạo object từ bên ngoài (new Singleton() sẽ lỗi)
+			
+			private static Singleton obj;
+			
+				→ Biến static giữ instance duy nhất
+			
+			public static Singleton getInstance()
+			
+				→ Phương thức static để truy cập instance
+
+		Method 2 || Make getInstance() synchronized to implement Singleton Method Design Pattern
+			
+			 // Thread Synchronized Java implementation of
+			// singleton design pattern
+			class Singleton {
+				private static Singleton obj;
+				private Singleton() {}
+
+				// Only one thread can execute this at a time
+				public static synchronized Singleton getInstance()
+				{
+					if (obj == null)
+						obj = new Singleton();
+					return obj;
+				}
+			}
+			
+		Method 3 - Eager Instantiation || Static initializer based implementation of singleton design pattern
+			
+			// Static initializer based Java implementation of
+			// singleton design pattern
+			class Singleton {
+				private static Singleton obj = new Singleton();
+				private Singleton() {}
+
+				public static Singleton getInstance() { return obj; }
+			}
+		
+		Method 4 - Most Efficient || Use “Double Checked Locking” to implement singleton design pattern
+			
+			// Double Checked Locking based Java implementation of
+			// singleton design pattern
+			class Singleton {
+				private static volatile Singleton obj = null;
+				private Singleton() {}
+
+				public static Singleton getInstance()
+				{
+					if (obj == null) {
+						// To make thread safe
+						synchronized (Singleton.class)
+						{
+							// check again as multiple threads
+							// can reach above step
+							if (obj == null)
+								obj = new Singleton();
+						}
+					}
+					return obj;
+				}
+			}
+			
+		Method 5 - Java Specific || Instantiation through inner class || Using class loading concept
+			
+			//using class loading concept
+			// singleton design pattern
+
+			public class Singleton {
+				
+				private Singleton() {
+				System.out.println("Instance created");
+				}
+
+				  private static class SingletonInner{
+				  
+				  private static final Singleton INSTANCE=new Singleton();
+				}
+				public static Singleton getInstance()
+				{
+				   return SingletonInner.INSTANCE;
+				}
+			}
+	Use Cases for the Singleton Design Pattern
+	
+		In applications where creating and managing database connections is resource-heavy, using 
+		a Singleton ensures that there’s just one connection maintained throughout the application.
+		
+		When global settings need to be accessed by different parts of the application, a 
+		Singleton configuration manager provides a single point of access for these settings.
+		
+		Singleton helps to centralize control and making it easier to manage the state and 
+		actions of user interface components.
+		
+		Singleton can effectively organize print jobs and streamlines the process in the 
+		systems where document printing is required.
+	
+	Advantages of the Singleton Design Pattern
+		
+		The Singleton pattern guarantees that there’s only one instance with a unique 
+		identifier, which helps prevent naming issues.
+		
+		This pattern supports both eager initialization (creating the instance when the 
+		class is loaded) and lazy initialization (creating it when it’s first needed), 
+		providing adaptability based on the use case.
+		
+		When implemented correctly, a Singleton can be thread-safe, ensuring that multiple 
+		threads don’t accidentally create duplicate instances.
+		
+		By keeping just one instance, the Singleton pattern can help lower memory usage in 
+		applications where resources are limited.
+	
+	Disadvantages of the Singleton Design Pattern
+		
+		Singletons can make unit testing difficult since they introduce a global state. This 
+		can complicate testing components that depend on a Singleton, as its state can 
+		influence the test results.
+		
+		In multi-threaded environments, the process of creating and initializing a Singleton 
+		can lead to race conditions if multiple threads try to create it simultaneously.
+		
+		If you later find that you need multiple instances or want to modify how instances 
+		are created, it can require significant code changes.
+		
+		The Singleton pattern creates a global dependency, which can complicate replacing 
+		the Singleton with a different implementation or using dependency injection.
+		
+		Subclassing a Singleton can be tricky since the constructor is usually private. This 
+		requires careful handling and may not fit standard inheritance practices.
+		
+--- Strategy
+
+	Strategy Pattern là một behavioral design pattern (mẫu thiết kế hành vi) dùng 
+	để định nghĩa một nhóm thuật toán và cho phép chúng thay thế lẫn nhau một cách 
+	linh hoạt mà không ảnh hưởng đến client.
+
+	Ý tưởng chính
+	
+		Đặt các thuật toán khác nhau vào các lớp riêng biệt (Strategy).
+
+		Client chỉ cần chọn hoặc thay đổi Strategy phù hợp tại runtime.
+
+		Giúp tách biệt logic thuật toán khỏi logic sử dụng.
+	
+	The Strategy Design Pattern defines a family of algorithms, encapsulates 
+	each one, and makes them interchangeable, allowing clients to switch algorithms 
+	dynamically without altering the code structure.
+	
+	What is the Strategy Design Pattern?
+		
+		The Strategy Design Pattern is a behavioral design pattern that allows you 
+		to define a family of algorithms or behaviors, put each of them in a separate 
+		class, and make them interchangeable at runtime. This pattern is useful when 
+		you want to dynamically change the behavior of a class without modifying its 
+		code.
+	
+	Characteristics of this design pattern
+		
+		Defines a family of algorithms
+			
+			The pattern allows you to encapsulate multiple algorithms or behaviors 
+			into separate classes, known as strategies.
+		
+		Encapsulates behaviors
+			
+			Each strategy encapsulates a specific behavior or algorithm, providing a 
+			clean and modular way to manage different variations or implementations.
+		
+		Enables dynamic behavior switching
+			
+			The pattern enables clients to switch between different strategies at 
+			runtime, allowing for flexible and dynamic behavior changes.
+		
+		Promotes object collaboration
+			
+			The pattern encourages collaboration between a context object and strategy 
+			objects, where the context delegates the execution of a behavior to a strategy 
+			object.
+	
+	Components of the Strategy Design Pattern
+		
+		Context
+			
+			A class or object known as the Context assigns the task to a strategy object 
+			and contains a reference to it.
+				
+				It serves as an intermediary between the client and the strategy, offering 
+				an integrated approach for task execution without exposing every detail of 
+				the process.
+				
+				The Context maintains a reference to a strategy object and calls its methods
+				to perform the task, allowing for interchangeable strategies to be used.
+		
+		Strategy Interface
+			
+			An abstract class or interface known as the Strategy Interface specifies a set 
+			of methods that all concrete strategies must implement.
+				
+				As a kind of agreement, it guarantees that all strategies follow the same 
+				set of rules and are interchangeable by the Context.
+				
+				The Strategy Interface promotes flexibility and modularity in the design 
+				by establishing a common interface that enables decoupling between the 
+				Context and the specific strategies.
+		
+		Concrete Strategies
+			
+			Concrete Strategies are the various implementations of the Strategy Interface. Each 
+			concrete strategy provides a specific algorithm or behavior for performing the 
+			task defined by the Strategy Interface.
+				
+				Concrete strategies encapsulate the details of their respective algorithms 
+				and provide a method for executing the task.
+				
+				They are interchangeable and can be selected and configured by the client based 
+				on the requirements of the task.
+		
+		Client
+			
+			The Client is responsible for selecting and configuring the appropriate strategy 
+			and providing it to the Context.
+				
+				It knows the requirements of the task and decides which strategy to use based 
+				on those requirements.
+				
+				The client creates an instance of the desired concrete strategy and passes it 
+				to the Context, enabling the Context to use the selected strategy to perform 
+				the task.
+	
+	Communication between the Components
+		
+		Client to Context
+			
+			The Client, which knows the requirements of the task, interacts with the Context
+			to initiate the task execution.
+			
+			The Client selects an appropriate strategy based on the task requirements and 
+			provides it to the Context.
+			
+			The Client may configure the selected strategy before passing it to the 
+			Context if necessary.
+		
+		Context to Strategy
+			
+			The Context holds a reference to the selected strategy and delegates the task to it.
+			
+			The Context invokes a method on the strategy object, triggering the execution of 
+			the specific algorithm or behavior encapsulated within the strategy.
+		
+		Strategy to Context
+			
+			Once the strategy completes its execution, it may return a result or perform 
+			any necessary actions.
+			
+			The strategy communicates the result or any relevant information back to the 
+			Context, which may further process or utilize the result as needed.
+		
+		Strategy Interface as Contract
+			
+			The Strategy Interface serves as a contract that defines a set of methods 
+			that all concrete strategies must implement.
+			
+			The Context communicates with strategies through the common interface, 
+			promoting interchangeability and decoupling.
+		
+		Decoupled Communication
+			
+			Since the components' communication is decoupled, the Context is not required 
+			to be aware of the exact details of how each strategy carries out the task.
+			
+			As long as they follow the same interface, strategies can be switched or 
+			replaced without affecting the client or other strategies.
+	
+	Real-World Analogy of Strategy Design Pattern
+		
+		Imagine you're planning a trip to a new city, and you have several options for getting 
+		there: by car, by train, or by plane. Each mode of transportation offers its own set 
+		of advantages and disadvantages, depending on factors such as cost, travel time, and 
+		convenience.
+		
+		Context
+			
+			You, as the traveler, represent the context in this analogy. You have a specific 
+			goal (reaching the new city) and need to choose the best transportation strategy 
+			to achieve it.
+		
+		Strategies
+			
+			The different modes of transportation (car, train, plane) represent the strategies 
+			in this analogy. Each strategy (mode of transportation) offers a different approach 
+			to reaching your destination.
+		
+		Interface
+			
+			The interface in this analogy is the set of common criteria you consider when 
+			choosing a transportation mode, such as cost, travel time, and convenience.
+		
+		Flexibility
+			
+			Just as the Strategy Design Pattern allows you to dynamically switch between 
+			different algorithms at runtime, you have the flexibility to choose a transportation 
+			mode based on your specific requirements and constraints.
+		
+		Dynamic Selection
+			
+			The Strategy Design Pattern allows you to dynamically select the best strategy 
+			(transportation mode) based on changing circumstances. For instance, if your 
+			initial flight is canceled due to bad weather, you can quickly switch to an 
+			alternative mode of transportation
+	
+	Strategy Design Pattern Example(with implementation)
+		
+		Problem Statement
+			
+			Let's consider a sorting application where we need to sort a list of integers. However, 
+			the sorting algorithm to be used may vary depending on factors such as the size of the 
+			list and the desired performance characteristics.
+		
+		Challenges Without Using Strategy Pattern
+			
+			Limited Flexibility
+				
+				Implementing sorting algorithms directly within the main sorting class can make the 
+				code inflexible. Adding new sorting algorithms or changing existing ones would 
+				require modifying the main class, which violates the Open/Closed Principle.
+			
+			Code Duplication
+				
+				Without a clear structure, you may end up duplicating sorting logic to handle 
+				different algorithms.
+			
+			Hard-Coded Logic
+				
+				Implementing sorting logic directly within the main sorting class can make the 
+				code rigid and difficult to extend or modify.
+	
+	How Strategy Pattern helps to solve above challenges?
+		
+		Code Reusability
+			
+			By encapsulating sorting algorithms into separate strategy classes, you can reuse these 
+			strategies across different parts of the system. This reduces code duplication and 
+			promotes maintainability.
+		
+		Flexibility and Extensibility
+			
+			The Strategy Pattern makes it simple to adapt or add new sorting algorithms without 
+			changing the existing code. Since each strategy is independent, it is possible to change 
+			or expand it without impacting other system components.
+		
+		Separation of Concerns
+			
+			The Strategy Pattern separates sorting logic into distinct strategy classes, which 
+			encourages a clear division of responsibilities. As a result, the code is easier to 
+			test, and maintain.
+		
+		// SortingContext.java
+		class SortingContext {
+			private SortingStrategy sortingStrategy;
+
+			public SortingContext(SortingStrategy sortingStrategy) {
+				this.sortingStrategy = sortingStrategy;
+			}
+
+			public void setSortingStrategy(SortingStrategy sortingStrategy) {
+				this.sortingStrategy = sortingStrategy;
+			}
+
+			public void performSort(int[] array) {
+				sortingStrategy.sort(array);
+			}
+		}
+
+		// SortingStrategy.java
+		interface SortingStrategy {
+			void sort(int[] array);
+		}
+
+		// BubbleSortStrategy.java
+		class BubbleSortStrategy implements SortingStrategy {
+			@Override
+			public void sort(int[] array) {
+				// Implement Bubble Sort algorithm
+				System.out.println("Sorting using Bubble Sort");
+				// Actual Bubble Sort Logic here
+			}
+		}
+
+		// MergeSortStrategy.java
+		class MergeSortStrategy implements SortingStrategy {
+			@Override
+			public void sort(int[] array) {
+				// Implement Merge Sort algorithm
+				System.out.println("Sorting using Merge Sort");
+				// Actual Merge Sort Logic here
+			}
+		}
+
+		// QuickSortStrategy.java
+		class QuickSortStrategy implements SortingStrategy {
+			@Override
+			public void sort(int[] array) {
+				// Implement Quick Sort algorithm
+				System.out.println("Sorting using Quick Sort");
+				// Actual Quick Sort Logic here
+			}
+		}
+
+		// Client.java
+		public class Client {
+			public static void main(String[] args) {
+				// Create SortingContext with BubbleSortStrategy
+				SortingContext sortingContext = new SortingContext(new BubbleSortStrategy());
+				int[] array1 = {5, 2, 9, 1, 5};
+				sortingContext.performSort(array1); // Output: Sorting using Bubble Sort
+
+				// Change strategy to MergeSortStrategy
+				sortingContext.setSortingStrategy(new MergeSortStrategy());
+				int[] array2 = {8, 3, 7, 4, 2};
+				sortingContext.performSort(array2); // Output: Sorting using Merge Sort
+
+				// Change strategy to QuickSortStrategy
+				sortingContext.setSortingStrategy(new QuickSortStrategy());
+				int[] array3 = {6, 1, 3, 9, 5};
+				sortingContext.performSort(array3); // Output: Sorting using Quick Sort
+			}
+		}
+		
+	When to use the Strategy Design Pattern?
+		
+		Multiple Algorithms
+			
+			When you have multiple algorithms that can be used interchangeably based 
+			on different contexts, such as sorting algorithms (bubble sort, merge sort, 
+			quick sort), searching algorithms, compression algorithms, etc.
+		
+		Encapsulating Algorithms
+			
+			When you want to encapsulate the implementation details of algorithms 
+			separately from the context that uses them, allowing for easier maintenance, 
+			testing, and modification of algorithms without affecting the client code.
+		
+		Runtime Selection
+			
+			When you need to dynamically select and switch between different algorithms 
+			at runtime based on user preferences, configuration settings, or system states.
+		
+		Reducing Conditional Statements
+			
+			When you have a class with multiple conditional statements that choose between 
+			different behaviors, using the Strategy pattern helps in eliminating the need 
+			for conditional statements and making the code more modular and maintainable.
+		
+		Testing and Extensibility
+			
+			When you want to facilitate easier unit testing by enabling the substitution of 
+			algorithms with mock objects or stubs. Additionally, the Strategy pattern makes 
+			it easier to extend the system with new algorithms without modifying existing code.
+	
+	When not to use the Strategy Design Pattern?
+		
+		Single Algorithm
+			
+			If there is only one fixed algorithm that will be used throughout the lifetime 
+			of the application, and there is no need for dynamic selection or switching 
+			between algorithms, using the Strategy pattern might introduce unnecessary complexity.
+		
+		Overhead
+			
+			If the overhead of implementing multiple strategies outweighs the benefits, 
+			especially in simple scenarios where direct implementation without the Strategy 
+			pattern is more straightforward and clear.
+		
+		Inflexible Context
+			
+			If the context class tightly depends on a single algorithm and there is no need 
+			for flexibility or interchangeability, using the Strategy pattern may introduce 
+			unnecessary abstraction and complexity.
+	
+	Advantages of the Strategy Design Pattern
+		
+		A family of algorithms can be defined as a class hierarchy and can be used 
+		interchangeably to alter application behavior without changing its architecture.
+		
+		By encapsulating the algorithm separately, new algorithms complying with the same 
+		interface can be easily introduced.
+		
+		The application can switch strategies at run-time.
+		
+		Strategy enables the clients to choose the required algorithm, without using a 
+		"switch" statement or a series of "if-else" statements.
+		
+		Data structures used for implementing the algorithm are completely encapsulated 
+		in Strategy classes. Therefore, the implementation of an algorithm can be changed 
+		without affecting the Context class.
+	
+	Disadvantages of the Strategy Design Pattern
+		
+		The application must be aware of all the strategies to select the right one 
+		for the right situation.
+		
+		Context and the Strategy classes normally communicate through the interface 
+		specified by the abstract Strategy base class. Strategy base class must expose 
+		interface for all the required behaviours, which some concrete Strategy classes 
+		might not implement.
+		
+		In most cases, the application configures the Context with the required Strategy 
+		object. Therefore, the application needs to create and maintain two objects in 
+		place of one.
